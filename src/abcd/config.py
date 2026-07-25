@@ -50,7 +50,7 @@ METRICS = (
     "t1t2_ratio",
 )
 
-PARCELLATIONS = ("dsk", "dst", "fzy")  # Desikan-Killiany, Destrieux, fuzzy-cluster
+PARCELLATIONS = ("dsk", "dst", "fzy", "hcp")  # Desikan-Killiany, Destrieux, fuzzy-cluster, HCP-MMP
 HEMISPHERES = ("lh", "rh", "both")
 
 #: How to decide which scans enter the model.

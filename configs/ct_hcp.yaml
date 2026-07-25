@@ -1,0 +1,26 @@
+run_id: thickness_hcp_51_7ee090027a6e
+hash: 7ee090027a6e
+release: '5.1'
+metric: thickness
+parcellation: hcp
+hemisphere: both
+qc_policy: legacy_euler
+sample_rule: min_visits
+min_visits: 2
+visits:
+- v0
+- v2
+- v4
+age_basis: linear
+spline_df: 3
+age_centre: null
+re_structure: slope_correlated
+global_covariate: observed_mean
+covariates:
+- sex
+family_effect: true
+site_effect: true
+note: 'HCP-MMP (Glasser) parcellation, from processed/ surface files rather than core/
+  release tables. Purpose: AHBA C3 is defined on HCP-MMP regions, so fitting here
+  avoids averaging the expression component across DK parcel boundaries. No release
+  QC columns exist for these files; QC is Euler-based only.'

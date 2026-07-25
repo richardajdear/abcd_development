@@ -135,10 +135,12 @@ class Release51Adapter(ReleaseAdapter):
                 f"{sorted(self.METRIC_TABLES)}. Derived metrics such as "
                 "'t1t2_ratio' are built in assemble.py, not here."
             )
+        if parcellation == "hcp":
+            return self._imaging_hcp(metric)
         if parcellation != "dsk":
             raise NotImplementedError(
-                f"parcellation {parcellation!r} not yet wired; only 'dsk' has "
-                "a verified label mapping in data/region_labels.csv"
+                f"parcellation {parcellation!r} not yet wired; only 'dsk' and "
+                "'hcp' have a verified label mapping"
             )
         table, prefix, family, agg = self.METRIC_TABLES[metric]
         labels = region_labels(parcellation).copy()
@@ -178,6 +180,69 @@ class Release51Adapter(ReleaseAdapter):
             ["subject", "visit", "metric", "hemi", "region", "label",
              "is_global", "value"]
         ].reset_index(drop=True)
+
+    # ------------------------------------------------------------------
+    HCP_FILES = {
+        "v0": "ses-baseline-year1_HCP.fsaverage.aparc_CT.csv",
+        "v2": "ses-2YearFollowUpYArm1_HCP.fsaverage.aparc_CT.csv",
+        "v4": "ses-4YearFollowUpYArm1_HCP.fsaverage.aparc_CT.csv",
+    }
+
+    def _imaging_hcp(self, metric: str) -> pd.DataFrame:
+        """Thickness in the HCP-MMP (Glasser) 360-region parcellation.
+
+        These come from ``processed/`` rather than ``core/`` -- they are
+        surface parcellations run locally, not release tables, so they carry
+        no release QC columns and their subject coverage is smaller than the
+        core tables (10,779 / 7,093 / 2,801 at v0 / v2 / v4).
+
+        The reason to use them: the AHBA C3 gene-expression component is
+        defined on HCP-MMP regions.  Mapping C3 onto DK would require
+        averaging expression components across parcel boundaries, which
+        blurs precisely the spatial gradient being tested.  Fitting in the
+        native parcellation of the reference map avoids that.
+        """
+        if metric != "thickness":
+            raise KeyError(
+                f"only 'thickness' is available in the HCP processed files; "
+                f"got {metric!r}"
+            )
+        frames = []
+        for visit, fname in self.HCP_FILES.items():
+            path = self.root / "processed" / fname
+            if not path.exists():
+                raise SourceUnavailable(f"HCP parcellated file absent: {path}")
+            raw = pd.read_csv(path, low_memory=False)
+            roi = [c for c in raw.columns
+                   if c.endswith("_ROI") and "???" not in c]
+            long = raw[["Subject"] + roi].melt(
+                id_vars="Subject", var_name="column", value_name="value")
+            long["visit"] = visit
+            frames.append(long)
+        long = pd.concat(frames, ignore_index=True)
+
+        # lh_L_V1_ROI -> hemi lh, region V1
+        parts = long.column.str.extract(r"^(lh|rh)_[LR]_(.+)_ROI$")
+        long["hemi"], long["region"] = parts[0], parts[1]
+        if long.hemi.isna().any():
+            bad = long.loc[long.hemi.isna(), "column"].unique()[:5]
+            raise ValueError(f"unparsed HCP column names: {list(bad)}")
+        long["label"] = long.hemi + "_" + long.region
+        long["subject"] = long.Subject.astype(str)
+        long["metric"] = metric
+        long["is_global"] = False
+
+        # the whole-cortex mean is needed as a covariate but is not a column
+        # here, so it is computed from the parcels
+        g = (long.groupby(["subject", "visit"], observed=True).value.mean()
+             .reset_index())
+        g["hemi"], g["region"], g["label"] = "both", "global_mean", "global_mean"
+        g["metric"], g["is_global"] = metric, True
+
+        out = pd.concat([long, g], ignore_index=True)
+        return out[["subject", "visit", "metric", "hemi", "region", "label",
+                    "is_global", "value"]].dropna(subset=["value"]
+                                                  ).reset_index(drop=True)
 
     # ------------------------------------------------------------------
     def demographics(self) -> pd.DataFrame:

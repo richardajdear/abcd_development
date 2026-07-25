@@ -1,0 +1,26 @@
+run_id: thickness_hcp_51_f408a620fde4
+hash: f408a620fde4
+release: '5.1'
+metric: thickness
+parcellation: hcp
+hemisphere: both
+qc_policy: legacy_euler
+sample_rule: min_visits
+min_visits: 2
+visits:
+- v0
+- v2
+- v4
+age_basis: linear
+spline_df: 3
+age_centre: null
+re_structure: slope_correlated
+global_covariate: none
+covariates:
+- sex
+family_effect: true
+site_effect: true
+note: 'HCP-MMP, ABSOLUTE thickness change (no global-mean covariate). This is the
+  biologically interpretable developmental map: conditioning on the global mean turns
+  a large fraction of regions into apparent thickening, which is a relative-to-average
+  statement, not growth.'
