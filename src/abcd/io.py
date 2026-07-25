@@ -31,6 +31,7 @@ from abc import ABC, abstractmethod
 from functools import lru_cache
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 from . import paths
@@ -245,6 +246,36 @@ class Release51Adapter(ReleaseAdapter):
             # NB: the local 5.1 copy contains no genotype/WGS data. GCTA and
             # GWAS steps therefore cannot run against 5.1 here; see hpc/README.
         }
+
+    def relatedness(self) -> pd.DataFrame:
+        """One row per subject: family, sibling group, and genetic relatedness.
+
+        Subject ids are normalised to the same BIDS-style form the imaging
+        tables use, so this joins directly to phenotype tables.  The release
+        ships raw ids as ``NDAR_INV...`` here but ``sub-NDARINV...`` elsewhere;
+        joining without normalising silently yields zero matched rows, which
+        is exactly the kind of failure that looks like a null result.
+
+        ``pair_type`` classifies subjects by genetic relatedness where it is
+        available: MZ twins (pi-hat > 0.9), DZ twins or full siblings
+        (0.35-0.65), and everything else.  ~3,670 of 11,868 subjects have a
+        pi-hat value in 5.1; the rest are singletons or ungenotyped.
+        """
+        p = pd.read_csv(self.genetics()["pihat"], low_memory=False)
+        p = p[p.eventname == self.VISITS["v0"]].copy()
+        out = pd.DataFrame({
+            "subject": self._to_bids(p.src_subject_id),
+            "family_id": p.rel_family_id,
+            "group_id": p.rel_group_id,
+            "relationship": p.rel_relationship,
+            "pi_hat": p.genetic_pi_hat_1,
+        })
+        out["pair_type"] = np.select(
+            [out.pi_hat > 0.9, out.pi_hat.between(0.35, 0.65)],
+            ["MZ", "DZ_or_sib"], default="other",
+        )
+        out.loc[out.pi_hat.isna(), "pair_type"] = "unknown"
+        return out.reset_index(drop=True)
 
 
 class Release70Adapter(Release51Adapter):
