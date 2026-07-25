@@ -1,0 +1,24 @@
+run_id: thickness_dsk_51_61582bf6f041
+hash: 61582bf6f041
+release: '5.1'
+metric: thickness
+parcellation: dsk
+hemisphere: lh
+qc_policy: legacy_euler
+sample_rule: has_last
+min_visits: 2
+visits:
+- v0
+- v2
+- v4
+age_basis: linear
+spline_df: 3
+age_centre: null
+re_structure: slope_correlated
+global_covariate: observed_mean
+covariates:
+- sex
+family_effect: false
+site_effect: false
+note: Reproduces the 5.1 thesis specification for back-comparison. Left hemisphere
+  only, static Euler QC list, sample = has year-4 scan, no family/site effects.

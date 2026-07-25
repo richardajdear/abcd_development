@@ -1,0 +1,23 @@
+run_id: thickness_dsk_51_b0ea067e3c4d
+hash: b0ea067e3c4d
+release: '5.1'
+metric: thickness
+parcellation: dsk
+hemisphere: both
+qc_policy: legacy_euler
+sample_rule: min_visits
+min_visits: 3
+visits:
+- v0
+- v2
+- v4
+age_basis: linear
+spline_df: 3
+age_centre: null
+re_structure: slope_correlated
+global_covariate: observed_mean
+covariates:
+- sex
+family_effect: true
+site_effect: true
+note: Restricted to 3-visit subjects; slope BLUPs least shrunk.

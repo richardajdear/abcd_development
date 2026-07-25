@@ -1,0 +1,26 @@
+run_id: thickness_dsk_51_f22d9bdb4145
+hash: f22d9bdb4145
+release: '5.1'
+metric: thickness
+parcellation: dsk
+hemisphere: both
+qc_policy: legacy_euler
+sample_rule: min_visits
+min_visits: 2
+visits:
+- v0
+- v2
+- v4
+age_basis: linear
+spline_df: 3
+age_centre: null
+re_structure: slope_correlated
+global_covariate: observed_mean
+covariates:
+- sex
+family_effect: true
+site_effect: true
+note: 'Baseline: cortical thickness, DK, both hemispheres, >=2 visits. qc_policy=legacy_euler
+  because the local 5.1 copy has no release-native QC tables (mri_y_qc_incl, Euler,
+  scanner manufacturer are all absent); the coded policy is inert here and activates
+  on 7.0.'

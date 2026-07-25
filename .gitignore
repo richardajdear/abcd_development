@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.DS_Store
+.ipynb_checkpoints/
+
+# ABCD pipeline outputs (regenerate with: python -m abcd.assemble configs/<x>.yaml)
+out/

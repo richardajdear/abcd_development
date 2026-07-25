@@ -1,0 +1,26 @@
+run_id: thickness_dsk_70_fb236c945db9
+hash: fb236c945db9
+release: '7.0'
+metric: thickness
+parcellation: dsk
+hemisphere: both
+qc_policy: coded
+sample_rule: min_visits
+min_visits: 3
+visits:
+- v0
+- v2
+- v4
+- v6
+age_basis: linear
+spline_df: 3
+age_centre: null
+re_structure: slope_correlated
+global_covariate: observed_mean
+covariates:
+- sex
+family_effect: true
+site_effect: true
+note: 'Target 7.0 run: four visits, coded QC (release-native sources expected to exist),
+  >=3 visits for well-identified slopes. Requires Release70Adapter verification first
+  - see io.verify_adapter(''7.0'').'

@@ -1,0 +1,23 @@
+run_id: t1t2_ratio_dsk_51_deb2cc090aac
+hash: deb2cc090aac
+release: '5.1'
+metric: t1t2_ratio
+parcellation: dsk
+hemisphere: both
+qc_policy: legacy_euler
+sample_rule: min_visits
+min_visits: 2
+visits:
+- v0
+- v2
+- v4
+age_basis: linear
+spline_df: 3
+age_centre: null
+re_structure: slope_correlated
+global_covariate: observed_mean
+covariates:
+- sex
+family_effect: true
+site_effect: true
+note: Derived T1w/T2w ratio; exercises the metric-agnostic path.
