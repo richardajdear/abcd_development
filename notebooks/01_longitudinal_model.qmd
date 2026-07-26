@@ -1,0 +1,331 @@
+---
+title: "Longitudinal model for adolescent cortical change in ABCD"
+subtitle: "What the mixed model is, why each term is in it, and what the phenotype means"
+date: last-modified
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-fold: show
+    embed-resources: true
+    fig-width: 8
+    fig-height: 4
+execute:
+  warning: false
+  message: false
+---
+
+```{r setup}
+#| include: false
+library(data.table)
+library(arrow)
+library(lme4)
+library(ggplot2)
+knitr::opts_chunk$set(dev = "png", dpi = 150)
+
+# Repo root, whether rendered from notebooks/ or the repo root.
+ROOT <- if (basename(getwd()) == "notebooks") ".." else "."
+source(file.path(ROOT, "R", "model_spec.R"))
+
+RUN <- "thickness_dsk_51_32bbb98e84e4"   # DK parcellation, release 5.1, genetics config
+RUN_DIR <- file.path(ROOT, "out", RUN)
+stopifnot(dir.exists(RUN_DIR))
+```
+
+## The question this model has to answer
+
+We want the genes that drive adolescent cortical development. That requires a
+per-subject *rate of change*, not a per-subject level, and it requires that
+rate to come with a known precision — because the next step is a genome-wide
+association analysis, and an association test on a phenotype whose measurement
+error is unknown cannot be interpreted.
+
+The design constraint is that ABCD is a family-based, multi-site,
+irregularly-spaced longitudinal study. In release 5.1 most subjects have two
+imaging visits and a minority have three. That is close to the minimum for
+estimating an individual slope at all, and it is the single fact that most
+shapes everything below.
+
+## Why a mixed model rather than a difference score
+
+The obvious alternative is $(y_2 - y_1)/(t_2 - t_1)$ per subject. It is worth
+being explicit about why we do not do that, because the difference score is what
+most of the imaging-genetics literature on change has used.
+
+A difference score treats each subject's two measurements as error-free. They
+are not: scan-to-scan measurement error in cortical thickness is a substantial
+fraction of two years of real change. The difference score therefore has a
+variance dominated by noise and — worse — cannot tell you so, because with two
+observations and two parameters there is no residual left from which to estimate
+error.
+
+A mixed model with random intercept and slope pools information across subjects.
+Each subject's slope is shrunk toward the group mean by an amount determined by
+how noisy their data are, and that shrinkage factor *is* the reliability of
+their slope. This gives three things the difference score cannot: a slope for
+subjects with unequal visit counts, a per-subject reliability, and a variance
+decomposition separating real between-subject differences in rate from
+measurement error.
+
+```{r load-data}
+mt <- as.data.table(read_parquet(file.path(RUN_DIR, "model_table.parquet")))
+
+# One region, for exposition. fit_lmm.R runs this per region.
+REGION <- "lh_precentral"
+d <- mt[label == REGION & !is.na(value)]
+
+cat(sprintf("subjects: %d | observations: %d | families: %d | sites: %d\n",
+            uniqueN(d$subject), nrow(d), uniqueN(d$family_id), uniqueN(d$site)))
+print(table(visits = d[, .N, by = subject]$N))
+```
+
+The visit distribution is the whole problem in one table. Read every result
+below in its light.
+
+## The model
+
+```{r formula}
+cfg <- list(age_basis = "linear", global_covariate = TRUE,
+            re_structure = "slope_correlated",
+            site_effect = TRUE, family_effect = FALSE,
+            covariates = character(0))
+f <- build_formula(cfg)
+print(f)
+```
+
+Term by term:
+
+**`value ~ age_c`** — `age_c` is age centred on the sample mean, in years. The
+fixed `age_c` coefficient is the group-average rate of change. Centring makes
+the intercept the fitted value at mean age rather than at age zero, which keeps
+the intercept interpretable and stops the intercept–slope correlation from being
+an artefact of extrapolating to an age no one was scanned at.
+
+**`(1 + age_c | subject)`** — the scientific target. Two correlated random
+effects per subject: their own level and their own rate. The correlation is
+estimated rather than assumed zero, because a subject with thicker cortex at
+baseline plausibly thins at a different rate, and forcing that covariance to
+zero would push it into the residual.
+
+**`(1 | site)`** — 22 sites, essentially constant within subject. As a fixed
+effect this costs 21 degrees of freedom and implicitly treats these particular
+sites as the population of interest; as a random intercept it costs one variance
+parameter and treats them as exchangeable, which is what they are.
+
+**Global mean, split into within- and between-subject parts** — see
+@sec-global. This is the term most easily got wrong.
+
+**Family** — omitted here, deliberately. This is the most consequential switch
+in the pipeline; see @sec-family.
+
+```{r fit}
+fit <- lmer(f, data = d, REML = TRUE, control = lmer_control())
+print(summary(fit), correlation = FALSE)
+```
+
+## The global-mean covariate, and why it is split in two {#sec-global}
+
+Thickness estimates share a lot of variance across regions: a scan with more
+motion produces a thinner-looking cortex everywhere. To study *regional*
+development rather than global scaling, we condition on the whole-cortex mean.
+
+But a single global term conflates two different things. A subject whose whole
+cortex is thin relative to other subjects is a biological fact about that
+subject. A visit at which a subject's cortex measures thin relative to their
+*own* other visits is mostly an occasion-level artefact. One `global` term
+forces a single coefficient to describe both.
+
+So the global mean enters as two columns: the subject's own mean across visits
+(`global_between`) and each visit's deviation from it (`global_within`). This
+within/between decomposition matters here specifically because the
+within-subject part is where the artefact lives.
+
+```{r global-decomp}
+cat(sprintf("SD of within-subject global deviation: %.4f\n", sd(d$global_within)))
+cat(sprintf("SD of between-subject global mean:     %.4f\n",
+            sd(d[, global_between[1], by = subject]$V1)))
+```
+
+The consequence for interpretation: with this covariate in, `age_c` estimates
+change in a region *relative to* the cortex-wide average. That is a different
+quantity from absolute regional change, and both are legitimate. The pipeline
+fits both (`configs/ct_hcp.yaml` vs `configs/ct_hcp_noglobal.yaml`) and they are
+not interchangeable — the absolute map answers "where does cortex thin?", the
+conditioned map answers "which regions deviate from the global pattern?".
+
+## The family random effect is a phenotype decision, not a fitting detail {#sec-family}
+
+ABCD contains roughly 5,989 families across 6,937 subjects, including about 800
+MZ and 1,700 DZ/sibling pairs. The instinct — mine initially — is that a
+family-based design demands a family random intercept and that omitting one is
+an error.
+
+For estimating fixed effects, that instinct is right. For *extracting a
+phenotype for genetic analysis* it is exactly backwards, and the reason is worth
+stating carefully.
+
+A random intercept for family absorbs the variance shared between relatives.
+Variance shared between relatives is precisely the genetic signal. So
+subject-level BLUPs from a model including family are *deviations from the
+family mean* — a phenotype from which heritability has been deliberately
+removed.
+
+This is not a theoretical worry. Fitting with and without the family term and
+computing twin correlations on the whole-cortex mean (207 MZ, 617 DZ/sib pairs):
+
+| phenotype | family RE | MZ *r* | DZ/sib *r* | Falconer *h²* |
+|:---|:---|---:|---:|---:|
+| intercept | included | 0.14 | −0.62 | — |
+| intercept | omitted | 0.88 | 0.47 | 0.83 |
+| slope | included | — | — | 0.54 |
+| slope | omitted | — | — | 0.58 |
+
+A DZ correlation of −0.62 is biologically impossible. It is the arithmetic
+signature of subtracting a family mean from two siblings. Without the family
+term the intercept recovers *h²* ≈ 0.83, matching published twin heritability
+of cortical thickness.
+
+The slope is far less affected (0.54 vs 0.58) because slope variance is mostly
+within-family anyway, but the direction is the same.
+
+**Therefore:** `configs/ct_genetics.yaml` sets `family_effect: false` and is the
+config for anything feeding a GWAS. `configs/ct_baseline.yaml` keeps the family
+term and is for descriptive fixed-effect inference, where ignoring family
+structure would understate standard errors. The two configs produce different
+phenotypes on purpose; the run directory records which was used.
+
+## Reading the variance components
+
+```{r varcomp}
+vc <- as.data.table(VarCorr(fit))
+print(vc[, .(grp, var1, var2, sdcor = round(sdcor, 5))])
+```
+
+`sd(age_c | subject)` is the between-subject spread of developmental rate — the
+quantity a slope GWAS tries to explain. `sigma` is per-observation measurement
+error. Their ratio sets the ceiling on GWAS power.
+
+```{r reliability}
+tau_s <- vc[grp == "subject" & var1 == "age_c" & is.na(var2), sdcor]
+sigma <- vc[grp == "Residual", sdcor]
+
+# Reliability of an individual slope. Sxx is the within-subject spread of age:
+# the lever arm. This is also exactly the mixed model's shrinkage factor.
+per <- d[, .(nv = .N, Sxx = sum((age_c - mean(age_c))^2)), by = subject]
+per[, rel := tau_s^2 / (tau_s^2 + sigma^2 / pmax(Sxx, 1e-12))]
+
+cat(sprintf("slope reliability: median %.3f (IQR %.3f-%.3f)\n",
+            median(per$rel), quantile(per$rel, .25), quantile(per$rel, .75)))
+print(per[, .(median_reliability = round(median(rel), 3), n = .N), by = nv][order(nv)])
+```
+
+Two things to note. First, this hand calculation reproduces what
+`abcd.phenotype` reports for this region (0.033 / 0.118 for 2 / 3 visits),
+which is a useful check that the shrinkage in the module is the shrinkage in the
+formula and not something else.
+
+Second, `lh_precentral` is a *below-average* region. Across all 68 DK regions
+the median slope reliability is 0.12 (2 visits) and 0.16 (3 visits), mean 0.15
+and 0.19 — so the numbers printed above are pessimistic relative to the cortex
+as a whole, and the good regions reach roughly 0.3. For comparison, the
+intercept phenotype has median reliability 0.88 / 0.91. The intercept is a
+well-measured trait; the slope, on release 5.1, is not.
+
+This is the headline limitation of release 5.1 and the reason to want 7.0.
+
+Reliability of an individual slope is
+$\tau_s^2 / (\tau_s^2 + \sigma^2/S_{xx})$, where $S_{xx}$ is the within-subject
+spread of age. Two consequences follow directly, and both are counterintuitive:
+
+1. **Follow-up *span* matters more than visit *count*.** $S_{xx}$ grows
+   quadratically with span but only linearly with the number of visits. Three
+   visits crammed into two years are worth less than two visits eight years
+   apart.
+2. **Averaging regions does not rescue it.** The dominant noise is
+   per-occasion (motion, positioning) and therefore shared across regions.
+   Averaging 68 regions cancels almost none of it — which is why the
+   whole-cortex mean slope has *lower* reliability (0.12) than the better
+   individual regions.
+
+At reliability $r \approx 0.15$ an association study's observed effect size is
+attenuated by $\sqrt{r} \approx 0.39$, so the required sample size for equal
+power scales as $1/r \approx 6.7\times$. That is why the slope GWAS on 5.1 is a
+pipeline test, not a discovery attempt.
+
+## Individual trajectories, and what shrinkage is doing
+
+```{r trajectories}
+#| fig-height: 3.6
+set.seed(1)
+ids <- sample(unique(d$subject), 60)
+bl <- as.data.table(coef(fit)$subject, keep.rownames = "subject")
+setnames(bl, "(Intercept)", "b0"); setnames(bl, "age_c", "b1")
+
+pd <- merge(d[subject %in% ids], bl[, .(subject, b0, b1)], by = "subject")
+pd[, fitted_line := b0 + b1 * age_c]
+
+ggplot(pd, aes(age_c, value, group = subject)) +
+  geom_line(colour = "grey78", linewidth = .3) +
+  geom_point(size = .5, colour = "grey55") +
+  geom_line(aes(y = fitted_line), colour = "#c0392b", linewidth = .35, alpha = .85) +
+  geom_abline(intercept = fixef(fit)[["(Intercept)"]],
+              slope = fixef(fit)[["age_c"]], colour = "black", linewidth = .9) +
+  labs(x = "age centred on sample mean (years)",
+       y = sprintf("thickness, %s (mm)", REGION),
+       title = "Grey: observed. Red: shrunken subject fits. Black: group mean.",
+       subtitle = "Red lines fan out far less than grey ones — that gap is the measurement error") +
+  theme_minimal(base_size = 9)
+```
+
+The visual signature of low reliability is that the red subject-specific lines
+are far more tightly bunched than the raw grey data. The model is saying that
+most of the apparent between-subject variability in rate is noise, and correctly
+refusing to propagate it into the phenotype. A difference-score analysis would
+have propagated all of it.
+
+## Singular fits are information, not failures
+
+```{r singular}
+cat("singular:", isSingular(fit), "\n")
+cat("converged:", is.null(fit@optinfo$conv$lme4$messages), "\n")
+```
+
+Fitting 68 or 360 regions produces some singular fits — usually a slope
+variance at the boundary, or an intercept–slope correlation at ±1. `fit_lmm.R`
+records these in `fits/diagnostics.parquet` rather than dropping them, because a
+region whose slope variance is zero is making a substantive claim: there is no
+detectable between-subject variation in rate there, so nothing for a GWAS to
+find. Dropping such regions would bias the regional maps toward regions where
+noise happened to resemble signal.
+
+## What runs in production
+
+Everything above is exposition on one region. The pipeline is:
+
+```bash
+python -m abcd.assemble configs/ct_genetics.yaml       # long table for a config
+Rscript R/fit_lmm.R --run-dir out/<run_id> --cores 8   # fit every region
+python -m abcd.phenotype out/<run_id>                  # subject phenotypes + reliability
+python -m abcd.gcta_export out/<run_id>                # GCTA/MAGMA inputs
+```
+
+Outputs per run: `fits/fixed.parquet` (fixed effects per region),
+`fits/varcomp.parquet` (variance components), `fits/diagnostics.parquet`
+(convergence, singularity), `phenotypes/phenotypes.parquet` (subject × region ×
+{intercept, slope} with reliability).
+
+## Open questions for release 7.0
+
+1. **Does slope reliability actually rise enough?** The $S_{xx}$ expression
+   predicts roughly a tripling with four visits over eight years. Check this
+   before assuming the GWAS becomes viable — it is a two-line calculation on the
+   new visit structure and it determines whether the rest is worth running.
+2. **Is linear-in-age still adequate over a longer span?** On 5.1 the spline
+   model was not preferred (`R/compare_models.R`), but the span was short. Over
+   8+ years the thinning trajectory is likely to curve, and if it does the
+   "slope" phenotype must be redefined — a spline coefficient, or an
+   area-under-curve summary.
+3. **Which metric?** Thickness is the default, but the pipeline is
+   metric-agnostic (`metric:` in the config; T1w/T2w ratio already runs). Given
+   the analysis above, scan-rescan reliability matters more than effect size
+   when choosing.
