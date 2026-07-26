@@ -51,6 +51,32 @@ def abcd_root() -> Path:
     )
 
 
+_AHBA_FALLBACKS = (
+    Path.home() / "Git" / "AHBA" / "data" / "abagen-data" / "expression",
+)
+
+
+def ahba_expression_path(parcellation: str = "hcp") -> Path:
+    """Locate the AHBA gene-by-region expression matrix.
+
+    These matrices are not redistributed with this repo: they are the
+    donor-normalised, probe-selected output of the pipeline in Dear et al.
+    (2024) and are several MB each.  Set ``ABCD_AHBA_DIR`` to the directory
+    holding ``{dk,hcp}_3d_ds5.csv``, or place it at the fallback path.
+    """
+    env = os.environ.get("ABCD_AHBA_DIR")
+    roots = (Path(env).expanduser(),) if env else _AHBA_FALLBACKS
+    fname = f"{parcellation}_3d_ds5.csv"
+    for r in roots:
+        p = r / fname
+        if p.exists():
+            return p
+    raise DataRootError(
+        f"Could not locate AHBA expression matrix {fname}. Set ABCD_AHBA_DIR "
+        f"to the directory containing it (looked in: {[str(r) for r in roots]})."
+    )
+
+
 def release_dir(release: str) -> Path:
     """Directory of a raw ABCD release, e.g. ``abcd-data-release-5.1/``."""
     d = abcd_root() / f"abcd-data-release-{release}"
