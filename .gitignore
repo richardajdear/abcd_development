@@ -12,3 +12,8 @@ Rplots.pdf
 # Quarto
 *_files/
 *.html
+
+# setuptools build artefacts (created by `pip install -e .`, machine-specific)
+src/*.egg-info/
+build/
+dist/

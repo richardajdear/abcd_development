@@ -229,3 +229,58 @@ class RunConfig:
                 "The file was hand-edited, or the config schema changed."
             )
         return cfg
+
+
+def find_run(out_dir: str | Path, *, metric: str | None = None,
+             parcellation: str | None = None, release: str | None = None,
+             require_fits: bool = True, **config_filters: Any) -> Path:
+    """Resolve a run directory by *what it is*, not by its hash.
+
+    ``run_id`` embeds a hash of the config, so any hardcoded id is specific to
+    the machine whose config produced it.  Notebooks that hardcode one break for
+    every other user (and for the same user after a config change).  Prefer::
+
+        RUN = find_run(ROOT / "out", release="7.0", family_effect=False)
+
+    Any keyword not named above is matched against the run's ``config.yaml``,
+    so ``family_effect=False`` or ``min_visits=2`` work as filters.
+
+    Raises ConfigError if zero or several runs match -- ambiguity here would
+    silently analyse the wrong phenotype, so it is never resolved by guessing.
+    """
+    out_dir = Path(out_dir)
+    if not out_dir.is_dir():
+        raise ConfigError(f"{out_dir} does not exist; run `python -m abcd.assemble <config>` first")
+
+    matches = []
+    for d in sorted(out_dir.iterdir()):
+        cfg_path = d / "config.yaml"
+        if not d.is_dir() or not cfg_path.exists():
+            continue
+        with open(cfg_path) as fh:
+            cfg = yaml.safe_load(fh) or {}
+        want = {"metric": metric, "parcellation": parcellation, "release": release,
+                **config_filters}
+        if any(v is not None and cfg.get(k) != v for k, v in want.items()):
+            continue
+        if require_fits and not (d / "fits").is_dir():
+            continue
+        matches.append(d)
+
+    criteria = {k: v for k, v in
+                {"metric": metric, "parcellation": parcellation, "release": release,
+                 **config_filters}.items() if v is not None}
+    if not matches:
+        avail = [p.name for p in out_dir.iterdir() if (p / "config.yaml").exists()]
+        raise ConfigError(
+            f"no run in {out_dir} matches {criteria}"
+            + (f" (with fits/)" if require_fits else "")
+            + f". Available: {avail or 'none'}"
+        )
+    if len(matches) > 1:
+        raise ConfigError(
+            f"{len(matches)} runs match {criteria}: {[m.name for m in matches]}. "
+            "Add filters (e.g. family_effect=, min_visits=) to disambiguate -- "
+            "picking one arbitrarily would risk analysing the wrong phenotype."
+        )
+    return matches[0]

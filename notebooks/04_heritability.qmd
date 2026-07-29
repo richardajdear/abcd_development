@@ -1,0 +1,248 @@
+---
+title: "Heritability of developmental slopes, from the pipeline outputs"
+subtitle: "Why no GWAS is needed, and how to compute it in twenty lines"
+format:
+  html:
+    toc: true
+    code-fold: false
+    embed-resources: true
+execute:
+  warning: false
+jupyter: python3
+---
+
+## What this notebook does
+
+It takes two files the pipeline already produces and returns a heritability
+estimate for the developmental slope phenotype. No genotypes, no GWAS, no LDSC,
+no cluster. It runs in about ten seconds.
+
+The point is conceptual as much as practical: **heritability is a question about
+variance, and the twin design answers it by comparison rather than by
+measurement.** Everything below is a consequence of that.
+
+```{python}
+from pathlib import Path
+import os
+import numpy as np
+import pandas as pd
+from scipy.stats import pearsonr
+
+os.environ.setdefault("ABCD_ROOT", "/Users/richard/Git/ABCD")
+ROOT = Path("..").resolve()
+
+from abcd import io
+from abcd.config import find_run
+from abcd.heritability import pair_table, falconer, falconer_by_region
+```
+
+## Why this works without a GWAS
+
+A GWAS asks *which* variants associate with a trait. It needs genotypes because
+it tests millions of specific hypotheses, one per variant, and so it pays a
+multiple-testing cost that only large samples can afford.
+
+Heritability asks a strictly weaker question: **how much of the trait's variance
+is attributable to genetic variation in aggregate?** It never needs to know
+which variants. And there is a natural experiment that answers it directly.
+
+Monozygotic twins share ~100% of their genome; dizygotic twins and full siblings
+share ~50% on average. Both members of a pair share a family, a home, a school,
+and a scan site. So if you compare how similar MZ pairs are to how similar DZ
+pairs are, the environment they have in common **cancels**, and what remains is
+attributable to the difference in genetic sharing:
+
+$$h^2 = 2\,(r_{MZ} - r_{DZ})$$
+
+That is Falconer's formula. The factor of 2 is there because the pairs differ by
+0.5 in genetic sharing, so the observed correlation gap is half the genetic
+variance fraction.
+
+**The efficiency comes from the fact that relatedness is known a priori.** A
+GWAS has to estimate the genetic relationship between subjects from data; the
+twin design has it by construction from the study's own family structure. You
+are spending the cohort's design rather than its sample size. That is why 260
+twin pairs answer a question that would need tens of thousands of unrelated
+subjects to answer via a GRM.
+
+The price you pay for that efficiency:
+
+- You get **one number**, not a locus. It tells you whether a GWAS is worth
+  running, not what it will find.
+- Falconer assumes MZ and DZ pairs share environment *equally*. If MZ twins are
+  treated more alike, $r_{MZ}$ is inflated and $h^2$ with it.
+- Our DZ class is diluted with non-twin full siblings, who differ in age. That
+  depresses $r_{DZ}$ and so **biases $h^2$ upward**. Treat the numbers below as
+  an upper region of the plausible range, and use GCTA-GRM for a defensible
+  point estimate.
+
+## Step 1: the two inputs
+
+Only two things are needed: the per-subject phenotype, and who is related to
+whom.
+
+```{python}
+RUN = find_run(ROOT / "out", release="7.0", family_effect=False)
+print("run:", RUN.name)
+
+ph = pd.read_parquet(RUN / "phenotypes" / "phenotypes.parquet")
+ph.head(3)
+```
+
+::: {.callout-important}
+## The run must be fitted without a family random effect
+
+`find_run(..., family_effect=False)` is not cosmetic. A model containing
+`(1 | family_id)` absorbs the between-family variance into the family term,
+leaving subject BLUPs that are *within-family deviations*. Two siblings' deviations
+are then forced to sum to ~zero, so they anti-correlate by construction and the
+heritability estimate is meaningless. `abcd.gcta_export` refuses such runs
+outright (`FamilyEffectConflict`). See `docs/REPORT_7.0.md` §3.
+:::
+
+Relatedness comes from the release adapter. 7.0 does not ship pi-hat, so
+genotype-confirmed zygosity is read from the 5.1 file and matched on subject ID:
+
+```{python}
+pairs = pair_table()
+pairs.pair_type.value_counts()
+```
+
+## Step 2: the estimate
+
+`pair_table` returns one row per subject with `family_id` and `pair_type`.
+Joining it to a phenotype and correlating the two members of each family is the
+whole computation:
+
+```{python}
+glob = ph[ph.phenotype == "slope"].groupby("subject").value.mean()
+res = falconer(glob, pairs, n_boot=500, seed=0)
+res
+```
+
+For comparison, baseline thickness — the positive control, a trait known to be
+strongly familial:
+
+```{python}
+base = ph[ph.phenotype == "intercept"].groupby("subject").value.mean()
+falconer(base, pairs, n_boot=500, seed=0)
+```
+
+::: {.callout-tip}
+## Always run the control
+
+The negative-sibling-correlation bug that invalidated our first attempt was
+invisible in the slope $h^2$ (which looked plausible at 0.485) and obvious in
+the baseline control (sibling $r = -0.117$, structurally impossible). Falconer
+*differences* two correlations, so it partly cancels artefacts that affect both
+pair types — which means **the $h^2$ value cannot be used to check itself.**
+Always inspect $r_{MZ}$ and $r_{DZ}$ separately.
+:::
+
+## Step 3: global vs regional
+
+The h² above is for the *mean across all 68 regions* — a single global slope per
+subject. Regional slopes are separate phenotypes with their own heritabilities:
+
+```{python}
+H = falconer_by_region(ph, pairs, phenotype="slope")
+H.h2.describe().round(3)
+```
+
+```{python}
+H.nlargest(8, "h2")[["h2", "r_MZ", "r_DZ", "n_MZ"]].round(3)
+```
+
+Regional $h^2$ spans roughly 0 to 0.95 and is highest in sensorimotor cortex.
+Two checks before believing that pattern:
+
+```{python}
+from scipy.stats import spearmanr, mannwhitneyu
+
+rel = ph[ph.phenotype == "slope"].groupby("label").reliability.mean()
+j = H.join(rel.rename("reliability"))
+print(f"h2 vs regional reliability: rho = {spearmanr(j.h2, j.reliability).statistic:+.3f} "
+      f"(p = {spearmanr(j.h2, j.reliability).pvalue:.3f})")
+```
+
+Noise attenuates heritability, so regions with more reliable slopes could show
+higher $h^2$ for purely technical reasons. They do not — the correlation is
+weak and non-significant, so the spatial pattern is not a reliability artefact.
+
+```{python}
+SENSORIMOTOR = ["precentral", "postcentral", "paracentral", "superiorparietal",
+                "pericalcarine", "cuneus", "lingual", "lateraloccipital",
+                "transversetemporal", "supramarginal"]
+j["base"] = j.index.str.replace(r"^(lh|rh)_", "", regex=True)
+j["sm"] = j.base.isin(SENSORIMOTOR)
+print(f"sensorimotor mean h2 = {j[j.sm].h2.mean():.3f} (n={j.sm.sum()})")
+print(f"association  mean h2 = {j[~j.sm].h2.mean():.3f} (n={(~j.sm).sum()})")
+print(f"Mann-Whitney p = {mannwhitneyu(j[j.sm].h2, j[~j.sm].h2).pvalue:.4f}")
+```
+
+::: {.callout-warning}
+## Per-region estimates are noisy
+
+Each regional $h^2$ rests on 260 MZ pairs, and the split-half reproducibility of
+the regional pattern is only $\rho \approx 0.28$. Individual regional values
+should not be over-interpreted; the *aggregate contrast* (sensorimotor >
+association) is what survives. This is exactly why the GWAS strategy below uses
+a multi-region summary rather than a hand-picked region.
+:::
+
+## Step 4: which phenotype should the GWAS use?
+
+Regional heritability varies, so the global mean is not obviously the best
+target. Candidate summaries, each evaluated by held-out heritability over
+repeated family-level splits — fit the summary on half the families, estimate
+$h^2$ on the other half:
+
+```{python}
+strategies = pd.read_csv(ROOT / "docs" / "strategy_crossval.csv", index_col=0)
+strategies.round(3)
+```
+
+Two results matter here:
+
+**PC1 of the subject × region slope matrix beats the global mean** (held-out
+$h^2$ 0.56 vs 0.36, higher in 87% of splits). Its loadings are highly stable
+across independent halves ($|r| = 0.97$), and it is *not* a rebranded global
+mean — it correlates only $r = -0.18$ with it. It is a posterior-to-anterior
+contrast: occipital and parietal regions load opposite prefrontal ones.
+
+**Selecting the top-$h^2$ regions does not work.** In-sample it looks like the
+best phenotype of all ($h^2 = 0.67$); out of sample it is no better than the
+global mean and has the widest error bars of any candidate. That gap is the
+selection effect — picking regions on the same pairs used to evaluate them
+capitalises on noise. Any region set chosen by looking at heritability must be
+validated on held-out families before it is used.
+
+::: {.callout-note}
+## Why PC1 is a defensible GWAS target and top-$h^2$ regions are not
+
+PC1 is defined by the *covariance structure of the phenotype* — it never looks
+at the twin data at all. So its definition cannot be contaminated by the
+relatedness information used to evaluate it. Selecting on $h^2$ uses the twin
+data twice.
+:::
+
+## Reproducing the figure
+
+```{python}
+#| eval: false
+# docs/regional_heritability.png
+```
+
+See `docs/regional_heritability.png` and `docs/REPORT_7.0.md` for the written-up
+version of these results.
+
+## What to run next
+
+The estimates here justify the cluster steps; they do not replace them.
+
+1. `python -m abcd.gcta_export <run-dir>` — writes phenotypes, covariates, and
+   the 10 ancestry PCs.
+2. `hpc/02_reml.sh` — GCTA-GRM + REML for a genotype-based $h^2$ that does not
+   assume equal environments and is not inflated by the sibling dilution.
+3. `hpc/03_gwas.sh` — fastGWA on the PC1 phenotype first, the global mean as a
+   secondary, and regional GWAS only after the primary run validates.
