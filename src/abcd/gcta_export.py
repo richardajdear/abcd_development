@@ -37,8 +37,55 @@ def _to_genetics_id(s: pd.Series) -> pd.Series:
     return out.str.replace(r"^NDARINV", "NDAR_INV", regex=True)
 
 
+class FamilyEffectConflict(ValueError):
+    """Raised when a run's BLUPs cannot support a genetic analysis.
+
+    Fitting ``(1 | family_id)`` partitions the between-family variance into its
+    own random effect.  The subject-level BLUPs that remain are *within-family*
+    deviations, and the between-family component -- which is exactly what
+    genetic relatedness explains -- has been removed from them.
+
+    Measured on release 7.0, whole-cortex thickness, 8,192 subjects (624
+    same-sex twin pairs, 578 sibling pairs):
+
+        with (1 | family_id):   r_sib = -0.117   <-- impossible; forced negative
+        without:                r_sib = +0.340
+
+    Cortical thickness is strongly familial, so a *negative* sibling
+    correlation is not a weak result, it is a structurally impossible one: the
+    family random effect centres each family at zero, so with two members per
+    family their deviations must sum to zero and anti-correlate by
+    construction.  Falconer's estimator differences two correlations and so
+    partly cancels the artefact -- it returned a plausible-looking h2 = 0.485
+    for baseline thickness from those invalid correlations -- which is why this
+    guard checks the model specification rather than trusting the h2 value to
+    look wrong.
+
+    Use a config with ``family_effect: false`` for genetic work (see
+    ``configs/ct_70_genetic.yaml``) and handle relatedness where it belongs:
+    in the GRM for GCTA, or via a mixed-model GWAS.
+    """
+
+
+def _check_genetic_validity(run_dir: Path) -> None:
+    """Refuse to export BLUPs that had the between-family variance removed."""
+    cfg_path = run_dir / "config.yaml"
+    if not cfg_path.exists():          # older runs predate the config dump
+        return
+    import yaml
+    cfg = yaml.safe_load(cfg_path.read_text()) or {}
+    if cfg.get("family_effect"):
+        raise FamilyEffectConflict(
+            f"{run_dir.name} was fitted with family_effect: true, so its BLUPs are "
+            "within-family deviations and carry no between-family genetic variance. "
+            "Re-fit with family_effect: false (configs/ct_70_genetic.yaml) before "
+            "exporting for GCTA/GWAS. See FamilyEffectConflict.__doc__."
+        )
+
+
 def build(run_dir: str | Path) -> dict[str, pd.DataFrame]:
     run_dir = Path(run_dir)
+    _check_genetic_validity(run_dir)
     ph = pd.read_parquet(run_dir / "phenotypes" / "phenotypes.parquet")
 
     # phenotypes.parquet is long: subject x label x phenotype.  GCTA needs one

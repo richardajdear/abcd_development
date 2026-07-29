@@ -1,0 +1,23 @@
+release: '7.0'
+metric: thickness
+parcellation: dsk
+hemisphere: both
+qc_policy: coded
+sample_rule: min_visits
+min_visits: 2
+visits:
+- v0
+- v2
+- v4
+- v6
+age_basis: linear
+spline_df: 3
+age_centre: null
+re_structure: slope_correlated
+global_covariate: observed_mean
+covariates:
+- sex
+family_effect: true
+site_effect: true
+note: '7.0 with >=2 visits: like-for-like against the 5.1 baseline config, which caps
+  at 3 visits.'

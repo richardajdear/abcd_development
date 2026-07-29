@@ -1,0 +1,24 @@
+release: '7.0'
+metric: thickness
+parcellation: dsk
+hemisphere: both
+qc_policy: coded
+sample_rule: min_visits
+min_visits: 2
+visits:
+- v0
+- v2
+- v4
+- v6
+age_basis: linear
+spline_df: 3
+age_centre: null
+re_structure: slope_correlated
+global_covariate: observed_mean
+covariates:
+- sex
+family_effect: false
+site_effect: true
+note: '7.0, >=2 visits, NO family random effect. Required for genetic analysis: (1|family_id)
+  absorbs the between-family variance that heritability and GWAS depend on, leaving
+  BLUPs that are within-family deviations.'
