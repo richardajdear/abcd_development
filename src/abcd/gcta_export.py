@@ -26,6 +26,7 @@ import sys
 from pathlib import Path
 
 import pandas as pd
+import yaml
 
 from . import paths
 
@@ -118,6 +119,25 @@ def build(run_dir: str | Path) -> dict[str, pd.DataFrame]:
     phen = df[["FID", "IID"] + pheno_cols]
     qcov = df[["FID", "IID", "age_c"]].rename(columns={"age_c": "baseline_age"})
     ccov = df[["FID", "IID", "sex", "site"]]
+
+    # Ancestry PCs must be quantitative covariates: ABCD is multi-ancestry, and
+    # neither GCTA-REML nor fastGWA absorbs population structure on its own.
+    # 7.0 tabulates 32 PCs in the static table; 5.1's local copy has none, in
+    # which case we emit the file without them and say so loudly.
+    n_pcs = 0
+    try:
+        from . import io as _io
+        release = (yaml.safe_load((run_dir / "config.yaml").read_text()) or {}).get("release")
+        pcs = _io.get_adapter(release).genetic_pcs(n=10)
+        pcs = pcs.copy()
+        pcs["IID"] = _to_genetics_id(pcs["subject"] if "subject" in pcs else pcs.index.to_series())
+        pc_cols = [c for c in pcs.columns if c.lower().startswith("pc")]
+        qcov = qcov.merge(pcs[["IID"] + pc_cols], on="IID", how="left")
+        n_pcs = len(pc_cols)
+    except Exception as exc:                       # noqa: BLE001 - release-dependent
+        qcov.attrs["pc_warning"] = str(exc)
+
+    qcov.attrs["n_pcs"] = n_pcs
     return {"phenotypes_gcta": phen, "covar_quant": qcov, "covar_categorical": ccov}
 
 
@@ -129,13 +149,23 @@ def main(argv: list[str] | None = None) -> int:
     a = ap.parse_args(argv)
     out = Path(a.out_dir) if a.out_dir else Path(a.run_dir) / "gcta_inputs"
     out.mkdir(parents=True, exist_ok=True)
-    for name, frame in build(a.run_dir).items():
+    built = build(a.run_dir)
+    for name, frame in built.items():
         p = out / f"{name}.txt"
         frame.to_csv(p, sep=" ", index=False, na_rep="NA")
         print(f"{p}  {frame.shape[0]} rows x {frame.shape[1]} cols")
-    print("\nNote: PCs of ancestry are NOT included. Add them to "
-          "covar_quant.txt before running 02_reml/03_gwas -- ABCD is "
-          "multi-ancestry and fastGWA does not absorb structure for you.")
+
+    qcov = built["covar_quant"]
+    n_pcs = qcov.attrs.get("n_pcs", 0)
+    if n_pcs:
+        miss = qcov[[c for c in qcov.columns if c.lower().startswith("pc")]].isna().any(axis=1).sum()
+        print(f"\ncovar_quant.txt includes {n_pcs} ancestry PCs "
+              f"({miss} subjects missing PCs -> NA; GCTA drops them).")
+    else:
+        print("\nWARNING: no ancestry PCs in covar_quant.txt "
+              f"({qcov.attrs.get('pc_warning', 'unavailable for this release')}). "
+              "ABCD is multi-ancestry and neither GCTA-REML nor fastGWA absorbs "
+              "population structure -- add PCs before 02_reml/03_gwas.")
     return 0
 
 

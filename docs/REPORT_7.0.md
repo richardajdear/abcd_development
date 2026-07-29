@@ -71,15 +71,35 @@ Figure: `family_effect_heritability.png`. Config: `configs/ct_70_genetic.yaml`.
 
 ### Headline result
 
-**The developmental slope phenotype is heritable: h² ≈ 0.28** (twin/sibling
-design, whole-cortex thickness). This is the number that makes the imaging
-genetics of longitudinal change viable, and it is roughly two-thirds of the
-baseline-thickness estimate (0.41) from the same subjects and estimator.
+**The developmental slope phenotype is heritable: h² ≈ 0.39.**
 
-Caveat: zygosity is design-based, not genotype-confirmed. `twin_same_sex` mixes
-MZ and DZ pairs, which *deflates* r_twin and so makes h² a conservative
-underestimate rather than an inflated one. Genotype-based zygosity and a GCTA
-GRM estimate are the next step; both need the cluster.
+7.0 does not ship pi-hat, but the 5.1 genotype file covers 3,670 of the same
+subjects, giving genotype-confirmed MZ/DZ status (260 MZ and 871 DZ-or-sibling
+pairs with phenotypes). Using it in place of the design-based twin classes:
+
+| phenotype | r (MZ) | r (DZ/sib) | h² |
+|---|---|---|---|
+| baseline thickness *(positive control)* | +0.721 | +0.382 | 0.678 |
+| **developmental slope** *(target)* | **+0.408** | **+0.215** | **0.385** |
+
+This confirms the prediction made from the design-based estimate: mixing MZ and
+DZ pairs in `twin_same_sex` deflated r_twin, so 0.28 was indeed a conservative
+floor and the true value is higher. Both phenotypes are clearly heritable, and
+the slope carries roughly 57% of the baseline phenotype's h² — attenuated as
+expected for a noisier derived measure, but far from null. **This is the number
+that makes imaging genetics of longitudinal change viable.**
+
+The genotype-based numbers also sharpen §3's warning: run with
+`(1 | family_id)`, the same estimator returns h² = 0.935 for baseline
+thickness — above the 1.0 ceiling in spirit and plainly impossible — from a
+*negative* DZ/sibling correlation of −0.079. Full table:
+`docs/heritability_genotype_zygosity.csv`.
+
+Remaining caveat: Falconer's estimator assumes MZ and DZ pairs share
+environment equally, and the DZ class here is diluted with full siblings (who
+differ in age, unlike twins), which biases r_DZ down and h² up. A GCTA-GRM
+estimate on the cluster is the proper replacement; these values establish the
+phenotype is worth that compute, not a final h².
 
 ## 4. Developmental maps do not resemble AHBA C1–C3
 

@@ -96,3 +96,22 @@ group-mean developmental change map and AHBA C1–C3 (`figures/abcd_spatial_null
 but that is a statement about *where* cortex changes on average, not about
 which genes carry disorder risk in a phenotype's association signal. Keep the
 two conclusions separate.
+
+## Ancestry PCs (added automatically for 7.0)
+
+`python -m abcd.gcta_export <run-dir>` now writes the first 10 ancestry PCs into
+`covar_quant.txt` from the 7.0 static table (`ab_g_stc__gen_pc__01..32`); 5.1's
+local copy has none, and the CLI prints a loud warning in that case. Note the
+7.0 `participant_id` is `sub-0A4P0LWM` — it carries **no** `NDARINV` token,
+unlike the imaging tables, so the join goes through the adapter rather than a
+string transform. Verified exact against the source table (max abs diff 0.0).
+
+Two properties to be aware of:
+
+- The PCs are standardised, so they are **not** ordered by decreasing variance
+  in the released table. Do not use variance ordering as a sanity check.
+- They are orthogonal in the full genotyped cohort (max |r| = 0.09) but not in
+  the imaging subset (max |r| = 0.26), which is expected when subsetting. This
+  is harmless collinearity for covariate adjustment; if you want strictly
+  orthogonal covariates, recompute PCs within the analysis sample.
+- 115 of 8,192 subjects have no PCs and appear as `NA`. GCTA drops them.
