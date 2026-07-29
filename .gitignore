@@ -5,3 +5,10 @@ __pycache__/
 
 # ABCD pipeline outputs (regenerate with: python -m abcd.assemble configs/<x>.yaml)
 out/
+
+# R droppings
+Rplots.pdf
+
+# Quarto
+*_files/
+*.html

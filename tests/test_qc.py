@@ -124,5 +124,5 @@ def test_coded_policy_is_inert_on_51_and_says_so():
     scans = qc.scan_table(a.imaging("thickness"))
     r = qc.apply_qc(scans, qc.build_policy("coded", a, 68), "coded")
     assert set(r.unavailable) == {
-        "release_qc_include", "euler_threshold", "scanner_manufacturer"
+        "release_qc_include", "surface_defects", "scanner_manufacturer"
     }

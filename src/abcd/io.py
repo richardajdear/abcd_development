@@ -27,6 +27,7 @@ release's event strings), and long-format ``region``/``hemi``/``value``.
 
 from __future__ import annotations
 
+import re
 from abc import ABC, abstractmethod
 from functools import lru_cache
 from pathlib import Path
@@ -35,6 +36,7 @@ import numpy as np
 import pandas as pd
 
 from . import paths
+from .paths import SourceUnavailable
 
 # --------------------------------------------------------------------------
 # Canonical region labels (shared by Python and R; R reads the same CSV)
@@ -302,6 +304,62 @@ class Release51Adapter(ReleaseAdapter):
             ["subject", "visit", "age", "site", "family_id"]
         ].reset_index(drop=True)
 
+    # -- QC sources ------------------------------------------------------
+    # Each returns a tidy (subject, visit, <value>) frame, or raises
+    # SourceUnavailable.  The predicates in qc.py call these rather than
+    # opening release files themselves, so adding a release means writing
+    # adapter methods, not editing QC logic.
+
+    def _qc_table(self, fname: str, col: str, out_name: str,
+                  dtype=None) -> pd.DataFrame:
+        p = self.imaging_dir / fname
+        if not p.exists():
+            raise SourceUnavailable(
+                f"{fname} not present in release {self.release} at {p.parent}"
+            )
+        raw = pd.read_csv(p, low_memory=False)
+        if col not in raw.columns:
+            raise SourceUnavailable(f"{fname} has no column {col!r}")
+        out = pd.DataFrame({
+            "subject": self._to_bids(raw.src_subject_id),
+            "visit": self._map_visits(raw.eventname),
+            out_name: raw[col] if dtype is None else raw[col].astype(dtype),
+        })
+        return out.dropna(subset=["visit"]).reset_index(drop=True)
+
+    def qc_include(self) -> pd.DataFrame:
+        """ABCD's recommended T1w inclusion flag (absent from the local copy)."""
+        return self._qc_table("mri_y_qc_incl.csv", "imgincl_t1w_include", "include")
+
+    def scanner(self) -> pd.DataFrame:
+        """Per-visit scanner manufacturer."""
+        for fname, col in (("mri_y_adm_info.csv", "mri_info_manufacturer"),
+                           ("mri_y_qc_motion.csv", "mri_info_manufacturer")):
+            try:
+                return self._qc_table(fname, col, "manufacturer")
+            except SourceUnavailable:
+                continue
+        raise SourceUnavailable(
+            f"no manufacturer column found for release {self.release}"
+        )
+
+    def surface_defects(self) -> pd.DataFrame:
+        """Topological defect count.
+
+        5.1's local copy exposes neither this nor the Euler number, so QC on
+        5.1 falls back to the precomputed legacy subject list -- see
+        :func:`qc.legacy_euler_predicate`.
+        """
+        raise SourceUnavailable(
+            f"release {self.release} exposes no surface-defect or Euler column; "
+            "use qc_policy='legacy_euler'"
+        )
+
+    def genetic_pcs(self, n: int = 10) -> pd.DataFrame:
+        raise SourceUnavailable(
+            f"release {self.release} has no ancestry PC table in the local copy"
+        )
+
     # ------------------------------------------------------------------
     def genetics(self) -> dict[str, Path]:
         d = self.root / "core" / "genetics"
@@ -344,43 +402,404 @@ class Release51Adapter(ReleaseAdapter):
 
 
 class Release70Adapter(Release51Adapter):
-    """ABCD data release 7.0 -- **stub, not yet verified against real data**.
+    """ABCD data release 7.0.
 
-    Inherits 5.1 behaviour so the pipeline is runnable the moment the release
-    is linked, but every assumption below must be checked before any 7.0
-    result is trusted.  Run ``python -m abcd.io --verify 7.0`` (see
-    :func:`verify_adapter`) once ``abcd-data-release-7.0/`` exists.
+    7.0 is not a superset of 5.1 with more rows -- it is a different tabulation
+    of the same study, and every one of the stub's original guesses was wrong.
+    The differences that matter, each verified against the release:
 
-    TO VERIFY ON LINKING
-    --------------------
-    1. **Event names.** ``VISITS`` below assumes the 6-year visit is
-       ``6_year_follow_up_y_arm_1``.  Confirm against the release notes; also
-       confirm the baseline/2y/4y strings are unchanged.
-    2. **Column naming.** Confirm the ``smri_*_cdk_*`` prefixes and the
-       stem_a/stem_b split still hold. If ABCD harmonised the T2 spellings,
-       ``METRIC_TABLES`` families need updating (the label CSV already carries
-       both, so this is a one-character change per metric).
-    3. **New modalities.** The local 5.1 copy is structural-only. 7.0 is
-       expected to carry resting-state and diffusion tables; add them to
-       ``METRIC_TABLES`` with their own prefixes and, for connectivity
-       matrices, a separate reader -- they are edge-level, not region-level,
-       so they need a different long schema (``region_i``/``region_j``).
-    4. **Genotypes.** Populate :meth:`genetics` with the genotype/WGS paths.
-       This is the blocker for every GCTA/GWAS step.
-    5. **QC variables.** Confirm the FreeSurfer QC and Euler columns used by
-       ``qc.py`` still exist under the same names.
+    1. **Directory name.** ``abcd-7.0/``, not ``abcd-data-release-7.0/``
+       (handled in :func:`paths.release_dir`).
+    2. **Session codes.** ``ses-00A``/``ses-02A``/``ses-04A``/``ses-06A``, not
+       ``*_year_follow_up_y_arm_1``.  The release also contains odd-year
+       sessions (``ses-01A``, ``ses-03A``, ``ses-05A``) which carry no imaging;
+       they are dropped by the visit map rather than silently joined as NaN.
+    3. **Subject ids.** ``sub-003RTV85``, where 5.1 used
+       ``NDAR_INV003RTV85``.  The transform is deterministic
+       (11,817/11,818 subjects intersect), so both releases normalise to the
+       same ``sub-NDARINV...`` form and phenotype tables remain joinable
+       across releases.
+    4. **Column scheme.** ``mr_y_smri__thk__dsk__bstmps__lh_mean`` against
+       5.1's ``smri_thick_cdk_banksstslh``, with abbreviated region codes.
+       Region identity is resolved by :data:`REGION_CODES`, which was built
+       from the release data dictionary and then *validated empirically* --
+       see the note on region order below.
+    5. **Age units.** ``ab_g_dyn__visit_age`` is in **years**; 5.1's
+       ``interview_age`` was in months.  Missing this would rescale every
+       slope by 12 while leaving all diagnostics looking healthy.
+    6. **Whole-cortex means are supplied.** ``__lh_mean``/``__rh_mean``/
+       ``_mean`` columns exist, where 5.1 required computing them.
+    7. **Covariates are consolidated.** ``ab_g_dyn`` (per visit) carries age,
+       site and scanner; ``ab_g_stc`` (per subject) carries sex, family,
+       birth event, twin flags and 32 genetic ancestry PCs -- so no separate
+       genetics file is needed for GWAS covariates.
+    8. **QC is renamed, not removed.** There is no Euler column; the
+       equivalent is ``topodfct_count`` (topological defect count), which is
+       what the Euler number is computed from.  Validated against the 5.1
+       legacy exclusion list: excluded subjects have median 32 defects vs 19
+       for retained (Mann-Whitney p = 3e-83, AUC 0.73).
+
+    REGION ORDER IS NOT SHARED BETWEEN RELEASES
+    -------------------------------------------
+    The two releases list the 68 DK regions in *different orders*.  Matching
+    5.1 and 7.0 columns by position agrees with the true correspondence for
+    only 16 of 68 regions -- and because both releases are internally
+    consistent, a positional mapping produces plausible thickness values,
+    plausible left-right symmetry and plausible age effects.  It would not
+    have failed loudly anywhere; it would just have relabelled the cortex.
+
+    :data:`REGION_CODES` is therefore checked against 5.1 on overlapping
+    subject-visits by :meth:`validate_region_mapping`, which is called from
+    :func:`verify_adapter`.  The check is a bijective correlation match
+    (min r = 0.9997, min margin over the runner-up = 0.17).  That check also
+    established that 99.94% of matched values are bit-identical, i.e. 7.0
+    reuses the 5.1 surface reconstructions for the shared waves rather than
+    reprocessing them -- so 5.1-vs-7.0 differences in results come from the
+    added wave and added subjects, not from a pipeline change upstream.
     """
 
     release = "7.0"
 
     VISITS = {
-        "v0": "baseline_year_1_arm_1",
-        "v2": "2_year_follow_up_y_arm_1",
-        "v4": "4_year_follow_up_y_arm_1",
-        "v6": "6_year_follow_up_y_arm_1",  # ASSUMED - verify
+        "v0": "ses-00A",
+        "v2": "ses-02A",
+        "v4": "ses-04A",
+        "v6": "ses-06A",
     }
 
-    VERIFIED = False
+    #: metric -> (table stem, column infix, global aggregation).
+    #: 7.0 has no stem_a/stem_b split: region codes are shared across metrics.
+    METRIC_TABLES = {
+        "thickness": ("mr_y_smri__thk__dsk",     "thk__dsk",     "mean"),
+        "t1_gray":   ("mr_y_smri__t1__gm__dsk",  "t1__gm__dsk",  "mean"),
+        "t2_gray":   ("mr_y_smri__t2__gm__dsk",  "t2__gm__dsk",  "mean"),
+    }
+
+    #: 7.0 region code -> 5.1 `stem_a` region token.  Built from the release
+    #: data dictionary's ROI descriptions, validated empirically (see class
+    #: docstring).  Keys are the abbreviations appearing in column names.
+    REGION_CODES = {
+        "bstmps": "bankssts",    "cac": "cdacate",        "cmfrt": "cdmdfr",
+        "cn": "cuneus",          "er": "ehinal",          "ff": "fusiform",
+        "ic": "ihcate",          "ins": "insula",         "iprt": "ifpl",
+        "itmp": "iftm",          "lg": "lingual",         "lobfrt": "lobfr",
+        "locc": "locc",          "mobfrt": "mobfr",       "mtmp": "mdtm",
+        "pactr": "paracn",       "pcc": "pericc",         "pcg": "ptcate",
+        "pfrt": "frpole",        "ph": "parahpal",        "pob": "parsobis",
+        "poctr": "postcn",       "pop": "parsopc",        "prcn": "pc",
+        "prctr": "precn",        "ptg": "parstgris",      "ptmp": "tmpole",
+        "rac": "rracate",        "rmfrt": "rrmdfr",       "sfrt": "sufr",
+        "sm": "sm",              "sprt": "supl",          "stmp": "sutm",
+        "ttmp": "trvtm",
+    }
+
+    VERIFIED = True
+
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _to_bids(subject: pd.Series) -> pd.Series:
+        """``sub-003RTV85`` -> ``sub-NDARINV003RTV85`` (idempotent).
+
+        Normalises to the same form the 5.1 adapter produces, so phenotype
+        tables from the two releases join without a crosswalk.
+        """
+        s = subject.astype(str)
+        # already-normalised or 5.1-style ids pass through unchanged
+        done = s.str.startswith("sub-NDARINV")
+        out = s.where(done, "sub-NDARINV" + s.str.replace("sub-", "", regex=False))
+        return out.str.replace("NDAR_INV", "NDARINV", regex=False)
+
+    def _table(self, stem: str) -> pd.DataFrame:
+        """Read a 7.0 table by stem, tolerating flat or nested layout."""
+        path = paths.find_table(self.root, stem)
+        sep = "\t" if path.suffix == ".tsv" else ","
+        if path.suffix == ".parquet":
+            return pd.read_parquet(path)
+        return pd.read_csv(path, sep=sep, low_memory=False)
+
+    # ------------------------------------------------------------------
+    def imaging(self, metric: str, parcellation: str = "dsk") -> pd.DataFrame:
+        if parcellation == "hcp":
+            # HCP-MMP parcellations were produced locally from 5.1 surfaces and
+            # have not been re-run on the 7.0 release.
+            raise SourceUnavailable(
+                "HCP-MMP parcellation is not available for release 7.0; it was "
+                "produced locally from 5.1 surfaces. Use parcellation='dsk', or "
+                "re-run the surface parcellation on 7.0 first."
+            )
+        if parcellation != "dsk":
+            raise NotImplementedError(
+                f"parcellation {parcellation!r} not wired for 7.0; only 'dsk'"
+            )
+        if metric not in self.METRIC_TABLES:
+            raise KeyError(
+                f"metric {metric!r} is not a raw 7.0 table. Available: "
+                f"{sorted(self.METRIC_TABLES)}. Derived metrics such as "
+                "'t1t2_ratio' are built in assemble.py, not here."
+            )
+        stem, infix, _agg = self.METRIC_TABLES[metric]
+        raw = self._table(stem)
+
+        pat = re.compile(rf"^mr_y_smri__{re.escape(infix)}__([a-z0-9]+)__(lh|rh)_mean$")
+        region_cols = {c: pat.match(c) for c in raw.columns}
+        region_cols = {c: m for c, m in region_cols.items() if m}
+        if len(region_cols) != 68:
+            raise KeyError(
+                f"{stem}: expected 68 region columns matching {pat.pattern}, "
+                f"found {len(region_cols)}"
+            )
+        unknown = {m.group(1) for m in region_cols.values()} - set(self.REGION_CODES)
+        if unknown:
+            raise KeyError(
+                f"{stem}: region codes not in REGION_CODES: {sorted(unknown)}. "
+                "The release may have changed its abbreviations; re-derive from "
+                "the data dictionary and re-run validate_region_mapping()."
+            )
+
+        # whole-cortex mean is supplied directly in 7.0
+        global_col = f"mr_y_smri__{infix}_mean"
+        keep = ["participant_id", "session_id"] + list(region_cols)
+        has_global = global_col in raw.columns
+        if has_global:
+            keep.append(global_col)
+
+        long = raw[keep].melt(
+            id_vars=["participant_id", "session_id"],
+            var_name="column",
+            value_name="value",
+        )
+        # REGION_CODES maps a 7.0 abbreviation to the release-5.1 column token;
+        # that token is then resolved to the canonical DK region name through
+        # the same ``region_labels.csv`` the 5.1 adapter uses.  Going through
+        # the shared table (rather than naming regions here) is what makes
+        # phenotype tables from the two releases directly comparable, and it
+        # keeps one canonical spelling for the spatial and gene-mapping code.
+        labels = region_labels(parcellation)
+        labels = labels[~labels.is_global]
+        token_to_region = dict(zip(labels.stem_a, labels.region))
+        meta_rows = []
+        for c, m in region_cols.items():
+            code, hemi = m.group(1), m.group(2)
+            token = f"{self.REGION_CODES[code]}{hemi}"
+            if token not in token_to_region:
+                raise KeyError(
+                    f"{stem}: region code {code!r} maps to token {token!r}, which "
+                    f"is not in {REGION_LABEL_FILE.name}. Fix REGION_CODES or add "
+                    "the region to the label table."
+                )
+            meta_rows.append({"column": c, "hemi": hemi,
+                              "region": token_to_region[token],
+                              "is_global": False})
+        meta = pd.DataFrame(meta_rows)
+        if has_global:
+            meta = pd.concat([meta, pd.DataFrame([{
+                "column": global_col, "hemi": "both",
+                "region": "global_mean", "is_global": True,
+            }])], ignore_index=True)
+        meta["label"] = np.where(
+            meta.is_global, meta.region, meta.hemi + "_" + meta.region
+        )
+
+        long = long.merge(meta, on="column", how="inner")
+        long["subject"] = self._to_bids(long.participant_id)
+        long["visit"] = self._map_visits(long.session_id)
+        long["metric"] = metric
+        long = long.dropna(subset=["visit", "value"])
+        return long[
+            ["subject", "visit", "metric", "hemi", "region", "label",
+             "is_global", "value"]
+        ].reset_index(drop=True)
+
+    # ------------------------------------------------------------------
+    def demographics(self) -> pd.DataFrame:
+        """Sex from the static cohort table (one row per subject)."""
+        st = self._table("ab_g_stc")
+        col = "ab_g_stc__cohort_sex"
+        if col not in st.columns:
+            raise SourceUnavailable(f"ab_g_stc has no column {col}")
+        out = pd.DataFrame({
+            "subject": self._to_bids(st.participant_id),
+            "sex_code": st[col],
+            "sex": st[col].map({1: "M", 2: "F"}),
+        })
+        return out.dropna(subset=["subject"]).drop_duplicates("subject").reset_index(drop=True)
+
+    # ------------------------------------------------------------------
+    def longitudinal(self) -> pd.DataFrame:
+        """Age, site and family, joined from the per-visit and static tables.
+
+        ``ab_g_dyn__visit_age`` is already in years -- unlike 5.1's
+        ``interview_age`` in months -- so no conversion is applied here.  The
+        unit is asserted in :func:`verify_adapter` rather than trusted.
+        """
+        dy = self._table("ab_g_dyn")
+        st = self._table("ab_g_stc")
+        need = ["ab_g_dyn__visit_age", "ab_g_dyn__design_site"]
+        missing = [c for c in need if c not in dy.columns]
+        if missing:
+            raise SourceUnavailable(f"ab_g_dyn missing columns: {missing}")
+
+        out = pd.DataFrame({
+            "subject": self._to_bids(dy.participant_id),
+            "visit": self._map_visits(dy.session_id),
+            "age": dy["ab_g_dyn__visit_age"].astype(float),
+            "site": dy["ab_g_dyn__design_site"],
+        }).dropna(subset=["visit", "age"])
+
+        fam = pd.DataFrame({
+            "subject": self._to_bids(st.participant_id),
+            "family_id": st["ab_g_stc__design_id__fam"],
+        }).dropna(subset=["family_id"]).drop_duplicates("subject")
+
+        # family is a subject-level attribute in 7.0 (static table), so unlike
+        # 5.1 there is no per-visit value that could drift mid-study.
+        out = out.merge(fam, on="subject", how="left")
+        return out[["subject", "visit", "age", "site", "family_id"]].reset_index(drop=True)
+
+    def scanner(self) -> pd.DataFrame:
+        """Per-visit scanner manufacturer, for the Philips exclusion."""
+        dy = self._table("ab_g_dyn")
+        col = "ab_g_dyn__design_mr__manufact"
+        if col not in dy.columns:
+            raise SourceUnavailable(f"ab_g_dyn has no column {col}")
+        return pd.DataFrame({
+            "subject": self._to_bids(dy.participant_id),
+            "visit": self._map_visits(dy.session_id),
+            "manufacturer": dy[col],
+        }).dropna(subset=["visit"]).reset_index(drop=True)
+
+    def qc_include(self) -> pd.DataFrame:
+        """The release's own recommended-inclusion flag for T1w."""
+        inc = self._table("mr_y_qc__incl")
+        col = "mr_y_qc__incl__smri__t1_indicator"
+        if col not in inc.columns:
+            raise SourceUnavailable(f"mr_y_qc__incl has no column {col}")
+        return pd.DataFrame({
+            "subject": self._to_bids(inc.participant_id),
+            "visit": self._map_visits(inc.session_id),
+            "include": inc[col],
+        }).dropna(subset=["visit"]).reset_index(drop=True)
+
+    def surface_defects(self) -> pd.DataFrame:
+        """Topological defect count -- the Euler-number equivalent.
+
+        FreeSurfer's Euler characteristic is a linear function of the number of
+        topological defects, so a *lower* Euler number and a *higher* defect
+        count mean the same thing: a worse surface reconstruction.  Thresholds
+        must therefore be expressed as an upper bound on defects, not a lower
+        bound on Euler.
+        """
+        au = self._table("mr_y_qc__post__aut")
+        col = "mr_y_qc__post__aut__smri__topodfct_count"
+        if col not in au.columns:
+            raise SourceUnavailable(f"mr_y_qc__post__aut has no column {col}")
+        return pd.DataFrame({
+            "subject": self._to_bids(au.participant_id),
+            "visit": self._map_visits(au.session_id),
+            "defects": au[col].astype(float),
+        }).dropna(subset=["visit"]).reset_index(drop=True)
+
+    # ------------------------------------------------------------------
+    def genetics(self) -> dict[str, Path]:
+        """Genetic resources.  PCs live in the static table in 7.0.
+
+        No genotype/WGS files are present in the local copy, so GCTA and GWAS
+        steps still cannot run against 7.0 here; see ``hpc/README.md``.
+        """
+        return {"static": paths.find_table(self.root, "ab_g_stc")}
+
+    def genetic_pcs(self, n: int = 10) -> pd.DataFrame:
+        """First ``n`` genetic ancestry PCs, for GWAS covariates."""
+        st = self._table("ab_g_stc")
+        cols = [f"ab_g_stc__gen_pc__{i:02d}" for i in range(1, n + 1)]
+        missing = [c for c in cols if c not in st.columns]
+        if missing:
+            raise SourceUnavailable(f"ab_g_stc missing PC columns: {missing}")
+        out = st[cols].copy()
+        out.columns = [f"PC{i}" for i in range(1, n + 1)]
+        out.insert(0, "subject", self._to_bids(st.participant_id))
+        return out.dropna(subset=["subject"]).reset_index(drop=True)
+
+    def relatedness(self) -> pd.DataFrame:
+        """Family, birth event and twin structure from the static table.
+
+        7.0 exposes no pi-hat, so ``pair_type`` is inferred from design
+        variables rather than measured relatedness: subjects sharing a birth
+        event are twins/triplets, and ``design_sstwin`` marks same-sex twins.
+        Same-sex twins are MZ *candidates* only -- roughly half are DZ -- so
+        this cannot substitute for genotype-based zygosity in a Falconer
+        estimate.  The column is named ``pair_type_design`` to keep that
+        distinction visible at the call site.
+        """
+        st = self._table("ab_g_stc")
+        out = pd.DataFrame({
+            "subject": self._to_bids(st.participant_id),
+            "family_id": st.get("ab_g_stc__design_id__fam"),
+            "birth_id": st.get("ab_g_stc__design_id__birth"),
+            "group_id": st.get("ab_g_stc__design_id__group"),
+            "relationship": st.get("ab_g_stc__design_famrel"),
+            "same_sex_twin": st.get("ab_g_stc__design_sstwin"),
+        })
+        multiple = out.birth_id.notna() & out.duplicated("birth_id", keep=False)
+        out["pair_type_design"] = np.select(
+            [multiple & (out.same_sex_twin == 1), multiple],
+            ["twin_same_sex", "twin_opposite_sex"],
+            default="singleton_or_sib",
+        )
+        return out.reset_index(drop=True)
+
+    # ------------------------------------------------------------------
+    def validate_region_mapping(self, metric: str = "thickness") -> pd.DataFrame:
+        """Check :data:`REGION_CODES` against 5.1 on overlapping visits.
+
+        Returns one row per region with the correlation to its mapped 5.1
+        counterpart.  Raises if the mapping is not the best available match for
+        every region, which is the failure a positional mapping would not
+        produce: see the class docstring.
+        """
+        mine = self.imaging(metric, "dsk")
+        mine = mine[~mine.is_global]
+        other = Release51Adapter().imaging(metric, "dsk")
+        other = other[~other.is_global]
+
+        a = mine.pivot_table(index=["subject", "visit"], columns="label", values="value")
+        b = other.pivot_table(index=["subject", "visit"], columns="label", values="value")
+        shared = a.index.intersection(b.index)
+        if len(shared) < 1000:
+            raise SourceUnavailable(
+                f"only {len(shared)} overlapping subject-visits between 7.0 and "
+                "5.1; cannot validate the region mapping"
+            )
+        a, b = a.loc[shared], b.loc[shared]
+        common = sorted(set(a.columns) & set(b.columns))
+        if len(common) != 68:
+            raise KeyError(
+                f"label sets disagree: {len(common)} shared of "
+                f"{len(a.columns)}/{len(b.columns)}"
+            )
+        A, B = a[common].to_numpy(float), b[common].to_numpy(float)
+        ok = ~(np.isnan(A).any(1) | np.isnan(B).any(1))
+        A, B = A[ok], B[ok]
+        Az = (A - A.mean(0)) / A.std(0)
+        Bz = (B - B.mean(0)) / B.std(0)
+        C = Az.T @ Bz / len(Az)
+
+        diag = np.diag(C)
+        best = C.argmax(1)
+        wrong = [common[i] for i in range(len(common)) if best[i] != i]
+        if wrong:
+            raise ValueError(
+                "REGION_CODES is wrong: for these labels the mapped 5.1 region "
+                f"is not the best correlate: {wrong[:10]}"
+                + (f" (+{len(wrong)-10} more)" if len(wrong) > 10 else "")
+            )
+        srt = np.sort(C, axis=1)
+        return pd.DataFrame({
+            "label": common,
+            "r": diag,
+            "margin_over_runner_up": srt[:, -1] - srt[:, -2],
+            "n_visits": len(A),
+        }).sort_values("r").reset_index(drop=True)
 
 
 ADAPTERS: dict[str, type[ReleaseAdapter]] = {

@@ -65,9 +65,29 @@ def test_derived_metric_rejected_by_adapter():
         a.imaging("t1t2_ratio")
 
 
-def test_70_adapter_warns_as_unverified():
-    with pytest.warns(UserWarning, match="unverified stub"):
-        io.get_adapter("7.0")
+def test_70_adapter_is_verified_and_silent():
+    """7.0 is verified against real data, so it must not warn.
+
+    The warning path still exists for any future unverified adapter; see
+    ``io.get_adapter``.
+    """
+    import warnings
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        a = io.get_adapter("7.0")
+    assert a.VERIFIED
+    assert set(a.VISITS.values()) == {"ses-00A", "ses-02A", "ses-04A", "ses-06A"}
+    assert len(a.REGION_CODES) == 34
+
+
+def test_70_subject_id_normalisation_matches_51():
+    """Both releases must normalise to the same id form, or joins silently fail."""
+    import pandas as pd
+    a70, a51 = io.Release70Adapter(), io.Release51Adapter()
+    assert a70._to_bids(pd.Series(["sub-003RTV85"]))[0] == "sub-NDARINV003RTV85"
+    assert a51._to_bids(pd.Series(["NDAR_INV003RTV85"]))[0] == "sub-NDARINV003RTV85"
+    # idempotent
+    assert a70._to_bids(pd.Series(["sub-NDARINV003RTV85"]))[0] == "sub-NDARINV003RTV85"
 
 
 def test_51_adapter_does_not_warn():

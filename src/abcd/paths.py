@@ -34,6 +34,15 @@ class DataRootError(FileNotFoundError):
     """Raised when the ABCD analysis tree cannot be located."""
 
 
+class SourceUnavailable(RuntimeError):
+    """Raised when a required input is not present in this release.
+
+    Lives here rather than in ``qc.py`` because both ``io.py`` (adapters) and
+    ``qc.py`` (predicates) raise it, and ``paths`` is the one module both
+    already depend on.  ``qc.SourceUnavailable`` remains a valid alias.
+    """
+
+
 def abcd_root() -> Path:
     """Locate the ABCD analysis tree (raw releases, QC lists, GWAS sumstats)."""
     env = os.environ.get("ABCD_ROOT")
@@ -77,15 +86,67 @@ def ahba_expression_path(parcellation: str = "hcp") -> Path:
     )
 
 
+#: Release directory naming is not consistent across ABCD releases: 5.1 ships
+#: as ``abcd-data-release-5.1/``, 7.0 as ``abcd-7.0/``.  Candidates are tried in
+#: order, so a release can be re-homed by adding a pattern rather than editing
+#: call sites.
+_RELEASE_DIR_PATTERNS = (
+    "abcd-data-release-{r}",
+    "abcd-{r}",
+    "abcd_data_release_{r}",
+    "release-{r}",
+)
+
+
 def release_dir(release: str) -> Path:
-    """Directory of a raw ABCD release, e.g. ``abcd-data-release-5.1/``."""
-    d = abcd_root() / f"abcd-data-release-{release}"
-    if not d.exists():
+    """Directory of a raw ABCD release.
+
+    Handles both the 5.1 (``abcd-data-release-5.1/``) and 7.0 (``abcd-7.0/``)
+    naming conventions.
+    """
+    root = abcd_root()
+    tried = []
+    for pat in _RELEASE_DIR_PATTERNS:
+        d = root / pat.format(r=release)
+        tried.append(d.name)
+        if d.exists():
+            return d
+    available = sorted(
+        p.name for p in root.glob("*")
+        if p.is_dir() and ("release" in p.name.lower() or p.name.startswith("abcd-"))
+    )
+    raise DataRootError(
+        f"Release {release} not found under {root} (tried {tried}). "
+        f"Available: {available}"
+    )
+
+
+def find_table(root: Path, stem: str) -> Path:
+    """Locate a release table by filename stem, wherever it sits in the tree.
+
+    Release 7.0's documented layout nests each table in its own directory
+    (``y/qc__incl/mr_y_qc__incl.tsv``), but a partial download may place them
+    flat (``y/mr_y_qc__incl.tsv``).  Both are valid; searching by stem means the
+    adapter does not care which, and a missing table raises with the paths
+    actually searched rather than a bare FileNotFoundError.
+    """
+    for suffix in (".tsv", ".csv", ".parquet"):
+        direct = root / f"{stem}{suffix}"
+        if direct.exists():
+            return direct
+    hits = sorted(
+        p for p in root.rglob(f"{stem}.*")
+        if p.suffix in {".tsv", ".csv", ".parquet"}
+    )
+    if not hits:
         raise DataRootError(
-            f"Release {release} not found at {d}. "
-            f"Available: {sorted(p.name for p in abcd_root().glob('abcd-data-release-*'))}"
+            f"table {stem!r} not found anywhere under {root}. "
+            "Check the release download is complete."
         )
-    return d
+    # prefer .tsv, then shallowest path, for determinism
+    hits.sort(key=lambda p: ({".tsv": 0, ".csv": 1, ".parquet": 2}[p.suffix],
+                             len(p.relative_to(root).parts)))
+    return hits[0]
 
 
 def run_dir(run_id: str, create: bool = True) -> Path:
