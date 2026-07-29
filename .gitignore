@@ -17,3 +17,8 @@ Rplots.pdf
 src/*.egg-info/
 build/
 dist/
+
+# Vendored ABCD release data: large and access-controlled, never committed.
+# Living inside the repo is what makes ABCD_ROOT unnecessary (see paths.py).
+abcd-data-release-*/
+abcd-[0-9]*.[0-9]*/

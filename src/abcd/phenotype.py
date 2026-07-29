@@ -218,11 +218,20 @@ def to_gcta(pheno: pd.DataFrame, phenotype: str = "slope",
 if __name__ == "__main__":  # pragma: no cover
     import argparse
 
-    ap = argparse.ArgumentParser(description="Build subject-level phenotypes.")
-    ap.add_argument("run_dir")
+    from .config import active_run_dir
+
+    ap = argparse.ArgumentParser(
+        description="Build subject-level phenotypes.",
+        epilog="run_dir defaults to the run for $ABCD_CONFIG.",
+    )
+    ap.add_argument("run_dir", nargs="?", default=None,
+                    help="run directory; omit to use $ABCD_CONFIG")
+    ap.add_argument("--config", default=None,
+                    help="config name, overriding $ABCD_CONFIG")
     ap.add_argument("--fits-name", default="fits")
     a = ap.parse_args()
-    ph = build_phenotypes(a.run_dir, a.fits_name)
-    d = write_phenotypes(ph, a.run_dir)
+    run_dir = a.run_dir or active_run_dir(a.config)
+    ph = build_phenotypes(run_dir, a.fits_name)
+    d = write_phenotypes(ph, run_dir)
     print(f"{len(ph):,} rows -> {d}")
     print(reliability_summary(ph).to_string(index=False))

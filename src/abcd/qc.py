@@ -122,9 +122,16 @@ LEGACY_SESSION_TO_VISIT = {
 
 def load_legacy_list() -> pd.DataFrame:
     """Read the 5.1 static QC list (subject x session that passed)."""
-    p = paths.abcd_root() / LEGACY_QC_FILE
-    if not p.exists():
-        raise SourceUnavailable(f"legacy QC list not found at {p}")
+    # Searched across every root, not just abcd_root(): this file sits beside
+    # the 5.1 release under ~/Git/ABCD, while the preferred root is now the repo
+    # (which holds 7.0). A single-root lookup silently reports the legacy policy
+    # as unavailable and lets QC pass every scan through.
+    p = paths.find_in_roots(LEGACY_QC_FILE)
+    if p is None:
+        raise SourceUnavailable(
+            f"legacy QC list {LEGACY_QC_FILE} not found in any of "
+            f"{[str(r) for r in paths.abcd_roots()]}"
+        )
     q = pd.read_csv(p)
     q = q.rename(columns={"Subject": "subject"})
     q["visit"] = q.session.map(LEGACY_SESSION_TO_VISIT)

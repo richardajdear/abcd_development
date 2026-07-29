@@ -4,10 +4,12 @@
 #' Reads   out/<run_id>/model_table.parquet
 #' Writes  out/<run_id>/fits/{blups,fixed,varcomp,diagnostics}.parquet
 #'
-#' Usage:
-#'   Rscript R/fit_lmm.R --run-dir out/thickness_dsk_51_f22d9bdb4145
-#'   Rscript R/fit_lmm.R --run-dir <dir> --regions lh_insula,lh_cuneus  # subset
-#'   Rscript R/fit_lmm.R --run-dir <dir> --cores 8
+#' Usage (the run comes from $ABCD_CONFIG; no run_id to type):
+#'   export ABCD_CONFIG=ct_70_genetic
+#'   Rscript R/fit_lmm.R --cores 8
+#'   Rscript R/fit_lmm.R --config ct_70_baseline        # override the export
+#'   Rscript R/fit_lmm.R --regions lh_insula,lh_cuneus  # subset, for debugging
+#'   Rscript R/fit_lmm.R --run-dir out/<run_id>         # explicit, still works
 #'
 #' What this does differently from the 5.1 pipeline
 #' ------------------------------------------------
@@ -41,14 +43,35 @@ source(here("model_spec.R"))
 # --------------------------------------------------------------------------
 
 opt <- parse_args(OptionParser(option_list = list(
-  make_option("--run-dir", type = "character", help = "run directory containing model_table.parquet"),
+  make_option("--run-dir", type = "character", default = NULL,
+              help = "run directory; omit to resolve from $ABCD_CONFIG"),
+  make_option("--config", type = "character", default = NULL,
+              help = "config name, overriding $ABCD_CONFIG"),
   make_option("--regions", type = "character", default = NULL, help = "comma-separated subset of labels (debugging)"),
   make_option("--cores", type = "integer", default = 1L, help = "parallel workers"),
   make_option("--out-name", type = "character", default = "fits", help = "subdirectory for outputs")
 )))
-stopifnot(!is.null(opt$`run-dir`))
 
-run_dir <- normalizePath(opt$`run-dir`, mustWork = TRUE)
+#' Resolve the run directory, preferring an explicit --run-dir.
+#'
+#' Delegates to `python -m abcd.run_dir` rather than recomputing the config
+#' hash here: the hash is the run's identity, and a second implementation in R
+#' would drift silently the moment a config field is added, pointing these fits
+#' at a stale run directory.
+resolve_run_dir <- function(opt) {
+  if (!is.null(opt$`run-dir`)) return(opt$`run-dir`)
+  args <- c("-m", "abcd.run_dir")
+  if (!is.null(opt$config)) args <- c(args, opt$config)
+  res <- suppressWarnings(system2("python", args, stdout = TRUE, stderr = TRUE))
+  if (!is.null(attr(res, "status")) && attr(res, "status") != 0) {
+    stop("could not resolve a run directory. Either pass --run-dir, or set\n",
+         "  export ABCD_CONFIG=ct_70_genetic\n",
+         "python said: ", paste(res, collapse = " "), call. = FALSE)
+  }
+  tail(res[nzchar(res)], 1)
+}
+
+run_dir <- normalizePath(resolve_run_dir(opt), mustWork = TRUE)
 cfg <- yaml::read_yaml(file.path(run_dir, "config.yaml"))
 out_dir <- file.path(run_dir, opt$`out-name`)
 dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)

@@ -28,8 +28,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import pearsonr
 
-os.environ.setdefault("ABCD_ROOT", "/Users/richard/Git/ABCD")
-ROOT = Path("..").resolve()
+ROOT = Path("..").resolve()  # ABCD_ROOT is not needed: see src/abcd/paths.py
 
 from abcd import io
 from abcd.config import find_run

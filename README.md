@@ -142,13 +142,31 @@ found, and what is blocked, with every number sourced.
 
 ## Pipeline
 
+Install once, then one variable selects the run and every step picks it up:
+
 ```bash
-export ABCD_ROOT=/path/to/ABCD
-python -m abcd.assemble configs/ct_genetics.yaml       # tidy long table
-Rscript R/fit_lmm.R --run-dir out/<run_id> --cores 8   # per-region lme4 fits
-python -m abcd.phenotype out/<run_id>                  # BLUPs + reliability
-python -m abcd.gcta_export out/<run_id>                # GCTA/MAGMA inputs
+pip install -e .                     # so `python -m abcd.*` works anywhere
+export ABCD_CONFIG=ct_70_genetic     # the only thing you set
+
+python -m abcd.assemble              # tidy long table
+Rscript R/fit_lmm.R --cores 8        # per-region lme4 fits
+python -m abcd.phenotype             # BLUPs + reliability
+python -m abcd.gcta_export           # GCTA/MAGMA inputs
 ```
+
+or `make all` for the same four steps. `make help` prints the active config,
+the run directory it resolves to, and the available configs.
+
+`ABCD_ROOT` is **not** required: release 7.0 is vendored at
+`abcd-data-release-7.0/` in the repo (gitignored — 92 MB, access-controlled),
+and 5.1 is found under `~/Git/ABCD`. Releases are searched across all roots, so
+the two need not share a parent; export `ABCD_ROOT` only to add a third
+location. Any step still accepts an explicit argument, which overrides the
+export (`python -m abcd.phenotype out/<run_id>`, `--config ct_70_baseline`).
+
+`python -m abcd.run_dir` prints the run directory for the active config and
+nothing else, which is how `R/fit_lmm.R` and the HPC scripts resolve the same
+run without reimplementing the config hash.
 
 Python (`src/abcd/`) does assembly, QC, spatial statistics and gene work; R
 (`R/`) does model fitting, because `lme4` handles crossed random effects with

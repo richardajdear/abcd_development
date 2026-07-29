@@ -20,11 +20,14 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 from dataclasses import asdict, dataclass, field, fields
 from pathlib import Path
 from typing import Any, Literal
 
 import yaml
+
+from . import paths
 
 # --------------------------------------------------------------------------
 # Controlled vocabularies.  Keeping these as module constants (rather than
@@ -229,6 +232,79 @@ class RunConfig:
                 "The file was hand-edited, or the config schema changed."
             )
         return cfg
+
+
+#: Environment variable naming the active config.  Set it once per shell and
+#: every pipeline step resolves the same run, so no step takes a ``run_id``:
+#:
+#:     export ABCD_CONFIG=ct_70_genetic
+#:
+#: Accepts a bare stem (``ct_70_genetic``), a filename (``ct_70_genetic.yaml``)
+#: or a path.  A path is honoured as given so a config outside ``configs/``
+#: still works.
+CONFIG_ENV_VAR = "ABCD_CONFIG"
+
+
+def resolve_config(spec: str | Path | None = None) -> Path:
+    """Locate a config YAML from an explicit spec or ``$ABCD_CONFIG``.
+
+    The pipeline's identity is the config; the ``run_id`` is a derived hash of
+    it.  Steps therefore take a config (or nothing, and read the environment)
+    rather than a run_id, which cannot be typed reliably and is machine-local.
+
+    Raises ConfigError -- never falls back to a default config -- because a
+    silently-chosen config would produce a real-looking run of the wrong
+    phenotype, which is far worse than stopping here.
+    """
+    raw = spec if spec is not None else os.environ.get(CONFIG_ENV_VAR)
+    if not raw:
+        available = sorted(p.stem for p in paths.CONFIG_DIR.glob("*.yaml"))
+        raise ConfigError(
+            f"No config given and ${CONFIG_ENV_VAR} is not set. Either export it "
+            f"once (export {CONFIG_ENV_VAR}=ct_70_genetic) or pass a config "
+            f"explicitly. Available: {available}"
+        )
+
+    p = Path(str(raw)).expanduser()
+    # A bare stem or filename is looked up in configs/; anything with a
+    # separator is treated as a path the caller means literally.
+    cands = [p] if p.parent != Path(".") else []
+    if p.suffix in ("", ".yaml", ".yml"):
+        stem = p.stem if p.suffix else p.name
+        cands += [paths.CONFIG_DIR / f"{stem}.yaml", paths.CONFIG_DIR / f"{stem}.yml"]
+    if p.parent == Path(".") and p.suffix:
+        cands.append(p)
+
+    for c in cands:
+        if c.exists():
+            return c.resolve()
+    available = sorted(q.stem for q in paths.CONFIG_DIR.glob("*.yaml"))
+    raise ConfigError(
+        f"config {raw!r} not found (looked in {[str(c) for c in cands]}). "
+        f"Available: {available}"
+    )
+
+
+def active_config(spec: str | Path | None = None) -> RunConfig:
+    """The :class:`RunConfig` named by ``spec`` or ``$ABCD_CONFIG``."""
+    return RunConfig.from_yaml(resolve_config(spec))
+
+
+def active_run_dir(spec: str | Path | None = None, *, must_exist: bool = True) -> Path:
+    """Run directory for the active config.
+
+    Derived from the config's own hash, so it needs no filesystem search and
+    cannot be ambiguous -- unlike :func:`find_run`, which is for the case where
+    only the run's *properties* are known.
+    """
+    cfg = active_config(spec)
+    run_dir = paths.OUT_DIR / cfg.run_id
+    if must_exist and not run_dir.exists():
+        raise ConfigError(
+            f"{run_dir} does not exist. Run `python -m abcd.assemble` first "
+            f"(config: {cfg.run_id})."
+        )
+    return run_dir
 
 
 def find_run(out_dir: str | Path, *, metric: str | None = None,

@@ -142,14 +142,23 @@ def build(run_dir: str | Path) -> dict[str, pd.DataFrame]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("run_dir")
+    from .config import active_run_dir
+
+    ap = argparse.ArgumentParser(
+        description=__doc__,
+        epilog="run_dir defaults to the run for $ABCD_CONFIG.",
+    )
+    ap.add_argument("run_dir", nargs="?", default=None,
+                    help="run directory; omit to use $ABCD_CONFIG")
+    ap.add_argument("--config", default=None,
+                    help="config name, overriding $ABCD_CONFIG")
     ap.add_argument("--out-dir", default=None,
                     help="default: <run-dir>/gcta_inputs")
     a = ap.parse_args(argv)
-    out = Path(a.out_dir) if a.out_dir else Path(a.run_dir) / "gcta_inputs"
+    run_dir = Path(a.run_dir) if a.run_dir else active_run_dir(a.config)
+    out = Path(a.out_dir) if a.out_dir else run_dir / "gcta_inputs"
     out.mkdir(parents=True, exist_ok=True)
-    built = build(a.run_dir)
+    built = build(run_dir)
     for name, frame in built.items():
         p = out / f"{name}.txt"
         frame.to_csv(p, sep=" ", index=False, na_rep="NA")

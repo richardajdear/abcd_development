@@ -9,11 +9,18 @@ and broke whenever a script moved):
     This repository.  Code, committed reference data, outputs.
 
 ``ABCD_ROOT``
-    The ABCD analysis tree holding the raw release directories.  Not in the
-    repo (it is large and access-controlled).  Resolved from, in order:
-    the ``ABCD_ROOT`` environment variable; ``~/Git/ABCD`` if it exists.
-    :func:`abcd_root` raises with a clear message if neither is available,
-    rather than failing later with a confusing FileNotFoundError.
+    A tree holding raw release directories.  Resolved from, in order:
+    :data:`REPO_ROOT` itself; the ``ABCD_ROOT`` environment variable;
+    ``~/Git/ABCD`` if it exists.  :func:`abcd_root` raises with a clear
+    message if none is available, rather than failing later with a confusing
+    FileNotFoundError.
+
+Releases are looked up across *all* of those roots rather than under a single
+one (:func:`abcd_roots`, :func:`release_dir`).  That is what lets a release
+live inside the repo -- ``abcd-data-release-7.0/``, gitignored -- so the common
+case needs no environment variable at all, while 5.1 (2.4 GB) stays outside it
+under ``~/Git/ABCD``.  A single-root design would force a choice between the
+two; searching several means both resolve with nothing exported.
 """
 
 from __future__ import annotations
@@ -43,20 +50,56 @@ class SourceUnavailable(RuntimeError):
     """
 
 
-def abcd_root() -> Path:
-    """Locate the ABCD analysis tree (raw releases, QC lists, GWAS sumstats)."""
+def abcd_roots() -> tuple[Path, ...]:
+    """Every tree that may hold a raw release, in search order.
+
+    ``REPO_ROOT`` comes first so a release vendored into the repo wins without
+    any environment variable.  ``ABCD_ROOT`` is honoured next -- an explicit
+    export still overrides -- then the historical ``~/Git/ABCD`` location.
+
+    Returns the roots that exist, deduplicated and order-preserving.  Never
+    raises: callers that need at least one root call :func:`abcd_root`.
+    """
+    cands = [REPO_ROOT]
     env = os.environ.get("ABCD_ROOT")
     if env:
         p = Path(env).expanduser()
         if not p.exists():
             raise DataRootError(f"ABCD_ROOT={env} does not exist")
-        return p
-    for p in _ABCD_FALLBACKS:
-        if p.exists():
-            return p
+        cands.append(p)
+    cands.extend(_ABCD_FALLBACKS)
+
+    seen: dict[Path, None] = {}
+    for c in cands:
+        try:
+            r = c.resolve()
+        except OSError:  # pragma: no cover - unreadable mount
+            continue
+        if r.exists():
+            seen.setdefault(r, None)
+    return tuple(seen)
+
+
+def abcd_root() -> Path:
+    """The first tree that actually contains a release directory.
+
+    Prefers a root holding releases over one that merely exists, so a bare
+    ``~/Git/ABCD`` cannot shadow the repo-vendored release.
+    """
+    roots = abcd_roots()
+    for r in roots:
+        if any(
+            (r / pat.format(r=rel)).exists()
+            for rel in ("5.1", "7.0")
+            for pat in _RELEASE_DIR_PATTERNS
+        ):
+            return r
+    if roots:
+        return roots[0]
     raise DataRootError(
-        "Could not locate the ABCD analysis tree. Set the ABCD_ROOT "
-        f"environment variable, or place it at one of: {list(_ABCD_FALLBACKS)}"
+        "Could not locate an ABCD data tree. Place a release directory in the "
+        f"repo ({REPO_ROOT}), set the ABCD_ROOT environment variable, or place "
+        f"it at one of: {list(_ABCD_FALLBACKS)}"
     )
 
 
@@ -101,24 +144,49 @@ _RELEASE_DIR_PATTERNS = (
 def release_dir(release: str) -> Path:
     """Directory of a raw ABCD release.
 
-    Handles both the 5.1 (``abcd-data-release-5.1/``) and 7.0 (``abcd-7.0/``)
-    naming conventions.
+    Handles the several release naming conventions, and searches every root in
+    :func:`abcd_roots` -- so 7.0 vendored into the repo and 5.1 kept outside it
+    both resolve without an environment variable.
     """
-    root = abcd_root()
-    tried = []
-    for pat in _RELEASE_DIR_PATTERNS:
-        d = root / pat.format(r=release)
-        tried.append(d.name)
-        if d.exists():
-            return d
+    roots = abcd_roots()
+    if not roots:
+        abcd_root()  # raises DataRootError with the actionable message
+    tried: list[str] = []
+    for root in roots:
+        for pat in _RELEASE_DIR_PATTERNS:
+            d = root / pat.format(r=release)
+            tried.append(str(d))
+            if d.exists():
+                return d
     available = sorted(
-        p.name for p in root.glob("*")
-        if p.is_dir() and ("release" in p.name.lower() or p.name.startswith("abcd-"))
+        {
+            p.name
+            for root in roots
+            for p in root.glob("*")
+            if p.is_dir()
+            and ("release" in p.name.lower() or p.name.startswith("abcd-"))
+        }
     )
     raise DataRootError(
-        f"Release {release} not found under {root} (tried {tried}). "
-        f"Available: {available}"
+        f"Release {release} not found in any of {[str(r) for r in roots]}. "
+        f"Available release directories: {available}. Tried: {tried}"
     )
+
+
+def find_in_roots(name: str) -> Path | None:
+    """Locate a loose analysis file across every root in :func:`abcd_roots`.
+
+    Auxiliary inputs (static subject lists, GWAS sumstats) sit beside the
+    release directories rather than inside them, and need not live in the same
+    tree as the release currently being analysed.  Returns ``None`` when absent
+    so callers can degrade -- the legacy QC policy, for instance, reports the
+    input as unavailable rather than failing the run.
+    """
+    for root in abcd_roots():
+        p = root / name
+        if p.exists():
+            return p
+    return None
 
 
 def find_table(root: Path, stem: str) -> Path:

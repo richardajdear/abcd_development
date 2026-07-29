@@ -296,7 +296,13 @@ def build(cfg: RunConfig, verbose: bool = True) -> tuple[pd.DataFrame, dict, Pat
 if __name__ == "__main__":  # pragma: no cover
     import argparse
 
-    ap = argparse.ArgumentParser(description="Assemble an ABCD modelling table.")
-    ap.add_argument("config", help="path to a config YAML (see configs/)")
+    from .config import resolve_config
+
+    ap = argparse.ArgumentParser(
+        description="Assemble an ABCD modelling table.",
+        epilog="config defaults to $ABCD_CONFIG.",
+    )
+    ap.add_argument("config", nargs="?", default=None,
+                    help="config name or path; omit to use $ABCD_CONFIG")
     args = ap.parse_args()
-    build(RunConfig.from_yaml(args.config))
+    build(RunConfig.from_yaml(resolve_config(args.config)))
