@@ -1,0 +1,20 @@
+# Python dependencies for src/abcd (assemble.py, gcta_export.py, genemaps.py,
+# io.py, magma_export.py, phenotype.py, qc.py, spatial.py, config.py, paths.py)
+# plus notebooks/02_maps_and_genes.qmd (jupyter/matplotlib engine).
+#
+# Installed into the 'abcd' mamba env with:
+#   mamba install -n abcd -c conda-forge numpy pandas scipy nibabel pyyaml pyarrow \
+#       matplotlib nbclient nbformat
+#
+# R dependencies for R/fit_lmm.R etc. are tracked separately, see ABCD/mamba_env
+# (r-base, r-essentials, r-tidyverse, r-arrow, r-lme4, r-optparse, r-yaml).
+
+numpy
+pandas
+scipy
+nibabel
+pyyaml
+pyarrow
+matplotlib
+nbclient
+nbformat

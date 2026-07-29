@@ -26,7 +26,7 @@ import numpy as np, pandas as pd, scipy.stats as st
 import matplotlib.pyplot as plt
 from abcd import spatial as sp, genemaps as gm
 
-RUN_ABS = ROOT / "out" / "thickness_hcp_51_f408a620fde4"   # HCP, absolute change
+RUN_ABS = ROOT / "out" / "thickness_dsk_51_32bbb98e84e4"   # HCP, absolute change
 pd.set_option("display.width", 100)
 ```
 
@@ -54,7 +54,7 @@ p-value from nothing. Two failure modes, both addressed below:
 ## The spatial null {#sec-nulls}
 
 ```{python}
-geom = sp.load_dk_geometry(ROOT / "data" / "hcp_centroids.csv")
+geom = sp.load_dk_geometry(ROOT / "data" / "dk_centroids.csv")
 lh = [l for l in geom.labels if l.startswith("lh_")]
 geom_lh = sp.ParcelGeometry(
     labels=tuple(l[3:] for l in lh),
@@ -101,7 +101,7 @@ Split-half over subjects:
 ```{python}
 fa = pd.read_parquet(RUN_ABS / "fits" / "fixed.parquet")
 dev_abs = fa[fa.term == "age_c"].set_index("label").estimate
-print(f"{len(dev_abs)} regions | thinning {(dev_abs < 0).sum()} | thickening {(dev_abs > 0).sum()}")
+print(f"{len(dev_abs)} regions V| thinning {(dev_abs < 0).sum()} | thickening {(dev_abs > 0).sum()}")
 print(f"lh/rh symmetry: {sp.hemisphere_symmetry(dev_abs, geom):.3f}")
 ```
 

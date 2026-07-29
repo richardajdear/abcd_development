@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "abcd"
+version = "0.1.0"
+description = "ABCD longitudinal brain-development pipeline"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "pandas",
+    "scipy",
+    "nibabel",
+    "pyyaml",
+    "pyarrow",
+    "matplotlib",
+    "nbclient",
+    "nbformat",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
