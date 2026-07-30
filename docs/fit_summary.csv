@@ -1,9 +1,9 @@
 key,run,global_cov,min_visits,family_effect,subjects,mean_visits,singular,nonconverged
-ng_mv2,thickness_dsk_70_a725e76aa17c,none,2,True,8192,3.057,0,0
-ng_mv2_gen,thickness_dsk_70_139406217085,none,2,False,8192,3.057,0,0
-ng_mv3,thickness_dsk_70_2da8b1ff0ebb,none,3,True,5195,3.42,0,0
-ng_mv3_gen,thickness_dsk_70_fcb2dfafb0ea,none,3,False,5195,3.42,0,0
+ng_mv2,thickness_dsk_70_a725e76aa17c,none,2,True,8192,2.8575,0,0
+ng_mv2_gen,thickness_dsk_70_139406217085,none,2,False,8192,2.8575,0,0
+ng_mv3,thickness_dsk_70_2da8b1ff0ebb,none,3,True,5195,3.3523,0,0
+ng_mv3_gen,thickness_dsk_70_fcb2dfafb0ea,none,3,False,5195,3.3523,0,0
 ng_mv4,thickness_dsk_70_38aca05672c2,none,4,True,1830,4.0,1,1
 ng_mv4_gen,thickness_dsk_70_5899982b9397,none,4,False,1830,4.0,1,1
-adj_mv3,thickness_dsk_70_fb236c945db9,observed_mean,3,True,5195,3.42,0,0
-adj_mv2_gen,thickness_dsk_70_36738d15ec02,observed_mean,2,False,8192,3.057,0,0
+adj_mv3,thickness_dsk_70_fb236c945db9,observed_mean,3,True,5195,3.3523,0,0
+adj_mv2_gen,thickness_dsk_70_36738d15ec02,observed_mean,2,False,8192,2.8575,0,0

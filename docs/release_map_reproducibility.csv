@@ -1,0 +1,5 @@
+comparison,spearman_rho,pearson_r,n_regions
+"release 5.1 vs 7.0, matched spec (no-global, mv2, fam on)",0.9366,0.9752,68
+release 5.1 vs 7.0 settled (fam off),0.9366,0.9751,68
+visit filter within 7.0: mv2 vs mv3,0.9982,0.9994,68
+family effect within 7.0: on vs off,1.0,1.0,68
