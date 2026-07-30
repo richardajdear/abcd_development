@@ -351,6 +351,25 @@ even though they are not the most heritable candidates.
 All 18 map × component pairs, with both spin and naive p-values, are in
 `docs/ahba_vs_maps_noglobal.csv`.
 
+### The maps, side by side
+
+![ABCD developmental maps and AHBA components]({{artifact:art_8dbed094-9be5-4285-926e-961c9c1e92ed}})
+
+The five ABCD maps (**a**) and the three AHBA components (**b**) are drawn on a
+common scale — each map standardised within itself, so colour encodes rank
+position within a map and not a shared unit, which differ across maps. The
+correlation matrix (**c**) is the table above rendered as a heatmap, and (**d**)
+shows the three strongest associations as scatters over the 34 bilateral
+regions.
+
+Two things are visible in the maps that the table alone does not convey. Slope
+PC3 and AHBA C2 (**d**, left) share a frontal-positive, occipital-negative
+gradient that is legible by eye in **a** and **b**, which is why that pair
+reaches ρ = +0.85. And the mean-rate/C3 replication (**d**, right) is carried
+substantially by three high-thinning outliers above +2 z; the association is
+real and survives the spin test, but it rests on a less uniform spatial
+correspondence than the two PC associations do.
+
 ![AHBA comparison]({{artifact:art_435c9e2f-1dfb-42b2-a774-ea403c03d437}})
 
 ---
