@@ -1,0 +1,6 @@
+phenotype,h2_full,h2_heldout,h2_heldout_sd,ahba_best,ahba_rho,ahba_p_spin,definition_uses_twins,definition_stable
+global mean slope,0.5837,0.5934,0.1337,C3,-0.546,0.0015996800639872,no,deterministic
+slope PC1,0.5931,0.6107,0.1513,C1,-0.511,0.0345930813837232,no,deterministic
+slope PC2,0.4411,0.4428,0.1266,C1,-0.812,0.0001999600079984,no,deterministic
+slope PC3,0.4969,0.5113,0.1508,C2,0.854,0.0001999600079984,no,deterministic
+top-10 h2 regions (mean),,0.6487,0.152,n/a,,,yes,6.1/10 regions replicate

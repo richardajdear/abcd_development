@@ -1,0 +1,201 @@
+split,phenotype,defined_on,h2
+0,global mean slope,none,0.5125982911585895
+0,slope PC1,train (PCA),0.6609805615884233
+0,slope PC2,train (PCA),0.43972728964015195
+0,slope PC3,train (PCA),0.5104962535897883
+0,top-10 h2 regions (mean),train (h2),0.6346152467478594
+1,global mean slope,none,0.6192181706477243
+1,slope PC1,train (PCA),0.8312230615225735
+1,slope PC2,train (PCA),0.34963234237452884
+1,slope PC3,train (PCA),0.5970602413942612
+1,top-10 h2 regions (mean),train (h2),0.6241809856107631
+2,global mean slope,none,0.5535462343574988
+2,slope PC1,train (PCA),0.5642453392171345
+2,slope PC2,train (PCA),0.4375325494981952
+2,slope PC3,train (PCA),0.6993912140873046
+2,top-10 h2 regions (mean),train (h2),0.6160694110386166
+3,global mean slope,none,0.7222959281069197
+3,slope PC1,train (PCA),0.7646939303058027
+3,slope PC2,train (PCA),0.41098110579785385
+3,slope PC3,train (PCA),0.5513465685485279
+3,top-10 h2 regions (mean),train (h2),0.6268502049759476
+4,global mean slope,none,0.7020178372017762
+4,slope PC1,train (PCA),0.600111224279858
+4,slope PC2,train (PCA),0.5569410586520298
+4,slope PC3,train (PCA),0.6645846091773491
+4,top-10 h2 regions (mean),train (h2),0.8126970284621065
+5,global mean slope,none,0.6750076124214943
+5,slope PC1,train (PCA),0.34662103391252047
+5,slope PC2,train (PCA),0.39388842748068154
+5,slope PC3,train (PCA),0.20662547659924013
+5,top-10 h2 regions (mean),train (h2),0.5123151988610766
+6,global mean slope,none,0.7306060990471182
+6,slope PC1,train (PCA),0.7248258689913499
+6,slope PC2,train (PCA),0.6052070578559787
+6,slope PC3,train (PCA),0.3838573417086166
+6,top-10 h2 regions (mean),train (h2),0.8291561193078945
+7,global mean slope,none,0.5154025935835749
+7,slope PC1,train (PCA),0.6195023510603185
+7,slope PC2,train (PCA),0.4183672196118885
+7,slope PC3,train (PCA),0.5812512768283077
+7,top-10 h2 regions (mean),train (h2),0.547850609259952
+8,global mean slope,none,0.5232397055290822
+8,slope PC1,train (PCA),0.6598106717675187
+8,slope PC2,train (PCA),0.5148995879035689
+8,slope PC3,train (PCA),0.706488995051017
+8,top-10 h2 regions (mean),train (h2),0.739850309531728
+9,global mean slope,none,0.5808593757527816
+9,slope PC1,train (PCA),0.6077287698101402
+9,slope PC2,train (PCA),0.2974296787615363
+9,slope PC3,train (PCA),0.5656163323948422
+9,top-10 h2 regions (mean),train (h2),0.7263127105353302
+10,global mean slope,none,0.5067817429436952
+10,slope PC1,train (PCA),0.8468800209677789
+10,slope PC2,train (PCA),0.7291512621948892
+10,slope PC3,train (PCA),0.7078676186706068
+10,top-10 h2 regions (mean),train (h2),0.7772948084041429
+11,global mean slope,none,0.8831806967530322
+11,slope PC1,train (PCA),0.6566039651498998
+11,slope PC2,train (PCA),0.44696513885997463
+11,slope PC3,train (PCA),0.3389550778494632
+11,top-10 h2 regions (mean),train (h2),1.0239104616245382
+12,global mean slope,none,0.5066577831132291
+12,slope PC1,train (PCA),0.3735410545719883
+12,slope PC2,train (PCA),0.4932124296328587
+12,slope PC3,train (PCA),0.29425277255209714
+12,top-10 h2 regions (mean),train (h2),0.4560398587373256
+13,global mean slope,none,0.566377169697627
+13,slope PC1,train (PCA),0.7539707914633244
+13,slope PC2,train (PCA),0.33987374624165456
+13,slope PC3,train (PCA),0.6695284272044049
+13,top-10 h2 regions (mean),train (h2),0.8767417819202418
+14,global mean slope,none,0.5227383278525624
+14,slope PC1,train (PCA),0.5097593721940901
+14,slope PC2,train (PCA),0.32537320083543253
+14,slope PC3,train (PCA),0.387006726719307
+14,top-10 h2 regions (mean),train (h2),0.7044420464438703
+15,global mean slope,none,0.8068727013253496
+15,slope PC1,train (PCA),0.6840493797777876
+15,slope PC2,train (PCA),0.491847652042159
+15,slope PC3,train (PCA),0.5083305744497713
+15,top-10 h2 regions (mean),train (h2),0.9007802536797553
+16,global mean slope,none,0.7601430866391383
+16,slope PC1,train (PCA),0.7523069817614961
+16,slope PC2,train (PCA),0.33402466636167827
+16,slope PC3,train (PCA),0.739344326089217
+16,top-10 h2 regions (mean),train (h2),0.8151736492238281
+17,global mean slope,none,0.6166714086722167
+17,slope PC1,train (PCA),0.754496955253712
+17,slope PC2,train (PCA),0.5779272141638396
+17,slope PC3,train (PCA),0.6507683731097738
+17,top-10 h2 regions (mean),train (h2),0.48794730013069343
+18,global mean slope,none,0.5958373152000047
+18,slope PC1,train (PCA),0.438646925480707
+18,slope PC2,train (PCA),0.4879440886585208
+18,slope PC3,train (PCA),0.4675052863145259
+18,top-10 h2 regions (mean),train (h2),0.7549679989835181
+19,global mean slope,none,0.595362920991185
+19,slope PC1,train (PCA),0.6766470951425735
+19,slope PC2,train (PCA),0.5924709393303114
+19,slope PC3,train (PCA),0.6548809757658821
+19,top-10 h2 regions (mean),train (h2),0.6259434185471762
+20,global mean slope,none,0.3367471240675444
+20,slope PC1,train (PCA),0.3002932656282509
+20,slope PC2,train (PCA),0.22310263300125172
+20,slope PC3,train (PCA),0.13295604585805731
+20,top-10 h2 regions (mean),train (h2),0.2936347476278807
+21,global mean slope,none,0.5612758637851388
+21,slope PC1,train (PCA),0.7697796495477525
+21,slope PC2,train (PCA),0.36755340225783756
+21,slope PC3,train (PCA),0.48425206109490726
+21,top-10 h2 regions (mean),train (h2),0.7479630572957316
+22,global mean slope,none,0.4577907606801369
+22,slope PC1,train (PCA),0.6270102893541296
+22,slope PC2,train (PCA),0.449128889667407
+22,slope PC3,train (PCA),0.5773622555276354
+22,top-10 h2 regions (mean),train (h2),0.6493720278496852
+23,global mean slope,none,0.4787818500602333
+23,slope PC1,train (PCA),0.6733282308303603
+23,slope PC2,train (PCA),0.4308673932892583
+23,slope PC3,train (PCA),0.5663652274102955
+23,top-10 h2 regions (mean),train (h2),0.6837089061003887
+24,global mean slope,none,0.5167484925190313
+24,slope PC1,train (PCA),0.42635045059976967
+24,slope PC2,train (PCA),0.09501065882135107
+24,slope PC3,train (PCA),0.41016374592230753
+24,top-10 h2 regions (mean),train (h2),0.25027876446577313
+25,global mean slope,none,0.6648808828631052
+25,slope PC1,train (PCA),0.5260755752177151
+25,slope PC2,train (PCA),0.411337143041276
+25,slope PC3,train (PCA),0.5184539244827417
+25,top-10 h2 regions (mean),train (h2),0.6037136160944099
+26,global mean slope,none,0.7637920692068179
+26,slope PC1,train (PCA),0.5140674563382197
+26,slope PC2,train (PCA),0.37197367702063044
+26,slope PC3,train (PCA),0.28934114012171935
+26,top-10 h2 regions (mean),train (h2),0.6887909899362469
+27,global mean slope,none,0.8378612027389276
+27,slope PC1,train (PCA),0.6416175962852271
+27,slope PC2,train (PCA),0.4423973278294581
+27,slope PC3,train (PCA),0.2848775165407322
+27,top-10 h2 regions (mean),train (h2),0.6153084277291373
+28,global mean slope,none,0.6981599037498416
+28,slope PC1,train (PCA),0.7757072580845836
+28,slope PC2,train (PCA),0.4909364898142548
+28,slope PC3,train (PCA),0.6528686952304632
+28,top-10 h2 regions (mean),train (h2),0.6539585877136919
+29,global mean slope,none,0.45357690325907546
+29,slope PC1,train (PCA),0.7754788906029451
+29,slope PC2,train (PCA),0.4740087788489026
+29,slope PC3,train (PCA),0.698333693042001
+29,top-10 h2 regions (mean),train (h2),0.6132839355685653
+30,global mean slope,none,0.44799656653769987
+30,slope PC1,train (PCA),0.2905930853856584
+30,slope PC2,train (PCA),0.5755547991771783
+30,slope PC3,train (PCA),0.44981187729507166
+30,top-10 h2 regions (mean),train (h2),0.5887760141791928
+31,global mean slope,none,0.45092512109105265
+31,slope PC1,train (PCA),0.7082065340771259
+31,slope PC2,train (PCA),0.5105570166610394
+31,slope PC3,train (PCA),0.5545472881672604
+31,top-10 h2 regions (mean),train (h2),0.7238410191379637
+32,global mean slope,none,0.6944782804665973
+32,slope PC1,train (PCA),0.5435077286373906
+32,slope PC2,train (PCA),0.44158616210855406
+32,slope PC3,train (PCA),0.4816964003046966
+32,top-10 h2 regions (mean),train (h2),0.7123713898435494
+33,global mean slope,none,0.6480433191986696
+33,slope PC1,train (PCA),0.774646710927666
+33,slope PC2,train (PCA),0.3690022058221231
+33,slope PC3,train (PCA),0.7222004587038843
+33,top-10 h2 regions (mean),train (h2),0.7558863083550629
+34,global mean slope,none,0.3882688296057977
+34,slope PC1,train (PCA),0.41063719983762037
+34,slope PC2,train (PCA),0.6851059782913627
+34,slope PC3,train (PCA),0.45267335603756464
+34,top-10 h2 regions (mean),train (h2),0.5713643627359486
+35,global mean slope,none,0.2888778914128729
+35,slope PC1,train (PCA),0.4030658176143582
+35,slope PC2,train (PCA),0.4115590087037392
+35,slope PC3,train (PCA),0.46219155816142876
+35,top-10 h2 regions (mean),train (h2),0.39684145195724085
+36,global mean slope,none,0.6721506181286289
+36,slope PC1,train (PCA),0.50468615175815
+36,slope PC2,train (PCA),0.5423299276317806
+36,slope PC3,train (PCA),0.5024920927265657
+36,top-10 h2 regions (mean),train (h2),0.5586489017070895
+37,global mean slope,none,0.5398715311941329
+37,slope PC1,train (PCA),0.7430527872143557
+37,slope PC2,train (PCA),0.34852140386208613
+37,slope PC3,train (PCA),0.4321608021209642
+37,top-10 h2 regions (mean),train (h2),0.6013040749083908
+38,global mean slope,none,0.7219678603474103
+38,slope PC1,train (PCA),0.692711508045383
+38,slope PC2,train (PCA),0.6249468825385616
+38,slope PC3,train (PCA),0.3352373029759359
+38,top-10 h2 regions (mean),train (h2),0.5810358171741214
+39,global mean slope,none,0.6177716453417504
+39,slope PC1,train (PCA),0.5009428799487279
+39,slope PC2,train (PCA),0.2034971208541883
+39,slope PC3,train (PCA),0.5588873635310264
+39,top-10 h2 regions (mean),train (h2),0.5649527740297586
