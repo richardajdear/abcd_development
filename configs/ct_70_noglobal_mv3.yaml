@@ -1,0 +1,26 @@
+release: '7.0'
+metric: thickness
+parcellation: dsk
+hemisphere: both
+qc_policy: coded
+sample_rule: min_visits
+min_visits: 3
+visits:
+- v0
+- v2
+- v4
+- v6
+age_basis: linear
+spline_df: 3
+age_centre: null
+re_structure: slope_correlated
+global_covariate: none
+covariates:
+- sex
+family_effect: true
+site_effect: true
+note: '7.0, >=3 visits, NO global covariate, WITH family random effect. global_covariate:
+  none makes the region-wise age coefficient the TOTAL thinning rate rather than the rate
+  relative to cortex-wide thinning. This is the phenotype that reproduces the AHBA C3 association
+  (r=-0.57 vs -0.32 for the global-adjusted coefficient); the cost is that site and scanner
+  variance are no longer absorbed by the global term, quantified in the site/scanner supplement.'

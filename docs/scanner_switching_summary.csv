@@ -1,0 +1,10 @@
+quantity,value
+subjects,8192.0
+sites,18.0
+distinct scanner serials,31.0
+scanner metadata coverage,1.0
+pct switched serial,0.2645
+pct switched model,0.1902
+pct switched manufacturer,0.0066
+var ratio switch/same (global slope),1.345
+Cohen d switch vs same,0.1403

@@ -88,3 +88,66 @@ def test_positive_adjusted_coefficient_can_be_negative_total():
 def test_total_slope_requires_both_terms():
     with pytest.raises(KeyError, match="global_within"):
         total_age_slope(_fixed({"age_c": {"lh_a": 0.01}}), -0.0166)
+
+
+def _write_run(tmp_path, *, with_global: bool):
+    """Minimal on-disk run directory: the four fit tables plus a model table.
+
+    ``global_within`` is written into the model table in BOTH cases, because
+    ``assemble`` does exactly that regardless of the fit spec -- which is the
+    trap ``regional_maps`` has to avoid keying on.
+    """
+    labels = ["lh_a", "lh_b"]
+    rng = np.random.default_rng(1)
+    n = 500
+    age = rng.normal(0, 2, n)
+    terms = {"age_c": {"lh_a": -0.020, "lh_b": -0.010}}
+    if with_global:
+        terms["global_within"] = {"lh_a": 0.8, "lh_b": 1.2}
+    fixed = _fixed(terms)
+    fixed["statistic"] = -5.0
+
+    fits = tmp_path / "fits"
+    fits.mkdir(parents=True)
+    fixed.to_parquet(fits / "fixed.parquet")
+    pd.DataFrame({"label": labels, "grp": "subject", "var1": "age_c",
+                  "var2": None, "sdcor": [0.006, 0.007]}
+                 ).to_parquet(fits / "varcomp.parquet")
+    for name in ("blups", "diagnostics"):
+        pd.DataFrame({"label": labels}).to_parquet(fits / f"{name}.parquet")
+
+    pd.DataFrame({
+        "label": np.repeat(labels, n),
+        "age_c": np.tile(age, len(labels)),
+        "global_within": np.tile(-0.0166 * age, len(labels)),
+    }).to_parquet(tmp_path / "model_table.parquet")
+    return tmp_path
+
+
+def test_regional_maps_noglobal_run_is_already_total(tmp_path):
+    """Without the covariate the age coefficient IS the absolute rate.
+
+    The two slope columns must be identical rather than one being a
+    reconstruction, and ``attrs`` must say so -- otherwise a figure captioned
+    'total' silently plots something else.
+    """
+    from abcd.maps import regional_maps
+
+    out = regional_maps(_write_run(tmp_path, with_global=False))
+    assert out.attrs["global_covariate"] is False
+    pd.testing.assert_series_equal(
+        out["slope_total"], out["slope_adjusted"], check_names=False)
+    assert (out["slope_total"] < 0).all()
+
+
+def test_regional_maps_global_run_reconstructs_and_differs(tmp_path):
+    """With the covariate, total != adjusted, and the difference has the sign
+    the chain rule dictates: a positive global loading plus cortex-wide
+    thinning makes the absolute rate MORE negative than the coefficient."""
+    from abcd.maps import regional_maps
+
+    out = regional_maps(_write_run(tmp_path, with_global=True))
+    assert out.attrs["global_covariate"] is True
+    assert (out["slope_total"] < out["slope_adjusted"]).all()
+    assert out.loc["lh_a", "slope_total"] == pytest.approx(
+        -0.020 + 0.8 * -0.0166, abs=1e-4)

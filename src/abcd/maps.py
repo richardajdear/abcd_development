@@ -96,18 +96,35 @@ def regional_maps(run_dir: str | Path, fits_name: str = "fits") -> pd.DataFrame:
     -------
     slope_adjusted : age coefficient with the global covariate in the model --
                      rate *relative* to cortex-wide thinning.
-    slope_total    : reconstructed absolute rate, mm/year (see module docstring).
-    slope_t        : t statistic for the adjusted coefficient.
+    slope_total    : absolute rate, mm/year (see module docstring).
+    slope_t        : t statistic for the fitted age coefficient.
     tau_slope      : between-subject SD of the random slope, mm/year.
+
+    Both run types are handled, and the distinction is decided by the *fitted
+    terms*, not by the model table: ``assemble`` writes ``global_within`` into
+    ``model_table.parquet`` regardless of whether the fit used it, so keying on
+    the table's columns would silently misclassify a no-global run.
+
+    For a run fitted *without* the global covariate the age coefficient is
+    already the absolute rate, so ``slope_total`` and ``slope_adjusted`` are
+    the same column.  They are both returned, identical, so that downstream
+    code and figures can name the quantity they mean without branching on the
+    config -- and ``global_covariate`` in the returned frame's ``attrs``
+    records which case produced it.
     """
     run_dir = Path(run_dir)
     f = load_fits(run_dir, fits_name)
     piv = f["fixed"].pivot(index="label", columns="term", values="estimate")
 
-    mt = pd.read_parquet(run_dir / "model_table.parquet",
-                         columns=["label", "age_c", "global_within"])
     out = pd.DataFrame({"slope_adjusted": piv["age_c"]})
-    out["slope_total"] = total_age_slope(f["fixed"], global_age_slope(mt))
+    if "global_within" in piv.columns:
+        mt = pd.read_parquet(run_dir / "model_table.parquet",
+                             columns=["label", "age_c", "global_within"])
+        out["slope_total"] = total_age_slope(f["fixed"], global_age_slope(mt))
+        out.attrs["global_covariate"] = True
+    else:
+        out["slope_total"] = out["slope_adjusted"]
+        out.attrs["global_covariate"] = False
 
     stat = f["fixed"].pivot(index="label", columns="term", values="statistic")
     if "age_c" in stat.columns:

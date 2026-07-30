@@ -1,0 +1,4 @@
+min_visits,n_sub,blup_r_mean,blup_r_min,sd_ratio_famoff_over_famon_mean
+2,8192,0.9971,0.9874,0.997
+3,5195,0.9977,0.987,0.9976
+4,1830,0.9988,0.9931,0.9988

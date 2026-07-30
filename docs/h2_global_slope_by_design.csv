@@ -1,0 +1,7 @@
+key,global_cov,min_visits,family_effect,h2,r_MZ,r_DZ,n_MZ,n_DZ,ci_lo,ci_hi
+ng_mv2,none,2,True,0.6508,0.4738,0.1484,260,871,0.4169,0.8908
+ng_mv2_gen,none,2,False,0.5837,0.5015,0.2097,260,871,0.3537,0.8208
+ng_mv3,none,3,True,0.6134,0.4663,0.1596,170,501,0.3157,0.9216
+ng_mv3_gen,none,3,False,0.547,0.479,0.2054,170,501,0.2359,0.862
+adj_mv3,observed_mean,3,True,0.2208,0.2666,0.1562,170,501,-0.1315,0.5856
+adj_mv2_gen,observed_mean,2,False,0.3846,0.4077,0.2154,260,871,0.1294,0.6344
