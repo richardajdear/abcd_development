@@ -7,6 +7,11 @@ and `R/`; these render it with the reasoning attached.
 |---|---|---|
 | `01_longitudinal_model.qmd` | R (knitr) | The mixed model: every term, why it is there, what the phenotype means, and why the family random effect is a phenotype decision rather than a fitting detail. **Start here.** |
 | `02_maps_and_genes.qmd` | Python (jupyter) | Spatial null calibration, the map-to-gene tests, and how the one positive result was interrogated. |
+| `03_thesis_figures.qmd` | Python (jupyter) | The thesis figure panels, kept for comparison against the 5.1 draft. |
+| `04_heritability.qmd` | Python (jupyter) | Falconer estimates, the DZ/full-sibling distinction, held-out scoring, and why the family random effect must be off. |
+
+The report (`docs/REPORT_7.0.md`) is the current statement of results; where a
+notebook and the report disagree, the report is newer.
 
 ## Rendering
 

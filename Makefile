@@ -12,10 +12,20 @@
 
 export ABCD_CONFIG
 
+# Work whether or not `pip install -e .` has been run. Without this every
+# target fails with ModuleNotFoundError, and `help` silently prints a blank
+# run dir because $(shell ...) discards stderr.
+#
+# The export covers recipes; the $(shell ...) below needs PYTHONPATH passed
+# explicitly as well, because GNU Make 3.81 (the macOS default) does not
+# propagate exported variables into the shell function.
+export PYTHONPATH := src:$(PYTHONPATH)
+SRCPATH = PYTHONPATH=src:$(PYTHONPATH)
+
 PY ?= python
 RSCRIPT ?= Rscript
 CORES ?= 4
-RUN = $(shell $(PY) -m abcd.run_dir --allow-missing 2>/dev/null)
+RUN = $(shell $(SRCPATH) $(PY) -m abcd.run_dir --allow-missing 2>/dev/null)
 
 .PHONY: all config assemble fit phenotype gcta test clean-run help
 
