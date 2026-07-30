@@ -90,6 +90,57 @@ def test_70_subject_id_normalisation_matches_51():
     assert a70._to_bids(pd.Series(["sub-NDARINV003RTV85"]))[0] == "sub-NDARINV003RTV85"
 
 
+@needs_data
+def test_70_zygosity_codes_are_what_we_think_they_are():
+    """No codebook ships with 7.0's ``gn_y_genrel``, so pin the inference.
+
+    The mapping in ``Release70Adapter.ZYGOSITY_CODES`` was established from the
+    data itself: code 1 sits at pi-hat ~1.0, codes 2 and 3 both at ~0.5, and
+    birth event separates 2 from 3 perfectly.  If a future release renumbers
+    these, every Falconer estimate silently changes class -- so assert the
+    evidence rather than trusting the constant.
+    """
+    import pandas as pd
+    a = io.Release70Adapter()
+    raw = a._table("gn_y_genrel")
+    zyg = raw["gn_y_genrel_zyg__01"].astype("float")
+    pih = raw["gn_y_genrel_pihat__01"].astype("float")
+    ok = zyg.notna() & pih.notna()
+    assert set(zyg[ok].astype(int)) <= set(a.ZYGOSITY_CODES), \
+        f"unexpected zygosity codes {sorted(set(zyg[ok].astype(int)))}"
+
+    by_code = pih[ok].groupby(zyg[ok].astype(int)).mean()
+    mz = [c for c, v in a.ZYGOSITY_CODES.items() if v == "MZ"][0]
+    assert by_code[mz] > 0.9, f"code {mz} labelled MZ but mean pi-hat is {by_code[mz]:.3f}"
+    for c, name in a.ZYGOSITY_CODES.items():
+        if name != "MZ":
+            assert 0.4 < by_code[c] < 0.6, f"code {c} ({name}) mean pi-hat {by_code[c]:.3f}"
+
+    # birth event separates DZ twins from non-twin siblings
+    birth = raw.set_index("participant_id")["gn_y_genrel_id__birth"]
+    same = (raw["gn_y_genrel_id__birth"].values
+            == raw["gn_y_genrel_id__paired__01"].map(birth).values)
+    rate = pd.Series(same)[ok.values].groupby(zyg[ok].astype(int).values).mean()
+    for c, name in a.ZYGOSITY_CODES.items():
+        want = 1.0 if name in ("MZ", "DZ_twin") else 0.0
+        assert rate[c] == want, \
+            f"code {c} ({name}): shares birth event in {rate[c]:.1%} of pairs, expected {want:.0%}"
+
+
+@needs_data
+def test_70_genotyped_pairs_are_reciprocal_and_consistent():
+    """Each pair is listed from both sides; collapsing must not lose or invent any."""
+    a = io.Release70Adapter()
+    gp = a.genotyped_pairs()
+    assert set(gp.pair_type) == {"MZ", "DZ_twin", "full_sib"}
+    assert (gp.a < gp.b).all(), "pair keys are not canonically ordered"
+    assert not gp.duplicated(["a", "b"]).any()
+    assert gp.a.str.startswith("sub-NDARINV").all() and gp.b.str.startswith("sub-NDARINV").all()
+    # every subject in a pair appears in the source's own participant list
+    src = set(a._to_bids(a._table("gn_y_genrel").participant_id))
+    assert set(gp.a) <= src and set(gp.b) <= src
+
+
 def test_51_adapter_does_not_warn():
     import warnings
     with warnings.catch_warnings():

@@ -1,0 +1,13 @@
+spec,map_col,component,n_regions,rho,p_spin,p_naive,null_sd_spin,null_sd_naive
+no global (settled),slope_total,C1,34,-0.0890756,0.494501,0.627275,0.132231,0.174168
+no global (settled),slope_total,C2,34,-0.32987,0.00339932,0.0489902,0.118767,0.172724
+no global (settled),slope_total,C3,34,-0.546218,0.00159968,0.00119976,0.18003,0.175286
+no global (settled),slope_adjusted,C1,34,-0.0890756,0.494501,0.627275,0.132231,0.174168
+no global (settled),slope_adjusted,C2,34,-0.32987,0.00339932,0.0489902,0.118767,0.172724
+no global (settled),slope_adjusted,C3,34,-0.546218,0.00159968,0.00119976,0.18003,0.175286
+global mean as covariate,slope_total,C1,34,-0.0111536,0.942412,0.953009,0.155223,0.173893
+global mean as covariate,slope_total,C2,34,-0.316425,0.0329934,0.0593881,0.153778,0.171217
+global mean as covariate,slope_total,C3,34,-0.480825,0.00579884,0.00639872,0.181356,0.174998
+global mean as covariate,slope_adjusted,C1,34,0.126356,0.609278,0.468506,0.223446,0.173736
+global mean as covariate,slope_adjusted,C2,34,-0.0631016,0.838432,0.717257,0.240682,0.171631
+global mean as covariate,slope_adjusted,C3,34,-0.142552,0.454509,0.413517,0.188378,0.173618

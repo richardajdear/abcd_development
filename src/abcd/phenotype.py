@@ -38,6 +38,12 @@ import pandas as pd
 
 from . import paths
 
+#: |corr(intercept, slope)| at or above this counts as a boundary (singular)
+#: random-effects fit, in which tau2 is not identified and per-subject
+#: reliability is undefined rather than high.  lme4 reports exactly +/-1 on the
+#: boundary; the margin absorbs printing/round-trip loss through parquet.
+_BOUNDARY_CORR = 0.999
+
 
 # --------------------------------------------------------------------------
 # Loading
@@ -86,6 +92,19 @@ def slope_reliability(blups: pd.DataFrame, varcomp: pd.DataFrame) -> pd.DataFram
     # numerical guard: a singular fit gives prior_var == 0 -> undefined
     for c in ("reliability_slope", "reliability_intercept"):
         b[c] = b[c].where(np.isfinite(b[c])).clip(0.0, 1.0)
+
+    # Boundary fits give a FINITE but meaningless reliability, which the guard
+    # above does not catch.  When the intercept-slope correlation is on the
+    # boundary (|r| -> 1) the RE covariance is degenerate: tau2 collapses to a
+    # near-zero value that the conditional SD tracks almost exactly, so
+    # 1 - v/tau2 -> 1.  Empirically these regions returned reliability ~0.87
+    # against ~0.10 elsewhere, which inflated any mean over regions.  tau2 is
+    # not identified in such a fit, so reliability is NaN, not high.
+    corr = varcomp[(varcomp.grp == "subject") & varcomp.var2.notna()]
+    degenerate = set(corr.loc[corr.sdcor.abs() >= _BOUNDARY_CORR, "label"])
+    if degenerate:
+        m = b.label.isin(degenerate)
+        b.loc[m, ["reliability_slope", "reliability_intercept"]] = np.nan
     return b
 
 

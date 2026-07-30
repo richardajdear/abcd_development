@@ -1,7 +1,9 @@
-key,global_cov,min_visits,family_effect,h2,r_MZ,r_DZ,n_MZ,n_DZ,ci_lo,ci_hi
-ng_mv2,none,2,True,0.6508,0.4738,0.1484,260,871,0.4169,0.8908
-ng_mv2_gen,none,2,False,0.5837,0.5015,0.2097,260,871,0.3537,0.8208
-ng_mv3,none,3,True,0.6134,0.4663,0.1596,170,501,0.3157,0.9216
-ng_mv3_gen,none,3,False,0.547,0.479,0.2054,170,501,0.2359,0.862
-adj_mv3,observed_mean,3,True,0.2208,0.2666,0.1562,170,501,-0.1315,0.5856
-adj_mv2_gen,observed_mean,2,False,0.3846,0.4077,0.2154,260,871,0.1294,0.6344
+run,global_cov,min_visits,family_effect,h2,ci_lo,ci_hi,r_MZ,r_DZ,n_MZ,n_DZ,dz_class,r_sib_excluded
+thickness_dsk_70_139406217085,none,2,False,0.444418,0.181475,0.716541,0.50145,0.279241,266,424,DZ_twin,0.0901879
+thickness_dsk_70_a725e76aa17c,none,2,True,0.481677,0.200555,0.766628,0.473026,0.232187,266,424,DZ_twin,0.0290379
+thickness_dsk_70_fcb2dfafb0ea,none,3,False,0.350724,0.00585253,0.668609,0.479063,0.303701,173,254,DZ_twin,0.0330422
+thickness_dsk_70_2da8b1ff0ebb,none,3,True,0.391113,0.0364585,0.718383,0.465762,0.270205,173,254,DZ_twin,-0.0142553
+thickness_dsk_70_5899982b9397,none,4,False,0.227442,-0.446863,0.858035,0.35602,0.242299,58,70,DZ_twin,-0.0528538
+thickness_dsk_70_38aca05672c2,none,4,True,0.281147,-0.4323,0.922636,0.349952,0.209378,58,70,DZ_twin,-0.0951446
+thickness_dsk_70_36738d15ec02,observed_mean,2,False,0.533708,0.276426,0.809029,0.432467,0.165613,266,424,DZ_twin,0.233977
+thickness_dsk_70_fb236c945db9,observed_mean,3,True,0.439309,0.0580137,0.795087,0.305731,0.0860766,173,254,DZ_twin,0.162113

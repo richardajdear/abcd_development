@@ -1,0 +1,25 @@
+release: '7.0'
+metric: thickness
+parcellation: dsk
+hemisphere: both
+qc_policy: coded
+sample_rule: min_visits
+min_visits: 3
+visits:
+- v0
+- v2
+- v4
+- v6
+age_basis: linear
+spline_df: 3
+age_centre: null
+re_structure: slope_correlated
+global_covariate: observed_mean
+covariates:
+- sex
+family_effect: false
+site_effect: true
+note: '7.0, >=3 visits, global mean as covariate, NO family random effect. Companion
+  to ct_70_noglobal_mv3_genetic.yaml: the pair lets the global-covariate decision
+  be tested at >=3 visits with the family effect held off, which is required for any
+  Falconer comparison.'

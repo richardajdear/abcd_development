@@ -720,16 +720,87 @@ class Release70Adapter(Release51Adapter):
         out.insert(0, "subject", self._to_bids(st.participant_id))
         return out.dropna(subset=["subject"]).reset_index(drop=True)
 
+    #: Zygosity codes in ``gn_y_genrel_zyg__NN``.  No codebook ships with the
+    #: release; these were established empirically and are asserted in
+    #: ``tests/test_io.py``.  Code 1 has pi-hat 0.92-1.00 (mean 0.987) and
+    #: always shares a birth event; codes 2 and 3 both sit at pi-hat ~0.50 and
+    #: are separated *perfectly* by birth event -- code 2 always shares one
+    #: (DZ twin), code 3 never does (non-twin full sibling).  That separation
+    #: is what lets a Falconer estimate use DZ twins alone instead of pooling
+    #: siblings in, which biases h2 upward (see :mod:`abcd.heritability`).
+    ZYGOSITY_CODES = {1: "MZ", 2: "DZ_twin", 3: "full_sib"}
+
+    def genotyped_pairs(self) -> pd.DataFrame:
+        """Genotype-confirmed relative pairs from ``gn_y_genrel``.
+
+        One row per *unordered* pair with columns ``a``, ``b`` (subject IDs in
+        the release's ``sub-NDARINV...`` form), ``family_id``, ``pihat`` and
+        ``pair_type`` (``MZ`` / ``DZ_twin`` / ``full_sib``).
+
+        This table is new in 7.0 and supersedes the previous route, which
+        borrowed zygosity from the 5.1 pi-hat file and matched on normalised
+        subject ID.  Two things it buys:
+
+        * **DZ twins are separable from non-twin full siblings.**  The 5.1 route
+          could only produce a pooled ``DZ_or_sib`` class.  Pooling inflates
+          Falconer h2, because siblings correlate less than DZ twins do
+          (measured on the 7.0 slope phenotype: r = 0.090 vs 0.279, difference
+          +0.189, 95% CI [+0.046, +0.321]).
+        * **Pairs are explicit rather than inferred from family size.**  The old
+          route took families with exactly two phenotyped members as a pair,
+          which silently drops any family holding both a twin pair and a third
+          sibling.
+
+        The source lists each pair from both sides across four partner slots;
+        this collapses them.  Reciprocity and class agreement are asserted --
+        on the 7.0 release all 1,922 pairs appear twice with no disagreement.
+        """
+        raw = self._table("gn_y_genrel")
+        slots = []
+        for i in ("01", "02", "03", "04"):
+            need = [f"gn_y_genrel_id__paired__{i}", f"gn_y_genrel_pihat__{i}",
+                    f"gn_y_genrel_zyg__{i}"]
+            if not all(c in raw.columns for c in need):
+                continue
+            s = raw[["participant_id", "gn_y_genrel_id__fam"] + need].copy()
+            s.columns = ["a", "family_id", "b", "pihat", "zyg"]
+            slots.append(s.dropna(subset=["zyg", "b"]))
+        if not slots:
+            raise SourceUnavailable("gn_y_genrel has no populated pair slots")
+
+        long = pd.concat(slots, ignore_index=True)
+        long["pair_type"] = long.zyg.astype(int).map(self.ZYGOSITY_CODES)
+        unknown = long.loc[long.pair_type.isna(), "zyg"].unique()
+        if len(unknown):
+            raise SourceUnavailable(
+                f"gn_y_genrel has unrecognised zygosity codes {sorted(unknown)}; "
+                f"known codes are {self.ZYGOSITY_CODES}"
+            )
+        long["a"] = self._to_bids(long.a)
+        long["b"] = self._to_bids(long.b)
+        long["_key"] = [tuple(sorted(t)) for t in zip(long.a, long.b)]
+
+        agree = long.groupby("_key").pair_type.nunique()
+        if (agree > 1).any():
+            bad = agree[agree > 1].index[:3].tolist()
+            raise SourceUnavailable(
+                f"gn_y_genrel disagrees with itself on the class of {int((agree > 1).sum())} "
+                f"pair(s), e.g. {bad}; zygosity cannot be trusted"
+            )
+        out = long.drop_duplicates("_key").copy()
+        out[["a", "b"]] = pd.DataFrame(out._key.tolist(), index=out.index)
+        return out[["a", "b", "family_id", "pihat", "pair_type"]].reset_index(drop=True)
+
     def relatedness(self) -> pd.DataFrame:
         """Family, birth event and twin structure from the static table.
 
-        7.0 exposes no pi-hat, so ``pair_type`` is inferred from design
-        variables rather than measured relatedness: subjects sharing a birth
-        event are twins/triplets, and ``design_sstwin`` marks same-sex twins.
-        Same-sex twins are MZ *candidates* only -- roughly half are DZ -- so
-        this cannot substitute for genotype-based zygosity in a Falconer
-        estimate.  The column is named ``pair_type_design`` to keep that
-        distinction visible at the call site.
+        ``pair_type_design`` here is inferred from *design* variables, not
+        measured relatedness: subjects sharing a birth event are twins/triplets,
+        and ``design_sstwin`` marks same-sex twins.  Same-sex twins are MZ
+        *candidates* only -- roughly half are DZ -- so this column cannot be
+        used in a Falconer estimate.  The name keeps that visible at the call
+        site.  For genotype-confirmed zygosity use :meth:`genotyped_pairs`,
+        which reads the ``gn_y_genrel`` pi-hat table shipped with 7.0.
         """
         st = self._table("ab_g_stc")
         out = pd.DataFrame({

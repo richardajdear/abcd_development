@@ -1,4 +1,3 @@
 grouping,k,n,icc,F,p
-site,18,8192,0.0207,10.55125,0.0
-baseline scanner serial,29,8192,0.02313,7.5676,0.0
-manufacturer (baseline),2,8192,0.00234,8.66629,0.00325
+site,18,8192,0.02056,10.5512,8.70151e-29
+scanner manufacturer (baseline),3,8192,0.00132,4.61053,0.00997236

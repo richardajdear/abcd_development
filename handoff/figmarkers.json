@@ -1,0 +1,12 @@
+{
+ "developmental_maps_noglobal.png": "{{artifact:art_73b07822-69cb-441d-a80b-e8629a646bd8}}",
+ "heritability_noglobal.png": "{{artifact:art_d03d2023-cf1b-4e61-be6e-f683761ff1ff}}",
+ "ahba_vs_maps_noglobal.png": "{{artifact:art_435c9e2f-1dfb-42b2-a774-ea403c03d437}}",
+ "structural_covariance.png": "{{artifact:art_0d2955df-b5cb-4c75-a383-dd322983bfe8}}",
+ "gwas_phenotype_priority.png": "{{artifact:art_b67e7df5-0c5d-4f2d-b105-f51d3830c6bf}}",
+ "reliability_design_grid.png": "{{artifact:art_949ca80d-6a2c-4113-855c-6ae97c1d489a}}",
+ "site_scanner_supplement.png": "{{artifact:art_371877ab-0f2b-4ddd-9a39-fc2706f9a1ff}}",
+ "site_icc_map.png": "{{artifact:art_d490090f-758e-4b26-8bcf-096d1d3da742}}",
+ "release_power_tradeoff.png": "{{artifact:art_0dd79d35-d9cc-47a4-94a9-b8e244c49274}}",
+ "family_effect_heritability.png": "{{artifact:art_92617adf-e522-4f53-9efd-62951ecbc602}}"
+}

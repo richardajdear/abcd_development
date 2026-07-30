@@ -72,7 +72,7 @@ pd.set_option("display.width", 100)
 # Either fitted run works; AHBA C1-C3 in this repo (data/ahba_dme_hcp_top8kgenes_scores.csv)
 # is only wired up in HCP-MMP space (see abcd.genemaps.ahba_components), so the
 # DK run falls back to the DK-space AHBA scores in the sibling AHBA repo.
-RUN = "thickness_hcp_51_7ee090027a6e"
+RUN = "thickness_dsk_70_36738d15ec02"
 # RUN = "thickness_dsk_51_32bbb98e84e4"
 RUN_DIR = ROOT / "out" / RUN
 

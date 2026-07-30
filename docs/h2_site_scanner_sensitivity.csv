@@ -1,5 +1,4 @@
-phenotype,n,h2,ci_lo,ci_hi,r_MZ,r_DZ,n_MZ,n_DZ
-"global slope, raw",8192,0.5837,0.3537,0.8208,0.5015,0.2097,260,871
-site-mean removed,8192,0.5986,0.3669,0.8345,0.4926,0.1933,260,871
-site+scanner-mean removed,8192,0.6035,0.3712,0.8425,0.4916,0.1899,260,871
-non-switchers only,6025,0.5555,0.2786,0.804,0.5425,0.2647,209,623
+phenotype,n,h2,ci_lo,ci_hi,r_MZ,r_DZ,n_MZ,n_DZ,dz_class,r_sib_excluded
+"global slope, raw",8192,0.444418,0.181475,0.716541,0.50145,0.279241,266,424,DZ_twin,0.0901879
+site-mean removed,8192,0.46305,0.196588,0.736639,0.492481,0.260956,266,424,DZ_twin,0.0716514
+baseline-manufacturer-mean removed (k=3),8178,0.437916,0.186076,0.681527,0.499471,0.280513,263,421,DZ_twin,0.0912753

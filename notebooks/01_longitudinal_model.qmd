@@ -27,7 +27,7 @@ knitr::opts_chunk$set(dev = "png", dpi = 150)
 ROOT <- if (basename(getwd()) == "notebooks") ".." else "."
 source(file.path(ROOT, "R", "model_spec.R"))
 
-RUN <- "thickness_dsk_51_32bbb98e84e4"   # DK parcellation, release 5.1, genetics config
+RUN <- "thickness_dsk_70_36738d15ec02"   # DK parcellation, release 5.1, genetics config
 RUN_DIR <- file.path(ROOT, "out", RUN)
 stopifnot(dir.exists(RUN_DIR))
 ```

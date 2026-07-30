@@ -26,7 +26,7 @@ import numpy as np, pandas as pd, scipy.stats as st
 import matplotlib.pyplot as plt
 from abcd import spatial as sp, genemaps as gm
 
-RUN_ABS = ROOT / "out" / "thickness_dsk_51_32bbb98e84e4"   # DK, absolute change
+RUN_ABS = ROOT / "out" / "thickness_dsk_70_36738d15ec02"   # DK, absolute change
 pd.set_option("display.width", 100)
 ```
 

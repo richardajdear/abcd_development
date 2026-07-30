@@ -13,23 +13,31 @@ import pytest
 from abcd.heritability import falconer, _normalise_ids, _SHARING_GAP
 
 
-def _synthetic(h2_true, n_mz=5000, n_dz=5000, seed=0):
-    """Build pair data with a known h2, then flatten to (y, pairs)."""
+def _synthetic(h2_true, n_mz=5000, n_dz=5000, seed=0, dz_label="DZ_twin",
+               r_sib=None, n_sib=5000):
+    """Build pair data with a known h2 in the explicit-pair contract.
+
+    Returns ``(y, pairs)`` where ``pairs`` has one row per unordered pair with
+    ``a``/``b`` subject columns -- the shape :func:`abcd.heritability.pair_table`
+    produces.  Passing ``r_sib`` adds a ``full_sib`` class at that correlation,
+    which is how the pooling-bias test is built.
+    """
     rng = np.random.default_rng(seed)
     rows, ys = [], {}
-    for pt, r in [("MZ", h2_true), ("DZ_or_sib", h2_true / 2)]:
-        n = n_mz if pt == "MZ" else n_dz
+    spec = [("MZ", h2_true, n_mz), (dz_label, h2_true / 2, n_dz)]
+    if r_sib is not None:
+        spec.append(("full_sib", r_sib, n_sib))
+    for pt, r, n in spec:
         # bivariate normal with correlation r
         a = rng.normal(size=n)
         b = r * a + np.sqrt(max(1 - r**2, 0)) * rng.normal(size=n)
         for i in range(n):
             fam = f"{pt}_{i}"
-            for j, v in enumerate((a[i], b[i])):
-                sid = f"{fam}_{j}"
-                ys[sid] = v
-                rows.append({"subject": sid, "family_id": fam, "pair_type": pt})
-    pairs = pd.DataFrame(rows).set_index("subject")
-    return pd.Series(ys), pairs
+            sa, sb = f"{fam}_0", f"{fam}_1"
+            ys[sa], ys[sb] = a[i], b[i]
+            rows.append({"a": sa, "b": sb, "family_id": fam,
+                         "pihat": np.nan, "pair_type": pt})
+    return pd.Series(ys), pd.DataFrame(rows)
 
 
 @pytest.mark.parametrize("h2_true", [0.2, 0.5, 0.8])
@@ -62,11 +70,8 @@ def test_negative_dz_correlation_is_not_silently_swallowed():
     """
     y, pairs = _synthetic(0.5)
     # force DZ pairs to anti-correlate, as within-family deviations do
-    dz = pairs[pairs.pair_type == "DZ_or_sib"]
-    for fam, grp in dz.groupby("family_id"):
-        ids = list(grp.index)
-        if len(ids) == 2:
-            y[ids[1]] = -y[ids[0]]
+    for _, row in pairs[pairs.pair_type == "DZ_twin"].iterrows():
+        y[row.b] = -y[row.a]
     res = falconer(y, pairs)
     assert res["r_DZ"] < 0
     assert res["h2"] > 0.9  # plausible-looking, from invalid input
@@ -77,6 +82,44 @@ def test_refuses_when_ids_do_not_join():
     y.index = ["nonsense_" + i for i in y.index]
     with pytest.raises(ValueError, match="complete"):
         falconer(y, pairs)
+
+
+def test_pooling_siblings_into_dz_biases_h2_upward():
+    """The 5.1-era pooled DZ class is not a harmless convenience.
+
+    Non-twin full siblings correlate less than DZ twins at the same nominal 0.5
+    sharing.  Pooling them lowers r_DZ, which Falconer *subtracts*, so h2 comes
+    out too high.  Built here with a true h2 of 0.5 (r_MZ 0.50, r_DZtwin 0.25)
+    and siblings at 0.10, the pooled estimate should overshoot while the
+    twins-only estimate recovers the truth.
+    """
+    y, pairs = _synthetic(0.5, r_sib=0.10)
+    twins = falconer(y, pairs, dz_class="twins_only")
+    pooled = falconer(y, pairs, dz_class="pooled")
+    assert abs(twins["h2"] - 0.5) < 0.05, twins["h2"]
+    assert pooled["h2"] > twins["h2"] + 0.1, (pooled["h2"], twins["h2"])
+    assert twins["dz_class"] == "DZ_twin" and pooled["dz_class"] == "DZ_or_sib"
+    # the excluded class must be reported so the choice is auditable
+    assert twins["r_sib_excluded"] < twins["r_DZ"]
+
+
+def test_twins_only_is_the_default():
+    """Default must be the unbiased class, not the historically-reported one."""
+    y, pairs = _synthetic(0.5, r_sib=0.10)
+    assert falconer(y, pairs)["dz_class"] == "DZ_twin"
+
+
+def test_pooled_source_ignores_dz_class_choice():
+    """On a 5.1-style table the classes are already pooled; don't pretend otherwise."""
+    y, pairs = _synthetic(0.5, dz_label="DZ_or_sib")
+    for dz in ("twins_only", "pooled"):
+        assert falconer(y, pairs, dz_class=dz)["dz_class"] == "DZ_or_sib"
+
+
+def test_rejects_unknown_dz_class():
+    y, pairs = _synthetic(0.5)
+    with pytest.raises(ValueError, match="dz_class"):
+        falconer(y, pairs, dz_class="siblings_only")
 
 
 def test_id_normalisation_reconciles_release_spellings():

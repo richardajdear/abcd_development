@@ -9,6 +9,11 @@ out/
 # R droppings
 Rplots.pdf
 
+# Transient image-preview files written by agent sessions inspecting figures.
+# These appear here (rather than in a scratch dir) whenever the interpreter's
+# working directory is the repo root; they are never analysis outputs.
+_view_*.png
+
 # Quarto
 *_files/
 *.html

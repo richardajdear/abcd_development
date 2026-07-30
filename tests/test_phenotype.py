@@ -18,6 +18,51 @@ needs_fits = pytest.mark.skipif(
 )
 
 
+def _blups_varcomp(corr: float):
+    """One region, three subjects, with intercept-slope correlation ``corr``.
+
+    ``tau2`` is set small and the conditional SD smaller still, which is the
+    numeric signature of a boundary fit: 1 - v/tau2 comes out near 1 even
+    though tau2 is not identified.
+    """
+    blups = pd.DataFrame({
+        "label": ["rA"] * 3, "subject": ["s1", "s2", "s3"],
+        "re_slope": [0.01, -0.01, 0.0], "re_intercept": [0.1, -0.1, 0.0],
+        "se_re_slope": [1e-4] * 3, "se_re_intercept": [1e-3] * 3,
+    })
+    varcomp = pd.DataFrame([
+        {"label": "rA", "grp": "subject", "var1": "age_c",
+         "var2": None, "vcov": 1e-6, "sdcor": 1e-3},
+        {"label": "rA", "grp": "subject", "var1": "(Intercept)",
+         "var2": None, "vcov": 1e-2, "sdcor": 0.1},
+        {"label": "rA", "grp": "subject", "var1": "(Intercept)",
+         "var2": "age_c", "vcov": -1e-4, "sdcor": corr},
+    ])
+    return blups, varcomp
+
+
+def test_boundary_fit_reliability_is_nan_not_high():
+    """A degenerate RE covariance must not report near-perfect reliability.
+
+    Regression test.  Boundary fits gave a finite reliability of ~0.87 against
+    ~0.10 in well-identified regions, which inflated every mean over regions and
+    made release 5.1 appear MORE reliable than 7.0 despite shorter follow-up.
+    """
+    b_ok = phenotype.slope_reliability(*_blups_varcomp(-0.45))
+    assert b_ok.reliability_slope.notna().all()
+    assert b_ok.reliability_slope.iloc[0] > 0.9  # the spurious-looking value...
+
+    b_bad = phenotype.slope_reliability(*_blups_varcomp(-1.0))
+    assert b_bad.reliability_slope.isna().all()  # ...is suppressed on the boundary
+    assert b_bad.reliability_intercept.isna().all()
+
+
+def test_boundary_detection_is_not_triggered_by_strong_but_valid_correlation():
+    """r = -0.99 is strong but identified; only the boundary itself is masked."""
+    b = phenotype.slope_reliability(*_blups_varcomp(-0.99))
+    assert b.reliability_slope.notna().all()
+
+
 def test_design_reliability_monotone_in_span():
     """Reliability must increase with span at fixed visit count.
 

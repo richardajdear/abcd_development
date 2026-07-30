@@ -1,7 +1,0 @@
-global_cov,family_effect,phenotype,r_MZ,r_DZ,h2,n_MZ,n_DZ
-none,True,baseline thickness (control),0.5805,-0.1733,1.5076,260,871
-none,True,developmental slope (target),0.4738,0.1484,0.6508,260,871
-none,False,baseline thickness (control),0.8756,0.4776,0.7959,260,871
-none,False,developmental slope (target),0.5015,0.2097,0.5837,260,871
-observed_mean,False,baseline thickness (control),0.7212,0.3821,0.6782,260,871
-observed_mean,False,developmental slope (target),0.4077,0.2154,0.3846,260,871
