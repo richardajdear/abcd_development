@@ -1,0 +1,10 @@
+map,col,ahba,n,r,p_spin,null_sd
+"Old thesis map (5.1), differenced predictions",old_delta_peryr,C1,32,-0.224,0.2909,0.203
+"Old thesis map (5.1), differenced predictions",old_delta_peryr,C2,32,-0.115,0.5519,0.182
+"Old thesis map (5.1), differenced predictions",old_delta_peryr,C3,32,-0.55,0.0044,0.196
+"New pipeline (7.0), total thinning rate",slope_total_70,C1,34,-0.093,0.6693,0.204
+"New pipeline (7.0), total thinning rate",slope_total_70,C2,34,-0.168,0.4187,0.187
+"New pipeline (7.0), total thinning rate",slope_total_70,C3,34,-0.567,0.0034,0.197
+"New pipeline (7.0), adjusted for global thinning",fe_age_70_mv3,C1,34,0.0,0.999,0.235
+"New pipeline (7.0), adjusted for global thinning",fe_age_70_mv3,C2,34,0.02,0.9434,0.225
+"New pipeline (7.0), adjusted for global thinning",fe_age_70_mv3,C3,34,-0.321,0.1046,0.197
