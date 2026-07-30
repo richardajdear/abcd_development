@@ -37,21 +37,51 @@ from . import paths, spatial
 # Reference maps and gene weights
 # --------------------------------------------------------------------------
 
+#: Score files by parcellation.  ``hcp`` is the native space the components
+#: were derived in; ``dsk`` is a Desikan-Killiany projection of the same
+#: components, provided because the ABCD imaging tables are released in DK.
+_AHBA_SCORE_FILES = {
+    "hcp": "ahba_dme_hcp_top8kgenes_scores.csv",
+    "dsk": "ahba_dme_dsk_scores.csv",
+}
+
+
 def ahba_components(parcellation: str = "hcp") -> pd.DataFrame:
     """AHBA differential-expression component scores per region.
 
-    Returns a frame indexed by region (no hemisphere -- AHBA donors are
-    overwhelmingly left-hemisphere, so the components are bilateral by
-    construction) with columns ``C1, C2, C3``.
+    Returns a frame indexed by region with columns ``C1, C2, C3``.
+
+    Parcellations
+    -------------
+    ``hcp``
+        Native space of the component derivation (360 HCP-MMP parcels,
+        ~180 with donor coverage).  Prefer this for gene-level work.
+    ``dsk``
+        Desikan-Killiany projection, 34 bilateral regions.  The ABCD
+        imaging tables are released in DK, so this avoids resampling the
+        *imaging* data; the cost is that the AHBA side has been coarsened
+        from ~180 parcels to 34, which attenuates correlations and leaves
+        only 34 points for a spin test.  Use it to compare against DK
+        developmental maps, and read the effect sizes as a lower bound.
+
+    The index is hemisphere-prefixed in ``dsk`` (``lh_bankssts``) but the
+    values are bilateral -- AHBA donors are overwhelmingly left-hemisphere,
+    so a component has no right-hemisphere counterpart to differ from.
+    Callers comparing against a two-hemisphere imaging map should reduce it
+    with :func:`bilateral` first; :func:`map_vs_components` does this.
     """
-    if parcellation != "hcp":
-        raise NotImplementedError(
-            "AHBA components are supplied in HCP-MMP space. Fitting the "
-            "imaging model in 'hcp' avoids cross-parcellation averaging; "
-            "see Release51Adapter._imaging_hcp."
-        )
-    p = paths.DATA_DIR / "ahba_dme_hcp_top8kgenes_scores.csv"
-    df = pd.read_csv(p).set_index("label")
+    try:
+        fname = _AHBA_SCORE_FILES[parcellation]
+    except KeyError:
+        raise ValueError(
+            f"unknown parcellation {parcellation!r}; "
+            f"expected one of {sorted(_AHBA_SCORE_FILES)}"
+        ) from None
+    df = pd.read_csv(paths.DATA_DIR / fname).set_index("label")
+    if parcellation == "dsk":
+        # Stored with an lh_ prefix but bilateral in content; strip so the
+        # index matches a bilateral()-reduced imaging map.
+        df.index = df.index.str.replace(r"^(lh|rh)_", "", regex=True)
     return df[["C1", "C2", "C3"]]
 
 
