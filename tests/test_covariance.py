@@ -50,12 +50,22 @@ def slopes() -> pd.DataFrame:
 
 
 def test_sc_pcs_equal_slope_pcs(slopes):
-    """The identity the report rests on: same eigenvectors, |r| ~ 1."""
+    """The identity the report rests on: not just |r|~1 but equal to float.
+
+    ``sc_pcs`` eigendecomposes corr(W) while ``slope_pcs`` runs PCA on the
+    standardised W.  Those are the same eigenproblem, so agreement should be
+    exact -- on the real ABCD slopes max|delta| is 0.0.  Asserting equality
+    rather than a loose r>0.99 means a refactor that quietly changes one path
+    (e.g. drops the per-region standardisation, giving two plausible but
+    different maps) fails here instead of downstream in a report.
+    """
     sc = sc_pcs(sc_matrix(slopes), n_components=3)
     dr = slope_pcs(slopes, n_components=3)
     for k in range(3):
-        r = np.corrcoef(sc.loadings.iloc[:, k], dr.loadings.iloc[:, k])[0, 1]
-        assert abs(r) > 0.99, f"component {k+1} diverged: r={r:.4f}"
+        np.testing.assert_allclose(
+            sc.loadings.iloc[:, k], dr.loadings.iloc[:, k], atol=1e-10,
+            err_msg=f"component {k+1} is not the same eigenvector",
+        )
 
 
 def test_variance_explained_is_not_the_squared_convention(slopes):

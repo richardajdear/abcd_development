@@ -1,0 +1,23 @@
+quantity,value
+off-diag mean r,0.2052
+off-diag median r,0.1861
+off-diag min r,-0.0757
+off-diag max r,0.7573
+n negative pairs,13.0
+n pairs,2278.0
+homotopic mean r,0.4552
+within-lobe mean r,0.3441
+between-lobe mean r,0.1819
+within-hemi mean r,0.226
+within-lobe r Frontal,0.2806
+within-lobe r Parietal,0.4716
+within-lobe r Temporal,0.2436
+within-lobe r Occipital,0.4584
+within-lobe r Cingulate,0.1707
+within-lobe r Insula,0.4396
+var_explained PC1,0.2409
+var_explained PC2,0.0548
+var_explained PC3,0.0448
+var_explained_sq PC1,0.7978
+var_explained_sq PC2,0.0413
+var_explained_sq PC3,0.0276

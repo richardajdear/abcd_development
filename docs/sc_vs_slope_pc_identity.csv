@@ -1,0 +1,4 @@
+component,r_loadings,max_abs_diff,var_exp_slope,var_exp_sc
+PC1,1.0,0.0,0.2409,0.2409
+PC2,1.0,0.0,0.0548,0.0548
+PC3,1.0,0.0,0.0448,0.0448
