@@ -23,7 +23,17 @@ src/*.egg-info/
 build/
 dist/
 
+# Machine-specific HPC path overrides (see hpc/config.local.sh.example).
+hpc/config.local.sh
+
+# Scratch tree for local pipeline tests: synthetic genotypes, GRMs, GWAS output.
+scratch/
+
 # Vendored ABCD release data: large and access-controlled, never committed.
 # Living inside the repo is what makes ABCD_ROOT unnecessary (see paths.py).
 abcd-data-release-*/
 abcd-[0-9]*.[0-9]*/
+
+# Manifest written by `make audit-artifacts`: a snapshot of local file sizes and
+# checksums, meaningful only on the machine that produced it.
+.artifact_audit.json

@@ -28,6 +28,7 @@ import argparse
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 
 from abcd import brainplot
@@ -62,7 +63,13 @@ def _single(docs: Path, name: str) -> plt.Figure:
 
 
 def site_icc_map(docs: Path) -> plt.Figure:
-    """Per-region site ICC -- the scanner-confound supplement's headline map."""
+    """Per-region site ICC as a standalone map.
+
+    No longer embedded in the report: §9 now shows this as the top-left panel of
+    ``site_scanner_supplement``, beside the boxplot of the same quantity.  Kept
+    because it is cheap to render and useful on its own (slides, or checking a
+    single region), but if you change it, change the panel too.
+    """
     t = pd.read_csv(docs / "site_scanner_icc_by_region.csv").set_index("label")
     fig, ax, _ = brainplot.plot_dk(t["site_icc"], diverging=False,
                                    label="site ICC of regional slope",
@@ -86,19 +93,38 @@ def _grid(values: dict, labels: dict, diverging: bool, ncols: int = 2) -> plt.Fi
 
 
 def developmental_maps_noglobal(docs: Path) -> plt.Figure:
-    """The five primary developmental maps as one grid."""
+    """The six primary developmental maps, 2 rows x 3 columns.
+
+    Row 1 is what the phenotype *is* -- where cortex starts and how fast it
+    thins, in mm and mm/yr.  Row 2 is what can be done with it -- whether the
+    per-subject slope is measurable, heritable, and structured.  That grouping
+    is the reason for the layout: the two rows answer different questions and
+    a reader comparing within a row is comparing like with like.
+    """
     m = pd.read_csv(docs / "developmental_maps_noglobal.csv").set_index("label")
-    cols = {"Absolute thinning rate": ("slope_total", True),
-            "Between-subject SD of rate": ("tau_slope", False),
-            "Slope PC1": ("slopePC1", True),
-            "Slope reliability": ("reliability", False),
-            "Regional h²": ("h2", False)}
-    fig, axes = plt.subplots(len(cols), 1, figsize=(6.8, 3.1 * len(cols)))
-    for ax, (title, (col, div)) in zip(axes, cols.items()):
+    panels = [
+        ("Baseline thickness (mm)",        "baseline_thickness", False),
+        ("Absolute thinning rate (mm/yr)", "slope_total",        True),
+        ("SD of thinning rate (mm/yr)",    "tau_slope",          False),
+        ("Slope reliability",              "reliability",        False),
+        ("Slope h² (Falconer)",            "h2",                 False),
+        ("Slope PC1 loading",              "slopePC1",           True),
+    ]
+    fig, axes = plt.subplots(2, 3, figsize=(16.5, 6.0))
+    for ax, (title, col, div) in zip(axes.ravel(), panels):
+        # Anchoring a sequential scale at 0 is right when 0 is the meaningful
+        # floor (reliability, SD, h2: "none of this quantity"), and wrong for
+        # baseline thickness, where every value sits between 1.8 and 3.8 mm and
+        # a 0-anchored scale spends its whole range on empty space -- the panel
+        # renders as one flat colour and the regional pattern disappears.
+        # Thinning rate is negative everywhere and h2 dips slightly below 0 from
+        # estimation noise, so those must autoscale too or real values clip.
+        vminmax = None
+        if not div and float(m[col].min()) >= 0 and col != "baseline_thickness":
+            vminmax = (0, float(m[col].max()))
         brainplot.plot_dk(m[col], ax=ax, diverging=div, colorbar=True,
-                          label="", fontsize=6,
-                          vminmax=None if div else (0, float(m[col].max())))
-        ax.set_title(title, loc="left", fontsize=8)
+                          label="", fontsize=6, vminmax=vminmax)
+        ax.set_title(title, loc="left", fontsize=9)
     fig.tight_layout()
     return fig
 
@@ -121,7 +147,14 @@ def ahba_maps_grid(docs: Path) -> plt.Figure:
                          "slopePC3", "h2"] if c in set(best.map_col)]
     best = best.set_index("map_col").loc[order]
 
-    fig, axes = plt.subplots(len(order), 2, figsize=(13.6, 3.1 * len(order)))
+    # Three columns per row: ABCD map, AHBA component, and the scatter behind
+    # the rho.  The scatter is what makes the rho auditable -- a coefficient
+    # printed in a title cannot show whether it rests on a couple of extreme
+    # regions or on a consistent gradient, and the maps alone cannot either.
+    # width_ratios keeps the scatter square-ish rather than letting it inherit
+    # the wide aspect the surface panels need.
+    fig, axes = plt.subplots(len(order), 3, figsize=(16.5, 3.1 * len(order)),
+                             gridspec_kw=dict(width_ratios=[1.0, 1.0, 0.52]))
     for i, (col, r) in enumerate(best.iterrows()):
         brainplot.plot_dk(m[col], ax=axes[i, 0], diverging=True, label="",
                           fontsize=6)
@@ -130,6 +163,12 @@ def ahba_maps_grid(docs: Path) -> plt.Figure:
         # hemispheres so the two columns are visually comparable.  The rho
         # beside it is computed on bilateral averages of BOTH maps -- hence
         # n_regions = 34 in the table, not 68.
+        #
+        # Mirroring shows the same 34 values twice and so implies no information
+        # that is not there, but a reader cannot tell that by looking, which is
+        # why the figure footnote says so explicitly.  The alternative -- passing
+        # lh_ labels only -- renders the right hemisphere in the no-data grey,
+        # which reads as missing rather than as deliberate.
         c = comps[r["component"]]
         mirrored = pd.concat([c.add_prefix("lh_"), c.add_prefix("rh_")])
         brainplot.plot_dk(mirrored, ax=axes[i, 1], diverging=True, label="",
@@ -138,7 +177,48 @@ def ahba_maps_grid(docs: Path) -> plt.Figure:
         axes[i, 1].set_title(
             f"AHBA {r['component']}   ρ = {r['rho']:+.2f}{star} "
             f"(p_spin = {r['p_spin']:.3f})", loc="left", fontsize=8)
+
+        # --- scatter -------------------------------------------------------
+        # Bilateral averages of BOTH maps, matching how rho in the table was
+        # computed (n_regions = 34).  Plotting the 68 unilateral regions here
+        # would show a different, more optimistic-looking cloud than the
+        # coefficient it sits beside.
+        ax = axes[i, 2]
+        bil = (m[[col]].assign(region=m.index.str.replace(r"^[lr]h_", "", regex=True))
+                       .groupby("region")[col].mean())
+        j = pd.concat([bil.rename("abcd"), c.rename("ahba")], axis=1).dropna()
+        # z within each map: the two axes are in incommensurable units (mm/yr or
+        # a PC loading vs an expression component), and z-scoring is monotone so
+        # Spearman rho is unchanged.
+        z = (j - j.mean()) / j.std()
+        ax.axhline(0, color="0.85", lw=0.6, zorder=0)
+        ax.axvline(0, color="0.85", lw=0.6, zorder=0)
+        ax.scatter(z.abcd, z.ahba, s=14, color="#3b6e8f", alpha=0.75,
+                   linewidths=0)
+        # Monotone fit on ranks, to match Spearman rather than implying a
+        # least-squares relationship the coefficient does not describe.
+        rk = z.rank()
+        b, a0 = np.polyfit(rk.abcd, rk.ahba, 1)
+        xs = np.array([rk.abcd.min(), rk.abcd.max()])
+        # Map the rank-space line back onto the z axes for display.
+        ax.plot(np.interp(xs, sorted(rk.abcd), sorted(z.abcd)),
+                np.interp(a0 + b * xs, sorted(rk.ahba), sorted(z.ahba)),
+                color="0.35", lw=1.0, ls="--", zorder=1)
+        ax.set_xlabel(f"{r['map']} (z)", fontsize=6)
+        ax.set_ylabel(f"AHBA {r['component']} (z)", fontsize=6)
+        ax.tick_params(labelsize=6)
+        ax.set_title(f"n = {len(z)} bilateral regions", loc="left", fontsize=7)
     fig.tight_layout()
+    # Footnote rather than a per-panel note: it applies to every row, and the
+    # two facts a reader needs are that the hemispheres are not independent
+    # evidence and that a few regions are unrenderable in this atlas.
+    fig.text(0.005, 0.002,
+             "Both hemispheres show the same 34 bilateral values (mirrored), so "
+             "left and right are not independent. ρ and the scatters use the 34 "
+             "bilateral regions. Frontal/temporal pole are unrenderable and "
+             "entorhinal, fusiform and parahippocampal draw as slivers in this "
+             "atlas; see docs/developmental_maps_noglobal.csv for values.",
+             fontsize=6, color="0.45", ha="left", va="bottom")
     return fig
 
 

@@ -284,6 +284,16 @@ lowest in lingual cortex (0.004).
 
 ![Developmental maps]({{artifact:art_73b07822-69cb-441d-a80b-e8629a646bd8}})
 
+The two rows answer different questions. Row 1 is what the phenotype *is* —
+where cortex starts (baseline thickness, the model intercept at the centring
+age), how fast it thins, and how much subjects differ in that rate. Row 2 is
+what can be done with it — whether a per-subject slope is measurable at all
+(reliability), whether it is heritable, and how it is spatially structured
+(PC1). Baseline thickness autoscales from 1.8 mm rather than from 0, because a
+zero-anchored scale spends its whole range on values that cannot occur and
+renders the panel flat; the other sequential maps do start at 0, where 0 is the
+meaningful floor.
+
 ### Components of the slope map
 
 Principal components of the subject × region slope matrix give three
@@ -411,20 +421,26 @@ All 18 map × component pairs, with both spin and naive p-values, are in
 
 ![ABCD developmental maps and AHBA components]({{artifact:art_8dbed094-9be5-4285-926e-961c9c1e92ed}})
 
-The five ABCD maps (**a**) and the three AHBA components (**b**) are drawn on a
-common scale — each map standardised within itself, so colour encodes rank
-position within a map and not a shared unit, which differ across maps. The
-correlation matrix (**c**) is the table above rendered as a heatmap, and (**d**)
-shows the three strongest associations as scatters over the 34 bilateral
-regions.
+Each row pairs one ABCD map (left) with the AHBA component it matches most
+strongly (centre) and the scatter behind that ρ (right). The scatter is what
+makes the coefficient auditable: a ρ printed in a title cannot show whether it
+rests on a few extreme regions or on a consistent gradient, and the surface maps
+cannot either. Both axes are z-scored within each map, because the units are
+incommensurable (mm/yr, an SD, unitless PC loadings, and an expression
+component); z-scoring is monotone, so Spearman ρ is unchanged. The scatter uses
+the 34 **bilateral** regions, matching how ρ is computed — plotting all 68
+unilateral regions would show a tighter cloud than the coefficient beside it
+describes.
 
-Two things are visible in the maps that the table alone does not convey. Slope
-PC3 and AHBA C2 (**d**, left) share a frontal-positive, occipital-negative
-gradient that is legible by eye in **a** and **b**, which is why that pair
-reaches ρ = +0.85. And the mean-rate/C3 replication (**d**, right) is carried
-substantially by three high-thinning outliers above +2 z; the association is
-real and survives the spin test, but it rests on a less uniform spatial
-correspondence than the two PC associations do.
+Two things are visible here that the table alone does not convey. Slope PC3 and
+AHBA C2 share a frontal-positive, occipital-negative gradient legible by eye in
+the two surface panels, and the scatter shows that pair's ρ = +0.85 resting on a
+consistent monotone relation across the whole range rather than on outliers. The
+mean-rate/C3 association (top row) is the opposite case: it survives the spin
+test, but the scatter shows it carried substantially by a handful of
+high-thinning regions beyond +2 z, so it rests on a less uniform spatial
+correspondence than the PC associations do. Regional h² (bottom row) is the
+clearest negative — a visibly unstructured cloud, ρ = +0.31, p_spin = 0.12.
 
 ![AHBA comparison]({{artifact:art_435c9e2f-1dfb-42b2-a774-ea403c03d437}})
 
@@ -502,9 +518,18 @@ serial-level effects (29 devices, 26.5% of subjects switching); those figures
 are not reproducible and are withdrawn. Manufacturer is a coarser grouping, so
 it necessarily accounts for less variance — this section is a *weaker* test
 than the one it replaces, not an equivalent one. Recovering serial-level
-control needs the DAIRC imaging-QC table, which is not in the local extract.
+control needs the imaging-QC table from **DAIRC** (the Data Analysis,
+Informatics and Resource Center, the ABCD centre that performs the centralised
+image processing and QC and distributes the derived imaging measures), which is
+not in the local extract.
 
-With that caveat, both effects are present but small. Between-site ICC for the
+With that caveat, both effects are present but small. **ICC** (intraclass
+correlation coefficient) is the fraction of total phenotype variance lying
+*between* groups — between sites, or between scanner manufacturers — so an ICC of
+0.02 means 2% of the variance in the slope phenotype is attributable to which
+site a subject attended, and 98% to differences between subjects within sites.
+
+Between-site ICC for the
 global slope phenotype is **0.021** across 18 sites; baseline manufacturer gives
 **0.0013** across 3 levels. Both are significant given n = 8,192 and together
 account for about 2% of variance. Per region, no ICC exceeds 0.08 for site or
@@ -529,9 +554,13 @@ applied to the primary phenotype**, and the GWAS should not need scanner
 covariates beyond the standard set — though including them is harmless.
 Table: `docs/h2_site_scanner_sensitivity.csv`.
 
-![Site and scanner supplement]({{artifact:art_371877ab-0f2b-4ddd-9a39-fc2706f9a1ff}})
+![Site and scanner effects]({{artifact:art_371877ab-0f2b-4ddd-9a39-fc2706f9a1ff}})
 
-![Site ICC map]({{artifact:art_d490090f-758e-4b26-8bcf-096d1d3da742}})
+Top-left is the per-region site ICC on the cortical surface; the other three
+panels are the two ICCs against each other, their per-region distributions, and
+the slope-variance inflation in manufacturer switchers. The map and the boxplot
+show the same quantity two ways, which is how to check that a small overall ICC
+is not hiding a few high regions — it is not: the highest single region is 0.076.
 
 ---
 
@@ -861,11 +890,36 @@ thickness.
    GWAS, which is the primary hypothesis. `magma_export.py` prepares inputs.
 4. **Compare the resulting gene sets** to AHBA C1–C3 and to the snRNA-seq
    leading component.
+5. **Test association with SCZ and MDD directly**, by two methods whose power
+   differs sharply in this sample (`hpc/06_prs.sbatch`, `hpc/05_ldsc_rg.sbatch`).
 
 The h²-versus-transcription tradeoff in §10 means step 3 should be run on both
 the global mean *and* the components — they may implicate different genes, and
 which one connects to the disorder GWAS is the empirical question the project
 exists to answer.
+
+### Which disorder-association test to believe
+
+Polygenic score association is the **primary** test and genetic correlation the
+secondary one, for a reason that follows directly from the reliability numbers
+in §3 and §10. LDSC's rg needs both traits well-estimated, and the slope side is
+not: at N≈8,000 with slope reliability ≈0.21 the expected h² z-score is ≈2,
+below the z > 4 that LDSC's own guidance requires. A rg of 0.1 ± 0.4 would not
+distinguish absence of overlap from absence of information.
+
+A polygenic score moves the statistical burden to the discovery GWAS
+(SCZ ≈160k, MDD ≈674k), so the score enters as one well-estimated regressor and
+only the target-side regression spends our N. That makes a null informative.
+`baseline_thickness` (reliability ≈0.90) is the exception where rg *is*
+interpretable, and it therefore serves as the positive control for the LDSC step;
+the pipeline's summary flags every row `underpowered` from its own h² z-score so
+this distinction cannot be lost when reading the table.
+
+Because the SCZ/MDD discovery GWAS are predominantly European and scores
+transfer poorly across ancestry, the EUR subset is primary and the full
+multi-ancestry sample is reported as a sensitivity analysis — ancestry-PC
+adjustment controls stratification but does not repair transferability. See
+`hpc/README.md` for the full rationale and the clumping/threshold choices.
 
 ---
 
@@ -884,7 +938,7 @@ Settled configuration: `configs/ct_70_noglobal_mv2_genetic.yaml`
 | §6 | `h2_candidate_phenotypes.csv`, `h2_map_split_half.csv`, `regional_h2.csv` | `heritability_noglobal.png`, `map_h2.png` |
 | §7 | `ahba_vs_maps_noglobal.csv`, `pc_vs_ahba.csv` | `ahba_vs_maps_noglobal.png`, `ahba_maps_grid.png` |
 | §8 | `sc_matrix_summary.csv`, `sc_matrix_lobe_ordered.csv`, `sc_vs_slope_pc_identity.csv` | `structural_covariance.png` |
-| §9 | `site_scanner_icc.csv`, `site_scanner_icc_by_region.csv`, `scanner_switching_summary.csv`, `h2_site_scanner_sensitivity.csv` | `site_scanner_supplement.png`, `site_icc_map.png` |
+| §9 | `site_scanner_icc.csv`, `site_scanner_icc_by_region.csv`, `scanner_switching_summary.csv`, `h2_site_scanner_sensitivity.csv` | `site_scanner_supplement.png` |
 | §10 | `gwas_phenotype_priority.csv`, `heldout_h2_by_split.csv`, `heldout_h2_paired_tests.csv`, `topH2_selection_optimism.csv` | `gwas_phenotype_priority.png` |
 | §11.5 | `h2_dz_class_comparison.csv` | — |
 

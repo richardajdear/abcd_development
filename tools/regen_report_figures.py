@@ -344,17 +344,34 @@ def structural_covariance(docs: Path) -> plt.Figure:
 
 
 def site_scanner_supplement(docs: Path) -> plt.Figure:
-    """Site and scanner variance in the slope phenotype.
+    """Site and scanner variance in the slope phenotype, as a 2x2 panel.
 
-    Three panels: the ICC of each grouping against the between-subject
-    variance it would have to rival to matter, the per-region distribution of
-    both ICCs, and the variance inflation in subjects who switched scanner.
+    Top-left is the per-region site ICC on the cortical surface; the remaining
+    three are the ICC of each grouping against the between-subject variance it
+    would have to rival to matter, the per-region distribution of both ICCs, and
+    the variance inflation in subjects who switched scanner manufacturer.
+
+    The map was previously a separate figure.  Combining them puts the spatial
+    and summary views of the same quantity side by side, which is how a reader
+    checks that the small overall ICC is not hiding a few high regions.
     """
+    from abcd import brainplot
+
     icc = pd.read_csv(docs / "site_scanner_icc.csv")
     byreg = pd.read_csv(docs / "site_scanner_icc_by_region.csv")
     sw = pd.read_csv(docs / "scanner_switching_summary.csv").set_index("quantity")["value"]
 
-    fig, axes = plt.subplots(1, 3, figsize=(10.5, 3.1))
+    # 2x2 with the per-region map in the top-left: the map is the spatial view
+    # of the same quantity the boxplot summarises, so keeping them in one figure
+    # lets a reader check that no region is an outlier without changing figures.
+    fig, axes = plt.subplots(2, 2, figsize=(11.0, 7.0))
+    axm = axes[0, 0]
+    brainplot.plot_dk(byreg.set_index("label")["site_icc"], ax=axm,
+                      diverging=False, colorbar=True, label="site ICC",
+                      fontsize=6, vminmax=(0, float(byreg.site_icc.max())))
+    axm.set_title("Per-region site ICC of regional slope", loc="left")
+
+    axes = np.array([axes[0, 1], axes[1, 0], axes[1, 1]])
     ax = axes[0]
     ax.bar(np.arange(len(icc)), icc.icc, color=C_FOCAL, width=0.55)
     ax.set_xticks(np.arange(len(icc)))
@@ -365,6 +382,9 @@ def site_scanner_supplement(docs: Path) -> plt.Figure:
         ax.annotate(f"{v:.4f}\np = {p:.3g}", (xi, v), ha="center", va="bottom",
                     fontsize=6, xytext=(0, 2), textcoords="offset points")
     ax.set_ylim(0, max(icc.icc) * 1.6)
+    # Bars of 2 categories on a half-width axis render as slabs; pad the x range
+    # so the bar width carries no accidental visual weight.
+    ax.set_xlim(-0.75, len(icc) - 0.25)
     ax.set_title(f"Both groupings explain < {max(icc.icc)*100:.0f}%", loc="left")
 
     ax = axes[1]
@@ -384,6 +404,7 @@ def site_scanner_supplement(docs: Path) -> plt.Figure:
     ax.set_xticks([0]); ax.set_xticklabels(["switched\nmanufacturer"], fontsize=7)
     ax.set_ylabel("slope variance ratio vs non-switchers")
     ax.set_ylim(0, 1.7)
+    ax.set_xlim(-1.0, 1.0)   # single bar: keep it from spanning the panel
     ax.annotate(f"{sw['var ratio switch/same (global slope)']:.2f}×\n"
                 f"Cohen d = {sw['Cohen d switch vs same']:.2f}\n"
                 f"{sw['pct switched manufacturer']:.1%} of subjects switched",

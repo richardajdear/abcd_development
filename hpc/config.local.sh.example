@@ -1,0 +1,66 @@
+# Example local override for hpc/config.sh.  Copy to hpc/config.local.sh
+# (gitignored) and edit.  Sourced before the defaults, so setting a root here
+# relocates every path derived from it.
+#
+# This example is the local-test configuration: synthetic genotypes from
+# tools/make_test_genotypes.py, no SLURM, few threads.
+
+# Everything under one scratch root.
+ABCD_HPC_ROOT="$REPO_ROOT/scratch/hpc_test"
+
+# Synthetic fixture written by: python tools/make_test_genotypes.py
+GENO="$ABCD_HPC_ROOT/genotype/synthetic"
+
+# Binaries from the local conda environment rather than ~/bin.
+# GCTA="$CONDA_PREFIX/bin/gcta64"
+# PLINK2="$CONDA_PREFIX/bin/plink2"
+
+THREADS=4
+
+# A synthetic fixture is small; keep every pair so the GRM has something to cut.
+GRM_CUTOFF=0.05
+
+# --- MAGMA and external summary statistics -------------------------------
+# Reference panel (expects $MAGMA_REF.bed/.bim/.fam) and gene locations.
+# MAGMA_REF="$ABCD_HPC_ROOT/magma_ref/g1000_eur"
+# MAGMA_GENE_LOC="$ABCD_HPC_ROOT/magma_ref/NCBI37.3.gene.loc"
+#
+# Published disorder GWAS for the reverse-direction test.  Each needs its
+# SNP-id and p-value column names, which differ between consortia, so set
+# them alongside the path.
+# SUMSTATS_DIR="$ABCD_HPC_ROOT/sumstats"
+# SCZ_SUMSTATS="$SUMSTATS_DIR/PGC3_SCZ_wave3.primary.autosome.public.v3.vcf.fixed.tsv"
+# SCZ_SNP_COL="ID"
+# SCZ_P_COL="PVAL"
+# MDD_SUMSTATS="$SUMSTATS_DIR/pgc-mdd2025_no23andMe_div_v3-49-46-01_formatted.tsv"
+# MDD_SNP_COL="rsid"
+# MDD_P_COL="p_value"
+#
+# Effect allele / effect size, used for PRS weights (06) and LDSC signing (05).
+# The signed-sumstats spec is "COLUMN,null": log-odds are null 0, ORs null 1.
+# Getting it wrong flips the sign of rg silently -- munge_sumstats' own median
+# check is the guard, so do not suppress its warnings.
+# SCZ_A1_COL="A1"; SCZ_EFFECT_COL="BETA"; SCZ_SIGNED="BETA,0"; SCZ_N_SPEC="--N-col NEFF"
+# MDD_A1_COL="effect_allele"; MDD_EFFECT_COL="beta"; MDD_SIGNED="beta,0"; MDD_N_SPEC="--N-col N"
+
+# --- LDSC (step 05) ------------------------------------------------------
+# LDSC_REF_DIR="$ABCD_HPC_ROOT/ldsc_ref"   # expects eur_w_ld_chr/ and w_hm3.snplist
+#
+# LDSC often needs its OWN environment.  The PyPI ldsc 2.0.1 wheel calls
+# pd.read_csv(delim_whitespace=...), removed in pandas 3.0, so it cannot share
+# an env with a current pandas; and the wheel ships ldsc.py only as a console
+# script, so munge_sumstats.py's `from ldsc import ...` needs an importable
+# copy.  Both are avoided by installing from the Broad repo instead.
+# LDSC="$HOME/.claude-science/conda/envs/abcd-ldsc/bin/ldsc.py"
+# LDSC_MUNGE="$HOME/.claude-science/conda/envs/abcd-ldsc/bin/munge_sumstats.py"
+# export PYTHONPATH="$REPO_ROOT/scratch/pylib${PYTHONPATH:+:$PYTHONPATH}"
+
+# --- PRS (step 06) -------------------------------------------------------
+# Clumping happens in $MAGMA_REF (the LD panel), never in the target sample.
+# CLUMP_R2=0.1
+# CLUMP_KB=250
+# PRS_THRESHOLDS="5e-8 1e-5 0.001 0.01 0.05 0.1 0.5 1"
+#
+# A 5,000-SNP fixture has almost nothing below 5e-8, so loosen locally or the
+# tighter thresholds all score zero SNPs:
+# PRS_THRESHOLDS="0.05 0.5 1"

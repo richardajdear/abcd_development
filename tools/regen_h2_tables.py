@@ -68,18 +68,19 @@ def _runs(root: Path) -> pd.DataFrame:
 
 
 def _subject_maps(run_dir: str) -> dict[str, pd.Series]:
-    """Candidate subject-level phenotypes from one run."""
-    ph = pd.read_parquet(Path(run_dir) / "phenotypes" / "phenotypes.parquet")
-    out = {
-        "global mean slope": ph[ph.phenotype == "slope"].groupby("subject")["value"].mean(),
-        "baseline thickness (control)":
-            ph[ph.phenotype == "intercept"].groupby("subject")["value"].mean(),
-    }
-    W = cov.slope_matrix(run_dir)
-    S = cov.subject_scores(W, cov.slope_pcs(W, 3).loadings)
-    for c in ("PC1", "PC2", "PC3"):
-        out[f"slope {c}"] = S[c]
-    return out
+    """Candidate subject-level phenotypes from one run.
+
+    Delegates to :func:`abcd.gcta_export.subject_phenotypes` so that the vector
+    whose heritability this table reports is the identical vector exported to
+    the cluster for GWAS.  The definitions used to be written out twice, here
+    and in the export module, which is one refactor away from publishing an h2
+    for a phenotype nobody ran a GWAS on.  Display names are this table's
+    convention and are mapped from the export's column names.
+    """
+    from abcd.gcta_export import PHENOTYPES, subject_phenotypes
+
+    frame = subject_phenotypes(run_dir)
+    return {p["display"]: frame[p["name"]] for p in PHENOTYPES}
 
 
 def _falc_row(y: pd.Series, pairs: pd.DataFrame, boot: int, **extra) -> dict:

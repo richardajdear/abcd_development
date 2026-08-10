@@ -264,6 +264,17 @@ def developmental_maps_noglobal(root: Path) -> pd.DataFrame:
 
     run = str(root / "out" / SETTLED)
     mp = M.regional_maps(run).copy()
+
+    # Baseline thickness: the model intercept, i.e. mm at the centring age (not
+    # at the first visit).  Section 5 shows it beside the rate maps, and it is
+    # the positive-control phenotype for the GWAS, so it belongs in the same
+    # table rather than being recomputed per figure.
+    fx = M.load_fits(run, "fits")["fixed"]
+    icept = (fx[fx.term == "(Intercept)"].set_index("label")["estimate"]
+             .rename("baseline_thickness"))
+    mp = mp.join(icept, how="left")
+    if mp.baseline_thickness.isna().any():
+        raise SystemExit("missing intercept for some regions")
     W = cov.slope_matrix(run)
     # slope_pcs names its components PC1..PC3; sc_pcs names them SC1..SC3.
     # Published column names are slopePC1.. and scPC1.., so normalise both.
@@ -286,6 +297,43 @@ def developmental_maps_noglobal(root: Path) -> pd.DataFrame:
     mp = mp.join(h2[["h2", "r_MZ", "r_DZ"]].rename(
         columns={"r_MZ": "h2_rMZ", "r_DZ": "h2_rDZ"}), how="left")
     return mp.reset_index()
+
+
+def ahba_vs_maps_noglobal(root: Path) -> pd.DataFrame:
+    """Spin-tested correlation of every developmental map with AHBA C1-C3.
+
+    This table previously had NO generator: it was written once and then read by
+    the section 7 figure and by ``gwas_phenotype_priority``.  It went stale --
+    its h2 row held rho = +0.342 against C1, while every h2 map in the repo
+    gives +0.313, so the value came from a superseded h2 definition and nothing
+    could detect the drift.  Regenerating it from the maps table closes that.
+
+    The spin test is the expensive part (1000 rotations x 3 components x 6 maps),
+    which is presumably why it was cached; it is a few minutes, not hours, and
+    correctness is worth more than the cache.
+    """
+    from abcd import genemaps, spatial
+
+    mp = pd.read_csv(root / "docs" / "developmental_maps_noglobal.csv").set_index("label")
+    geom = spatial.load_dk_geometry()
+    comps = genemaps.ahba_components("dsk")
+
+    # Labels are the published column names; keep the section-5/7 ordering.
+    wanted = [("Absolute thinning rate", "slope_total"),
+              ("Between-subject SD of rate", "tau_slope"),
+              ("Slope PC1", "slopePC1"),
+              ("Slope PC2", "slopePC2"),
+              ("Slope PC3", "slopePC3"),
+              ("Regional h²", "h2")]
+    rows = []
+    for label, col in wanted:
+        if col not in mp.columns:
+            continue
+        r = genemaps.map_vs_components(mp[col].dropna(), geom, components=comps)
+        r.insert(0, "map_col", col)
+        r.insert(0, "map", label)
+        rows.append(r)
+    return pd.concat(rows, ignore_index=True)
 
 
 def handoff_release_comparison(root: Path) -> pd.DataFrame:
@@ -349,6 +397,7 @@ TABLES = {
     "site_scanner_icc_by_region": site_scanner_icc_by_region,
     "scanner_switching_summary": scanner_switching_summary,
     "developmental_maps_noglobal": developmental_maps_noglobal,
+    "ahba_vs_maps_noglobal": ahba_vs_maps_noglobal,
     "regional_slope_pc_loadings": regional_slope_pc_loadings,
     "handoff_release_comparison": handoff_release_comparison,
 }

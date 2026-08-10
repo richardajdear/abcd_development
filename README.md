@@ -105,7 +105,7 @@ docs/            # REPORT_7.0.md + every table and figure it cites
 tools/           # regenerators for every table and figure in the report
 hpc/             # SLURM pipeline for GRM, REML, GWAS, MAGMA
 notebooks/       # explanatory documents, not analysis scripts
-tests/           # 144 tests, incl. provenance and README checks
+tests/           # 152 tests, incl. provenance and README checks
 ```
 
 The Python/R seam is Parquet in `out/<run_id>/`. Computation is kept separate
@@ -179,9 +179,42 @@ generator. It exists because 11 figures were once drawn in ad-hoc cells and
 silently survived corrections to the numbers underneath them.
 
 ```bash
-python -m pytest tests/ -q                                 # 144 tests collected
+python -m pytest tests/ -q                                 # 152 tests collected
 python tools/check_notebook_chunks.py notebooks/01_*.qmd    # notebooks run
 ```
+
+### Keeping the artifact tray current
+
+If you work on this repo through Claude Science, note that **editing a file on
+disk does not update its artifact**, and neither does committing. The artifact
+tray is a separate store, and it is what gets read when someone asks to see a
+deliverable — so a corrected report can sit right on disk while a stale copy is
+what actually gets looked at. This has happened three times here, once with the
+whole `hpc/` pipeline, which was correct on disk and in git but had never been
+saved as an artifact at all.
+
+```bash
+make audit-artifacts        # writes .artifact_audit.json (gitignored)
+```
+
+That writes a manifest of every deliverable with its size and SHA-256. It cannot
+finish the job on its own: comparing against the tray needs `host.artifacts()`,
+a kernel global that no subprocess can import. An agent reads the manifest in its
+own kernel and re-saves whatever is stale or missing — the snippet is in the
+`audit-artifacts` target in the `Makefile`. **Run it at the end of any session
+that edits deliverables.**
+
+The check is one-directional by design: every repo deliverable must be current
+in the tray, but the tray holds plenty that is not in the repo — exploratory
+figures, checkpoints, one-off analyses — and that is fine, not drift.
+
+Two tests guard the audit itself, because a manifest with a gap is worse than
+none: one asserts the glob list covers every cited table and figure plus the
+`hpc/` handover docs (its first version omitted `hpc/*.md`, so it was blind to
+the very file that prompted it), and one asserts no two deliverables share a
+basename unqualified — `save_artifacts` keys on basename, so `README.md` and
+`hpc/README.md` would otherwise share one artifact and the audit would compare
+the wrong pair.
 
 ## What runs next, on the cluster
 

@@ -1,13 +1,20 @@
 """Export subject-level phenotypes and covariates in GCTA/PLINK format.
 
-Run as ``python -m abcd.gcta_export <run-dir>``.  Writes three files that the
+Run as ``python -m abcd.gcta_export <run-dir>``.  Writes four files that the
 scripts in ``hpc/`` expect:
 
 * ``phenotypes_gcta.txt``   FID IID <phenotype columns>
 * ``covar_quant.txt``       FID IID <continuous covariates>
 * ``covar_categorical.txt`` FID IID <discrete covariates>
+* ``phenotype_manifest.tsv``  name, mpheno column index, priority, role
 
-Two things here are easy to get wrong and expensive to discover on the cluster.
+The manifest exists so the sbatch scripts do not have to rediscover a
+phenotype's column position by grepping the header of a space-delimited file --
+a step that silently produced the wrong ``--mpheno`` whenever a phenotype name
+was a prefix of another.  It is written by the same code that writes the
+phenotype columns, so the two cannot disagree.
+
+Three things here are easy to get wrong and expensive to discover on the cluster.
 
 **Subject IDs.** ABCD writes ``NDAR_INV...`` in the genetics tables and
 ``sub-NDARINV...`` in the imaging tables.  A join without normalisation returns
@@ -18,6 +25,14 @@ that is the target form.
 handle relatedness, so FID is bookkeeping.  But writing IID into FID (a common
 shortcut) makes every subject look like their own family, which breaks any
 downstream tool that *does* read FID.  We write the real family ID.
+
+**Which phenotypes.** The five in :data:`PHENOTYPES`, in the priority order
+REPORT_7.0 section 10 derives -- not the ``intercept``/``slope`` pair an earlier
+version of this module exported.  ``baseline_thickness`` is carried as a
+positive control rather than as a target: it is the phenotype that exposed the
+family-effect artefact (section 4.2), and a REML run that fails to recover a
+high h2 for it means something is wrong with the GRM or the covariates, not
+with the developmental phenotype.
 """
 from __future__ import annotations
 
@@ -84,40 +99,91 @@ def _check_genetic_validity(run_dir: Path) -> None:
         )
 
 
+#: The phenotypes exported for genetic analysis, in the priority order derived
+#: in REPORT_7.0 section 10.  ``priority`` 0 marks the positive control, which
+#: is not a target but must be run: it is the only phenotype on which a
+#: specification error is *visible* (section 4.2).
+#:
+#: The ordering is not by heritability.  Held-out h2 is nearly flat across the
+#: four slope phenotypes (0.263-0.464, per-split SD 0.10-0.18) while AHBA
+#: coupling is not (|rho| 0.51-0.85), so transcriptional association breaks the
+#: tie -- which is why PC3 and PC2 outrank PC1 despite PC1 scoring higher on h2.
+PHENOTYPES: tuple[dict, ...] = (
+    dict(name="baseline_thickness", priority=0, role="positive control",
+         display="baseline thickness (control)"),
+    dict(name="global_slope", priority=1, role="primary",
+         display="global mean slope"),
+    dict(name="slope_PC3", priority=2, role="target", display="slope PC3"),
+    dict(name="slope_PC2", priority=3, role="target", display="slope PC2"),
+    dict(name="slope_PC1", priority=4, role="secondary", display="slope PC1"),
+)
+
+PHENOTYPE_NAMES: tuple[str, ...] = tuple(p["name"] for p in PHENOTYPES)
+
+
+def subject_phenotypes(run_dir: str | Path) -> pd.DataFrame:
+    """The five settled subject-level phenotypes, one column each.
+
+    Single source of truth for what these phenotypes *are*: both this module
+    and ``tools/regen_h2_tables.py`` build them here, so the vector a GWAS is
+    run on is by construction the same vector whose heritability the report
+    publishes.  They were previously defined twice, in two files.
+
+    ``global_slope`` and ``baseline_thickness`` are the cross-region means of
+    the per-subject slope and intercept BLUPs.  The PC scores project each
+    subject onto loadings fitted on the whole sample -- correct here, and *not*
+    the same procedure as section 10's held-out evaluation, which refits
+    loadings per split precisely so that a phenotype definition never sees the
+    twins it is scored on.  For a GWAS there is no such circularity to avoid:
+    the definition does not consume the genotypes.
+    """
+    run_dir = Path(run_dir)
+    ph = pd.read_parquet(run_dir / "phenotypes" / "phenotypes.parquet")
+    from . import covariance as cov
+
+    out = {
+        "global_slope": ph[ph.phenotype == "slope"].groupby("subject")["value"].mean(),
+        "baseline_thickness": ph[ph.phenotype == "intercept"].groupby("subject")["value"].mean(),
+    }
+    W = cov.slope_matrix(run_dir)
+    scores = cov.subject_scores(W, cov.slope_pcs(W, 3).loadings)
+    for c in ("PC1", "PC2", "PC3"):
+        out[f"slope_{c}"] = scores[c]
+
+    frame = pd.DataFrame(out)
+    frame.index.name = "subject"
+    return frame[list(PHENOTYPE_NAMES)]
+
+
 def build(run_dir: str | Path) -> dict[str, pd.DataFrame]:
     run_dir = Path(run_dir)
     _check_genetic_validity(run_dir)
-    ph = pd.read_parquet(run_dir / "phenotypes" / "phenotypes.parquet")
-
-    # phenotypes.parquet is long: subject x label x phenotype.  GCTA needs one
-    # column per phenotype, so pivot on the whole-cortex mean.  Regional GWAS
-    # is a separate (much larger) job; see hpc/README.md.
-    if "label" in ph.columns:
-        glob = ph[ph.label.isin(["mean", "global", "whole_cortex"])]
-        if glob.empty:
-            # No explicit global row: average regions per subject.
-            glob = (ph.groupby(["subject", "phenotype"], observed=True)
-                      .value.mean().reset_index())
-        ph = glob
-    wide = ph.pivot_table(index="subject", columns="phenotype",
-                          values="value", observed=True)
+    wide = subject_phenotypes(run_dir)
 
     meta_path = run_dir / "model_table.parquet"
-    cols = ["subject", "family_id", "site", "sex", "age_c"]
-    meta = pd.read_parquet(meta_path, columns=[c for c in cols if c])
+    cols = ["subject", "family_id", "site", "sex", "age_c", "n_visits"]
+    meta = pd.read_parquet(meta_path, columns=cols)
     meta = (meta.sort_values("age_c").groupby("subject", observed=True).first()
                 .reset_index())
 
     df = wide.reset_index().merge(meta, on="subject", how="inner")
+    if df.empty:
+        raise ValueError(
+            f"phenotypes and model_table for {run_dir.name} share no subjects"
+        )
     df["IID"] = _to_genetics_id(df["subject"])
     df["FID"] = df["family_id"].astype(str)
 
-    pheno_cols = [c for c in wide.columns if c in ("intercept", "slope")]
-    if not pheno_cols:
-        raise ValueError(f"no intercept/slope columns in {run_dir}; got {list(wide.columns)}")
-
+    pheno_cols = list(PHENOTYPE_NAMES)
     phen = df[["FID", "IID"] + pheno_cols]
-    qcov = df[["FID", "IID", "age_c"]].rename(columns={"age_c": "baseline_age"})
+
+    # n_visits is a covariate because the phenotype is a shrunken BLUP: a
+    # 2-visit subject's slope is pulled harder toward the fixed effect than a
+    # 4-visit subject's, and attrition is not random.  This adjusts the mean,
+    # not the variance -- the heteroscedasticity it leaves behind is a known
+    # limitation, not something a linear covariate can absorb.
+    qcov = (df[["FID", "IID", "age_c", "n_visits"]]
+            .rename(columns={"age_c": "baseline_age"}))
     ccov = df[["FID", "IID", "sex", "site"]]
 
     # Ancestry PCs must be quantitative covariates: ABCD is multi-ancestry, and
@@ -138,7 +204,22 @@ def build(run_dir: str | Path) -> dict[str, pd.DataFrame]:
         qcov.attrs["pc_warning"] = str(exc)
 
     qcov.attrs["n_pcs"] = n_pcs
-    return {"phenotypes_gcta": phen, "covar_quant": qcov, "covar_categorical": ccov}
+
+    # --mpheno is 1-based over the phenotype columns only, i.e. it ignores
+    # FID/IID.  Deriving it here from the frame that is about to be written is
+    # the whole point: a script that greps the header instead has to reproduce
+    # that offset convention, and got it wrong.
+    manifest = pd.DataFrame([
+        {"name": p["name"],
+         "mpheno": phen.columns.get_loc(p["name"]) - 1,
+         "priority": p["priority"],
+         "role": p["role"],
+         "n_nonmissing": int(phen[p["name"]].notna().sum())}
+        for p in PHENOTYPES
+    ]).sort_values("priority", ignore_index=True)
+
+    return {"phenotypes_gcta": phen, "covar_quant": qcov,
+            "covar_categorical": ccov, "phenotype_manifest": manifest}
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -160,8 +241,14 @@ def main(argv: list[str] | None = None) -> int:
     out.mkdir(parents=True, exist_ok=True)
     built = build(run_dir)
     for name, frame in built.items():
-        p = out / f"{name}.txt"
-        frame.to_csv(p, sep=" ", index=False, na_rep="NA")
+        # The manifest is read by shell (cut/awk), so it is tab-separated with a
+        # .tsv suffix; the GCTA inputs are space-delimited as GCTA expects.
+        if name == "phenotype_manifest":
+            p = out / "phenotype_manifest.tsv"
+            frame.to_csv(p, sep="\t", index=False)
+        else:
+            p = out / f"{name}.txt"
+            frame.to_csv(p, sep=" ", index=False, na_rep="NA")
         print(f"{p}  {frame.shape[0]} rows x {frame.shape[1]} cols")
 
     qcov = built["covar_quant"]
