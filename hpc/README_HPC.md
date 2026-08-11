@@ -684,10 +684,12 @@ that it exists and has the expected row count before believing a green state.
      sensitivity — has **no full sample to contrast against**. `prs_assoc.R`
      will fit its "full" stratum, but it is the EUR stratum with a different
      label. Either source multi-ancestry genotypes or drop that arm and say so.
-2. **Ancestry PCs**: release PCs (multi-ancestry cohort) or the in-sample EUR
-   PCs already sitting in `abcd_eur.eigenvec`? §5. In an EUR-only sample the
-   release PCs are mostly measuring between-ancestry variation that no longer
-   exists here, so the in-sample PCs are probably the better covariates.
+2. **Ancestry PCs**: ~~release PCs or the in-sample EUR PCs already sitting in
+   `abcd_eur.eigenvec`?~~ **RESOLVED — see §15.** Two corrections to what this
+   entry used to say: there is no `abcd_eur.eigenvec` (it never existed, so
+   in-sample PCs had to be computed), and although the release PCs are indeed
+   nearly constant within EUR as suspected, swapping them for in-sample PCs
+   moves h² by 0.009. The concern was real and the effect is negligible.
 3. **GRM provenance**: reuse the undocumented prebuilt GRM, or spend 2 h
    rebuilding it with recorded filters? §5.
 4. **SNP identifiers**: 86.3 % of `abcd_eur.bim` IDs are rsIDs; the other
@@ -1087,3 +1089,120 @@ It is not safe to: the two "pools" are different objects built by different
 methods at different scales, exactly as set out above. The comparison that is
 like-for-like — SCZ's 120 prioritised versus MDD's 308 high-confidence — is
 **null on both sides**, for every phenotype.
+
+## 15. Two audit checks: ancestry PCs, and the N reaching LDSC
+
+Both raised as "these could be silently wrong"; both chased to a definite
+answer rather than an argument. One was a real defect with a negligible effect,
+the other was already correct.
+
+### 15a. The ancestry PCs are the wrong ones — and it does not matter
+
+`src/abcd/io.py:711` takes the covariate PCs from `ab_g_stc__gen_pc__01..10`,
+which the release computes on the **full multi-ancestry cohort**. Restricted to
+the 4,126 EUR analysis subjects they are close to constant:
+
+| | mean | SD | mean / SD |
+|---|---|---|---|
+| PC1 | 0.006310 | 0.000523 | **12.1** |
+| PC2 | −0.005263 | 0.001125 | 4.7 |
+| PC3 | −0.001102 | 0.001230 | 0.9 |
+
+A PC that separates ancestry groups looks exactly like this inside one group.
+Recomputing PCs *within* EUR from the existing GRM (`work/eur_pca_check.sbatch`,
+job 33485665) gives PCs with **25x the spread** — SD 0.0128–0.0147 against
+0.000523 — so they genuinely describe within-EUR variation the release PCs do
+not.
+
+Re-running REML on `baseline_thickness` with each:
+
+| covariates | h² | SE | n |
+|---|---|---|---|
+| release PCs (multi-ancestry) | 0.5754 | 0.1474 | 3,329 |
+| **in-sample EUR PCs** | **0.5663** | **0.1483** | 3,336 |
+
+**A difference of 0.009 — 0.06 of one SE.** The covariates were wrong in
+principle and irrelevant in practice, and the reason is visible in the
+eigenvalues: in-sample PC1 explains **0.13 %** of variance, with PC1/PC2 =
+7.23/3.92. There is no meaningful structure left inside the EUR subset for a PC
+to correct.
+
+So **h² = 0.575 is not an artefact of the ancestry covariates.** Against the
+published 0.20–0.40 for mean cortical thickness, three things reconcile it
+without invoking stratification:
+
+- the SE of 0.147 gives a 95 % CI of **[0.29, 0.86]**, which already overlaps
+  the published range;
+- the LDSC intercept is **0.990 ± 0.006** and λ_GC is 1.03 — stratification
+  normally pushes the intercept above 1, not to 1;
+- `baseline_thickness` is a **BLUP intercept pooling 2–4 visits**, reliability
+  0.892–0.941 (§9). Published estimates use single-timepoint thickness, whose
+  measurement error attenuates h². A latent-trait phenotype should return a
+  higher h², and that is the expected direction.
+
+Two corrections to earlier notes in this file: §11.2 claimed in-sample PCs were
+"already sitting in `abcd_eur.eigenvec`" — **that file does not exist**;
+`genetics_copy/` holds only `abcd_eur.{bed,bim,fam}` and the sparse GRM.
+
+For the all-ancestry GRM (§16) none of this reassurance carries over: there the
+structure is real and in-sample PCs are required, not optional.
+
+### 15b. The `N = 2 x NEFFDIV2` convention did reach LDSC
+
+Checked through the whole chain rather than in the config alone, since a wrong
+N rescales h² invisibly:
+
+| trait | munge log | N seen | expected |
+|---|---|---|---|
+| SCZ | `--N-col N` → `N: Sample size` | max 170,115 | N_eff ≈ 171,860 ✓ |
+| MDD | `--N-col N` → `N: Sample size` | 1,183,605 | study N_eff ✓ |
+| ABCD | `--N-col N` → `N: Sample size` | 4,119, constant | matches fastGWA ✓ |
+
+All three correct.
+
+One refinement on the risk, though: a wrong N would **not** have moved rg. LDSC's
+h² scales as 1/N and gencov as 1/√(N₁N₂), so in rg = gencov / √(h²₁ h²₂) the N
+terms cancel exactly. **rg is invariant to N misspecification; only h² is
+exposed.** The §12 rg nulls were never at risk from this.
+
+## 16. Cross-ancestry GRM (jobs 33485653, 33485654) — SUBMITTED
+
+Building the all-ancestry GRM deferred at §11.1, because N is the binding
+constraint on every result in §12–§14.
+
+**Verified gain** (joined on the 8-character NDAR token, not assumed):
+
+| | subjects |
+|---|---|
+| phenotyped | 8,192 |
+| phenotyped ∩ EUR genotyped | **4,126** (current) |
+| phenotyped ∩ all-ancestry genotyped | **7,111** |
+| gain | **+2,985 (+72 %)** |
+
+`work/grm_allanc.sbatch` builds per-chromosome GRMs (array 1–22 at `%12`, 192
+CPUs, inside the 448-CPU limit) over `ABCD_chr{1..22}_hg19` — 10,072 subjects,
+18,943,024 autosomal SNPs, `--maf 0.01` to match `03_gwas`. Per chromosome
+rather than merging ~60 GB of filesets: `--mgrm` combines exactly, as the
+SNP-count-weighted mean, and runs in parallel.
+
+`work/grm_allanc_merge.sbatch` then produces everything the pipeline consumes —
+`abcd_all`, `abcd_all_sp` (sparse, 0.05), `abcd_all.unrel` (0.05 cutoff) and
+**20 in-sample ancestry PCs** — so switching over is a config edit. It refuses
+to merge an incomplete set rather than quietly building from fewer chromosomes;
+that quiet-wrong failure mode has already occurred twice here (§6d, §12b).
+
+Checked before building, both favourable:
+
+- **IDs**: the all-ancestry `.fam` is `FID=AB0000055 IID=NDAR_INVD5FWJDCY`, so
+  the IID already matches `gcta_export`'s native spelling and only FID needs the
+  token join `align_ids.py` already does.
+- **rsIDs**: 84.7 %, against 85.4 % for `abcd_eur` — MAGMA, LDSC and PRS stay
+  as feasible as they are now.
+
+### The caveat to weigh before trusting its h²
+
+A single GRM pooled across ancestries assumes a common allele frequency and LD
+structure, which is precisely what does not hold across these groups. In-sample
+PCs help but do not repair it. If the all-ancestry h² differs materially from
+the EUR estimate, the defensible design is **ancestry-stratified REML
+meta-analysed across groups**, not one pooled GRM.
