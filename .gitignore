@@ -37,3 +37,36 @@ abcd-[0-9]*.[0-9]*/
 # Manifest written by `make audit-artifacts`: a snapshot of local file sizes and
 # checksums, meaningful only on the machine that produced it.
 .artifact_audit.json
+
+# ---------------------------------------------------------------------------
+# CSD3 working tree (hpc/work/).  Everything in here is either huge, rebuildable,
+# machine-specific, or access-controlled:
+#
+#   pheno/ pheno_prs/   SUBJECT-LEVEL ABCD phenotypes and covariates -- never
+#                       commit these, they are access-controlled data
+#   results/gwas/       ~620 MB per phenotype of fastGWA output
+#   sumstats/           ~1.5 GB of PGC summary statistics
+#   envs/ mamba/ bin/   micromamba environments and vendored binaries
+#   genotype/ ldsc_ref/ copies of reference and genotype data
+#   genesets/           third-party published supplementary tables; the
+#                       make_*_genesets.py scripts record the URLs and md5s
+#
+# The exceptions are the scripts written for this run and the small result
+# summary tables, which are the actual work product.
+hpc/work/*
+!hpc/work/*.py
+!hpc/work/*.sbatch
+!hpc/work/*.sh
+
+# Result summaries only (a few KB each); everything else under results/ is
+# regenerable output measured in hundreds of megabytes.
+!hpc/work/results/
+hpc/work/results/*
+!hpc/work/results/*/
+hpc/work/results/*/*
+!hpc/work/results/*/*_summary.tsv
+!hpc/work/results/prs/prs_association.tsv
+
+# SLURM stderr scratch, and the convenience symlink to hpc/work/out.
+hpc/slurm/
+/out

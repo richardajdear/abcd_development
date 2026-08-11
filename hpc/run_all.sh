@@ -16,7 +16,19 @@
 #
 # Configure paths with environment variables or hpc/config.local.sh; nothing in
 # this file is machine-specific.  See hpc/README.md.
-source "$(dirname "$0")/config.sh"
+# Locate config.sh.  Under sbatch, $0 is a COPY of this script in
+# /var/spool/slurm/slurmd/jobNNN/, so `dirname "$0"` does not contain
+# config.sh -- run_all.sh's SLURM mode therefore sourced nothing, and because
+# `set -euo pipefail` lives INSIDE config.sh it was never enabled either, so
+# every step ran to completion with undefined functions and exited 0.  Search
+# the submit directory too ($PWD, which run_all.sh sets via --chdir).
+set -e
+_cfg=""
+for _d in "$(dirname "$0")" "$PWD" "${SLURM_SUBMIT_DIR:-}"; do
+  if [[ -n "$_d" && -f "$_d/config.sh" ]]; then _cfg="$_d/config.sh"; break; fi
+done
+[[ -n "$_cfg" ]] || { echo "FATAL: cannot locate hpc/config.sh (looked in $(dirname "$0"), $PWD, ${SLURM_SUBMIT_DIR:-unset})" >&2; exit 2; }
+source "$_cfg"
 
 HPC_DIR="$REPO_ROOT/hpc"
 # config.sh defines paths but deliberately creates nothing (so that sourcing it

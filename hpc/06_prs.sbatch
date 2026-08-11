@@ -33,7 +33,19 @@
 # effect" and "the score does not transfer", which is exactly the ambiguity the
 # EUR-primary design avoids.  Both are computed; the summary labels which is
 # which, and tools/prs_assoc.R fits them separately rather than pooling.
-source "$(dirname "$0")/config.sh"
+# Locate config.sh.  Under sbatch, $0 is a COPY of this script in
+# /var/spool/slurm/slurmd/jobNNN/, so `dirname "$0"` does not contain
+# config.sh -- run_all.sh's SLURM mode therefore sourced nothing, and because
+# `set -euo pipefail` lives INSIDE config.sh it was never enabled either, so
+# every step ran to completion with undefined functions and exited 0.  Search
+# the submit directory too ($PWD, which run_all.sh sets via --chdir).
+set -e
+_cfg=""
+for _d in "$(dirname "$0")" "$PWD" "${SLURM_SUBMIT_DIR:-}"; do
+  if [[ -n "$_d" && -f "$_d/config.sh" ]]; then _cfg="$_d/config.sh"; break; fi
+done
+[[ -n "$_cfg" ]] || { echo "FATAL: cannot locate hpc/config.sh (looked in $(dirname "$0"), $PWD, ${SLURM_SUBMIT_DIR:-unset})" >&2; exit 2; }
+source "$_cfg"
 require_paths GENO PHENO COVAR_QUANT COVAR_CAT MANIFEST PLINK
 ensure_dirs "$PRS_DIR"
 
@@ -138,11 +150,31 @@ done
 if [[ "$DRY_RUN" != "1" ]]; then
   if command -v "$RSCRIPT" >/dev/null 2>&1; then
     echo "=== 06_prs  association tests  $(date) ==="
+    # prs_assoc.R takes family_id from FID.  That is correct for the export,
+    # but on this cluster align_ids.py must overwrite FID with the .fam's
+    # spelling (FID = IID) or GCTA matches nobody -- which leaves every subject
+    # in a family of one, so lmer rejects `(1 | family_id)`, prs_assoc.R's
+    # try() skips every model, and the step dies claiming the IDs do not
+    # overlap when they overlap completely.  work/make_prs_pheno.py writes a
+    # parallel copy carrying the real family ids; $PHENO stays as GCTA needs it.
+    P_PHENO="$PHENO"; P_QUANT="$COVAR_QUANT"; P_CAT="$COVAR_CAT"
+    PRS_PHENO_DIR="${PRS_PHENO_DIR:-$(dirname "$PHENO")_prs}"
+    if [[ -f "$PRS_PHENO_DIR/phenotypes_gcta.txt" ]]; then
+      echo "family-aware phenotypes: $PRS_PHENO_DIR"
+      P_PHENO="$PRS_PHENO_DIR/$(basename "$PHENO")"
+      P_QUANT="$PRS_PHENO_DIR/$(basename "$COVAR_QUANT")"
+      P_CAT="$PRS_PHENO_DIR/$(basename "$COVAR_CAT")"
+    else
+      echo "WARNING: $PRS_PHENO_DIR absent -- FID is the subject id, so the" >&2
+      echo "family random effect is unidentifiable and no model will fit." >&2
+      echo "Run: python $(dirname "$0")/work/make_prs_pheno.py \\" >&2
+      echo "       $(dirname "$PHENO") $PRS_PHENO_DIR" >&2
+    fi
     "$RSCRIPT" "$REPO_ROOT/tools/prs_assoc.R" \
       --prs-dir "$PRS_DIR" \
-      --pheno "$PHENO" \
-      --covar-quant "$COVAR_QUANT" \
-      --covar-cat "$COVAR_CAT" \
+      --pheno "$P_PHENO" \
+      --covar-quant "$P_QUANT" \
+      --covar-cat "$P_CAT" \
       --manifest "$MANIFEST" \
       --out "$PRS_DIR/prs_association.tsv"
     echo
