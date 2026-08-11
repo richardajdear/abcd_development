@@ -684,12 +684,13 @@ that it exists and has the expected row count before believing a green state.
      sensitivity — has **no full sample to contrast against**. `prs_assoc.R`
      will fit its "full" stratum, but it is the EUR stratum with a different
      label. Either source multi-ancestry genotypes or drop that arm and say so.
-2. **Ancestry PCs**: ~~release PCs or the in-sample EUR PCs already sitting in
-   `abcd_eur.eigenvec`?~~ **RESOLVED — see §15.** Two corrections to what this
-   entry used to say: there is no `abcd_eur.eigenvec` (it never existed, so
-   in-sample PCs had to be computed), and although the release PCs are indeed
-   nearly constant within EUR as suspected, swapping them for in-sample PCs
-   moves h² by 0.009. The concern was real and the effect is negligible.
+2. **Ancestry PCs**: ~~release PCs or the in-sample EUR PCs in
+   `abcd_eur.eigenvec`?~~ **RESOLVED — see §15a.** This entry was right that
+   `abcd_eur.eigenvec` exists (in `rds-genetics_hpc-Nl99R8pHODQ/ABCD/`, 50 PCs,
+   not in `genetics_copy/`) and right that the release PCs are nearly constant
+   within EUR. It was wrong about the consequence: swapping to in-sample PCs
+   moves h² by 0.009. Use the in-sample PCs anyway — they are free and correct
+   — but nothing downstream turns on it.
 3. **GRM provenance**: reuse the undocumented prebuilt GRM, or spend 2 h
    rebuilding it with recorded filters? §5.
 4. **SNP identifiers**: 86.3 % of `abcd_eur.bim` IDs are rsIDs; the other
@@ -1140,9 +1141,16 @@ without invoking stratification:
   measurement error attenuates h². A latent-trait phenotype should return a
   higher h², and that is the expected direction.
 
-Two corrections to earlier notes in this file: §11.2 claimed in-sample PCs were
-"already sitting in `abcd_eur.eigenvec`" — **that file does not exist**;
-`genetics_copy/` holds only `abcd_eur.{bed,bim,fam}` and the sparse GRM.
+**Where the in-sample PCs already were.** `abcd_eur.eigenvec` does exist — 5,678
+rows and 50 PCs in `rds-genetics_hpc-Nl99R8pHODQ/ABCD/`, beside
+`abcd_eur.pcair.rdata` and `.pcrelate.rdata`. It is absent only from
+`genetics_copy/`, which is where this file previously looked before wrongly
+recording that it "does not exist". Recomputing PCs with GCTA `--pca` on the
+same GRM reproduces the stored eigenvector **to six significant figures**
+(0.00327779, 0.00521468 for the first subject), so the check above was already
+using the right PCs and the stored file needed no re-run. That agreement also
+confirms the prebuilt GRM in use is the one those PCs came from — a provenance
+question §5 had left open.
 
 For the all-ancestry GRM (§16) none of this reassurance carries over: there the
 structure is real and in-sample PCs are required, not optional.
@@ -1165,7 +1173,7 @@ h² scales as 1/N and gencov as 1/√(N₁N₂), so in rg = gencov / √(h²₁ 
 terms cancel exactly. **rg is invariant to N misspecification; only h² is
 exposed.** The §12 rg nulls were never at risk from this.
 
-## 16. Cross-ancestry GRM (jobs 33485653, 33485654) — SUBMITTED
+## 16. Cross-ancestry GRM — BLOCKED: the source data is internally inconsistent
 
 Building the all-ancestry GRM deferred at §11.1, because N is the binding
 constraint on every result in §12–§14.
@@ -1179,7 +1187,7 @@ constraint on every result in §12–§14.
 | phenotyped ∩ all-ancestry genotyped | **7,111** |
 | gain | **+2,985 (+72 %)** |
 
-`work/grm_allanc.sbatch` builds per-chromosome GRMs (array 1–22 at `%12`, 192
+`work/grm_allanc.sbatch` (written, and it runs correctly -- the failure is in the data, not the script) builds per-chromosome GRMs (array 1–22 at `%12`, 192
 CPUs, inside the 448-CPU limit) over `ABCD_chr{1..22}_hg19` — 10,072 subjects,
 18,943,024 autosomal SNPs, `--maf 0.01` to match `03_gwas`. Per chromosome
 rather than merging ~60 GB of filesets: `--mgrm` combines exactly, as the
@@ -1199,7 +1207,47 @@ Checked before building, both favourable:
 - **rsIDs**: 84.7 %, against 85.4 % for `abcd_eur` — MAGMA, LDSC and PRS stay
   as feasible as they are now.
 
-### The caveat to weigh before trusting its h²
+### It cannot be built: the `.bed` and `.bim` disagree
+
+All 22 array tasks failed within seconds:
+
+```
+Unexpected PLINK 1 .bed file size (expected 650469907 bytes).
+```
+
+Not a script bug. Every chromosome's `.bed` holds ~29 % more variants than its
+`.bim` lists:
+
+| | `.bim` says | `.bed` implies | exact division? |
+|---|---|---|---|
+| chr1 | 1,492,345 | **1,918,599** | yes |
+| chr2 | 1,606,847 | **2,068,162** | yes |
+| chr22 | 258,328 | **333,660** | yes |
+
+The arithmetic identifies the faulty file. A PLINK 1 `.bed` is
+`3 + ceil(n/4) x m` bytes. With `n = 10,072` from the `.fam`, the implied `m`
+divides **exactly** on every chromosome, so the `.fam` is right and the `.bed`
+is intact and unfiltered. If instead the `.bim` were right, bytes-per-variant
+would be 3252.2835 — not a whole number — so **no sample count reconciles the
+`.bim` with the `.bed`**. The `.bim` files were filtered to ~78 % without
+regenerating the `.bed`.
+
+That is unrecoverable here: nothing records which `.bed` columns the surviving
+`.bim` rows correspond to. Searched and absent — an original larger `.bim`, and
+any build log. The `Data_Genetics` copy is internally consistent but EUR-only
+(5,678 x 13,697,177, verified).
+
+**To unblock**, either obtain the matching `.bim` from whoever built these (the
+files are owned by `yh464`) or re-derive the all-ancestry set from the ABCD
+DAIRC release. Both are external dependencies, so the +72 % N is not available
+on this cluster today.
+
+Worth noting that GCTA **refused loudly**. A more permissive tool would have
+built a GRM from misaligned variants and returned h² estimates that looked
+entirely plausible. Anyone else reaching for `ABCD_chr*_hg19` should know it is
+broken.
+
+### The caveat that would still apply once it is unblocked
 
 A single GRM pooled across ancestries assumes a common allele frequency and LD
 structure, which is precisely what does not hold across these groups. In-sample
