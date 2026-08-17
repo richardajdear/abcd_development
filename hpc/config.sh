@@ -236,7 +236,7 @@ require_paths() {
     # valid GRM present.  Check the member file that must exist.
     if [[ "$name" == "GENO" || "$name" == "MAGMA_REF" ]]; then
       [[ -f "$value.bed" ]] || { echo "ERROR: $name=$value -- $value.bed not found" >&2; missing=1; }
-    elif [[ "$name" == GRM_SPARSE ]]; then
+    elif [[ "$name" == GRM_SPARSE || "$name" == GRM_ALLANC_SPARSE ]]; then
       # A sparse GRM is NOT a dense one with fewer entries: --make-bK-sparse
       # writes .grm.sp (a three-column list of retained pairs) and .grm.id, and
       # no .grm.bin at all.  Checking for .grm.bin here rejected every valid
@@ -248,7 +248,13 @@ require_paths() {
         echo "ERROR: $name=$value -- $value.grm.id missing (GRM is incomplete)" >&2
         missing=1
       fi
-    elif [[ "$name" == GRM || "$name" == GRM_UNREL ]]; then
+    # The GRM_ALLANC* names are the same kind of object as GRM*, so they must be
+    # matched here too.  Without them they fell through to the `-e "$value"`
+    # branch at the bottom, which tests the PREFIX, can never succeed, and would
+    # abort the script before it ran -- the exact failure the GRM/GRM_UNREL case
+    # was added to fix, repeated for the all-ancestry names.
+    elif [[ "$name" == GRM || "$name" == GRM_UNREL \
+         || "$name" == GRM_ALLANC || "$name" == GRM_ALLANC_UNREL ]]; then
       # GCTA writes .grm.bin/.grm.id (binary) or .grm.gz/.grm.id (list).
       if [[ ! -f "$value.grm.bin" && ! -f "$value.grm.gz" ]]; then
         echo "ERROR: $name=$value -- neither $value.grm.bin nor $value.grm.gz found" >&2

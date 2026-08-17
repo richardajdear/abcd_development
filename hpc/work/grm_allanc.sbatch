@@ -36,7 +36,33 @@
 # config.local.sh when the release tree moves or is renamed.
 set -euo pipefail
 
-REPO_ROOT="${REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+# Locate the repository.  Under sbatch, $0 and ${BASH_SOURCE[0]} name a COPY of
+# this script in /var/spool/slurm/slurmd/jobNNN/, so the obvious
+# `dirname "${BASH_SOURCE[0]}"/../..` resolves to /var/spool/slurm and every
+# array task dies in two seconds on
+#   /var/spool/slurm/hpc/config.sh: No such file or directory
+# 02_reml.sbatch and 06_prs.sbatch already carry this scar; these work/ scripts
+# did not, only because they had always been run with REPO_ROOT already
+# exported into the submitting environment, which hid it.  Observed here on
+# 2026-08-17, job 33789921, all 22 tasks.  Walk up from the submit directory
+# (and $PWD) looking for hpc/config.sh, which is what actually identifies the
+# repo, rather than trusting any one path to be the right one.
+if [[ -z "${REPO_ROOT:-}" || ! -f "${REPO_ROOT:-}/hpc/config.sh" ]]; then
+  REPO_ROOT=""
+  for _d in "$(dirname "${BASH_SOURCE[0]}")/../.." "${SLURM_SUBMIT_DIR:-}" "$PWD"; do
+    [[ -n "$_d" ]] || continue
+    _p="$(cd "$_d" 2>/dev/null && pwd)" || continue
+    while [[ -n "$_p" && "$_p" != "/" ]]; do
+      if [[ -f "$_p/hpc/config.sh" ]]; then REPO_ROOT="$_p"; break 2; fi
+      _p="$(dirname "$_p")"
+    done
+  done
+fi
+[[ -n "$REPO_ROOT" ]] || {
+  echo "FATAL: cannot find hpc/config.sh above $PWD or ${SLURM_SUBMIT_DIR:-unset}." >&2
+  echo "       Submit from inside the repo, or export REPO_ROOT." >&2
+  exit 2
+}
 # shellcheck source=/dev/null
 source "$REPO_ROOT/hpc/config.sh"
 

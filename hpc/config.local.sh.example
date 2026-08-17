@@ -11,6 +11,23 @@ ABCD_HPC_ROOT="$REPO_ROOT/scratch/hpc_test"
 # Synthetic fixture written by: python tools/make_test_genotypes.py
 GENO="$ABCD_HPC_ROOT/genotype/synthetic"
 
+# --- all-ancestry GRM (work/split_allanc_chroms + grm_allanc*) -----------
+# On CSD3 these point at the ABCD 7.0 curated Smokescreen array fileset:
+#
+#   ABCD70="/rds/project/rds-CeXlNYOYMxw/Data_Genetics/genotype_microarray"
+#   GENO_ALLANC_SRC="$ABCD70/smokescreen/merged_chroms"   # 11,670 x 515,228, hg19
+#   GENO_ALLANC_DIR="$ABCD_HPC_ROOT/genotype_allanc70"    # written by the split
+#   GENO_ALLANC_TPL='abcd70_chr{CHR}'
+#
+# GENO_ALLANC_SRC is the ONE merged fileset the release ships;
+# work/split_allanc_chroms.sbatch cuts it into the 22 per-chromosome filesets
+# that grm_allanc.sbatch consumes.  Set SRC only if you need the split; if the
+# release already ships per-chromosome files, set DIR and TPL alone.
+#
+# Do NOT write {CHR} inside a ${VAR:-default} expansion -- bash ends the
+# expansion at the brace closing {CHR}.  config.sh uses an `if [[ -z ]]` for
+# exactly this reason; copy that form, as above.
+
 # Binaries from the local conda environment rather than ~/bin.
 # GCTA="$CONDA_PREFIX/bin/gcta64"
 # PLINK2="$CONDA_PREFIX/bin/plink2"
