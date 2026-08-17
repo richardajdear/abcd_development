@@ -21,7 +21,8 @@ interest.
 Modelling settled on release 7.0. **The genetic pipeline has run end to end on
 CSD3.** Headline: no genome-wide-significant loci at N = 4,119 (expected), but a
 coherent lead — higher SCZ polygenic score predicts faster cortical thinning
-(β = −0.038, p = 0.009), monotone across score thresholds, and the age × PRS
+(β = −0.038, p = 0.015 in the EUR stratum, n = 3,725; β = −0.040, p = 0.009 in
+the full stratum, n = 4,126), monotone across score thresholds, and the age × PRS
 interaction confirms the effect is on the *rate* rather than the level attained.
 Nothing survives the original correction; a corrected multiple-testing treatment
 puts it at p = 0.024–0.041.

@@ -61,7 +61,8 @@ slope row is flagged `underpowered` in `results/ldsc/ldsc_rg_summary.tsv`.
 
 **Polygenic scores** — 160 models; nothing survives correction. The one coherent
 pattern is SCZ → `global_slope`, monotone across thresholds, reaching
-β = −0.038 (p = 0.015 EUR, 0.009 full) at p<0.5. Negative β means **higher SCZ
+β = −0.038, p = 0.015 (EUR, n = 3,725) and β = −0.040, p = 0.009 (full,
+n = 4,126) at p<0.5. Negative β means **higher SCZ
 risk → faster thinning**, the predicted direction. `p_adj` = 0.119 Bonferroni
 across 8 thresholds. **A lead to power up, not a result.**
 
