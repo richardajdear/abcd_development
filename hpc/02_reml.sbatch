@@ -94,7 +94,7 @@ if [[ "$DRY_RUN" != "1" ]]; then
   column -t -s $'\t' "$summary" 2>/dev/null || cat "$summary"
   echo
   echo "NOTE: n above is the unrelated subset, far below the phenotyped sample."
-  echo "      A wide SE here is the design, not a failure -- see hpc/README.md."
+  echo "      A wide SE here is the design, not a failure -- see hpc/README_HPC.md."
 fi
 
 echo "=== 02_reml done  $(date) ==="

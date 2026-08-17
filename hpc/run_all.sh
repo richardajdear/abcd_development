@@ -15,7 +15,7 @@
 #                      exactly the same script bodies the cluster will run.
 #
 # Configure paths with environment variables or hpc/config.local.sh; nothing in
-# this file is machine-specific.  See hpc/README.md.
+# this file is machine-specific.  See hpc/README_HPC.md.
 # Locate config.sh.  Under sbatch, $0 is a COPY of this script in
 # /var/spool/slurm/slurmd/jobNNN/, so `dirname "$0"` does not contain
 # config.sh -- run_all.sh's SLURM mode therefore sourced nothing, and because

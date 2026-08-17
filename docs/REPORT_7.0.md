@@ -919,7 +919,7 @@ Because the SCZ/MDD discovery GWAS are predominantly European and scores
 transfer poorly across ancestry, the EUR subset is primary and the full
 multi-ancestry sample is reported as a sensitivity analysis — ancestry-PC
 adjustment controls stratification but does not repair transferability. See
-`hpc/README.md` for the full rationale and the clumping/threshold choices.
+`hpc/README_HPC.md` for the full rationale and the clumping/threshold choices.
 
 ---
 

@@ -704,7 +704,7 @@ class Release70Adapter(Release51Adapter):
         """Genetic resources.  PCs live in the static table in 7.0.
 
         No genotype/WGS files are present in the local copy, so GCTA and GWAS
-        steps still cannot run against 7.0 here; see ``hpc/README.md``.
+        steps still cannot run against 7.0 here; see ``hpc/README_HPC.md``.
         """
         return {"static": paths.find_table(self.root, "ab_g_stc")}
 
