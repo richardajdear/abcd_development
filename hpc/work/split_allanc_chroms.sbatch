@@ -35,9 +35,40 @@
 # every h2 here incomparable with the EUR numbers.  It is a useful cross-check
 # on the relatedness pruning, not an input.
 #
-# No MAF or missingness filter is applied at this step deliberately: GCTA
-# applies --maf 0.01 in grm_allanc.sbatch, so the filter lives in exactly one
-# place and the per-chromosome files stay a faithful split of the source.
+# By default no MAF or missingness filter is applied here: GCTA applies
+# --maf 0.01 in grm_allanc.sbatch, so the filter lives in exactly one place and
+# the per-chromosome files stay a faithful split of the source.
+#
+# GENO_ALLANC_KEEP and GENO_ALLANC_GENO exist because that default turned out to
+# be inadequate for the 7.0 array data, and the reason is worth stating rather
+# than burying in a flag.  Measured on chr1 (work/qc_missing_allanc.sbatch):
+# per-sample call rate is not noise, it is BATCH -- 87.6 % of the variance in
+# per-sample F_MISS is explained by the ten Smokescreen batches, and four of
+# them (BATCH_5_Saliva, BATCH_3_WB, BATCH_2_WB, BATCH_6; 511 subjects) sit at
+# 7-10 % missing while the other six sit at 0.4-1.7 %.
+#
+# What that does to a GRM -- checked against chr1.grm.N.bin rather than assumed,
+# because the obvious guess is wrong.  GCTA does NOT mean-impute: it estimates
+# each pair from the SNPs non-missing in BOTH members and records the count.
+# On chr1 that count ranges 29,324-37,800 and averages 35,256 for the
+# high-missing subjects against 37,683 for the clean ones.
+#
+# So the damage is not a shared imputation bias, it is ~6 % fewer SNPs behind
+# every relatedness estimate involving a bad-batch subject.  Noisier relatedness
+# attenuates GREML h2, and here the noise is structured BY BATCH rather than
+# spread at random.  That is a milder problem than imputation would have been --
+# milder enough that it justifies a sensitivity track, not distrust of the
+# primary one.  Which is why both are built and compared.
+#
+# GENO_ALLANC_KEEP must be a GENOME-WIDE sample list, not a per-chromosome
+# --mind: --mind applied inside this array would drop a DIFFERENT sample set on
+# each chromosome, leaving 22 filesets with 22 different .fam files, and GCTA
+# --mgrm would then combine GRMs over inconsistent samples.  work/
+# qc_keeplist_allanc.sbatch computes the list once, genome-wide, for this reason.
+#
+# Both tracks are built and compared rather than one being chosen up front; see
+# README_HPC.md.  Neither filter is applied unless the variable is set, so the
+# unfiltered track is still what you get by default.
 #
 # Chromosomes 23/25/26 (X, PAR, MT) are present in the source .bim and are
 # dropped here: a GRM is conventionally autosomal.
@@ -95,9 +126,21 @@ echo "=== split chr$CHR  $(date) ==="
 echo "source: $GENO_ALLANC_SRC"
 echo "out   : $OUT"
 
+filters=()
+if [[ -n "${GENO_ALLANC_KEEP:-}" ]]; then
+  [[ -f "$GENO_ALLANC_KEEP" ]] || { echo "FATAL: GENO_ALLANC_KEEP=$GENO_ALLANC_KEEP not found" >&2; exit 5; }
+  echo "keep  : $GENO_ALLANC_KEEP ($(wc -l < "$GENO_ALLANC_KEEP") subjects)"
+  filters+=(--keep "$GENO_ALLANC_KEEP")
+fi
+if [[ -n "${GENO_ALLANC_GENO:-}" ]]; then
+  echo "geno  : --geno $GENO_ALLANC_GENO"
+  filters+=(--geno "$GENO_ALLANC_GENO")
+fi
+
 "$PLINK" \
   --bfile "$GENO_ALLANC_SRC" \
   --chr "$CHR" \
+  "${filters[@]+"${filters[@]}"}" \
   --make-bed \
   --threads "${SLURM_CPUS_PER_TASK:-4}" \
   --out "$OUT"
@@ -110,12 +153,19 @@ bash "$REPO_ROOT/hpc/work/check_bfile_integrity.sh" "$OUT" || {
   exit 3
 }
 
-# The split must not lose or gain subjects: plink keeps all samples unless
-# asked otherwise, so a count change here means a filter crept in.
-n_src=$(wc -l < "$GENO_ALLANC_SRC.fam")
+# The subject count must be exactly what was asked for -- the source count when
+# no --keep was given, the keep-list count when one was.  plink keeps all
+# samples unless told otherwise, so any other number means a filter arrived
+# that nobody asked for, and a GRM built from 22 filesets with inconsistent
+# .fam files is the quiet-wrong failure this whole gate exists to prevent.
+if [[ -n "${GENO_ALLANC_KEEP:-}" ]]; then
+  n_want=$(wc -l < "$GENO_ALLANC_KEEP")
+else
+  n_want=$(wc -l < "$GENO_ALLANC_SRC.fam")
+fi
 n_out=$(wc -l < "$OUT.fam")
-[[ "$n_src" == "$n_out" ]] || {
-  echo "FATAL: chr$CHR has $n_out subjects, source has $n_src" >&2
+[[ "$n_want" == "$n_out" ]] || {
+  echo "FATAL: chr$CHR has $n_out subjects, expected $n_want" >&2
   exit 4
 }
 
