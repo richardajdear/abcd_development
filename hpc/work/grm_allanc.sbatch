@@ -92,8 +92,29 @@ echo "input : $BFILE  ($(wc -l < "$BFILE.bim") SNPs, $(wc -l < "$BFILE.fam") sub
 # pooled, which is the standard choice but not a neutral one -- see the caveat
 # in README_HPC.md: a single GRM across ancestries assumes a common allele
 # frequency and LD structure that does not actually hold.
+#
+# GRM_ALLANC_KEEP is how you stop that being a caveat and make it a measurement.
+# GCTA estimates allele frequencies from the samples actually included, so
+# passing a single-ancestry keep-list here builds a GRM whose frequencies come
+# from THAT group -- which is a different object from the pooled GRM restricted
+# to the same people afterwards, and the difference is exactly the assumption
+# under scrutiny.  Restricting after the fact keeps the pooled frequencies and
+# so keeps the problem.
+#
+# This matters more than it sounds.  Measured on the pooled GRM here: within
+# stratum the off-diagonal averages +0.0402, between strata -0.0348.  A 0.05
+# relatedness cutoff therefore lands inside the within-stratum bulk and prunes
+# the non-European strata to 1.7-22 % while keeping 75.6 % of the European one.
+keep_args=()
+if [[ -n "${GRM_ALLANC_KEEP:-}" ]]; then
+  [[ -f "$GRM_ALLANC_KEEP" ]] || { echo "FATAL: GRM_ALLANC_KEEP=$GRM_ALLANC_KEEP not found" >&2; exit 3; }
+  echo "keep  : $GRM_ALLANC_KEEP ($(wc -l < "$GRM_ALLANC_KEEP") subjects; allele frequencies come from THESE)"
+  keep_args+=(--keep "$GRM_ALLANC_KEEP")
+fi
+
 "$GCTA" \
   --bfile "$BFILE" \
+  "${keep_args[@]+"${keep_args[@]}"}" \
   --maf 0.01 \
   --make-grm \
   --thread-num "${SLURM_CPUS_PER_TASK:-16}" \

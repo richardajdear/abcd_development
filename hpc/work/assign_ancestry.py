@@ -64,7 +64,23 @@ def token(s: str) -> str | None:
 
 
 def read_eigenvec(path: Path, n_pcs: int):
-    """GCTA's headerless `FID IID PC1..PCk` -> (iids, tokens, PC matrix)."""
+    """GCTA's headerless `FID IID PC1..PCk` -> (iids, tokens, scaled PC matrix).
+
+    Columns are scaled by sqrt(eigenvalue) when the matching `.eigenval` is
+    present, and THAT MATTERS MORE THAN IT LOOKS.  GCTA writes unit-norm
+    eigenVECTORS, so every column comes out with roughly the same spread --
+    measured here, SD 0.0091, 0.0088, 0.0088, 0.0093 for PC1-4 -- even though
+    their eigenvalues are 727, 175, 49 and 15, i.e. 6.04 %, 1.45 %, 0.41 % and
+    0.13 % of variance.
+
+    Clustering the raw columns therefore weights a PC explaining 0.13 % exactly
+    as heavily as one explaining 6.04 %, and the noise PCs drive the split.
+    Observed: on the unscaled matrix, k=4 put 8,385 subjects in one cluster at
+    54.8 % anchor-EUR and named a separate 1,477-subject cluster "EURlike" at
+    72 % -- the EUR mass split in two and neither piece clean.  Scaling to PC
+    SCORES (eigenvector * sqrt(eigenvalue)) is the standard construction and is
+    what makes the geometry mean what k-means assumes it means.
+    """
     iids, toks, mat = [], [], []
     for line in path.read_text().splitlines():
         f = line.split()
@@ -75,7 +91,22 @@ def read_eigenvec(path: Path, n_pcs: int):
         mat.append([float(v) for v in f[2:2 + n_pcs]])
     if not mat:
         raise SystemExit(f"{path}: no rows with at least {n_pcs} PCs")
-    return iids, toks, np.asarray(mat, dtype=float)
+    X = np.asarray(mat, dtype=float)
+
+    eigenval = path.with_suffix(".eigenval")
+    if eigenval.exists():
+        ev = np.array([float(v) for v in eigenval.read_text().split()][:n_pcs])
+        if ev.size == n_pcs and (ev > 0).all():
+            X = X * np.sqrt(ev)
+            print(f"  scaled PC1..PC{n_pcs} by sqrt(eigenvalue) "
+                  f"({', '.join(f'{v:.1f}' for v in ev)})")
+        else:
+            print(f"  WARNING: {eigenval.name} unusable; clustering UNSCALED "
+                  "eigenvectors, which over-weights the low-variance PCs")
+    else:
+        print(f"  WARNING: no {eigenval.name}; clustering UNSCALED eigenvectors, "
+              "which over-weights the low-variance PCs")
+    return iids, toks, X
 
 
 def kmeans(X: np.ndarray, k: int, seed: int = SEED, iters: int = 300):
@@ -141,11 +172,17 @@ def main(argv: list[str]) -> int:
     # cannot support (see the module docstring).
     names = {}
     if anchor:
-        share = {}
+        # By anchor COUNT, not anchor SHARE.  Share picks whichever cluster is
+        # purest, which on a bad split is a small offshoot: the unscaled run
+        # named a 1,477-subject cluster at 72 % "EURlike" over an
+        # 8,385-subject one at 54.8 %, even though the latter held four times
+        # as many anchor subjects.  The EUR cluster is the one where the
+        # anchor's 5,656 members actually are.
+        count = {}
         for j in range(a.k):
             m = lab == j
-            share[j] = sum(1 for i in np.flatnonzero(m) if toks[i] in anchor) / max(m.sum(), 1)
-        eur_j = max(share, key=share.get)
+            count[j] = sum(1 for i in np.flatnonzero(m) if toks[i] in anchor)
+        eur_j = max(count, key=count.get)
         names[eur_j] = "EURlike"
         nxt = 1
         for j in sorted(set(range(a.k)) - {eur_j}, key=lambda j: -(lab == j).sum()):
