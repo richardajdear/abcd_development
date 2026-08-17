@@ -1,0 +1,28 @@
+release: '7.0'
+metric: t1t2_ratio
+parcellation: dsk
+hemisphere: both
+qc_policy: coded
+sample_rule: min_visits
+min_visits: 2
+visits:
+- v0
+- v2
+- v4
+- v6
+age_basis: linear
+spline_df: 3
+age_centre: null
+re_structure: slope_correlated
+global_covariate: none
+covariates:
+- sex
+family_effect: false
+site_effect: true
+note: 'T1w/T2w ratio (intracortical myelin proxy), 7.0, >=2 visits. Every other
+  setting is copied from ct_70_noglobal_mv2_genetic so the two metrics are directly
+  comparable: same visits, same QC policy, same random-effect structure, and
+  global_covariate: none so the region-wise age coefficient is the TOTAL rate of
+  change. Note the ABCD T1w/T2w ratio is not bias-field corrected, so site and
+  scanner sensitivity is expected to be worse than for thickness -- check the site
+  ICC before treating any slope here as a genetic phenotype.'

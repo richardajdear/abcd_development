@@ -1,12 +1,12 @@
 #!/bin/bash
 #SBATCH --job-name=abcd_grm_anc
-#SBATCH --account=VERTES-SL3-CPU
+#SBATCH --account=VERTES-SL3-CPU   # override at submit: sbatch -A <acct>
 #SBATCH --partition=icelake
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=16
 #SBATCH --time=12:00:00
 #SBATCH --array=1-22%12
-#SBATCH --output=/home/rajd2/rds/hpc-work/abcd_development/hpc/work/logs/%x_%A_%a.log
+#SBATCH --output=%x_%A_%a.log
 #
 # Step 1 of 2: per-chromosome GRMs over the ALL-ANCESTRY genotypes.
 #
@@ -28,17 +28,35 @@
 #
 # X is excluded deliberately: a GRM is conventionally autosomal, and the X
 # dosage convention differs between males and females.
+#
+# PATHS COME FROM hpc/config.sh.  The first version of this script hardcoded
+# /home/rajd2/... and rds-genetics_hpc-Nl99R8pHODQ, which are 4.0-era locations
+# on one account; every other script in this pipeline is path-modular and this
+# one now matches.  Override GENO_ALLANC_DIR / GENO_ALLANC_TPL in
+# config.local.sh when the release tree moves or is renamed.
 set -euo pipefail
 
-W=/home/rajd2/rds/hpc-work/abcd_development/hpc/work
-SRC=/home/rajd2/rds/rds-genetics_hpc-Nl99R8pHODQ/ABCD
-OUT=/rds/user/rajd2/hpc-work/ABCD/grm_allanc
-mkdir -p "$OUT"
+REPO_ROOT="${REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+# shellcheck source=/dev/null
+source "$REPO_ROOT/hpc/config.sh"
+
+ensure_dirs "$GRM_ALLANC_DIR" "$LOG_DIR"
 
 CHR=${SLURM_ARRAY_TASK_ID:?this script must run as an array job}
-BFILE="$SRC/ABCD_chr${CHR}_hg19"
+BFILE="$(geno_allanc_prefix "$CHR")"
+OUT="$GRM_ALLANC_DIR"
 
-[[ -f "$BFILE.bed" ]] || { echo "FATAL: $BFILE.bed not found" >&2; exit 2; }
+# Integrity check BEFORE GCTA touches the fileset.  On 4.0 all 22 tasks died in
+# seconds with "Unexpected PLINK 1 .bed file size" because every .bim had been
+# filtered to ~78 % without regenerating the .bed.  This costs about a second
+# and reports which of the two files is wrong, instead of leaving that to be
+# reconstructed from GCTA's error afterwards.
+bash "$REPO_ROOT/hpc/work/check_bfile_integrity.sh" "$BFILE" || {
+  echo "FATAL: chr$CHR failed the .bed/.bim/.fam integrity check (see above)." >&2
+  echo "       Do NOT work around this by filtering: if the .bim was filtered" >&2
+  echo "       without rebuilding the .bed, the variant identities are unknown." >&2
+  exit 2
+}
 
 echo "=== chr$CHR  $(date) ==="
 echo "input : $BFILE  ($(wc -l < "$BFILE.bim") SNPs, $(wc -l < "$BFILE.fam") subjects)"
@@ -48,7 +66,7 @@ echo "input : $BFILE  ($(wc -l < "$BFILE.bim") SNPs, $(wc -l < "$BFILE.fam") sub
 # pooled, which is the standard choice but not a neutral one -- see the caveat
 # in README_HPC.md: a single GRM across ancestries assumes a common allele
 # frequency and LD structure that does not actually hold.
-"$W/bin/gcta64" \
+"$GCTA" \
   --bfile "$BFILE" \
   --maf 0.01 \
   --make-grm \

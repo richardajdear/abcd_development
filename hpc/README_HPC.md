@@ -650,6 +650,10 @@ only the association scan is restricted.
 
 ## 10. Next commands
 
+> **If you are the agent picking this up now, the task is §17** — build the
+> cross-ancestry GRM on the newly acquired 7.0 genetics. Start there; the
+> commands below are for re-running the existing EUR pipeline.
+
 ```bash
 cd /home/rajd2/rds/hpc-work/abcd_development
 
@@ -674,6 +678,9 @@ that it exists and has the expected row count before believing a green state.
 ## 11. Open questions for the next person
 
 1. **The sample is EUR-only, and smaller than the power section assumes.**
+   *(Status: this is §17's task, and the 7.0 genetics needed to fix it has now
+   been acquired. The counts in §17.2 establish that the missing subjects were
+   never genotyped rather than dropped by QC.)*
    Only 5,678 of the 8,192 phenotyped subjects are genotyped, and the sole
    genotype fileset on this cluster — in both the `rds-abcd` and
    `rds-genetics_hpc` copies — is `europeanonly`. Two consequences:
@@ -1173,7 +1180,14 @@ h² scales as 1/N and gencov as 1/√(N₁N₂), so in rg = gencov / √(h²₁ 
 terms cancel exactly. **rg is invariant to N misspecification; only h² is
 exposed.** The §12 rg nulls were never at risk from this.
 
-## 16. Cross-ancestry GRM — BLOCKED: the source data is internally inconsistent
+## 16. Cross-ancestry GRM on the 4.0 data — BLOCKED (superseded by §17)
+
+> **Read §17 first.** The 7.0 genetics arrived after this section was written.
+> The blocker below is a property of the **4.0** per-chromosome filesets, not of
+> the approach or the scripts, and §17 is the live task. This section is kept
+> because it documents the failure signature and the arithmetic that diagnosed
+> it — both of which are how you check whether 7.0 has the same problem.
+
 
 Building the all-ancestry GRM deferred at §11.1, because N is the binding
 constraint on every result in §12–§14.
@@ -1254,3 +1268,199 @@ structure, which is precisely what does not hold across these groups. In-sample
 PCs help but do not repair it. If the all-ancestry h² differs materially from
 the EUR estimate, the defensible design is **ancestry-stratified REML
 meta-analysed across groups**, not one pooled GRM.
+
+---
+
+## 17. Cross-ancestry GRM on the 7.0 genetics — THE LIVE TASK
+
+The 7.0 genetics data has been acquired. **This supersedes §16**, which failed
+on a defect in the 4.0 per-chromosome filesets. This section is written for
+whoever picks the work up on the cluster; you should not need this repo's
+conversation history, only this file.
+
+### 17.1 What you are trying to do, and why it is the top priority
+
+Every result in §12–§15 is limited by N, not by method. The analysis sample is
+**4,126** subjects: those both phenotyped (8,192) and present in the EUR-only
+prebuilt GRM (5,678). Raising N is the single change that alters what the
+pipeline can detect.
+
+Projected effect, anchored on the observed `h2_se = 0.1135` at N = 4,119
+(GREML SE scales ~1/N; PRS z scales ~sqrt(N)) — from `power_projection.csv`:
+
+| scenario | N | h² z | PRS power |
+|---|---|---|---|
+| current (EUR GRM, 4.0 genotypes) | 4,119 | 1.45 | 76 % |
+| cross-ancestry GRM only | 5,678 | 2.0 | 88 % |
+| 7.0 genotypes only (EUR) | 5,719 | 2.0 | 88 % |
+| **both** | **~7,278** | **2.6** | **94 %** |
+
+**Set expectations honestly before you start.** An interpretable LDSC `rg`
+needs h² z ≈ 4, which at h² = 0.165 requires N ≈ 11,300 — above ABCD's
+**phenotyped** ceiling of 8,192. So `rg` on the slope stays out of reach in
+ABCD alone even after this work succeeds. What the extra N does buy is a
+well-powered PRS test and a usable h² point estimate. Do not sell this as
+unlocking `rg`.
+
+### 17.2 The counts you should expect to see (answers a real question)
+
+We checked the published ABCD documentation to establish whether the subjects
+missing from the 4.0 genetics were **truly never genotyped** or **dropped by
+QC**. The answer is: essentially none of them were dropped by QC, and the 7.0
+release should recover nearly the whole cohort.
+
+| | subjects | source |
+|---|---|---|
+| ABCD enrolled cohort | 11,868 | baseline recruitment |
+| **7.0 curated Smokescreen PLINK** | **11,670** | `docs.abcdstudy.org` genetics page (~515k variants) |
+| 7.0 TOPMed r3 imputed | 11,670 | same page |
+| 7.0 WGS (separate product) | 8,710 | same page |
+| never genotyped | ~200 | 6.0 release notes: "still not been genotyped from the full enrolled sample" |
+| removed (consent / relatedness inconsistency) | 4 | 6.0 `removed_individuals.txt` |
+
+**The arithmetic closes: 11,868 − 11,670 = 198, against ~200 never genotyped
+plus 4 removed.** So the curated 7.0 genotype file is essentially the entire
+enrolled cohort, and the shortfalls we have been working with are **not**
+genotyping-QC attrition:
+
+| what we had | subjects | shortfall vs 11,670 |
+|---|---|---|
+| 4.0 all-ancestry per-chromosome `.fam` | 10,072 | 1,598 |
+| `abcd_eur` (EUR-only, what every result uses) | 5,678 | 5,992 |
+
+The 5,992 EUR shortfall is an **ancestry restriction**, not QC. The 1,598
+all-ancestry shortfall is a **release-vintage** difference. Both are recoverable
+by moving to 7.0; neither represents subjects who failed genotyping.
+
+**Consequence for you:** if the 7.0 fileset you find has ~11,670 subjects, it is
+the full curated set and nothing is missing. If it has appreciably fewer,
+someone has pre-filtered it — find out on what basis before building a GRM from
+it, because an undocumented subset is how §16 happened.
+
+Caveat on provenance: these counts are from ABCD's public documentation for the
+7.0 release, not from the files on CSD3. Confirm against the actual `.fam` you
+are handed; the point of the table is to tell you what "correct" looks like.
+
+### 17.3 Do this first — it takes one second and would have saved 22 jobs
+
+```bash
+bash hpc/work/check_bfile_integrity.sh "$GENO_ALLANC_DIR"/ABCD_chr{1..22}_hg19
+```
+
+Every one of the 22 array tasks in §16 died in seconds on
+`Unexpected PLINK 1 .bed file size`. That is diagnosable from file sizes alone
+without submitting anything, because a PLINK 1 `.bed` is exactly
+
+```
+3 + ceil(n/4) * m bytes        n = .fam rows, m = .bim rows
+```
+
+`check_bfile_integrity.sh` inverts that and reports which file is wrong:
+
+- **`.bed` holds more variants than the `.bim` lists** → the `.bim` was filtered
+  without regenerating the `.bed`. This was the 4.0 defect (`.bim` at ~78 % of
+  the `.bed`). **Not recoverable by filtering further**: nothing records which
+  `.bed` columns the surviving `.bim` rows correspond to. You need the original
+  `.bim` or a re-derived fileset.
+- **`(size-3)` does not divide by `ceil(n/4)`** → the `.fam` does not match the
+  `.bed`; usually the wrong `.fam` was copied and the right one still exists.
+- **magic bytes not `6c1b01`** → not variant-major PLINK 1; `6c1b00` is
+  sample-major, fix with `plink --make-bed`.
+
+It is wired into `grm_allanc.sbatch` as a gate, so a bad fileset now aborts that
+chromosome in about a second with a diagnosis instead of a GCTA error. Tested
+against a valid fixture and against a deliberately reconstructed copy of the 4.0
+defect (both directions verified).
+
+**If 7.0 shows the same `.bim`/`.bed` mismatch, stop and report it** — do not
+work around it by filtering. Misaligned variants produce plausible-looking,
+meaningless h². GCTA refused loudly here; be glad it did.
+
+### 17.4 Running it
+
+Both scripts are now **path-modular** (they were not; see 17.6). Point them at
+the 7.0 tree in `hpc/config.local.sh`:
+
+```bash
+# hpc/config.local.sh  -- gitignored, never commit this file
+GENO_ALLANC_DIR="/path/to/7.0/per-chromosome/filesets"
+GENO_ALLANC_TPL='ABCD_chr{CHR}_hg19'     # {CHR} is substituted; adjust to the
+                                          # 7.0 naming, which may differ from 4.0
+GRM_ALLANC_DIR="$OUT/grm_allanc"          # optional; this is the default
+```
+
+Then:
+
+```bash
+bash hpc/work/check_bfile_integrity.sh "$GENO_ALLANC_DIR"/<7.0 prefixes>   # gate
+sbatch hpc/work/grm_allanc.sbatch                                          # array 1-22
+sbatch --dependency=afterok:<jobid> hpc/work/grm_allanc_merge.sbatch       # merge + PCA
+```
+
+`grm_allanc_merge.sbatch` produces everything downstream consumes, so switching
+over is a config edit rather than another round of jobs:
+
+| output | config variable | consumed by |
+|---|---|---|
+| `abcd_all` | `GRM_ALLANC` | `02_reml` |
+| `abcd_all_sp` | `GRM_ALLANC_SPARSE` | `03_gwas` (fastGWA) |
+| `abcd_all.unrel` | `GRM_ALLANC_UNREL` | `02_reml` unrelated subset |
+| `abcd_all_pca.eigenvec` | `GRM_ALLANC_PCA` | ancestry covariates (20 PCs) |
+
+To switch the pipeline over, set `GRM`, `GRM_SPARSE` and `GRM_UNREL` to the
+`GRM_ALLANC*` values in `config.local.sh`. They are deliberately separate
+variables so the EUR results stay reproducible instead of being overwritten.
+
+The merge job refuses to run on an incomplete set of 22 rather than quietly
+building from fewer — that quiet-wrong failure has already happened twice here
+(§6d, §12b).
+
+### 17.5 Two things that are NOT optional on the all-ancestry set
+
+1. **Use the in-sample PCs**, from `abcd_all_pca.eigenvec`. §15a found that
+   swapping the release's multi-ancestry PCs for in-sample EUR PCs moved h² by
+   only 0.009 — but that reassurance **does not carry over here**. Within EUR
+   there was no structure left for a PC to correct; across ancestries the
+   structure is real and large. Replace the `PC1..PC10` columns in
+   `covar_quant.txt` with the first 10–20 columns of `abcd_all_pca.eigenvec`.
+
+2. **A single pooled GRM across ancestries is a real methodological compromise**,
+   not a formality. It assumes common allele frequencies and LD structure, which
+   is exactly what does not hold across these groups; in-sample PCs mitigate but
+   do not repair it. Compute the pooled estimate, but **also** run
+   ancestry-stratified REML and compare. If the pooled h² differs materially
+   from the EUR estimate, the defensible design is stratified REML
+   meta-analysed across groups, and the pooled number should not be the headline.
+
+### 17.6 What changed in this repo for you (and one bash trap)
+
+- **`hpc/work/check_bfile_integrity.sh`** — new; §17.3.
+- **`hpc/work/grm_allanc.sbatch`** — was hardcoded to `/home/rajd2/...` and
+  `rds-genetics_hpc-Nl99R8pHODQ`, which are one account's 4.0-era paths. Now
+  sources `hpc/config.sh` like every other script, uses `$GCTA`, and gates on
+  the integrity check. `#SBATCH --output` is relative (matching `hpc/*.sbatch`)
+  and the account is overridable with `sbatch -A`.
+- **`hpc/work/grm_allanc_merge.sbatch`** — same treatment.
+- **`hpc/config.sh`** — new variables `GENO_ALLANC_DIR`, `GENO_ALLANC_TPL`,
+  `geno_allanc_prefix()`, `GRM_ALLANC`, `GRM_ALLANC_UNREL`,
+  `GRM_ALLANC_SPARSE`, `GRM_ALLANC_PCA`.
+
+**Bash trap, recorded because it cost a debugging cycle and is invisible:**
+`${GENO_ALLANC_TPL:-ABCD_chr{CHR}_hg19}` does **not** work. Bash ends the
+parameter expansion at the first unquoted `}` — the one closing `{CHR}` — so
+`_hg19}` is appended as literal text and any override silently gains a `_hg19}`
+suffix. The config uses an `if [[ -z ... ]]` assignment instead. If you add
+another `{CHR}`-style template variable, keep the placeholder out of
+`${...:-...}` defaults.
+
+### 17.7 Definition of done
+
+1. `check_bfile_integrity.sh` passes on all 22 chromosomes of the 7.0 set.
+2. `abcd_all.grm.id` has appreciably more than 5,678 subjects (expect toward
+   ~10–11k depending on what the 7.0 tree contains).
+3. The phenotyped ∩ genotyped join exceeds 4,126 — this is the number that
+   matters, and `hpc/work/align_ids.py` already does the token join.
+4. `02_reml` re-run on `global_slope` and `baseline_thickness` with the new GRM
+   and the in-sample PCs, reported **alongside** the EUR estimates rather than
+   replacing them.
+5. Ancestry-stratified REML run and compared, per §17.5.2.
