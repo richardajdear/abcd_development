@@ -3,6 +3,13 @@
 **Last updated: 2026-08-17.** Written for an agent starting fresh on CSD3 with
 no access to the conversations that produced it.
 
+> **§5 has been executed — read §8 before acting on §5.** The cross-ancestry GRM
+> is built and N nearly doubled, but §5 asked for one thing that turns out to be
+> unsafe as specified: the `--grm-cutoff 0.05` unrelated subset of a *pooled*
+> multi-ancestry GRM is **94 % European** and would have been reported as
+> cross-ancestry. §8.6 has the diagnosis and the replacement. §5 is kept as
+> written so the two can be compared.
+
 > **You should not need to read `legacy/`.** Those two files are the full
 > working record through 2026-08-17, kept because they contain the diagnostic
 > detail behind everything asserted here. Read them **only** if the repo state
@@ -320,3 +327,272 @@ figure caption overstating its own panel. If you did not check it, say so.
 section. If the cross-ancestry h² materially disagrees with the EUR estimate, or
 the PRS lead strengthens or evaporates, that is the headline — not a detail in a
 results table.
+
+---
+
+## 8. 2026-08-17 — the cross-ancestry GRM on the 7.0 genetics
+
+Written by the agent that executed §5, for one that was not present. Every N is
+stated, because this pipeline's history is one long argument about N and a
+result without its N cannot be compared to anything.
+
+### 8.1 Headline
+
+1. **The 4.0 defect does not recur.** The 7.0 curated fileset passes
+   `check_bfile_integrity.sh` exactly, on the source and on all 22 splits.
+2. **N nearly doubles: the phenotyped ∩ genotyped join is 8,082**, against 4,126
+   on `abcd_eur`. That is *above* the 7,278 §3 projected, because §3 treated the
+   7.0 gain and the cross-ancestry gain as more overlapping than they are.
+3. **`--grm-cutoff 0.05` is not safe on a pooled cross-ancestry GRM** (§8.6).
+   It returns a 94 %-European "unrelated" subset while reporting nothing wrong.
+   This is the single most important thing in this section.
+4. **The 7.0 array data has a genotyping-batch artefact** §5 did not anticipate
+   (§8.5). It does not invalidate the GRM; it is why two GRMs were built.
+5. Heritability results: §8.9.
+
+### 8.2 What the 7.0 tree holds — verified against the files, not the docs
+
+| product | contents | build | used |
+|---|---|---|---|
+| `smokescreen/merged_chroms` | 11,670 × 515,228, **one merged fileset** | hg19 | **yes** |
+| `imputed/chr*_dose.vcf.gz` | TOPMed r3 dosages, ~890 GB | **GRCh38** | no |
+| `genesis/pcrelate_*`, `unrelateds_individuals.txt` | PC-Relate kinship, PC-AiR unrelated set | — | the unrelated set, yes |
+
+11,670 is exactly §4's documented curated-genotype count, so **nothing has been
+pre-filtered** and the §4 warning did not trigger. Checked directly: 0 duplicate
+variant IDs, 0 duplicate `chr:pos`, 0 duplicate IIDs, FID == IID on every row,
+502,528 autosomal variants (the remainder are chr23/25/26, dropped — a GRM is
+conventionally autosomal).
+
+The imputed set's build was read off its own header — `##mis_panel=topmed-r3`,
+`##contig=<ID=chr22>`, first chr22 record at position 10,557,776, where hg19
+chr22 begins near 16.05 Mb. **It is GRCh38 while everything else in this
+pipeline is hg19**, so it is not a drop-in for any existing step: it needs
+liftover on top of the conversion. Worth knowing before anyone reaches for it.
+
+### 8.3 Why the array data and not the imputed data
+
+Converting ~890 GB of VCF to PLINK would cost days of wall-clock and hundreds of
+GB before a single GRM existed. GREML does not need imputed density — SNP-h² is
+estimated from the LD-tagging of ~500k common array SNPs, which is the standard
+input for it.
+
+**The cost of that choice, stated plainly:** the multi-ancestry GRM rests on a
+different variant set from the EUR GRM (13.7M imputed at MAF 0.001, against
+456,015 array SNPs surviving MAF 0.01 here). A pooled-vs-EUR h² difference
+therefore confounds ancestry with SNP set. That is what the EUR-only GRM in §8.8
+is for: it re-estimates EUR h² on **this** variant set, so the two confounds can
+be separated instead of being argued about.
+
+`genesis/pcrelate_*` was not used as the GRM: PC-Relate is a PC-adjusted kinship
+estimator meant for association-model relatedness control, not a GCTA additive
+GRM, and substituting it would make every h² here incomparable with §2. Its
+companion PC-AiR unrelated set *is* used, for the reason in §8.6.
+
+### 8.4 Compute is not the constraint; the queue is
+
+A per-chromosome GRM over 11,670 subjects takes **17 seconds**. The whole
+22-chromosome array is under 10 minutes of CPU. Every delay in this run was SLURM
+queue time on SL3, and `mybalance` shows SL2-CPU exhausted (0 hours available)
+against ~154,000 on SL3 — so SL3 is not a preference, it is the only option.
+
+**Size jobs for backfill.** Dropping the GRM array from 16 CPUs × 3 h to 8 CPUs ×
+1 h 45 moved its estimated start from 3.8 hours away to minutes. Ask for what the
+job needs, which on this pipeline is far less than the headers suggest.
+
+### 8.5 A defect §5 did not anticipate: missingness *is* genotyping batch
+
+`work/qc_missing_allanc.sbatch`, `work/qc_keeplist_allanc.sbatch`.
+
+Genome-wide autosomal call rate averages 99.08 %, which looks unremarkable. The
+distribution is not:
+
+| BATCH | n | mean F_MISS | frac > 5 % |
+|---|---|---|---|
+| BATCH_5_Saliva | 203 | 0.099 | 100 % |
+| BATCH_3_WB | 83 | 0.099 | 100 % |
+| BATCH_2_WB | 192 | 0.082 | 100 % |
+| BATCH_6 | 33 | 0.074 | 52 % |
+| *other six batches* | 11,159 | 0.004–0.017 | ~0 % |
+
+**87.6 % of the variance in per-sample missingness is explained by the ten
+Smokescreen batches** (`smokescreen/batch.info`), against **23.5 %** by the ten
+release ancestry PCs jointly. So the ancestry correlation that exists
+(PC5 r = −0.36) is mostly batch–ancestry confounding — but it does mean the
+artefact runs **along the ancestry axes**, which is where a pooled GRM can least
+afford it.
+
+**Correcting the obvious-but-wrong mechanism, because it is what a reader will
+assume.** GCTA does *not* mean-impute missing genotypes. Verified against
+`chr1.grm.N.bin`, whose per-pair SNP count **varies** (29,324–37,800) rather than
+being constant: GCTA estimates each pair from the SNPs non-missing in both
+members. So the damage is not a shared imputation bias but ~6 % fewer SNPs behind
+every relatedness estimate touching a bad-batch subject (35,256 against 37,683 on
+chr1) — batch-structured noise in the GRM, which attenuates h². Milder than
+imputation would have been; not nothing.
+
+Note what does **not** fix this: genotyping batch as a *covariate*. The
+distortion is in the GRM, and a covariate on the outcome cannot repair a
+relatedness matrix. Filtering can, so two tracks were built:
+
+| track | filter | subjects | phenotyped ∩ |
+|---|---|---|---|
+| primary | `--maf 0.01` only | 11,670 | 8,082 |
+| QC sensitivity | `--mind 0.05`, `--geno 0.02`, `--maf 0.01` | 11,167 | 7,756 |
+
+`--mind` would drop 2,550 (at 0.01), 956 (0.02), 503 (0.05) or 31 (0.10)
+subjects, so 0.05 is a choice and its cost is visible rather than implied.
+`--mind` is computed **once, genome-wide**: applied per chromosome inside the
+split it would drop a different sample set on each, leaving 22 filesets with 22
+different `.fam` files for `--mgrm` to combine anyway.
+
+### 8.6 **`--grm-cutoff` does not mean "unrelated" across ancestries**
+
+**This is the finding. Read it before reusing any part of §5.**
+
+§5.3.2 warned that a pooled GRM assumes common allele frequencies and LD. The
+concrete consequence is worse than a bias in h²: it breaks the *relatedness
+pruning step that every REML in this pipeline depends on*, and does so silently.
+
+On the pooled GRM the off-diagonal averages **+0.0402 within stratum** and
+**−0.0348 between**. A 0.05 threshold therefore sits inside the within-stratum
+bulk rather than out in the tail of genuine relatives. Retention through
+`--grm-cutoff 0.05`:
+
+| stratum | in GRM | kept | retained |
+|---|---|---|---|
+| EURlike | 7,448 | 5,633 | **75.6 %** |
+| cluster1 | 2,309 | 61 | **2.6 %** |
+| cluster2 | 1,390 | 308 | **22.2 %** |
+| cluster3 | 523 | 9 | **1.7 %** |
+| total | 11,670 | 6,011 | 51.5 % |
+
+**The resulting "unrelated" subset is 94 % EUR-like.** A pooled REML on
+`abcd_all.unrel` is an essentially European analysis with a larger N, a plausible
+h², and no error anywhere — reported as cross-ancestry. It would have passed
+review, because `--grm-cutoff` is correct within one ancestry and nobody thinks
+to question it.
+
+Corroborating the mechanism, not just the symptom: genome-wide over 456,015 SNPs
+the sampling noise in an off-diagonal is ~0.0015, yet the observed off-diagonal
+SD is **0.0643, 43× that**. And while 1,659,570 pairs exceed 0.2, only 21,895
+exceed 0.4. The 0.2–0.4 mass is not relatives; it is same-ancestry pairs scored
+against pooled allele frequencies.
+
+**The replacement.** ABCD 7.0 ships a GENESIS **PC-AiR** unrelated set
+(`genesis/unrelateds_individuals.txt`, 8,181 subjects), built with
+ancestry-adjusted kinship, which is exactly the estimator this situation calls
+for. It prunes evenly:
+
+| stratum | `--grm-cutoff` retained | PC-AiR retained |
+|---|---|---|
+| EURlike | 75.6 % | 73.9 % |
+| cluster1 | 2.6 % | 65.2 % |
+| cluster2 | 22.2 % | 68.6 % |
+| cluster3 | 1.7 % | 39.5 % |
+| **non-EUR share of the unrelated set** | **5.7 %** | **32.1 %** |
+
+PC-AiR retains **5,649 phenotyped unrelated subjects** against 3,329 in the EUR
+analysis. Both definitions are run and both are reported: `--grm-cutoff` because
+it is what the published EUR h² used and comparability matters, PC-AiR because it
+is the one that is correct here. **A gap between them is the finding, not a
+nuisance to resolve.**
+
+Tooling: `work/grm_diagnostics.py` reports all of the above for any GRM;
+`work/grm_pcair_subset.sbatch` cuts the PC-AiR unrelated GRM.
+
+### 8.7 Ancestry strata — derived, and here is exactly how
+
+§5.3.2 requires a stratified REML, which needs a stratum label. **ABCD 7.0 ships
+none.** Checked, not assumed: the only genetics columns under
+`derivatives/tabulated` are `ab_g_stc__gen_pc__01..32` and `gn_y_genrel_*`
+(pihat/zygosity) — no ancestry-proportion or ancestry-group variable anywhere.
+Nor is a multi-ancestry 1000 Genomes panel on this account (`hpc-work` holds
+`g1000_eur` and `g1000_eas` only), so "project onto 1000G and take the nearest
+reference centroid" was not available.
+
+So labels are derived, two ways, so neither is trusted alone
+(`work/assign_ancestry.py`):
+
+- **`EUR_anchor`** — membership of the `abcd_eur` fileset behind every published
+  result here (5,656 of its 5,678 are in the 7.0 GRM). The one label not inferred
+  by us.
+- **k-means on the in-sample PC scores**, reported with each cluster's overlap
+  against that anchor.
+
+Two independent checks that the split is real rather than merely self-consistent:
+all **5,656** anchor-EUR subjects land in one cluster at every k in 3–5 and every
+non-EUR cluster is **0.0 %** anchor; and an independent k-means on the *release's*
+own 32 PCs reproduces the sizes to about 1 % (7,448/2,309/1,390/523 against
+7,515/2,286/1,353/509).
+
+**A bug worth recording because it produced a plausible answer.** GCTA writes
+unit-norm eigen*vectors*, so all columns have similar SD (0.0091, 0.0088, 0.0088,
+0.0093 for PC1–4) even though their eigenvalues are 727/175/49/15 (6.04 %,
+1.45 %, 0.41 %, 0.13 % of variance). Clustering the raw columns weighted a
+0.13 %-of-variance PC as heavily as a 6.04 % one, and the noise PCs drove the
+split: k=4 put 8,385 subjects in one cluster at 54.8 % anchor-EUR and named a
+separate 1,477-subject cluster "EURlike" at 72 %. **Cluster PC scores
+(eigenvector × √eigenvalue), not eigenvectors.**
+
+**This is not a continental-ancestry classifier and must not be reported as
+one.** ABCD contains a large admixed group and k-means gives no partial
+membership: an admixed subject lands at whichever centroid is nearest. These
+strata are regions of PC space. That supports "is h² stable across strata?" and
+does **not** support "h² in African-ancestry participants is X".
+
+### 8.8 In-sample PCs — §5.3.1 confirmed, and it matters here
+
+`insample_pcs.py`'s docstring records that inside EUR the swap moved h² by 0.009,
+because there was no structure left for a PC to correct. Across ancestries there
+is: **in-sample PC1 explains 6.04 % of variance here against 0.13 % within EUR**,
+PC2 1.45 %, PC3 0.41 %. §5.3.1's "real and large" is now measured, not asserted.
+All 8,082 subjects kept their PCs, and 11 who had no release PCs at all rejoined
+the analysis sample.
+
+### 8.9 Results
+
+See `results/reml_allanc_cutoff/`, `results/reml_allanc_pcair/`,
+`results/reml_strat/` and `results/reml_allanc_qc/`. **Reported alongside the §2
+EUR estimates, not replacing them.**
+
+⟨RESULTS TABLES — filled in below⟩
+
+### 8.10 Verified vs assumed
+
+**Verified against a file:** every count in §8.2; the batch/missingness tables in
+§8.5; GCTA's pairwise-complete handling (`chr1.grm.N.bin`); every retention and
+off-diagonal figure in §8.6; the cluster concordances in §8.7; the PC variance in
+§8.8; that all 22 per-chromosome `.grm.id` files are byte-identical; that the
+split conserved exactly 502,528 autosomal variants and 11,670 subjects per
+chromosome.
+
+**Assumed / inferred, and not checked:** that the four high-missingness batches
+are an assay or array-version difference rather than sample quality — the
+direction of the effect on the GRM is the same either way, so it was not chased;
+that ABCD's "curated" designation implies upstream QC beyond call rate;
+that the k-means clusters correspond to conventional continental groupings —
+deliberately *not* claimed (§8.7).
+
+### 8.11 Not done, and why
+
+**`06_prs` was not re-run, and should not be re-run on these genotypes.** The
+scores would be computed over ~456k array SNPs instead of the 8.78M imputed ones
+the published PRS used. The SCZ index SNPs are clumped in `g1000_eur` at imputed
+density, so most would simply be absent from the array, and the score would be
+built from a small and non-random subset. A weakened or vanished SCZ →
+`global_slope` signal would then be uninterpretable: it would be consistent with
+"the lead was noise" and equally with "the score lost its SNPs", and those are
+not distinguishable after the fact. **That is a worse outcome than not running
+it**, because the §2 lead is the result most likely to be over-read.
+
+Powering up the PRS properly needs the imputed 7.0 genotypes, which are GRCh38
+(§8.2) against this pipeline's hg19 — so it needs a liftover and a ~890 GB
+conversion, or a targeted extraction of the clumped index SNPs by position after
+liftover. That is a project, not a step, and it is the obvious next one.
+
+**`03_gwas` / `05_ldsc` were not re-run** either: the sparse GRM for fastGWA
+exists (`abcd_all_sp`) but a GWAS on 456k array SNPs is not comparable with the
+published 8.78M-SNP scan, and §3 already establishes that rg stays out of reach
+in ABCD regardless of this N.
+
