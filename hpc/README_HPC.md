@@ -687,6 +687,45 @@ Powering up the PRS properly needs the imputed 7.0 genotypes, which are GRCh38
 conversion, or a targeted extraction of the clumped index SNPs by position after
 liftover. That is a project, not a step, and it is the obvious next one.
 
+### 8.12 Phase 0 of the imputed project — sizing it (job 33838952)
+
+Before committing to the §8.11 project, `work/probe_imputed.sbatch` counted what
+actually survives filtering on chr22. The raw variant count is not the relevant
+number; the surviving one is.
+
+| chr22 | variants | of total |
+|---|---|---|
+| total imputed | 5,789,636 | — |
+| R² ≥ 0.8 | 1,019,601 | 17.6 % |
+| **MAF ≥ 0.01** | **144,524** | **2.5 %** |
+| R² ≥ 0.8 **and** MAF ≥ 0.01 | 135,050 | 2.3 % |
+
+Scaling by chr22's share of the autosome (1.642 %, from the array variant
+counts) projects **~8.2M genome-wide** — against the 8.78M the published EUR
+GWAS used, which is a useful independent check that the filter is sane. As
+PLINK that is **~24 GB**, ~31 GB including GRMs, against 184 GB free. **The
+project fits; it does not need the ~890 GB the raw VCFs suggest**, provided the
+filters are applied in the same pass as the conversion so the unfiltered form
+never lands on disk.
+
+**The finding that redirects the risk.** MAF, not R², does nearly all the
+filtering: 97.5 % of TOPMed variants are too rare to use here, and of those that
+clear MAF 0.01, **93.4 % already clear R² 0.8**. So ancestry-differential
+*imputation quality* — the thing §8.11 was most worried about — is barely
+binding among common variants.
+
+What is binding is the MAF filter, and the `MAF` in the INFO field is the
+**pooled whole-cohort frequency**. A variant at 4 % in one ancestry group and
+absent elsewhere is ~0.8 % pooled and is discarded, despite being common in the
+children it is informative for. **That is the §8.6 problem for the third time:
+a single pooled number standing in for a quantity that differs by ancestry.**
+`work/impqual_by_ancestry.sbatch` measures per-group MAF and per-group dosage
+ambiguity so the threshold is chosen on evidence rather than convention.
+
+Cost note: the chr22 census took 57 minutes single-threaded (12.6 GB of gzip);
+chr1 at 69 GB scales to ~5 h. Phase 2 should use
+`plink2 --extract-if-info` rather than an awk pass.
+
 **`03_gwas` / `05_ldsc` were not re-run** either: the sparse GRM for fastGWA
 exists (`abcd_all_sp`) but a GWAS on 456k array SNPs is not comparable with the
 published 8.78M-SNP scan, and §3 already establishes that rg stays out of reach
