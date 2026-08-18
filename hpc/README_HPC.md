@@ -571,121 +571,88 @@ the analysis sample.
 
 ### 8.9 Results
 
-All from `02_reml.sbatch` (jobs 33823211–14, 33823242) and
-`work/strat_reml.sbatch` (33793546), on the phenotypes in `pheno_allanc`.
-**These SUPPLEMENT the §2 EUR estimates; they do not replace them**, for the
-reason in the first finding below. Summaries are committed at
-`results/reml_*/reml_summary.tsv`.
+Jobs 33823211–14 (`02_reml`), 33823242 (20-PC sensitivity), 33793546
+(`strat_reml`). Summaries committed at `results/reml_*/reml_summary.tsv`.
+**These supplement §2; they are not comparable with it** — see (a).
 
-#### The two headline numbers
-
-**(a) Switching from imputed to array SNPs halves h². This is not an ancestry
-effect and it is not a bug.**
-
-The cleanest possible comparison — same ancestry definition, essentially the
-same N, allele frequencies estimated within EUR in both cases, differing *only*
-in the variant set:
+**(a) Array SNPs halve h². Isolated, not inferred.** Same ancestry definition,
+N differing by 3, allele frequencies estimated within EUR in both — only the
+variant set differs:
 
 | | n | SNPs | `baseline_thickness` | `global_slope` |
 |---|---|---|---|---|
 | §2 published EUR | 3,329 | 13.7M imputed | 0.575 ± 0.147 | 0.228 ± 0.141 |
-| **EUR-only, this GRM** | 3,332 | 456k array | **0.246 ± 0.091** | **0.074 ± 0.087** |
+| EUR-only, this GRM | 3,332 | 456k array | 0.246 ± 0.091 | 0.074 ± 0.087 |
 
-N differs by 3 subjects. The h² point estimate falls by 57 %. Common array SNPs
-tag only part of the causal variation that imputed SNPs reach, so a lower
-GREML h² on array data is the expected result, not a defect — but it means
-**no number in this section is comparable with §2's**, and quoting them side by
-side without this row would be misleading.
+Expected (array SNPs tag less causal variation), but it governs everything below.
 
-**(b) The N gain bought precision, and for the primary phenotype the precision
-gain was cancelled by (a).**
+**(b) §3's forecast fails: precision improved, z did not.**
 
-| phenotype | arm | n | h² | SE | **z** |
+| phenotype | arm | n | h² | SE | z |
 |---|---|---|---|---|---|
-| `baseline_thickness` | §2 EUR, imputed | 3,329 | 0.575 | 0.147 | 3.91 |
-| | EUR-only, array | 3,332 | 0.246 | 0.091 | 2.70 |
-| | **pooled, PC-AiR** | **5,649** | **0.269** | **0.056** | **4.77** |
-| | pooled, PC-AiR + QC | 5,422 | 0.257 | 0.058 | 4.43 |
-| | pooled, `--grm-cutoff` (94 % EUR) | 4,299 | 0.346 | 0.077 | 4.47 |
-| `global_slope` | §2 EUR, imputed | 3,329 | 0.228 | 0.141 | 1.62 |
-| | EUR-only, array | 3,332 | 0.074 | 0.087 | 0.85 |
-| | **pooled, PC-AiR** | **5,649** | **0.076** | **0.054** | **1.42** |
-| | pooled, PC-AiR + QC | 5,422 | 0.081 | 0.056 | 1.46 |
-| | pooled, `--grm-cutoff` (94 % EUR) | 4,299 | 0.042 | 0.078 | 0.53 |
+| `baseline_thickness` | §2 EUR imputed | 3,329 | 0.575 | 0.147 | 3.91 |
+| | **pooled PC-AiR** | **5,649** | **0.269** | **0.056** | **4.77** |
+| | pooled PC-AiR + QC | 5,422 | 0.257 | 0.058 | 4.43 |
+| | pooled `--grm-cutoff` (94 % EUR) | 4,299 | 0.346 | 0.077 | 4.47 |
+| `global_slope` | §2 EUR imputed | 3,329 | 0.228 | 0.141 | 1.62 |
+| | **pooled PC-AiR** | **5,649** | **0.076** | **0.054** | **1.42** |
+| | pooled PC-AiR + QC | 5,422 | 0.081 | 0.056 | 1.46 |
+| | pooled `--grm-cutoff` (94 % EUR) | 4,299 | 0.042 | 0.078 | 0.53 |
 
-SE on `global_slope` fell from 0.141 to 0.054 — a 2.6× precision gain, slightly
-better than §3 forecast. **But h² fell by the same factor, so z did not improve
-(1.62 → 1.42).** §3's table implicitly assumed h² would hold while N grew; on
-array data it does not. **The primary phenotype is still not significantly
-heritable, and more N alone will not fix that — the variant set has to change
-back.** State this plainly to anyone expecting §3's "z = 2.6".
+SE on `global_slope` fell 0.141 → 0.054 (2.6×, as §3 forecast) but h² fell by the
+same factor, so **z went 1.62 → 1.42**. §3's arithmetic held h² fixed while N
+grew; on array data it does not. **More N will not make `global_slope`
+detectable — the variant set has to go back to imputed.** Update expectations
+accordingly; do not quote §3's "z = 2.6".
 
-#### A new result: the slope PCs become heritable
+**(c) New: `slope_PC2` is heritable — a lead, not a result.**
 
-| phenotype | §2 EUR (imputed, n=3,329) | pooled PC-AiR (n=5,649) | + QC (n=5,422) | **20 PCs** (n=5,649) |
+| | §2 EUR (n=3,329) | pooled PC-AiR (n=5,649) | + QC (n=5,422) | 20 PCs (n=5,649) |
 |---|---|---|---|---|
-| `slope_PC1` | 0.000 ± ~0.14 | 0.137 ± 0.054 (p=4.1e-03) | 0.144 ± 0.056 | 0.128 ± 0.055 |
-| `slope_PC2` | 0.113 ± 0.141 | **0.179 ± 0.055 (p=4.4e-04)** | 0.184 ± 0.057 | 0.186 ± 0.055 |
-| `slope_PC3` | 0.000 ± ~0.14 | 0.111 ± 0.054 (p=0.018) | 0.138 ± 0.056 | 0.101 ± 0.055 |
+| `slope_PC1` | 0.000 ± ~0.14 | 0.137 ± 0.054 | 0.144 ± 0.056 | 0.128 ± 0.055 |
+| `slope_PC2` | 0.113 ± 0.141 | **0.179 ± 0.055** (p=4.4e-04) | 0.184 ± 0.057 | 0.186 ± 0.055 |
+| `slope_PC3` | 0.000 ± ~0.14 | 0.111 ± 0.054 | 0.138 ± 0.056 | 0.101 ± 0.055 |
 
-`slope_PC2` at p = 4.4e-04 survives Bonferroni across the five phenotypes
-(0.01). This is the first phenotype in this project other than the positive
-control to reach that.
+`slope_PC2` survives Bonferroni across the five phenotypes — the first phenotype
+here besides the positive control to do so. It is significant pooled and **not**
+in the EUR-only arm (0.090 ± 0.089), which is also what residual population
+structure looks like, so it was tested rather than announced:
 
-**Treat it as a lead, and here is exactly why.** It is significant in the pooled
-multi-ancestry arm and *not* in the EUR-only arm (0.090 ± 0.089, z = 1.01) —
-which is the signature a residual-population-structure artefact would also
-produce. Two things argue against the artefact and one caveat remains:
+- **20 ancestry PCs instead of 10 → 0.186.** Structure-driven inflation shrinks
+  under more PCs; this does not (`results/reml_allanc_pc20/`, job 33823242).
+- **QC track reproduces it** (0.184) on a different 5,422-subject sample, so it
+  is not the §8.5 batch artefact.
+- **Caveat that remains:** pooled and EUR-only differ by ≈1 SE, so "the EUR arm
+  is underpowered" explains it equally well. **EUR at imputed density settles
+  it** — the §8.11 project.
 
-- **Doubling the ancestry covariates barely moves it** (10 PCs 0.179 → 20 PCs
-  0.186). Structure-driven inflation shrinks under more PCs; this does not.
-  (`results/reml_allanc_pc20/`, job 33823242.)
-- **The QC track reproduces it** (0.184 ± 0.057) on a different 5,422-subject
-  sample with the bad genotyping batches removed, so it is not the §8.5 artefact.
-- **But** the pooled and EUR-only estimates are not significantly different from
-  each other (0.179 vs 0.090, difference ≈ 1 SE), so this is equally consistent
-  with "the EUR arm is simply underpowered". **The EUR-only arm at imputed
-  density would settle it**, and that is the same imputed-genotype project §8.11
-  describes.
-
-#### Ancestry-stratified (§5.3.2), job 33793546
+**(d) Stratified (§5.3.2), job 33793546.**
 
 | stratum | n | `baseline_thickness` | `global_slope` |
 |---|---|---|---|
-| EURlike (k-means) | 3,968 | 0.365 ± 0.085 | 0.112 ± 0.084 |
-| EUR_anchor (`abcd_eur`) | 3,159 | 0.310 ± 0.107 | 0.101 ± 0.105 |
+| EURlike | 3,968 | 0.365 ± 0.085 | 0.112 ± 0.084 |
+| EUR_anchor | 3,159 | 0.310 ± 0.107 | 0.101 ± 0.105 |
 | cluster1 | 966 | 0.000 ± 0.231 | 0.000 ± 0.235 |
 | cluster2 | 571 | 0.063 ± 0.427 | 0.000 ± 0.453 |
-| cluster3 | *skipped* — 221 unrelated, below `STRAT_MIN_N=300` | | |
+| cluster3 | skipped — 221 unrelated, below `STRAT_MIN_N=300` | | |
 
-**The non-European strata are uninformative, not null.** SEs of 0.23–0.45 span
-essentially the whole parameter space; a 0.000 there means "no information",
-and reporting it as evidence of no heritability would be wrong. **This design
-can compare EUR against pooled; it cannot say anything about h² in the other
-groups**, and ABCD does not contain enough of them to fix that.
+**The non-European strata are uninformative, not null** — SEs of 0.23–0.45 span
+the parameter space, and a 0.000 there must not be read as evidence of absence.
+Pooled (0.269) sits inside the EUR estimates' error bars, so **pooled and
+stratified do not materially disagree** and the pooled number is defensible as
+the headline *provided* it uses the PC-AiR unrelated set (§8.6). EUR_anchor's
+0.310 vs EUR-only's 0.246 is the pooled-allele-frequency effect, measured:
+restricting a pooled GRM to one group ≠ building that group's own GRM.
 
-Answering §5.3.2's actual question: the pooled estimate (0.269) sits between the
-EUR-only (0.246) and EUR_anchor-on-the-pooled-GRM (0.310) values and well inside
-their error bars, so **pooled and stratified do not materially disagree** and
-the pooled number is defensible as the headline — *provided* it uses the PC-AiR
-unrelated set (§8.6). Note that EUR_anchor's 0.310 against EUR-only's 0.246 is
-itself the pooled-allele-frequency effect, measured: restricting a pooled GRM to
-one group is not the same object as building that group's own GRM.
+**(e) The batch artefact does not matter.** QC track moves h² by <1 SE
+everywhere (0.269 → 0.257) at a cost of 227 subjects. **Use the unfiltered track
+as primary; the QC track is the recorded sensitivity.** A defect measured and
+found negligible is a result.
 
-#### The batch artefact does not matter
-
-The QC track (§8.5) changes nothing worth acting on: `baseline_thickness`
-0.269 → 0.257, `global_slope` 0.076 → 0.081, every slope PC within 0.03 — all
-far inside one SE, at the cost of 227 subjects. **Recommendation: use the
-unfiltered track as primary and keep the QC track as the recorded sensitivity.**
-The artefact is real (§8.5) and its effect on h² was measured and is negligible.
-
-#### And the one that would have been reported as cross-ancestry
-
-The `--grm-cutoff` arm gives `baseline_thickness` 0.346 against PC-AiR's 0.269,
-and `global_slope` 0.042 against 0.076 — differences of ~1 SE, in a sample that
-is 94 % European rather than 68 %. Not obviously wrong; just quietly a different
-analysis from the one it claims to be. **That is the point of §8.6.**
+**(f) What §8.6 would have cost.** The `--grm-cutoff` arm gives 0.346 vs 0.269
+and 0.042 vs 0.076 — about 1 SE apart, in a sample 94 % European instead of
+68 %. Not obviously wrong; just quietly a different analysis from the one it
+claims to be.
 
 ### 8.10 Verified vs assumed
 
