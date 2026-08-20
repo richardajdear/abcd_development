@@ -112,10 +112,19 @@ if [[ -n "${GRM_ALLANC_KEEP:-}" ]]; then
   keep_args+=(--keep "$GRM_ALLANC_KEEP")
 fi
 
+# GRM_MAF is a variable, not a constant, because the published EUR h2 = 0.575
+# was built at MAF 0.001, not 0.01 -- recovered from abcd_eur.grm.N.bin
+# (13,695,250 SNPs of the fileset's 13,697,177) after its build log turned out to
+# have been overwritten by a later --pca run.  Comparing our 0.01 estimate with
+# that 0.575 therefore confounds the variant set with the frequency floor, and
+# the only way to separate them is to run both floors on the same genotypes.
+GRM_MAF="${GRM_MAF:-0.01}"
+echo "maf   : $GRM_MAF"
+
 "$GCTA" \
   --bfile "$BFILE" \
   "${keep_args[@]+"${keep_args[@]}"}" \
-  --maf 0.01 \
+  --maf "$GRM_MAF" \
   --make-grm \
   --thread-num "${SLURM_CPUS_PER_TASK:-16}" \
   --out "$OUT/chr${CHR}"
