@@ -103,3 +103,66 @@ fig.tight_layout(rect=[0, 0.07, 1, 0.96])
 fig.savefig(FIG / "fig2_retention_by_k.png", dpi=170, bbox_inches="tight")
 plt.close(fig)
 print("wrote fig2")
+
+# ---------------------------------------------------------------- Figures 3&4
+ks_df = pd.read_csv("hpc/work/results/impqual/ksweep_chr22.tsv", sep="\t")
+KS = sorted(ks_df.k.unique())
+
+# Fig 3: where the pooled-MAF filter's losses fall.
+# Stacked columns of the LOST variants attributed to the stratum each is
+# commonest in -- the question is composition of a loss, so part-to-whole.
+fig, axes = plt.subplots(1, len(KS), figsize=(3.3 * len(KS), 4.0), sharey=True)
+for ax, k in zip(np.atleast_1d(axes), KS):
+    d = ks_df[(ks_df.k == k) & (ks_df.metric == "lost_attributed")]
+    order = strat_order(d.stratum.unique())
+    d = d.set_index("stratum").reindex(order)
+    tot = int(ks_df[(ks_df.k == k) & (ks_df.metric == "n_lost_by_pooled")].value.iloc[0])
+    com = int(ks_df[(ks_df.k == k) & (ks_df.metric == "n_stratum_common")].value.iloc[0])
+    bottom = 0.0
+    for j, s in enumerate(order):
+        v = float(d.loc[s, "value"])
+        ax.bar([0], [v], bottom=[bottom], color=SLOT[j], width=0.5,
+               edgecolor=SURF, linewidth=1.6, label=s if k == KS[0] else None)
+        # Direct-label only segments tall enough to hold two lines of text.
+        # At 4% the label overflowed the segment and was clipped by the axis --
+        # caught by looking at the rendered PNG, which is why that step exists.
+        # Smaller segments are carried by the legend and the table instead.
+        if v / max(tot, 1) > 0.10:
+            ax.text(0, bottom + v / 2, f"{s}\n{v:.0f} ({100*v/tot:.0f}%)",
+                    ha="center", va="center", fontsize=8.5, color="white", fontweight="bold")
+        bottom += v
+    ax.set_title(f"k = {k}\n{tot} of {com} lost ({100*tot/com:.0f}%)", fontsize=10, color=INK, pad=8)
+    ax.set_xticks([]); ax.yaxis.grid(True); ax.set_axisbelow(True)
+    ax.set_ylim(0, 500)
+    if k == KS[0]:
+        ax.legend(loc="upper left", frameon=False, fontsize=8, ncol=1)
+np.atleast_1d(axes)[0].set_ylabel("variants common in a stratum but\nfailing the POOLED MAF filter")
+fig.suptitle("A pooled MAF filter discards mostly non-European variation",
+             fontsize=12.5, y=0.99, color=INK)
+fig.tight_layout(rect=[0, 0.02, 1, 0.93])
+fig.savefig(FIG / "fig3_maf_loss_by_k.png", dpi=170, bbox_inches="tight")
+plt.close(fig)
+print("wrote fig3")
+
+# Fig 4: imputation uncertainty among variants common in each stratum.
+fig, axes = plt.subplots(1, len(KS), figsize=(3.3 * len(KS), 4.0), sharey=True)
+for ax, k in zip(np.atleast_1d(axes), KS):
+    d = ks_df[(ks_df.k == k) & (ks_df.metric == "pct_uncertain_ge05")]
+    order = [s for s in strat_order(d.stratum.unique())]
+    d = d.set_index("stratum").reindex(order)
+    x = np.arange(len(order))
+    ax.bar(x, d.value.values, color=[SLOT[j] for j in range(len(order))],
+           width=0.62, edgecolor=SURF, linewidth=1.4)
+    for xi, v in zip(x, d.value.values):
+        ax.text(xi, v + 0.4, f"{v:.1f}", ha="center", va="bottom", fontsize=8, color=INK2)
+    ax.axhline(float(d.loc["EURlike", "value"]), color=INK2, lw=1, ls=(0, (4, 3)))
+    ax.set_xticks(x); ax.set_xticklabels(order, fontsize=8, rotation=20, ha="right")
+    ax.set_title(f"k = {k}", fontsize=11, color=INK, pad=8)
+    ax.yaxis.grid(True); ax.set_axisbelow(True); ax.set_ylim(0, 20)
+np.atleast_1d(axes)[0].set_ylabel("% of stratum-common variants\nsubstantially uncertain (ambiguity ≥ 0.05)")
+fig.suptitle("Imputation quality by stratum — dashed line = European-like reference",
+             fontsize=12.5, y=0.99, color=INK)
+fig.tight_layout(rect=[0, 0.02, 1, 0.94])
+fig.savefig(FIG / "fig4_impqual_by_k.png", dpi=170, bbox_inches="tight")
+plt.close(fig)
+print("wrote fig4")

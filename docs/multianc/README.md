@@ -314,7 +314,101 @@ pass is exactly what nobody re-examines.
 
 ### 6.3 Results
 
-RESULTS_PLACEHOLDER
+![Where the pooled MAF filter's losses fall](fig/fig3_maf_loss_by_k.png)
+
+*Figure 3. Variants common within at least one stratum but failing a pooled
+MAF ≥ 0.01 filter, attributed to the stratum each is commonest in. Panel titles
+give the loss as a fraction of all stratum-common variants. Segments ≥10 % are
+direct-labelled; the rest are in the legend and the table.*
+
+![Imputation uncertainty by stratum](fig/fig4_impqual_by_k.png)
+
+*Figure 4. Percentage of each stratum's own common variants that are
+substantially uncertain (§6.1). Dashed line marks the European-like cluster, for
+reference. Restricted to variants common in the stratum being assessed — the
+unrestricted version is meaningless (§6.2).*
+
+**Pooled-MAF loss, and the R² filter's bite**
+
+| k | common in ≥1 stratum | pass pooled MAF | LOST by pooled | % lost | % passing R²≥0.8 |
+|---|---|---|---|---|---|
+| 3 | 1071.0 | 700.0 | 371.0 | 34.6 | 92.5 |
+| 4 | 1117.0 | 700.0 | 417.0 | 37.3 | 89.9 |
+| 5 | 1138.0 | 700.0 | 438.0 | 38.5 | 89.5 |
+
+**k = 3**
+
+| stratum | n common variants | lost by pooled filter | % of all loss | mean ambiguity | % uncertain (≥0.05) |
+|---|---|---|---|---|---|
+| EURlike | 575 | 21 | 5.7 | 0.0157 | 4.5 |
+| cluster1 | 950 | 326 | 87.9 | 0.0118 | 3.4 |
+| cluster2 | 582 | 24 | 6.5 | 0.0209 | 8.6 |
+
+**k = 4**
+
+| stratum | n common variants | lost by pooled filter | % of all loss | mean ambiguity | % uncertain (≥0.05) |
+|---|---|---|---|---|---|
+| EURlike | 575 | 20 | 4.8 | 0.0157 | 4.5 |
+| cluster1 | 952 | 328 | 78.7 | 0.0118 | 3.4 |
+| cluster2 | 587 | 12 | 2.9 | 0.0181 | 7 |
+| cluster3 | 575 | 57 | 13.7 | 0.0286 | 17 |
+
+**k = 5**
+
+| stratum | n common variants | lost by pooled filter | % of all loss | mean ambiguity | % uncertain (≥0.05) |
+|---|---|---|---|---|---|
+| EURlike | 567 | 20 | 4.6 | 0.0159 | 4.6 |
+| cluster1 | 957 | 346 | 79 | 0.0118 | 3.3 |
+| cluster2 | 580 | 13 | 3 | 0.0183 | 7.1 |
+| cluster3 | 854 | 1 | 0.2 | 0.0124 | 2.7 |
+| cluster4 | 573 | 58 | 13.2 | 0.0288 | 16.8 |
+
+**Finding 3 — the pooled MAF filter, and it is robust to k.** Between **35 % and
+38 %** of stratum-common variants fail a pooled MAF ≥ 0.01 filter, at every k. The
+loss is overwhelmingly non-European throughout: the European-like cluster
+accounts for only **4.6–5.7 %** of it, while `cluster1` (79.4–94.1 % self-reported
+Black) accounts for **79–88 %**. This is the expected consequence of pooling —
+African-ancestry genomes carry the most variation, and a variant common in a
+group that is ~20 % of the sample is diluted ~5× in the pooled frequency.
+
+**Finding 4 — imputation quality is not the binding constraint, with one
+exception.** Among stratum-common variants, **89.5–92.5 %** pass R² ≥ 0.8 at every
+k, so the quality filter costs ~10 % and is not what shapes the dataset.
+Per-stratum:
+
+- `cluster1` (African) is **better** imputed than European — 3.3–3.4 % uncertain
+  against 4.5 %. TOPMed's panel covers it well.
+- `cluster2` (Hispanic/Latino) is modestly worse: 7.0–8.6 %.
+- The **Asian-ancestry cluster is ~4× worse than European** — 17.0 % at k=4 and
+  16.8 % at k=5. **That it is the same number under two different partitions
+  (where it is `cluster3` and `cluster4` respectively) is the check that makes
+  it a property of the group rather than of the clustering.**
+- k=5's admixed `cluster3` is *well* imputed (2.7 %) and loses almost nothing to
+  the pooled filter (1 variant). Admixed genomes sit near the pooled frequencies
+  by construction, so a pooled filter treats them kindly — which is worth noting
+  because it means the pooled approach is least damaging exactly where ancestry
+  labels are least meaningful.
+
+**What we did about it.** The fileset is built with a **union** rule
+(`MAC ≥ 10`) rather than a pooled MAF filter, so no group's common variation is
+discarded at conversion. This costs disk and forecloses nothing: GCTA recomputes
+allele frequencies on whichever samples `--keep` leaves (verified — the same
+chr1 fileset yields 37,807 SNPs over 11,670 subjects and 32,099 over the 5,656
+European subset), so a pooled analysis still gets a pooled filter and a
+stratified one automatically gets its own group's.
+
+`MAC ≥ 10` is a **superset** of "common in at least one stratum", not an exact
+implementation: the smallest stratum (523 children, 1,046 allele copies) needs
+≥10 copies for MAF 0.01, so nothing stratum-common can fall below it — but ~44 %
+more variants clear it than the true union rule would admit. Harmless, since
+GCTA's `--maf` discards them at GRM-build time, but **the resulting variant count
+must not be quoted as "variants common in some ancestry group".**
+
+**We did not act on the Asian-ancestry quality finding.** That cluster is 523
+children with 221 unrelated — already below the `STRAT_MIN_N` floor for
+stratified heritability — so a stricter per-group R² threshold would protect an
+analysis that cannot be run anyway. It is recorded rather than corrected, and
+Phase 4 tests dropping the group entirely.
 
 ---
 
