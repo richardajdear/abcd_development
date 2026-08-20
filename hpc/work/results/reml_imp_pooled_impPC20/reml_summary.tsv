@@ -1,0 +1,6 @@
+phenotype	h2	se	pval	n
+baseline_thickness	0.2594	0.0493	3.8367e-08	5649
+global_slope	0.1327	0.0469	1.7814e-03	5649
+slope_PC3	0.0384	0.0454	1.9564e-01	5649
+slope_PC2	0.1580	0.0469	2.2203e-04	5649
+slope_PC1	0.0510	0.0460	1.3178e-01	5649

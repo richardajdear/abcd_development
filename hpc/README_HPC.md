@@ -737,6 +737,75 @@ still passes). Verified after the fix, before resubmitting 66 array tasks:
 convention against a keep-list *before* trusting any step that has no `--keep`
 to fail for you.
 
+### 8.15 IMPUTED GENOTYPES — `global_slope` is heritable (jobs 34089870–3, 34092188–9)
+
+**Headline: the primary phenotype reaches significance for the first time.**
+`global_slope` h² = **0.137 ± 0.046, p = 0.0012** (n = 5,649 unrelated), which
+survives Bonferroni across the five phenotypes. It took **both** changes — the
+extra N halved the SE, the imputed variants restored the point estimate — and
+neither alone was enough, which is why the array run (§8.9b) came back flat.
+
+**The pipeline validates against a known number.** EUR-only at imputed density
+with MAF 0.001 — matched to §2 on ancestry, N and frequency floor — gives
+`baseline_thickness` **0.474 ± 0.142** against the published **0.575 ± 0.147**,
+within ~0.7 SE, on a *different* imputation panel (TOPMed r3) and genome build.
+
+**§8.9(a) is now properly decomposed, and its attribution was half wrong.** Same
+children throughout:
+
+| arm | n | `baseline_thickness` | attributable to |
+|---|---|---|---|
+| array, MAF 0.01 | 3,332 | 0.246 ± 0.091 | — |
+| imputed, MAF 0.01 | 3,336 | 0.378 ± 0.107 | **variant set: +0.132** |
+| imputed, MAF 0.001 | 3,312 | 0.474 ± 0.142 | **frequency floor: +0.096** |
+| §2 published | 3,329 | 0.575 ± 0.147 | different panel/build |
+
+**Both terms are real and roughly equal.** §8.9(a) attributed the whole halving
+to the variant set; that was about half right.
+
+**Primary results — imputed, pooled multi-ancestry, PC-AiR unrelated set:**
+
+| phenotype | h² | SE | p | vs array (§8.9b) |
+|---|---|---|---|---|
+| `baseline_thickness` | 0.246 | 0.049 | 1.5e-07 | 0.269 |
+| **`global_slope`** | **0.137** | **0.046** | **0.0012** | 0.076 (p=0.075) |
+| `slope_PC2` | 0.161 | 0.046 | 1.6e-04 | 0.179 |
+| `slope_PC1` | 0.075 | 0.046 | 0.046 | 0.137 |
+| `slope_PC3` | 0.041 | 0.045 | 0.18 | 0.111 |
+
+**Robustness — three checks, all passed:**
+
+| check | `global_slope` | `slope_PC2` |
+|---|---|---|
+| array-derived PCs, 10 | 0.137 ± 0.046 | 0.161 ± 0.046 |
+| imputed-derived PCs, 10 | 0.135 ± 0.047 | 0.165 ± 0.047 |
+| imputed-derived PCs, 20 | 0.133 ± 0.047 | 0.158 ± 0.047 |
+| drop cluster3 (n = 5,505) | 0.160 ± 0.047 | 0.163 ± 0.047 |
+
+Residual population structure inflates under too few PCs and shrinks under more.
+Neither result moves. (The PC-source mismatch was a genuine setup error — the
+covariates carried PCs from the *array* GRM while the analysis used the
+*imputed* one — caught and corrected here rather than left as an assumption.)
+
+**§8.9(c)'s open caveat is resolved.** On array data `slope_PC2` was significant
+pooled (0.179) and not in the EUR arm (0.090 ± 0.089), which is also what a
+structure artefact looks like. At imputed density the EUR arm gives
+**0.205 ± 0.108**, consistent with the pooled 0.161. So *"the EUR arm was
+underpowered"* was the correct explanation, not residual structure. Likewise
+`global_slope`: EUR-only gives 0.157 ± 0.107 (MAF 0.01) and 0.151 ± 0.138
+(MAF 0.001), both bracketing the pooled 0.137 — **pooling is not inflating it.**
+
+**Answer to "should we drop the poorly-imputed cluster3?" — no.** Dropping its
+523 children moves `global_slope` by half an SE (0.137 → 0.160), *strengthening*
+it. The group adds a little noise and nothing qualitative depends on it. Keep,
+with the sensitivity on record (`results/reml_imp_pooled_noc3/`).
+
+**What still limits this.** The pooled GRM uses pooled allele frequencies — the
+compromise `docs/multianc/README.md` §7 flags as unresolved, and the reason no
+single GCTA GRM can have ancestry-specific frequencies *and* cross-ancestry
+entries. And these numbers are **not** comparable with §2: different panel,
+build, variant set and sample. The EUR-MAF-0.001 arm is the only bridge.
+
 ### 8.13 Multi-ancestry diagnostics — see the dedicated report
 
 **[`docs/multianc/README.md`](../docs/multianc/README.md)** is the full
