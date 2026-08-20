@@ -45,6 +45,19 @@
 #
 # --snps-only --max-alleles 2 : a GRM is defined over biallelic SNPs; indels
 # and multiallelics have no single dosage coding that GCTA will read correctly.
+#
+# --double-id sets FID = IID = the VCF sample name.  WITHOUT it plink2 writes
+# FID = 0 for every sample, and that is the README section 6 ID gotcha arriving
+# through a new door: GCTA identifies an individual by the FID+IID PAIR, so a
+# keep-list written FID=IID (which is what every other fileset in this project
+# and every keep list we hold uses) matches nothing.  Observed 2026-08-20, jobs
+# 34058416/34058417: "Get 5656 samples from list ... After keeping individuals,
+# 0 subjects remain."
+#
+# Those two failed LOUDLY only because they used --keep.  The pooled GRM has no
+# --keep, so it would have completed normally and produced a GRM whose .grm.id
+# carried FID=0 -- and every later --keep step, including the PC-AiR unrelated
+# subset, would then have silently matched nothing.  The loud failure was luck.
 set -euo pipefail
 
 if [[ -z "${REPO_ROOT:-}" || ! -f "${REPO_ROOT:-}/hpc/config.sh" ]]; then
@@ -84,6 +97,7 @@ convert() {   # $1 = tag, $2.. = frequency filter args
   echo "--- $tag ---"
   "$PLINK2" \
     --vcf "$VCF" dosage=DS \
+    --double-id \
     --extract-if-info "R2 >= $IMP_R2" \
     "$@" \
     --snps-only --max-alleles 2 \

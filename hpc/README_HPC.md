@@ -704,6 +704,39 @@ Powering up the PRS properly needs the imputed 7.0 genotypes, which are GRCh38
 conversion, or a targeted extraction of the clumped index SNPs by position after
 liftover. That is a project, not a step, and it is the obvious next one.
 
+### 8.14 `plink2 --vcf` writes FID = 0 — and the loud failure was luck
+
+Jobs 34058416/34058417 (EUR-only imputed GRMs) died on all 22 tasks with
+
+```
+Get 5656 samples from list [.../eur_anchor.keep].
+After keeping individuals, 0 subjects remain.
+```
+
+`plink2 --vcf` sets **FID = 0** for every sample unless `--double-id` is given,
+while the array filesets and every keep list in this project use **FID = IID**.
+GCTA identifies an individual by the FID+IID **pair** — §6's ID gotcha, arriving
+through a door §6 does not mention.
+
+**The important part is which job did *not* fail.** Those two used `--keep`, so
+they errored. The pooled GRM (34058415) has no `--keep`: it was running happily
+and would have completed, producing a GRM whose `.grm.id` carried FID = 0 — after
+which *every* later keep-based step, including the PC-AiR unrelated subset that
+§8.6 exists to enforce, would have silently matched zero subjects. **A loud
+failure in the arm that happened to use `--keep` is the only reason this was
+caught before the pooled result existed.**
+
+Fixed two ways: `--double-id` added to `work/convert_imputed.sbatch` so a rerun
+cannot reintroduce it, and the 22 existing `.fam` files rewritten in place
+(FID := IID; the `.fam` does not affect `.bed` layout, and the integrity gate
+still passes). Verified after the fix, before resubmitting 66 array tasks:
+`eur_anchor.keep` matches 5,656/5,656 FID+IID pairs and `pcair_unrelated.keep`
+8,178/8,181 (the 3 are the known non-genotyped).
+
+**Generalisable lesson:** when a fileset changes provenance, check the ID
+convention against a keep-list *before* trusting any step that has no `--keep`
+to fail for you.
+
 ### 8.13 Multi-ancestry diagnostics — see the dedicated report
 
 **[`docs/multianc/README.md`](../docs/multianc/README.md)** is the full
