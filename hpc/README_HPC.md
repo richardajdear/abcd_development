@@ -586,6 +586,23 @@ variant set differs:
 
 Expected (array SNPs tag less causal variation), but it governs everything below.
 
+**CORRECTION (2026-08-20): that table understates the difference by one term.**
+The published EUR GRM's build log was overwritten by a later `--pca` run, so its
+MAF was unrecorded and the row above implicitly assumed it matched ours. It does
+not. Recovered from `abcd_eur.grm.N.bin`, whose per-pair SNP count is
+**13,695,250** against the fileset's 13,697,177: **no MAF 0.01 filter was
+applied** — the published GRM used essentially every variant down to the
+fileset's own MAF 0.001 floor. Ours used MAF 0.01.
+
+So 0.575 vs 0.246 confounds **two** differences, not one: array-vs-imputed
+tagging *and* MAF 0.01 vs 0.001. Including 0.001–0.01 variants generally raises
+GREML h², because they add tagging and because the 1/(2p(1−p)) standardisation
+upweights them. **Phase 4 must therefore run EUR-imputed at MAF 0.001 as well as
+0.01**; only the 0.001 arm is like-for-like with §2, and only it can test the
+array-vs-imputed explanation cleanly. The `MAC ≥ 10` union fileset (pooled MAF
+≥ 0.00043) supports it: a variant at MAF 0.001 within EUR carries ~11 copies, so
+it survives the pooled MAC floor.
+
 **(b) §3's forecast fails: precision improved, z did not.**
 
 | phenotype | arm | n | h² | SE | z |
