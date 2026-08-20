@@ -704,6 +704,36 @@ Powering up the PRS properly needs the imputed 7.0 genotypes, which are GRCh38
 conversion, or a targeted extraction of the clumped index SNPs by position after
 liftover. That is a project, not a step, and it is the obvious next one.
 
+### 8.13 Multi-ancestry diagnostics — see the dedicated report
+
+**[`docs/multianc/README.md`](../docs/multianc/README.md)** is the full
+methodological record behind §8.5–§8.7 and §8.12: why each pre-GRM check exists,
+what it found, every threshold we chose and on what basis, a k-sensitivity sweep
+with figures, and a comparison against published ABCD genetics methodology.
+**Read it before repeating or extending this analysis.** In brief:
+
+- **The `--grm-cutoff` finding does not depend on k.** At k=3/4/5 it retains
+  75.8/75.6/75.4 % of the European-like cluster and 0–33 % of every other,
+  leaving an unrelated set that is 93.6/93.7/90.8 % European. Expected rather
+  than lucky: the failure is a property of the GRM's pooled allele frequencies,
+  not of any partition. The strata are a lens for seeing it.
+- **The clusters are validated, not asserted.** Blind to self-report, k=4 yields
+  clusters that are 91 % White, 80 % Black, 95 % Hispanic and 45 % Asian.
+- **k=4 is a judgement, and k=5 is defensible.** k=3 merges the Hispanic and
+  Asian groups; k=5 isolates an admixed cluster and thereby raises `cluster1`
+  from 79.6 % to 94.1 % Black — better purity, but its 221 unrelated children sit
+  below `STRAT_MIN_N`. `strata_k2..k6.tsv` are all written; **prefer k=5 if you
+  need cleaner group definitions rather than more fittable strata.**
+- **We are not the first here.** PC-AiR is what the ABCD release itself uses, and
+  `FastSparseGRM` exists because multi-ancestry GRMs are confounded with
+  population structure. Two published choices are **better** than ours and are
+  named as such: 1000 Genomes projection for ancestry labels (no multi-ancestry
+  panel on this account) and PC-Relate as the GRM (we use GCTA for comparability
+  with §2, which is a trade, not a win).
+- **The unresolved compromise:** the pooled GRM still uses pooled allele
+  frequencies. No single GCTA GRM can have ancestry-specific frequencies *and*
+  cross-ancestry entries. State this wherever the pooled h² is reported.
+
 ### 8.12 Phase 0 of the imputed project — sizing it (job 33838952)
 
 Before committing to the §8.11 project, `work/probe_imputed.sbatch` counted what
