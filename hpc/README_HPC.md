@@ -3,12 +3,27 @@
 **Last updated: 2026-08-17.** Written for an agent starting fresh on CSD3 with
 no access to the conversations that produced it.
 
-> **§5 has been executed — read §8 before acting on §5.** The cross-ancestry GRM
-> is built and N nearly doubled, but §5 asked for one thing that turns out to be
-> unsafe as specified: the `--grm-cutoff 0.05` unrelated subset of a *pooled*
-> multi-ancestry GRM is **94 % European** and would have been reported as
-> cross-ancestry. §8.6 has the diagnosis and the replacement. §5 is kept as
-> written so the two can be compared.
+> **§5 has been executed and the pipeline extended to the imputed genotypes.**
+> Start at **§8.1** (findings), then **§8.15** (heritability) and **§8.16**
+> (GWAS / rg / MAGMA / PRS). Headlines:
+>
+> - **N nearly doubled**: 4,126 → 8,082 phenotyped ∩ genotyped.
+> - **`global_slope` is heritable**: h² = 0.137 ± 0.046, p = 0.0012 — the primary
+>   phenotype, significant for the first time. It needed *both* the extra N and
+>   the imputed variant set; neither alone was enough (§8.15).
+> - **First genome-wide-significant loci**: 2 loci for `baseline_thickness`,
+>   verified not to be ancestry artefacts (§8.16.1).
+> - **The SCZ → faster-thinning PRS lead survives correction** in the full
+>   sample (p_adj = 0.034) but *not* in the EUR arm the design makes primary
+>   (§8.16.5). Strengthened, not settled.
+> - **Two things §5 asked for are unsafe as specified.** `--grm-cutoff 0.05` on a
+>   pooled multi-ancestry GRM returns a **94 % European** "unrelated" set (§8.6),
+>   and the European LD reference behind LDSC/MAGMA/PRS produces an LDSC
+>   intercept that reads as confounding but is misspecification (§8.16.2, §8.16.6).
+> - **Run every ancestry-sensitive analysis twice** — pooled and EUR-stratified.
+>   Where they disagree, the ancestry-matched arm is the one to believe.
+>
+> §5 is kept as written so the two can be compared.
 
 > **You should not need to read `legacy/`.** Those two files are the full
 > working record through 2026-08-17, kept because they contain the diagnostic
@@ -805,6 +820,186 @@ compromise `docs/multianc/README.md` §7 flags as unresolved, and the reason no
 single GCTA GRM can have ancestry-specific frequencies *and* cross-ancestry
 entries. And these numbers are **not** comparable with §2: different panel,
 build, variant set and sample. The EUR-MAF-0.001 arm is the only bridge.
+
+### 8.16 GWAS, rg and MAGMA on the imputed genotypes (jobs 34108582, 34108774, 34108739–40, 34109942–3, 34109963, 34109989, 34110020–2)
+
+**Every analysis is run twice: pooled multi-ancestry and EUR-stratified.** That
+is not thoroughness for its own sake. LDSC's LD scores, MAGMA's LD panel and the
+PRS clumping reference are all `g1000_eur` / `eur_w_ld_chr` — **European**. On a
+32 %-non-European sample each carries an untested LD model, and §8.16.2 shows
+that mismatch producing a result that looks exactly like a finding.
+
+#### 8.16.1 GWAS — the first genome-wide-significant loci in this project
+
+| phenotype | multi-ancestry (n = 7,932) | | EUR (n = 4,039) | |
+|---|---|---|---|---|
+| | λ_GC | p<5e-8 | λ_GC | p<5e-8 |
+| `baseline_thickness` | 1.107 | **20** | 1.024 | 0 |
+| `slope_PC3` | 0.993 | **3** | 0.999 | 1 |
+| `global_slope` | 1.013 | 0 | 1.000 | 0 |
+| `slope_PC2` | 1.030 | 0 | 1.017 | 0 |
+| `slope_PC1` | 0.999 | 0 | 1.007 | 0 |
+
+9,077,609 SNPs tested. The published run (N = 4,119, 8.78M SNPs) found **none**.
+The 20 hits are **2 loci** — chr2 ~26.9 Mb (8 SNPs) and chr12 ~69.4 Mb (12) —
+the SNP count being LD within loci.
+
+**These are not ancestry artefacts, and the check that settles it is not λ_GC.**
+λ_GC rises with N under genuine polygenicity too, so 1.107 → 1.024 at half the N
+is consistent with either story. The decisive test is per-SNP: **all 20 hits
+appear in the EUR-only scan at p = 4.4e-05 to 7.9e-04 — 20 of 20 below 0.05,
+where ~1 is expected.** Had they been driven by between-ancestry structure,
+restricting to Europeans would have destroyed them. It does not; they sit at
+exactly the strength a true effect shows at half the sample size.
+
+#### 8.16.2 The LDSC intercept was misspecification, not confounding
+
+Worth recording in full, because the intermediate state looked alarming and a
+reader stopping there would draw the wrong conclusion.
+
+| phenotype | intercept, multi-ancestry sumstats + **EUR** LD scores | intercept, EUR sumstats + EUR LD scores |
+|---|---|---|
+| `baseline_thickness` | **1.0995 ± 0.0085** | **0.9927 ± 0.0062** |
+| `global_slope` | 1.0283 | 1.0050 |
+| `slope_PC2` | 1.0350 | 0.9949 |
+| `slope_PC1` | 1.0223 | 1.0018 |
+| `slope_PC3` | 1.0284 | 1.0196 |
+
+An LDSC intercept above 1 conventionally indicates confounding, and 1.0995
+accounts for essentially all of λ_GC = 1.107. **But when the LD scores match the
+sample's ancestry, every intercept sits at 1.00.** The inflation was the EUR LD
+scores applied to a multi-ancestry sample — LDSC's intercept absorbs exactly
+that kind of model misspecification — not population structure in the GWAS.
+
+**So the multi-ancestry LDSC h² and rg estimates should not be used.** Their
+model is wrong in a way the intercept makes visible.
+
+#### 8.16.3 Genetic correlation — still out of reach for the slope, as §3 predicted
+
+| | SCZ × `baseline_thickness` | SCZ × `global_slope` |
+|---|---|---|
+| §2 published | 0.036 ± 0.047 | not estimable |
+| multi-ancestry *(mis-specified, §8.16.2)* | 0.003 ± 0.045, h² z 5.30 | −0.140 ± 0.083, p = 0.092, h² z 2.26 |
+| **EUR (properly specified)** | 0.019 ± 0.057, h² z 3.89 | −0.199 ± 0.218, p = 0.36, h² z 0.57 |
+
+**Every slope row is flagged underpowered in both arms**, and §3's arithmetic is
+why: an interpretable rg needs h² z ≈ 4, and LDSC estimates h² less precisely
+than GREML on a HapMap3 subset. The GREML z of 2.96 does not carry over.
+`baseline_thickness` reaches h² z 3.89 in EUR — borderline — and its rg with both
+disorders is a clean null. MDD is null throughout.
+
+The one thing worth noting: SCZ × `global_slope` is **negative in both arms**
+(−0.140, −0.199), the direction the PRS and the age×PRS interaction also give —
+higher SCZ risk, faster thinning. It is not significant in either and should not
+be reported as support; it is consistent with the lead, nothing more.
+
+#### 8.16.4 MAGMA — the SCZ locus pool moves onto the slope, and MDD stops being null
+
+Gene sets tested against our phenotypes' gene-level signal:
+
+| set → phenotype | §2 published (4.0 EUR) | **EUR imputed** | multi-ancestry |
+|---|---|---|---|
+| `SCZ_locus_pool` → `baseline_thickness` | β 0.183, **p 1.9e-04** | β 0.153, **p 1.4e-03** | β 0.079, p 0.051 |
+| `SCZ_locus_pool` → `global_slope` | p 0.017 | β 0.127, **p 7.0e-03** | β 0.119, **p 6.5e-03** |
+| `SCZ_prioritised` (101 genes) | none | none | none |
+| `MDD_hc_finemap` → `baseline_thickness` | null | β 0.174, **p 8.6e-03** | — |
+| MDD gene covariate → `baseline_thickness` | null | **p 5.1e-05** | p 1.7e-03 |
+
+Three readings:
+
+1. **The published `baseline_thickness` result replicates** in the ancestry-matched
+   arm (0.183 → 0.153) and **attenuates in the multi-ancestry arm** (0.079,
+   p = 0.051) — the LD mismatch degrading MAGMA's gene Z-scores, same mechanism
+   as §8.16.2.
+2. **`global_slope` strengthened in both arms**, from nominal (p = 0.017) to
+   p ≈ 7e-03. That is the change the extra N and denser variants bought.
+3. **MDD is no longer null** — new, and present in the properly-specified arm.
+   §2's "MDD high-confidence sets are null throughout" no longer holds.
+
+The prioritised genes still carry nothing, reproducing §2: the signal is in the
+broad locus pool, not the fine-mapped genes.
+
+**AHBA C1–C3: do NOT report the C1− result.** The multi-ancestry arm gives
+C1− → `slope_PC1` β = −0.107, p = 5.1e-04, with the same sign across all four
+slope phenotypes — which reads as a coherent finding. In the EUR arm the same
+test gives β = −0.042, p = 0.20. MAGMA's gene-covariate SE depends on the gene
+count (6,940, identical in both arms), not on sample size, so **this is a real
+attenuation of the effect, not a loss of power**. C2 and C3 are null everywhere.
+The ancestry-matched arm is the one to believe.
+
+#### 8.16.5 PRS — the SCZ lead survives correction, in the arm that is not primary
+
+SCZ → `global_slope` at p<0.5, the threshold where it has always peaked:
+
+| arm | n | β | p | p_adj (Bonferroni × 8) |
+|---|---|---|---|---|
+| §2 published, full | 4,126 | −0.0397 | 0.0090 | 0.072 |
+| **imputed, full** | **8,082** | **−0.0413** | **0.0043** | **0.034** |
+| §2 published, EUR | 3,725 | −0.0385 | 0.0149 | 0.119 |
+| imputed, EUR | 5,361 | −0.0300 | 0.030 | 0.240 |
+
+**The full-sample result survives Bonferroni across all 8 thresholds for the
+first time.** Effect size is unchanged (−0.040 → −0.041), monotone across
+thresholds, same direction: higher SCZ risk → faster thinning.
+
+**But `06_prs`'s design makes the EUR arm primary**, because European-discovery
+scores transfer poorly across ancestry — in the full sample a result is
+ambiguous between a real effect and a transferability artefact. The EUR arm gives
+p_adj = 0.24 and is *weaker* than published despite 44 % more children. The two
+β's (−0.030 vs −0.041) differ by ~0.6 SE and are compatible, but the full-sample
+estimate being the larger one is also what residual ancestry confounding
+produces. **Strengthened, not settled.**
+
+**New:** SCZ → `slope_PC1`, β = **+0.0440**, p = 0.0033, p_adj = 0.026 —
+*positive*, i.e. opposite in sign to `global_slope`. This is consistent with the
+local regional-PRS finding (§2 follow-ups: the SCZ PRS map correlates with slope
+PC1, ρ = +0.28, spin p = 0.014). **It appears only in the full sample**, so it
+carries the same caveat. All effects are small: r² ≈ 0.17 % of variance.
+
+#### 8.16.6 What to do about the European LD reference
+
+Three analyses depend on it and none of them should. Options, in order of what
+was actually done:
+
+- **In-sample LD scores (implemented, `work/insample_ldscores.sbatch`).** We hold
+  11,670 genotypes; LD scores computed from the analysis sample describe its LD
+  by construction, and 11,670 is >20× the 503 EUR individuals behind
+  `eur_w_ld_chr`. This is the fix for LDSC's multi-ancestry arm.
+- **In-sample MAGMA panel.** Same logic — MAGMA's `--bfile` only needs a panel
+  representing the sample's LD, and the 7.07M-SNP PRS fileset can serve.
+- **What neither fixes:** in an admixed sample, admixture creates long-range LD
+  that a 1 cM window misses, so in-sample LD scores are themselves biased.
+  **cov-LDSC** (Luo et al. 2021 — 20 cM windows plus PC covariates) is the method
+  for that and is not in this LDSC build.
+- **For rg specifically the problem is deeper still:** SCZ and MDD discovery GWAS
+  are themselves European, so a cross-ancestry rg needs a method modelling *two*
+  LD structures — **Popcorn** (Brown et al.). Standard LDSC assumes one.
+  **The EUR-stratified rg therefore remains the only arm with no ancestry
+  mismatch anywhere, and is the one to report.**
+
+#### 8.16.7 Two defects found, both mine, both worth the warning
+
+**`--set-all-var-ids` destroyed every rsID.** `convert_imputed.sbatch` set all
+variant IDs to `chr:pos:ref:alt`; the intent was `--set-MISSING-var-ids`. MAGMA,
+LDSC and the PRS all match on rsID, so one flag blocked all three — while the GRM
+work, which needs no IDs, proceeded looking healthy. Recovered without
+re-converting by `work/extract_rsids.sbatch`, which re-reads the VCFs taking only
+columns 1–5 and never parses a genotype: 25,950,182 of 25,952,942 mapped
+(99.99 %), 0 duplicate IDs, 97.0 % of HapMap3 present. Original `.bim` files kept
+in `genotype_imputed/bim_backup_chrposID/`.
+
+**This also removed the liftover requirement.** An rsID names the same variant in
+GRCh38 and hg19, and all three tools match on rsID — so the build mismatch §8.2
+flagged never bites. That was luck: any position-matched step would have needed a
+chain file.
+
+**A race condition in `insample_ldscores.sbatch`.** All 22 array tasks wrote the
+same `hm3.snps` path; five read it mid-truncation and died on "0 variants
+remaining". They failed loudly, but **the same race could have delivered a
+partial list and produced LD scores over a silently truncated SNP set**, which
+nothing downstream would flag. Verified after the fact that the surviving
+chromosomes' SNP counts scale correctly with chromosome size, so none were
+truncated. Now writes a per-chromosome list.
 
 ### 8.13 Multi-ancestry diagnostics — see the dedicated report
 

@@ -46,6 +46,14 @@
 # --snps-only --max-alleles 2 : a GRM is defined over biallelic SNPs; indels
 # and multiallelics have no single dosage coding that GCTA will read correctly.
 #
+# --set-MISSING-var-ids, not --set-ALL-var-ids.  The first version used --set-all,
+# which overwrites EVERY variant ID with chr:pos:ref:alt and so discarded the
+# rsIDs.  MAGMA, LDSC and the PRS all match on rsID, so that one flag blocked
+# every downstream analysis while the GRM work -- which needs no IDs at all --
+# proceeded looking perfectly healthy.  Recovered without re-converting by
+# work/extract_rsids.sbatch, which re-reads the VCFs taking only columns 1-5 and
+# never parses a genotype.
+#
 # --double-id sets FID = IID = the VCF sample name.  WITHOUT it plink2 writes
 # FID = 0 for every sample, and that is the README section 6 ID gotcha arriving
 # through a new door: GCTA identifies an individual by the FID+IID PAIR, so a
@@ -101,7 +109,7 @@ convert() {   # $1 = tag, $2.. = frequency filter args
     --extract-if-info "R2 >= $IMP_R2" \
     "$@" \
     --snps-only --max-alleles 2 \
-    --set-all-var-ids '@:#:$r:$a' --new-id-max-allele-len 100 missing \
+    --set-missing-var-ids '@:#:$r:$a' --new-id-max-allele-len 100 missing \
     --make-bed \
     --threads "$T" \
     --out "$out"

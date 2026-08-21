@@ -34,10 +34,14 @@
 # devoid of cortical signal.
 set -euo pipefail
 
-REPO=/home/rajd2/rds/hpc-work/abcd_development
+# REPO and MAGMA_DIR were hard-coded, which pinned this script to one account
+# and to the 4.0/EUR MAGMA outputs.  Both are now overridable so the same harness
+# runs against the imputed multi-ancestry gene results; the defaults reproduce
+# the original behaviour exactly.
+REPO=${REPO_ROOT:-/home/rajd2/rds/hpc-work/abcd_development}
 W=$REPO/hpc/work
-MAGMA=$W/bin/magma
-MAGMA_DIR=$W/results/magma
+MAGMA=${MAGMA:-$W/bin/magma}
+MAGMA_DIR=${MAGMA_DIR:-$W/results/magma}
 # Parameterised so the same harness runs the SCZ and the MDD set files.
 # TAG names the outputs and the conditioning set differs per disorder, so
 # both are passed in rather than hard-coded.

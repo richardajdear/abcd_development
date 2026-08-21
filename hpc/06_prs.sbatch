@@ -170,7 +170,22 @@ if [[ "$DRY_RUN" != "1" ]]; then
       echo "Run: python $(dirname "$0")/work/make_prs_pheno.py \\" >&2
       echo "       $(dirname "$PHENO") $PRS_PHENO_DIR" >&2
     fi
+    # PRS_EUR_IDS overrides prs_assoc.R's PC-distance cut with an explicit list.
+    # The PC cut ("within N SDs of the EUR centroid") is a reasonable default
+    # when nothing better exists, but this project now has a k-means EUR cluster
+    # validated against both the abcd_eur anchor (all 5,656 members land in it)
+    # and self-report (91% White) -- see docs/multianc/README.md.  Using it keeps
+    # the PRS strata identical to the strata every other analysis here uses,
+    # rather than introducing a third definition of "EUR".
+    _eur_args=()
+    if [[ -n "${PRS_EUR_IDS:-}" ]]; then
+      [[ -f "$PRS_EUR_IDS" ]] || { echo "FATAL: PRS_EUR_IDS=$PRS_EUR_IDS not found" >&2; exit 5; }
+      echo "EUR subset from $PRS_EUR_IDS ($(wc -l < "$PRS_EUR_IDS") ids)"
+      _eur_args=(--eur-ids "$PRS_EUR_IDS")
+    fi
+
     "$RSCRIPT" "$REPO_ROOT/tools/prs_assoc.R" \
+      "${_eur_args[@]+"${_eur_args[@]}"}" \
       --prs-dir "$PRS_DIR" \
       --pheno "$P_PHENO" \
       --covar-quant "$P_QUANT" \

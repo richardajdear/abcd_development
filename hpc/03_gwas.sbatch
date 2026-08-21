@@ -32,7 +32,11 @@ for _d in "$(dirname "$0")" "$PWD" "${SLURM_SUBMIT_DIR:-}"; do
 done
 [[ -n "$_cfg" ]] || { echo "FATAL: cannot locate hpc/config.sh (looked in $(dirname "$0"), $PWD, ${SLURM_SUBMIT_DIR:-unset})" >&2; exit 2; }
 source "$_cfg"
-require_paths GENO GRM_SPARSE PHENO COVAR_QUANT COVAR_CAT MANIFEST GCTA
+if [[ -n "${GENO_MBFILE:-}" ]]; then
+  require_paths GRM_SPARSE PHENO COVAR_QUANT COVAR_CAT MANIFEST GCTA
+else
+  require_paths GENO GRM_SPARSE PHENO COVAR_QUANT COVAR_CAT MANIFEST GCTA
+fi
 ensure_dirs "$GWAS_DIR"
 
 names=()   # not mapfile: bash 3.2 compatibility, see 02_reml.sbatch
@@ -52,8 +56,21 @@ for pheno in "${todo[@]}"; do
   mpheno=$(mpheno_for "$pheno") || { echo "ERROR: '$pheno' not in $MANIFEST" >&2; exit 3; }
   echo "=== 03_gwas  $pheno  (--mpheno $mpheno)  $(date) ==="
 
+  # GENO_MBFILE lets fastGWA read a LIST of per-chromosome filesets instead of
+  # one merged one.  The imputed genotypes arrive per chromosome (26M variants,
+  # 72 GB); merging them would duplicate all of that on a filesystem with far
+  # less headroom, to produce a file GCTA can already read as a list.  Verified
+  # --mbfile works with this GCTA build before relying on it.
+  if [[ -n "${GENO_MBFILE:-}" ]]; then
+    [[ -f "$GENO_MBFILE" ]] || { echo "FATAL: GENO_MBFILE=$GENO_MBFILE not found" >&2; exit 4; }
+    _geno_args=(--mbfile "$GENO_MBFILE")
+    echo "genotypes: $(wc -l < "$GENO_MBFILE") filesets from $GENO_MBFILE"
+  else
+    _geno_args=(--bfile "$GENO")
+  fi
+
   run "$GCTA" \
-    --bfile "$GENO" \
+    "${_geno_args[@]}" \
     --grm-sparse "$GRM_SPARSE" \
     --fastGWA-mlm \
     --pheno "$PHENO" \
