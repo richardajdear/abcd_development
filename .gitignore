@@ -25,6 +25,7 @@ dist/
 
 # Machine-specific HPC path overrides (see hpc/config.local.sh.example).
 hpc/config.local.sh
+hpc_v2/config.local.sh
 
 # Scratch tree for local pipeline tests: synthetic genotypes, GRMs, GWAS output.
 scratch/

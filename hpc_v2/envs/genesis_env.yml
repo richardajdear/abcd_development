@@ -1,0 +1,30 @@
+# R environment for the hpc_v2 pipeline (GENESIS stack + step-06 mixed models).
+#
+# Build on CSD3 (or anywhere with conda/mamba):
+#   mamba env create -p ~/rds/hpc-work/envs/genesis -f hpc_v2/envs/genesis_env.yml
+# then set in hpc_v2/config.local.sh:
+#   RSCRIPT="$HOME/rds/hpc-work/envs/genesis/bin/Rscript"
+#
+# Pinned to R 4.4 / Bioconductor 3.20-era builds; GENESIS' API used here
+# (pcair, pcrelate, pcrelateToMatrix, fitNullModel, assocTestSingle,
+# GenotypeBlockIterator) is stable across recent releases.
+name: genesis
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - r-base=4.4
+  - bioconductor-genesis
+  - bioconductor-snprelate
+  - bioconductor-gwastools
+  - bioconductor-gdsfmt
+  - bioconductor-biobase
+  - bioconductor-biocparallel
+  - r-matrix
+  - r-data.table
+  - r-optparse
+  - r-lme4
+  - r-lmertest
+  # step 05 / preflight use these binaries from the same env when present:
+  - plink
+  - gcta        # comment out if using the ~/bin/gcta64 install instead
