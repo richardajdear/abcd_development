@@ -22,8 +22,18 @@
 # genesis/unrelateds_individuals.txt.
 #
 #   Rscript 02_kinship.R --gds FILE.gds --out-dir DIR \
-#       [--maf 0.05] [--ld-r2 0.1] [--kin-thresh 0.02209709] [--n-pcs 32] \
-#       [--threads 8] [--seed 20260823]
+#       [--maf 0.05] [--ld-r2 0.1] [--kin-thresh 0.02209709] \
+#       [--sparse-thresh 0.04419417] [--max-density 0.10] \
+#       [--n-pcs 32] [--threads 8] [--seed 20260823]
+#
+# TWO thresholds, doing different jobs -- do not conflate them:
+#   --kin-thresh    (default 2^(-11/2) ~ 0.02210) is RAW kinship, and sets
+#                   PC-AiR's unrelated/related partition (3rd-degree boundary).
+#   --sparse-thresh (default 2^(-9/2)  ~ 0.04419) is compared against
+#                   2*kinship, because pcrelateToMatrix applies it AFTER
+#                   scaleKin=2.  It therefore corresponds to raw kinship
+#                   ~0.02210 -- numerically the same boundary, reached through
+#                   a different scaling.  See config.sh's SPARSE_KIN_THRESH.
 #
 # Outputs (all under --out-dir):
 #   pruned_snps.rds       LD-pruned SNP set used by every estimator
@@ -32,9 +42,13 @@
 #   pcair_pcs.tsv         FID IID PC1..PCk   (FID = IID here; join on IID)
 #   pcair_unrelated.txt   IIDs of the PC-AiR unrelated partition
 #   pcrelate.rds          pcrelate object (kinBtwn/kinSelf tables)
-#   kinship_sparse.rds    sparse symmetric Matrix from pcrelateToMatrix,
-#                         off-diagonals < 2*kin-thresh zeroed -- the null
-#                         model's covariance input
+#   kinship_sparse.rds    block-diagonal symmetric Matrix from
+#                         pcrelateToMatrix -- the null model's covariance
+#                         input.  NOTE it clusters by transitive closure at
+#                         --sparse-thresh rather than zeroing entries
+#                         element-wise, so it can come out DENSE; the summary
+#                         reports sparse_density / sparse_largest_block and a
+#                         warning fires above --max-density.
 #   kinship_summary.tsv   counts + degree tallies, the "did it work" file
 suppressPackageStartupMessages({
   library(optparse)
