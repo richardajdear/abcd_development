@@ -14,9 +14,12 @@ Rplots.pdf
 # working directory is the repo root; they are never analysis outputs.
 _view_*.png
 
-# Quarto
+# Quarto render output.  The exception below is a hand-authored report, not a
+# rendered notebook -- it is the shareable version of hpc_v2/README_HPC.md 11-13
+# and is a work product like the *_summary.tsv tables.
 *_files/
 *.html
+!docs/abcd_v2_findings.html
 
 # setuptools build artefacts (created by `pip install -e .`, machine-specific)
 src/*.egg-info/
@@ -71,3 +74,22 @@ hpc/work/results/*/*
 # SLURM stderr scratch, and the convenience symlink to hpc/work/out.
 hpc/slurm/
 /out
+
+# ---------------------------------------------------------------------------
+# hpc_v2 working tree, same contract as hpc/work/ above: setup scripts and the
+# small *_summary.tsv tables are the work product, everything else (GDS files,
+# per-chromosome association output, GRM id views, conda logs) is huge or
+# rebuildable.
+hpc_v2/work/*
+!hpc_v2/work/setup/
+hpc_v2/work/setup/*
+!hpc_v2/work/setup/*.sh
+!hpc_v2/work/setup/*.sbatch
+!hpc_v2/work/setup/*.py
+!hpc_v2/work/setup/*.R
+!hpc_v2/work/results_v2/
+hpc_v2/work/results_v2/*
+!hpc_v2/work/results_v2/*/
+hpc_v2/work/results_v2/*/*
+!hpc_v2/work/results_v2/*/*_summary.tsv
+!hpc_v2/work/results_v2/prs_family/prs_withinfamily.tsv

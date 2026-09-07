@@ -29,6 +29,26 @@ ensure_dirs "$LOG_DIR"
 steps=("${@:-01 02 03 04 05 06}")
 read -r -a steps <<< "${steps[*]}"
 
+# sbatch, with DRY_RUN honoured.  This function exists because it once did not:
+# DRY_RUN was only wired into config.sh's run(), which the SLURM branch never
+# calls, so `DRY_RUN=1 bash run_all.sh` SUBMITTED the whole pipeline -- and
+# then, because sbatch exports the submitting environment, every job inherited
+# DRY_RUN=1 and echoed its commands instead of running them.  Seven jobs
+# reported COMPLETED in one second having done nothing: precisely the v1
+# failure mode this pipeline's README warns about.  (Caught 2026-08-23 on the
+# first cluster run; jobs 34277587-93 were cancelled.)
+#
+# Real submissions pin DRY_RUN=0 in the job environment as well, so a stale
+# export in the submitting shell can never silently hollow out a real run.
+submit() {
+  if [[ "$DRY_RUN" == "1" ]]; then
+    { printf 'DRY_RUN: sbatch '; printf '%q ' "$@"; printf '\n'; } >&2
+    echo "DRYRUN"
+  else
+    sbatch --parsable --export=ALL,DRY_RUN=0 "$@"
+  fi
+}
+
 script_for() {   # case, not declare -A: bash 3.2 (macOS) compatibility
   case "$1" in
     01) echo "01_gds.sbatch" ;;
@@ -69,7 +89,7 @@ if command -v sbatch >/dev/null 2>&1; then
     case "$s" in 05|06) this_dep="" ;; esac
 
     # shellcheck disable=SC2086
-    jid=$(sbatch --parsable \
+    jid=$(submit \
             --account "$SLURM_ACCOUNT" --partition "$SLURM_PARTITION" \
             --chdir "$HPC_DIR" --output "$LOG_DIR/%x_%A_%a.log" \
             $arr $this_dep "$HPC_DIR/$f")
@@ -79,7 +99,7 @@ if command -v sbatch >/dev/null 2>&1; then
       04)
         # Final collection pass AFTER the whole assoc array: the inline
         # chr==22 collect can see a partial set; this one cannot.
-        col=$(sbatch --parsable \
+        col=$(submit \
                 --account "$SLURM_ACCOUNT" --partition "$SLURM_PARTITION" \
                 --chdir "$HPC_DIR" --output "$LOG_DIR/%x_%j.log" \
                 --job-name=v2_collect --time=00:30:00 --mem=16G \

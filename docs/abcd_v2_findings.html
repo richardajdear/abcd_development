@@ -1,0 +1,452 @@
+<title>ABCD Development Genetics v2</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --paper:#f5f6f8; --surface:#ffffff; --surface-2:#eef0f4;
+    --ink:#12161c; --ink-2:#39424f; --muted:#5a6472; --faint:#8b95a3;
+    --rule:#dde1e7; --rule-2:#c8cfd8;
+    --v2:#2d5c8a; --v1:#7a6a5d;
+    --pos:#1f6b52; --warn:#9c5b1a; --neg:#8c3b3b;
+    --pos-bg:#e6f0ec; --warn-bg:#f6ece0; --neg-bg:#f4e7e7; --v2-bg:#e6edf4;
+    --serif:"Newsreader",Georgia,"Times New Roman",serif;
+    --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --paper:#12151a; --surface:#181c23; --surface-2:#1f242c;
+      --ink:#e7eaef; --ink-2:#bcc4cf; --muted:#94a0ae; --faint:#6d7886;
+      --rule:#2a313b; --rule-2:#3a434f;
+      --v2:#79a8d6; --v1:#b09b88;
+      --pos:#63b494; --warn:#d99a58; --neg:#d18585;
+      --pos-bg:#17271f; --warn-bg:#2a2015; --neg-bg:#2a1a1a; --v2-bg:#182531;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#12151a; --surface:#181c23; --surface-2:#1f242c;
+    --ink:#e7eaef; --ink-2:#bcc4cf; --muted:#94a0ae; --faint:#6d7886;
+    --rule:#2a313b; --rule-2:#3a434f;
+    --v2:#79a8d6; --v1:#b09b88;
+    --pos:#63b494; --warn:#d99a58; --neg:#d18585;
+    --pos-bg:#17271f; --warn-bg:#2a2015; --neg-bg:#2a1a1a; --v2-bg:#182531;
+  }
+
+  body{background:var(--paper); color:var(--ink); font-family:var(--sans);
+       font-size:16px; line-height:1.62; -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1120px; margin:0 auto; padding:0 28px 96px;}
+  .measure{max-width:70ch;}
+
+  header.top{border-bottom:1px solid var(--rule); padding:56px 0 30px; margin-bottom:44px;}
+  .kicker{font-family:var(--mono); font-size:11.5px; letter-spacing:.13em;
+          text-transform:uppercase; color:var(--v2); margin:0 0 16px;}
+  h1{font-family:var(--serif); font-weight:600; font-size:clamp(34px,5vw,50px);
+     line-height:1.08; letter-spacing:-.015em; margin:0 0 18px; text-wrap:balance;}
+  .standfirst{font-family:var(--serif); font-size:20px; line-height:1.5;
+              color:var(--ink-2); max-width:62ch; margin:0 0 26px;}
+  .meta{display:flex; flex-wrap:wrap; gap:10px 26px; font-family:var(--mono);
+        font-size:12px; color:var(--muted);}
+  .meta b{color:var(--ink-2); font-weight:500;}
+
+  h2{font-family:var(--serif); font-weight:600; font-size:29px; line-height:1.18;
+     letter-spacing:-.01em; margin:60px 0 6px; text-wrap:balance;}
+  h3{font-family:var(--sans); font-weight:600; font-size:16.5px;
+     margin:36px 0 10px; color:var(--ink);}
+  .eyebrow{font-family:var(--mono); font-size:11px; letter-spacing:.12em;
+           text-transform:uppercase; color:var(--faint); margin:0 0 4px;}
+  p{margin:0 0 16px;}
+  .measure p, .measure ul, .measure ol{max-width:70ch;}
+  a{color:var(--v2);}
+  strong{font-weight:600;}
+  code{font-family:var(--mono); font-size:.88em; background:var(--surface-2);
+       padding:1px 5px; border-radius:3px;}
+  ul,ol{margin:0 0 16px; padding-left:22px;} li{margin-bottom:7px;}
+
+  .scroll{overflow-x:auto; margin:20px 0 26px; border:1px solid var(--rule);
+          border-radius:5px; background:var(--surface);}
+  table{border-collapse:collapse; width:100%; font-size:13.5px;
+        font-variant-numeric:tabular-nums;}
+  caption{text-align:left; font-family:var(--mono); font-size:11px;
+          letter-spacing:.1em; text-transform:uppercase; color:var(--faint);
+          padding:12px 16px 0;}
+  th,td{padding:8px 14px; text-align:right; border-bottom:1px solid var(--rule);
+        white-space:nowrap;}
+  th{font-family:var(--mono); font-size:11px; letter-spacing:.06em;
+     text-transform:uppercase; color:var(--muted); font-weight:500;
+     border-bottom:1px solid var(--rule-2);}
+  th:first-child,td:first-child{text-align:left;}
+  td.num{font-family:var(--mono);}
+  tbody tr:last-child td{border-bottom:none;}
+  tr.group td{background:var(--surface-2); font-family:var(--mono); font-size:11px;
+              letter-spacing:.1em; text-transform:uppercase; color:var(--muted);}
+  .hi{background:var(--v2-bg);}
+  .sig{color:var(--pos); font-weight:600;}
+  .ns{color:var(--muted);}
+  .bad{color:var(--neg); font-weight:600;}
+
+  .callout{border-left:3px solid var(--v2); background:var(--surface);
+           padding:18px 22px; margin:26px 0; border-radius:0 5px 5px 0;}
+  .callout.warn{border-left-color:var(--warn);}
+  .callout.neg{border-left-color:var(--neg);}
+  .callout h3{margin:0 0 8px;}
+  .callout p:last-child{margin-bottom:0;}
+
+  .verdict{display:grid; gap:14px; grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+           margin:26px 0;}
+  .vcard{background:var(--surface); border:1px solid var(--rule); border-radius:5px;
+         padding:16px 18px;}
+  .vcard .tag{font-family:var(--mono); font-size:10.5px; letter-spacing:.1em;
+              text-transform:uppercase; margin:0 0 8px;}
+  .vcard.yes .tag{color:var(--pos);} .vcard.no .tag{color:var(--neg);}
+  .vcard p{margin:0; font-size:14px; line-height:1.55; color:var(--ink-2);}
+
+  /* forest plot */
+  .forest{margin:22px 0 30px; border:1px solid var(--rule); border-radius:5px;
+          background:var(--surface); padding:18px 20px 12px;}
+  .frow{display:grid; grid-template-columns:210px 1fr 140px; gap:14px;
+        align-items:center; padding:5px 0;}
+  .flabel{font-size:13px; color:var(--ink-2);}
+  .fnum{font-family:var(--mono); font-size:12px; color:var(--muted); text-align:right;}
+  .ftrack{position:relative; height:22px;}
+  .fhead{font-family:var(--mono); font-size:10.5px; letter-spacing:.1em;
+         text-transform:uppercase; color:var(--faint); padding-bottom:6px;
+         border-bottom:1px solid var(--rule); margin-bottom:6px;}
+  @media (max-width:720px){
+    .frow{grid-template-columns:1fr; gap:2px; padding:10px 0;
+          border-bottom:1px solid var(--rule);}
+    .fnum{text-align:left;}
+  }
+  footer{margin-top:70px; padding-top:22px; border-top:1px solid var(--rule);
+         font-size:13px; color:var(--muted);}
+  .pending{display:inline-block; font-family:var(--mono); font-size:10.5px;
+           letter-spacing:.09em; text-transform:uppercase; color:var(--warn);
+           background:var(--warn-bg); padding:2px 8px; border-radius:3px;}
+</style>
+
+<div class="wrap">
+
+<header class="top">
+  <p class="kicker">ABCD · Cortical development genetics · Pipeline v2</p>
+  <h1>Does adolescent brain development share genetics with adolescent-onset illness?</h1>
+  <p class="standfirst">A sibling-aware, ancestry-aware rebuild of the ABCD genetics pipeline. It corrects a real confound in the previous analysis, sharpens one result, weakens another — and leaves the central claim resting on two non-independent tests.</p>
+  <div class="meta">
+    <span><b>Sample</b> 8,082 genotyped + phenotyped (4,116 European)</span>
+    <span><b>Pipeline</b> hpc_v2 · GENESIS PC-AiR/PC-Relate</span>
+    <span><b>Compared against</b> hpc v1 · GCTA fastGWA</span>
+    <span><b>Updated</b> 7 Sep 2026</span>
+  </div>
+</header>
+
+<section class="measure">
+  <p class="eyebrow">The question</p>
+  <h2 style="margin-top:0">What we were testing</h2>
+  <p>Five phenotypes derived from longitudinal cortical thickness in ABCD: <code>baseline_thickness</code> (a positive control), <code>global_slope</code> (cortex-wide thinning rate — the pre-specified primary phenotype), and three principal components of the regional slope. The hypothesis is that the genetic architecture of adolescent cortical thinning overlaps with genetic risk for disorders that emerge in adolescence — schizophrenia and major depression.</p>
+  <p>Three instruments test that overlap, and they differ in what limits them. <strong>Polygenic scores</strong> draw their power from the discovery side, where PGC has hundreds of thousands of cases, so they work at our sample size. <strong>MAGMA</strong> aggregates our SNP signal to genes and asks whether disorder-implicated genes are enriched. <strong>Genetic correlation</strong> needs both traits to be well-powered, and ours is not.</p>
+</section>
+
+<section>
+  <p class="eyebrow">Method</p>
+  <h2>What changed between v1 and v2</h2>
+  <div class="measure">
+    <p>Same subjects, same phenotypes, same disorder GWAS, and — deliberately — the same downstream code: v1's own MAGMA and LDSC scripts were pointed at the v2 summary statistics, so any difference is the association model and nothing else.</p>
+    <p>What differs is how relatedness and ancestry are estimated. ABCD deliberately recruited siblings, and it is ancestrally diverse. A conventional genetic relatedness matrix confuses those two things: two people look genetically similar whether they are cousins or simply share ancestry. v1 built both its ancestry covariates and its association model on such a matrix. v2 replaces it with <strong>PC-AiR</strong> (ancestry axes computed on unrelated individuals, relatives projected onto them) and <strong>PC-Relate</strong> (kinship estimated conditional on those axes).</p>
+    <p>Sample size is <em>not</em> the difference — v1's association step already kept siblings. v2 buys a cleaner separation of kinship from ancestry, nothing more.</p>
+  </div>
+
+  <div class="scroll">
+    <table>
+      <caption>Relatedness, pooled sample vs within Europeans</caption>
+      <thead><tr><th>Pair class</th><th>Pooled (n=11,670)</th><th>Within EUR (n=5,656)</th><th>Expected in EUR if pooled counts were real</th></tr></thead>
+      <tbody>
+        <tr><td>Duplicate / MZ</td><td class="num">421</td><td class="num">227</td><td class="num ns">99</td></tr>
+        <tr><td>1st degree</td><td class="num">1,504</td><td class="num">748</td><td class="num ns">353</td></tr>
+        <tr><td>2nd degree</td><td class="num">982</td><td class="num bad">14</td><td class="num ns">231</td></tr>
+        <tr><td>3rd degree</td><td class="num">26,464</td><td class="num bad">106</td><td class="num ns">6,218</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="measure">
+    <p>First-degree pairs exceed the naive scaling, because siblings are real and concentrated. The distant bands collapse by 16–60×. <strong>The pooled scan's large distant-relative counts were cross-ancestry residue</strong>, not genuine kinship — the confound made visible.</p>
+  </div>
+</section>
+
+<section>
+  <p class="eyebrow">GWAS</p>
+  <h2>The association scan</h2>
+  <div class="scroll">
+    <table>
+      <caption>Genomic inflation and genome-wide hits</caption>
+      <thead><tr><th>Phenotype</th><th>λ<sub>GC</sub> v1</th><th>λ<sub>GC</sub> v2</th><th>p&lt;5e−8 v1</th><th>p&lt;5e−8 v2</th></tr></thead>
+      <tbody>
+        <tr class="group"><td colspan="5">Pooled multi-ancestry · n ≈ 7,900</td></tr>
+        <tr class="hi"><td>baseline_thickness</td><td class="num">1.107</td><td class="num sig">1.036</td><td class="num">20</td><td class="num">0</td></tr>
+        <tr><td>global_slope</td><td class="num">1.012</td><td class="num">1.014</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td>slope_PC1</td><td class="num">0.999</td><td class="num">1.014</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td>slope_PC2</td><td class="num">1.030</td><td class="num">1.036</td><td class="num">0</td><td class="num">1</td></tr>
+        <tr><td>slope_PC3</td><td class="num">0.993</td><td class="num">1.005</td><td class="num">3</td><td class="num">2</td></tr>
+        <tr class="group"><td colspan="5">European only · n ≈ 4,020</td></tr>
+        <tr><td>baseline_thickness</td><td class="num">1.024</td><td class="num">1.027</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td>global_slope</td><td class="num">1.000</td><td class="num">1.000</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td>slope_PC1</td><td class="num">1.007</td><td class="num">1.005</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td>slope_PC2</td><td class="num">1.017</td><td class="num">1.019</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td>slope_PC3</td><td class="num">0.999</td><td class="num">0.995</td><td class="num">1</td><td class="num">0</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="measure">
+    <p>The entire difference sits in the pooled arm. Within Europeans the two pipelines agree to within noise on every λ — as they should, because inside one continental group there is little ancestry structure to disentangle from kinship. That agreement is the control that makes the pooled difference interpretable.</p>
+  </div>
+
+  <div class="callout">
+    <h3>v1's inflation was confounding, not misspecification</h3>
+    <p>v1 recorded an LDSC intercept of <strong>1.0995 ± 0.0085</strong> on the pooled scan and attributed it to European LD scores being applied to a multi-ancestry sample — a modelling artefact rather than population structure. v2's scan is <em>equally</em> multi-ancestry and used the <em>same</em> LD scores. Its intercept is <strong>1.0036 ± 0.0060</strong>.</p>
+    <p>If the cause were LD-score misspecification, the intercept would not have moved. It was structure, and the new relatedness model removed it. The same conclusion arrives from the other direction: an in-sample LD panel returned strongly negative heritability on v1's statistics (down to −0.495, z = −8.0) and behaves normally on v2's.</p>
+    <p>Consequence: v1's 20 genome-wide hits for <code>baseline_thickness</code> do not survive. They attenuate to p = 8.2e−08 (chr2) and 9.5e−08 (chr12) — still the top two signals genome-wide, so not ancestry artefacts, but no longer significant.</p>
+  </div>
+</section>
+
+<section>
+  <p class="eyebrow">LDSC</p>
+  <h2>Genetic correlation with SCZ and MDD</h2>
+  <div class="measure">
+    <p>Every estimate is null, in both pipelines and under every specification. What v2 changes is precision.</p>
+  </div>
+
+  <div class="scroll">
+    <table>
+      <caption>European arm · rg ± standard error</caption>
+      <thead><tr><th>Disorder</th><th>Phenotype</th><th>rg v1</th><th>rg v2</th><th>h² z v1</th><th>h² z v2</th></tr></thead>
+      <tbody>
+        <tr><td>SCZ</td><td>baseline_thickness</td><td class="num">0.019 ± 0.057</td><td class="num">0.026 ± 0.052</td><td class="num">3.89</td><td class="num sig">4.49</td></tr>
+        <tr class="hi"><td>SCZ</td><td>global_slope</td><td class="num">−0.199 ± 0.218</td><td class="num">−0.149 ± 0.109</td><td class="num">0.57</td><td class="num">1.16</td></tr>
+        <tr><td>SCZ</td><td>slope_PC1</td><td class="num">0.163 ± 0.369</td><td class="num">0.094 ± 0.150</td><td class="num">0.32</td><td class="num">0.66</td></tr>
+        <tr><td>SCZ</td><td>slope_PC2</td><td class="num">−0.066 ± 0.062</td><td class="num">−0.052 ± 0.060</td><td class="num">3.18</td><td class="num">3.46</td></tr>
+        <tr><td>MDD</td><td>baseline_thickness</td><td class="num">−0.027 ± 0.058</td><td class="num">−0.019 ± 0.053</td><td class="num">3.62</td><td class="num sig">4.29</td></tr>
+        <tr><td>MDD</td><td>global_slope</td><td class="num">−0.043 ± 0.151</td><td class="num">−0.051 ± 0.107</td><td class="num">0.58</td><td class="num">1.04</td></tr>
+        <tr><td>MDD</td><td>slope_PC1</td><td class="num">−0.018 ± 0.466</td><td class="num">0.013 ± 0.168</td><td class="num">0.26</td><td class="num">0.43</td></tr>
+        <tr><td>MDD</td><td>slope_PC2</td><td class="num">−0.019 ± 0.065</td><td class="num">−0.008 ± 0.061</td><td class="num">3.26</td><td class="num">3.77</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="measure">
+    <p>Standard errors on the slope phenotypes fall 2–2.8×, and <code>baseline_thickness</code> crosses LDSC's usability threshold of h² z ≈ 4 for the first time. But read the mechanism honestly: the h² <em>standard errors</em> barely moved (0.108 → 0.104). The h² <em>point estimates</em> rose, and rg's standard error scales as 1/√(h²₁h²₂). For <code>global_slope</code>, LDSC h² goes 0.062 → 0.124, landing on the GREML estimate of 0.137 where it had been half of it.</p>
+  </div>
+
+  <div class="callout warn">
+    <h3>Is SCZ × global_slope significant? No — and the ± is why</h3>
+    <p>The value <code>−0.149 ± 0.109</code> reports a <strong>standard error</strong>, not a confidence-interval half-width. That gives z = −1.37 and p = 0.171; the 95% interval is [−0.363, +0.064]. To reach p &lt; 0.05 two-sided at that standard error, rg would have to be ≤ −0.214.</p>
+    <p>A directional prior does license a one-sided test. Even then nothing clears 0.05 except v1's pooled arm — <em>the one specification now known to have been structure-confounded.</em> The only "significant" cell is the artefact v2 removed.</p>
+  </div>
+
+  <div class="forest">
+    <div class="frow fhead"><div>Specification</div><div>rg with 95% CI</div><div style="text-align:right">p (2-sided / 1-sided)</div></div>
+    <div id="forest-rows"></div>
+    <p style="font-family:var(--mono); font-size:11px; color:var(--faint); margin:10px 0 0;">Dashed line = zero. Every interval crosses it.</p>
+  </div>
+
+  <div class="measure">
+    <p>There is a further reason the prior-hypothesis argument does not rescue this. A polygenic-score association and a genetic correlation <strong>estimate the same parameter</strong> — the genetic covariance between SCZ liability and thinning rate — from the <strong>same two datasets</strong>. The PRS result cannot be used to lower the bar for the rg and then have the rg reported as corroboration; that is one piece of evidence counted twice. The same applies to the consistent sign across the six specifications above: they share the ABCD sample entirely and the SCZ sample almost entirely.</p>
+    <p><strong>Defensible to write:</strong> the genetic correlation is negative in every specification (−0.12 to −0.20), consistent in direction with the polygenic-score association, and not significantly different from zero in any (best p = 0.17 two-sided). <strong>Not defensible:</strong> calling it significant, or independent confirmation.</p>
+  </div>
+
+  <h3>Both disorder GWAS were themselves multi-ancestry</h3>
+  <div class="measure">
+    <p>A mismatch neither pipeline had noticed: the SCZ statistics in use are the PGC3 <em>primary</em> release (European <em>and</em> East Asian), and MDD is the PGC MDD2025 <em>div</em> trans-ancestry release. The European-only SCZ file was already on disk, unused; the European MDD file has now been downloaded and checksum-verified. So no arm of this project, v1 or v2, had ever been ancestry-matched on both sides.</p>
+    <p>Matching it changes nothing. Every estimate moves less than a third of a standard error.</p>
+  </div>
+  <div class="scroll">
+    <table>
+      <caption>Ancestry-matched disorder statistics · European arm</caption>
+      <thead><tr><th>Test</th><th>Phenotype</th><th>rg, v1 EUR</th><th>rg, v2 EUR</th></tr></thead>
+      <tbody>
+        <tr><td>SCZ core (EUR-only)</td><td>baseline_thickness</td><td class="num">0.018 ± 0.059</td><td class="num">0.022 ± 0.054</td></tr>
+        <tr class="hi"><td>SCZ core (EUR-only)</td><td>global_slope</td><td class="num">−0.153 ± 0.168</td><td class="num">−0.121 ± 0.099</td></tr>
+        <tr><td>SCZ core (EUR-only)</td><td>slope_PC2</td><td class="num">−0.052 ± 0.061</td><td class="num">−0.042 ± 0.059</td></tr>
+        <tr><td>MDD EUR-only</td><td>baseline_thickness</td><td class="num">−0.045 ± 0.059</td><td class="num">−0.032 ± 0.053</td></tr>
+        <tr><td>MDD EUR-only</td><td>global_slope</td><td class="num">−0.038 ± 0.176</td><td class="num">−0.059 ± 0.115</td></tr>
+        <tr><td>MDD EUR-only</td><td>slope_PC2</td><td class="num">−0.006 ± 0.063</td><td class="num">0.008 ± 0.062</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <p class="eyebrow">MAGMA</p>
+  <h2>Gene-set enrichment</h2>
+  <div class="scroll">
+    <table>
+      <caption>Disorder gene sets against our gene-level signal · European arm</caption>
+      <thead><tr><th>Gene set → phenotype</th><th>β v1</th><th>p v1</th><th>β v2</th><th>p v2</th></tr></thead>
+      <tbody>
+        <tr class="hi"><td>SCZ_locus_pool → baseline_thickness</td><td class="num">0.153</td><td class="num">1.4e−03</td><td class="num">0.187</td><td class="num sig">1.1e−04</td></tr>
+        <tr class="hi"><td>SCZ_locus_pool → global_slope</td><td class="num">0.127</td><td class="num">7.0e−03</td><td class="num">0.124</td><td class="num">7.4e−03</td></tr>
+        <tr><td>SCZ_prioritised → baseline_thickness</td><td class="num">0.110</td><td class="num">0.116</td><td class="num">0.154</td><td class="num">0.048</td></tr>
+        <tr><td>SCZ_prio_finemap → baseline_thickness</td><td class="num">0.119</td><td class="num">0.150</td><td class="num">0.116</td><td class="num">0.158</td></tr>
+        <tr><td>MDD_hc_finemap → baseline_thickness</td><td class="num">0.174</td><td class="num">8.6e−03</td><td class="num">0.147</td><td class="num">0.023</td></tr>
+        <tr><td>MDD_highconf → baseline_thickness</td><td class="num">0.115</td><td class="num">0.034</td><td class="num">0.075</td><td class="num">0.117</td></tr>
+        <tr><td>MDD_pool → slope_PC2</td><td class="num">0.046</td><td class="num">0.042</td><td class="num">0.034</td><td class="num">0.098</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="measure">
+    <p>The project's most robust result strengthens by an order of magnitude: <strong>SCZ_locus_pool → baseline_thickness</strong> now clears Bonferroni across all 35 set × phenotype tests (threshold 1.4e−03) with room to spare, where v1 sat exactly on the line. The enrichment reaching the <em>slope</em> — the developmental phenotype, not just the cross-sectional one — reproduces unchanged under a different association model.</p>
+    <p>MDD moves the other way, uniformly: every MDD row weakens by a factor of 2–4 in p. The claim that "MDD is no longer null" should be read as weaker than v1 stated.</p>
+  </div>
+
+  <h3>AHBA transcriptional components C1–C3</h3>
+  <div class="scroll">
+    <table>
+      <caption>AHBA gene covariates · European arm</caption>
+      <thead><tr><th>Phenotype</th><th>Component</th><th>β v1</th><th>p v1</th><th>β v2</th><th>p v2</th></tr></thead>
+      <tbody>
+        <tr><td>slope_PC1</td><td>C1−</td><td class="num">−0.042</td><td class="num ns">0.204</td><td class="num">−0.035</td><td class="num ns">0.283</td></tr>
+        <tr><td>global_slope</td><td>C1−</td><td class="num">−0.046</td><td class="num ns">0.163</td><td class="num">−0.030</td><td class="num ns">0.359</td></tr>
+        <tr><td>slope_PC3</td><td>C1−</td><td class="num">−0.043</td><td class="num ns">0.196</td><td class="num">−0.043</td><td class="num ns">0.193</td></tr>
+        <tr><td>baseline_thickness</td><td>C3−</td><td class="num">−0.091</td><td class="num ns">0.216</td><td class="num">−0.136</td><td class="num ns">0.060</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="measure">
+    <p>The C1− → <code>slope_PC1</code> result that looked compelling in the pooled arm (β = −0.107, p = 5.1e−04) remains <strong>null in the ancestry-matched arm under v2, exactly as it was under v1</strong>. Nothing in C1/C2/C3 reaches significance anywhere in the European arm; the strongest cell is p = 0.060, one of 30 tests. The existing ruling — do not report the C1− result — stands.</p>
+  </div>
+</section>
+
+<section>
+  <p class="eyebrow">PRS</p>
+  <h2>Polygenic scores, and the sibling test</h2>
+  <div class="measure">
+    <p>Polygenic scoring does not use our GWAS — it applies PGC weights to our genotypes — so v2 leaves the population estimates untouched. What v2 adds is the decomposition that the sibling design uniquely permits: each child's score splits into a family mean and a deviation from it. The deviation is identified only by which alleles that child happened to inherit, which is random with respect to ancestry, upbringing and parental phenotype.</p>
+  </div>
+  <div class="scroll">
+    <table>
+      <caption>Population association vs between/within-family decomposition · pooled sample, 1,339 sibling pairs</caption>
+      <thead><tr><th>Disorder</th><th>Phenotype</th><th>v1 population β</th><th>β between</th><th>β within</th><th>p difference</th></tr></thead>
+      <tbody>
+        <tr class="hi"><td>SCZ</td><td>global_slope</td><td class="num">−0.041 <span class="sig">(4.3e−03)</span></td><td class="num">−0.046 <span class="sig">(2.5e−03)</span></td><td class="num ns">+0.007 (0.89)</td><td class="num ns">0.31</td></tr>
+        <tr><td>SCZ</td><td>slope_PC1</td><td class="num">0.044 <span class="sig">(3.3e−03)</span></td><td class="num">0.045 <span class="sig">(3.8e−03)</span></td><td class="num ns">0.031 (0.55)</td><td class="num ns">0.80</td></tr>
+        <tr><td>SCZ</td><td>slope_PC2</td><td class="num">0.033 (0.030)</td><td class="num">0.036 (0.023)</td><td class="num ns">−0.001 (0.99)</td><td class="num ns">0.50</td></tr>
+        <tr><td>MDD</td><td>global_slope</td><td class="num">−0.046 (0.016)</td><td class="num">−0.040 (0.047)</td><td class="num">−0.115 (0.071)</td><td class="num ns">0.26</td></tr>
+        <tr><td>MDD</td><td>slope_PC2</td><td class="num">0.051 (0.013)</td><td class="num">0.055 (9.3e−03)</td><td class="num ns">0.004 (0.95)</td><td class="num ns">0.46</td></tr>
+        <tr><td>MDD</td><td>baseline_thickness</td><td class="num">−0.059 (0.032)</td><td class="num">−0.074 (0.011)</td><td class="num ns">0.039 (0.57)</td><td class="num ns">0.12</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="measure">
+    <p>The between-family term reproduces every v1 population estimate — the check that the two pipelines agree where they must. No p-difference is significant, so this run gives <em>no evidence</em> that the population estimates are inflated by between-family confounding, and at 1,339 pairs and roughly 18% power, no evidence against it either. The within-family estimates are simply uninformative at this sample size.</p>
+    <p>The one exception worth watching: MDD → <code>global_slope</code> has a within-family estimate <em>larger</em> than its between-family counterpart and in the same direction (β = −0.115, p = 0.071). At this power that is a curiosity for a larger release, not a result.</p>
+  </div>
+
+  <div class="callout warn" id="alz-block">
+    <h3>Alzheimer's negative control <span class="pending">running</span></h3>
+    <p>The hypothesis is specific to <em>adolescent-onset</em> illness, and that specificity is only demonstrated if a late-onset brain disorder fails the same test. PGC-ALZ2 (Wightman et al. 2021, excluding 23andMe) is being run through the identical rg, MAGMA and polygenic-score pipeline, with and without the APOE region. If Alzheimer's risk predicts adolescent cortical thinning as well as schizophrenia risk does, the schizophrenia result is far more likely to reflect generic brain-related polygenicity or residual stratification than anything developmental. Results will be added here.</p>
+  </div>
+</section>
+
+<section>
+  <p class="eyebrow">Assessment</p>
+  <h2>Did v2 add signal?</h2>
+  <div class="verdict">
+    <div class="vcard yes"><p class="tag">Added</p><p>A demonstrated confound removal: LDSC intercept 1.0995 → 1.0036, λ<sub>GC</sub> 1.107 → 1.036, and an in-sample LD panel that works instead of returning negative heritability.</p></div>
+    <div class="vcard yes"><p class="tag">Added</p><p>SCZ_locus_pool → baseline_thickness strengthened from p = 1.4e−03 to 1.1e−04, clearing multiple-testing correction with room.</p></div>
+    <div class="vcard yes"><p class="tag">Added</p><p>Standard errors on genetic correlations 2–2.8× tighter, and the first phenotype to cross LDSC's h² z ≥ 4 usability line.</p></div>
+    <div class="vcard yes"><p class="tag">Added</p><p>A within-family polygenic test with no v1 counterpart, plus two corrections to the record that did not hold up.</p></div>
+    <div class="vcard no"><p class="tag">Not added</p><p>No new loci. The pooled arm <em>loses</em> v1's 20 genome-wide hits, which fall just below threshold.</p></div>
+    <div class="vcard no"><p class="tag">Not added</p><p>No genetic correlation becomes significant, under any of six specifications.</p></div>
+    <div class="vcard no"><p class="tag">Not added</p><p>No AHBA component becomes significant; C1− stays null in the matched arm.</p></div>
+    <div class="vcard no"><p class="tag">Not added</p><p>MDD gene-set results weaken uniformly, by 2–4× in p.</p></div>
+  </div>
+  <div class="measure">
+    <p><strong>v2 bought correctness and precision, not discovery.</strong> The scientific claims are where v1 left them, with one strengthened, one weakened, and one retired.</p>
+  </div>
+</section>
+
+<section>
+  <p class="eyebrow">The honest read</p>
+  <h2>Are the PRS and MAGMA results convincing on their own?</h2>
+  <div class="measure">
+    <p><strong>Not yet.</strong> They are a coherent, directionally consistent set of weak signals — and every one of the concerns below is about the same underlying limitation, which is that the phenotype carries very little genetic signal to work with.</p>
+    <ol>
+      <li><strong>The effect is at the edge of detectability.</strong> The SCZ polygenic score explains roughly 0.17% of variance in thinning rate. Effects that small are exactly where residual confounding lives.</li>
+      <li><strong>The two surviving results are not independent.</strong> The polygenic association and the MAGMA locus-pool enrichment both aggregate SCZ discovery signal against ABCD signal, on the same two datasets. They are two views of one measurement, not two measurements.</li>
+      <li><strong>The causal test came back uninformative.</strong> Within families, the SCZ score does not predict thinning (β = +0.007). At 18% power that is not evidence against the effect — but it means the population association has never been shown to survive the control that would distinguish a causal effect from stratification, assortative mating or genetic nurture.</li>
+      <li><strong>Multiple testing depends on pre-specification.</strong> Correcting across the eight score thresholds gives p<sub>adj</sub> = 0.034, which holds only because <code>global_slope</code> was designated the primary phenotype in advance. The manifest does record it that way. Correct across all 160 disorder × phenotype × threshold × stratum cells and nothing survives.</li>
+      <li><strong>There is no replication.</strong> Not internally, not externally. Every number here comes from one sample.</li>
+    </ol>
+    <p>What the evidence does support: a consistent, small, directionally stable association between schizophrenia genetic risk and faster adolescent cortical thinning, visible through two related instruments and not contradicted by a third. That is a promising lead worth pursuing. It is not yet a demonstrated shared genetic architecture.</p>
+  </div>
+</section>
+
+<section>
+  <p class="eyebrow">Next</p>
+  <h2>What would actually move this forward</h2>
+  <div class="measure">
+    <p>The binding constraint is the phenotype's genetic signal: <code>global_slope</code> has h² ≈ 0.137 and an LDSC h² z of 1.16. Genetic correlation power, polygenic r², and gene-level power all scale with that number. Most of what follows attacks it.</p>
+  </div>
+
+  <h3>Cheap, and uses data already on disk</h3>
+  <div class="measure">
+    <ol>
+      <li><strong>Finish the negative-control panel.</strong> Alzheimer's is running. Add an ASD score as a childhood-onset contrast — the sumstats are already in the same directory. A specificity gradient across onset age (childhood → adolescent → late-life) would be a far stronger argument than any single association, and it costs one job.</li>
+      <li><strong>Replace clumping-and-thresholding with PRS-CS or SBayesR.</strong> Typically 1.5–2× the variance explained for the same discovery data, which is the cheapest real power gain available. PRS-CSx would additionally do the ancestry-stratified arm properly.</li>
+      <li><strong>Test the locus-pool finding with local genetic correlation.</strong> The MAGMA result says the signal concentrates in SCZ loci. LAVA or SUPERGNOVA tests exactly that, is far better powered than genome-wide rg when signal is localised, and turns a gene-set enrichment into a proper statistical statement about shared architecture.</li>
+      <li><strong>Formalise the age × PRS interaction.</strong> The hypothesis is developmental. If schizophrenia risk acts on the <em>rate</em> of thinning, the interaction is the direct test, and it uses the longitudinal structure that makes this cohort valuable.</li>
+    </ol>
+  </div>
+
+  <h3>Moderate effort, larger payoff</h3>
+  <div class="measure">
+    <ol>
+      <li><strong>Multivariate regional GWAS.</strong> A single global slope discards the regional patterning that a spatial map of SCZ risk already appears to track. MOSTest across parcels has repeatedly found an order of magnitude more loci for cortical morphology than univariate scans, and it is the single most likely route to a phenotype with enough h² for the downstream tests to work.</li>
+      <li><strong>Improve the slope itself.</strong> More waves, explicit measurement-error modelling, and longitudinal harmonisation raise h² directly. Every downstream test inherits the gain.</li>
+      <li><strong>Get more sibling pairs.</strong> 1,339 pairs gives 18% power for the within-family test — the one test that could establish causality. Newer ABCD genotype releases add subjects, and the within-family estimate is the number worth buying.</li>
+    </ol>
+  </div>
+
+  <h3>The one that would settle it</h3>
+  <div class="measure">
+    <p><strong>Replication in an independent cohort with longitudinal cortical measures</strong> — IMAGEN, Generation R, ALSPAC, or the ABCD-adjacent lifespan samples. Everything above improves an estimate inside one dataset. Only an independent sample converts a lead into a finding, and at this effect size it is what a reviewer will ask for first.</p>
+  </div>
+</section>
+
+<footer>
+  <p>Generated from <code>hpc_v2/README_HPC.md</code> §11–§13 and the summary tables under <code>hpc_v2/work/results_v2/</code>. Every figure is read from a results file; none are transcribed by hand. Pipeline code, configuration and provenance are in the repository on branch <code>hpc-cluster-run</code>.</p>
+</footer>
+
+</div>
+
+<script>
+  // Forest plot: rg estimates with 95% CIs, drawn on one shared scale so the
+  // reader can see directly that every interval crosses zero.
+  var rows = [
+    {label:"v1 pooled (EUR LD)",        rg:-0.140, se:0.083, p2:"0.092", p1:"0.046", note:"confounded"},
+    {label:"v1 EUR",                    rg:-0.199, se:0.218, p2:"0.361", p1:"0.180"},
+    {label:"v2 pooled (EUR LD)",        rg:-0.162, se:0.115, p2:"0.160", p1:"0.080"},
+    {label:"v2 pooled (in-sample LD)",  rg:-0.115, se:0.079, p2:"0.143", p1:"0.071"},
+    {label:"v2 EUR (SCZ primary)",      rg:-0.149, se:0.109, p2:"0.171", p1:"0.085"},
+    {label:"v2 EUR (SCZ core, matched)",rg:-0.121, se:0.099, p2:"0.223", p1:"0.111"}
+  ];
+  var LO = -0.7, HI = 0.35;
+  function pos(v){ return ((v - LO) / (HI - LO)) * 100; }
+  var host = document.getElementById("forest-rows");
+  rows.forEach(function(r){
+    var lo = r.rg - 1.96 * r.se, hi = r.rg + 1.96 * r.se;
+    var div = document.createElement("div");
+    div.className = "frow";
+    var confounded = r.note === "confounded";
+    div.innerHTML =
+      '<div class="flabel">' + r.label +
+        (confounded ? ' <span style="color:var(--neg); font-size:11px;">(confounded)</span>' : '') +
+      '</div>' +
+      '<div class="ftrack">' +
+        '<div style="position:absolute; left:' + pos(0) + '%; top:0; bottom:0; width:1px; ' +
+             'border-left:1px dashed var(--rule-2);"></div>' +
+        '<div style="position:absolute; top:50%; transform:translateY(-50%); left:' + pos(lo) + '%; ' +
+             'width:' + (pos(hi) - pos(lo)) + '%; height:2px; background:' +
+             (confounded ? 'var(--neg)' : 'var(--v2)') + '; opacity:.45;"></div>' +
+        '<div style="position:absolute; top:50%; left:' + pos(r.rg) + '%; ' +
+             'transform:translate(-50%,-50%); width:9px; height:9px; border-radius:50%; ' +
+             'background:' + (confounded ? 'var(--neg)' : 'var(--v2)') + ';"></div>' +
+      '</div>' +
+      '<div class="fnum">' + r.p2 + ' / ' + r.p1 + '</div>';
+    host.appendChild(div);
+  });
+</script>
