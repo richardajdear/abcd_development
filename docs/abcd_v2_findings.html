@@ -127,12 +127,12 @@
 <header class="top">
   <p class="kicker">ABCD · Cortical development genetics · Pipeline v2</p>
   <h1>Does adolescent brain development share genetics with adolescent-onset illness?</h1>
-  <p class="standfirst">A sibling-aware, ancestry-aware rebuild of the ABCD genetics pipeline. It corrects a real confound in the previous analysis, sharpens one result, weakens another — and leaves the central claim resting on two non-independent tests.</p>
+  <p class="standfirst">A sibling-aware, ancestry-aware rebuild of the ABCD genetics pipeline. It corrects a real confound in the previous analysis and sharpens one result. A promising locus-level finding did not survive its own background test, and the central claim still rests on two non-independent tests.</p>
   <div class="meta">
     <span><b>Sample</b> 8,082 genotyped + phenotyped (4,116 European)</span>
     <span><b>Pipeline</b> hpc_v2 · GENESIS PC-AiR/PC-Relate</span>
     <span><b>Compared against</b> hpc v1 · GCTA fastGWA</span>
-    <span><b>Updated</b> 7 Sep 2026</span>
+    <span><b>Updated</b> 8 Sep 2026</span>
   </div>
 </header>
 
@@ -335,9 +335,51 @@
     <p>The one exception worth watching: MDD → <code>global_slope</code> has a within-family estimate <em>larger</em> than its between-family counterpart and in the same direction (β = −0.115, p = 0.071). At this power that is a curiosity for a larger release, not a result.</p>
   </div>
 
-  <div class="callout warn" id="alz-block">
-    <h3>Alzheimer's negative control <span class="pending">running</span></h3>
-    <p>The hypothesis is specific to <em>adolescent-onset</em> illness, and that specificity is only demonstrated if a late-onset brain disorder fails the same test. PGC-ALZ2 (Wightman et al. 2021, excluding 23andMe) is being run through the identical rg, MAGMA and polygenic-score pipeline, with and without the APOE region. If Alzheimer's risk predicts adolescent cortical thinning as well as schizophrenia risk does, the schizophrenia result is far more likely to reflect generic brain-related polygenicity or residual stratification than anything developmental. Results will be added here.</p>
+
+</section>
+
+<section>
+  <p class="eyebrow">Controls</p>
+  <h2>The onset-age control panel</h2>
+  <div class="measure">
+    <p>The hypothesis is specific to <em>adolescent-onset</em> illness, and that specificity is only demonstrated if disorders with other onset ages fail the same test. Two were run through the identical pipeline: <strong>ASD</strong> (childhood onset, SPARK+iPSYCH+PGC, N = 58,794) and <strong>Alzheimer's</strong> (late onset, PGC-ALZ2 excluding 23andMe).</p>
+    <p>Read naively the panel fails: the ASD score predicts <code>baseline_thickness</code> at p = 8.4e-05, <em>stronger than any schizophrenia result</em>. But the threshold profile discriminates them, and that is the diagnostic that matters — a genuine polygenic overlap strengthens as more variants enter the score.</p>
+  </div>
+  <div class="scroll">
+    <table>
+      <caption>Beta by p-value threshold &middot; global_slope &middot; pooled sample</caption>
+      <thead><tr><th>Disorder</th><th>5e&minus;8</th><th>1e&minus;5</th><th>0.001</th><th>0.01</th><th>0.05</th><th>0.1</th><th>0.5</th><th>1</th></tr></thead>
+      <tbody>
+        <tr class="hi"><td>SCZ</td><td class="num">+0.006</td><td class="num">+0.003</td><td class="num">&minus;0.005</td><td class="num">&minus;0.020</td><td class="num sig">&minus;0.033</td><td class="num sig">&minus;0.033</td><td class="num sig">&minus;0.041</td><td class="num sig">&minus;0.039</td></tr>
+        <tr class="hi"><td>MDD</td><td class="num">&minus;0.018</td><td class="num">&minus;0.021</td><td class="num">&minus;0.031</td><td class="num sig">&minus;0.046</td><td class="num sig">&minus;0.048</td><td class="num sig">&minus;0.057</td><td class="num sig">&minus;0.055</td><td class="num sig">&minus;0.056</td></tr>
+        <tr><td>ASD <span class="ns">(childhood)</span></td><td class="num">+0.006</td><td class="num sig">+0.036</td><td class="num">+0.007</td><td class="num">&minus;0.012</td><td class="num">&minus;0.010</td><td class="num">&minus;0.011</td><td class="num">&minus;0.009</td><td class="num">&minus;0.009</td></tr>
+        <tr><td>ALZ <span class="ns">(late, no APOE)</span></td><td class="num">+0.008</td><td class="num">&minus;0.010</td><td class="num">&minus;0.020</td><td class="num">&minus;0.014</td><td class="num sig">&minus;0.034</td><td class="num">&minus;0.025</td><td class="num">&minus;0.029</td><td class="num">&minus;0.029</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="measure">
+    <p><strong>SCZ and MDD are monotone</strong> &mdash; null at stringent thresholds, strengthening steadily as variants accumulate. That is distributed polygenic overlap. <strong>ASD is the opposite</strong>: significant at 1e&minus;5 on 69 variants, dead null at 31,740 / 183,700 / 271,508, with the sign reversing. A handful of loci or a threshold-selection artefact, not polygenic sharing &mdash; and present in the European arm too (p = 3.2e&minus;03), so not simply stratification.</p>
+    <p><strong>Alzheimer's is the awkward one.</strong> It is weakly monotone in the <em>same</em> direction as schizophrenia and never survives correction. It is not clean evidence against specificity, and it is not the flat null the hypothesis wants. Both controls should be reported. Alzheimer's LDSC heritability on these statistics is 0.005 &plusmn; 0.004, so its genetic-correlation null is uninformative &mdash; only its polygenic arm carries weight.</p>
+  </div>
+</section>
+
+<section>
+  <p class="eyebrow">Local rg</p>
+  <h2>Testing the MAGMA finding directly, and retracting it</h2>
+  <div class="measure">
+    <p>Genome-wide genetic correlation averages over the whole genome and came back null. MAGMA said the signal concentrates in the schizophrenia locus pool. LAVA tests that directly, estimating rg <em>within</em> each of 2,495 approximately independent LD blocks. 223 of them contain a locus-pool gene &mdash; a hypothesis fixed by MAGMA before any local rg existed, cutting the testing burden elevenfold.</p>
+    <p>Within that targeted set the result looked compelling: four correlations passing FDR, three at one locus (chr2:144.5&ndash;146.0 Mb) whose only locus-pool gene is <strong>ZEB2</strong>, a transcription factor required for cortical interneuron migration. All four slope phenotypes agreed in sign once their &minus;0.583 correlation with <code>global_slope</code> was accounted for.</p>
+  </div>
+
+  <div class="callout neg">
+    <h3>The genome-wide comparison falsifies the enrichment</h3>
+    <p>The background run &mdash; 10,412 tests over 2,028 blocks &mdash; shows the targeted blocks are <strong>not enriched at any threshold</strong>: 11.21% of targeted tests reach p &lt; 0.05 against 11.11% elsewhere (Fisher p = 0.92); at p &lt; 1e&minus;4 it is 0.19% against 0.14% (p = 0.66). The four hits are what 1,053 tests drawn from anywhere in this genome produce.</p>
+    <p>The nulls are also anti-conservative: 3.48% of all tests fall below p = 0.01 where 1% is expected, and 11.1% below 0.05 where 5% is expected &mdash; a 3.5&times; tail excess <em>genome-wide</em>, most likely from LAVA's univariate pre-filter selecting blocks whose statistics are already large. The empirical distribution, not the nominal p-value, is the right reference.</p>
+    <p><strong>ZEB2 should not be reported as a finding.</strong> It survives genome-wide FDR at q = 0.044 &mdash; as the 7th of 7 such hits, six of which sit in blocks with no locus-pool gene, and two of the seven being boundary solutions. A plausible locus worth revisiting in a better-powered sample, and not distinguishable from background here.</p>
+  </div>
+
+  <div class="measure">
+    <p>One thing survives independently: at that locus <code>baseline_thickness</code> fails the univariate local-heritability gate (p = 0.096) while all four slope phenotypes pass (p = 9.3e&minus;07 to 0.034). Local heritability there is specific to the rate of change rather than the cross-sectional measure &mdash; a statement about our own phenotypes, independent of the disorder correlation.</p>
   </div>
 </section>
 

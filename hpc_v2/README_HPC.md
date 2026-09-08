@@ -1144,3 +1144,64 @@ than to P+T, because PRS-CS models `beta_hat ~ N(beta, sigma²/n)` and Z rescale
 every SNP by 1/SE, which varies with MAF.  Beta is reconstructed as
 `z / sqrt(2p(1-p)(n + z²))` using MAF from PRS-CS's own 1000G EUR reference, so
 the control is weighted on the same scale as the other three.
+
+### 13.4 CORRECTION to 13.2 — the ZEB2 locus is not enriched, and the local-rg nulls are not calibrated
+
+The genome-wide LAVA run (job 35061400, 3 h 21 m) has now landed, and it
+**retracts the enrichment reading of 13.2**. 10,412 bivariate tests across
+2,028 blocks, of which the 223 SCZ locus-pool blocks contribute 1,053.
+
+**The targeted blocks show no excess of local genetic correlation whatever:**
+
+| threshold | in SCZ locus-pool blocks | elsewhere | ratio | Fisher p |
+|---|---|---|---|---|
+| p < 0.05 | 118/1,053 (11.21 %) | 1,040/9,359 (11.11 %) | 1.01× | 0.92 |
+| p < 1e-3 | 7/1,053 (0.66 %) | 55/9,359 (0.59 %) | 1.13× | 0.67 |
+| p < 1e-4 | 2/1,053 (0.19 %) | 13/9,359 (0.14 %) | 1.37× | 0.66 |
+| Bonferroni (4.8e-06) | 0/1,053 | 1/9,359 | — | 1.00 |
+
+So the MAGMA-motivated hypothesis — that SCZ/thinning sharing concentrates in
+the SCZ locus pool — **is not supported**. The four FDR hits reported in 13.2
+are what 1,053 tests drawn from anywhere in this genome produce.
+
+**The nulls are also anti-conservative, which inflates every p-value in 13.2:**
+
+| p-value bin | observed | expected under a calibrated null |
+|---|---|---|
+| < 0.01 | 3.48 % | 1 % |
+| 0.01–0.05 | 7.65 % | 4 % |
+| < 0.05 (total) | **11.1 %** | **5 %** |
+
+A ~3.5× excess in the tail, *genome-wide* — not confined to the targeted
+blocks. The likely cause is LAVA's own univariate pre-filter: conditioning on
+local h² being significant in both traits selects blocks where the statistics
+are already large, so the bivariate null is no longer uniform. Whatever the
+cause, **the genome-wide empirical distribution, not the nominal p-value, is
+the right reference**, and against it the targeted set is unremarkable.
+
+**Where that leaves ZEB2.** `slope_PC1 × SCZ` at locus 335 survives *genome-wide*
+FDR (q = 0.044) — but as the **7th of 7** such hits, the other six sitting in
+blocks with no SCZ locus-pool gene, and two of those seven being boundary
+solutions (|rho| = 1). It is a plausible locus with a developmentally sensible
+gene, and it is not distinguishable from background. **Do not report ZEB2 as a
+finding.** The internal consistency noted in 13.2 (all four slope phenotypes
+agreeing in sign once their −0.583 correlation with `global_slope` is accounted
+for) remains true and remains the reason the locus is worth revisiting in a
+better-powered sample — but consistency across correlated measures of one
+phenotype is not independent evidence.
+
+**What 13.2 got right and what it got wrong.** Right: the method, the
+pre-specification, the multiple-testing arithmetic within the targeted set, and
+the sign-consistency check. Wrong: treating "passes FDR within the targeted
+set" as evidence of enrichment without the genome-wide comparison that was still
+running. That comparison was flagged as outstanding in 13.2 and it has now
+falsified the reading. The lesson is the one this project keeps relearning — a
+result computed on a selected subset means nothing until the background rate is
+measured on the same pipeline.
+
+**One thing genuinely survives**: `baseline_thickness` failed the univariate
+local-h² gate at locus 335 (p = 0.096) while all four slope phenotypes passed
+(p = 9.3e-07 to 0.034). Local heritability there is specific to the rate of
+change rather than the cross-sectional measure. That is a statement about our
+phenotypes' own local h², independent of the disorder correlation and of the
+enrichment failure.
