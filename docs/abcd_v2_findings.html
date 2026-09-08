@@ -384,6 +384,37 @@
 </section>
 
 <section>
+  <p class="eyebrow">PRS-CS</p>
+  <h2>Scoring without threshold selection</h2>
+  <div class="measure">
+    <p>Clumping-and-thresholding keeps only variants below a p-value cut and reports the best of eight such cuts &mdash; a figure already selected on the outcome, needing a Bonferroni factor of 8. PRS-CS instead keeps every HapMap3 variant, re-estimates all effects jointly under a continuous-shrinkage prior with an external LD model, and learns its shrinkage from the data. One pre-specified test, nothing to tune.</p>
+  </div>
+  <div class="scroll">
+    <table>
+      <caption>Best-of-8-thresholds vs a single untuned Bayesian score &middot; pooled sample</caption>
+      <thead><tr><th>Disorder</th><th>Phenotype</th><th>C+T best-of-8</th><th>PRS-CS</th><th>PRS-CS r&sup2;</th></tr></thead>
+      <tbody>
+        <tr class="hi"><td>SCZ</td><td>global_slope</td><td class="num">&minus;0.041 <span class="sig">(4.3e&minus;03)</span></td><td class="num">&minus;0.026 <span class="ns">(0.195)</span></td><td class="num">0.00066</td></tr>
+        <tr><td>SCZ</td><td>slope_PC1</td><td class="num">+0.044 <span class="sig">(3.3e&minus;03)</span></td><td class="num">+0.052 <span class="sig">(0.011)</span></td><td class="num">0.00273</td></tr>
+        <tr><td>SCZ</td><td>slope_PC2</td><td class="num">+0.033 (0.030)</td><td class="num ns">+0.028 (0.186)</td><td class="num">0.00076</td></tr>
+        <tr><td>SCZ</td><td>slope_PC3</td><td class="num">&minus;0.029 (0.035)</td><td class="num ns">&minus;0.033 (0.105)</td><td class="num">0.00111</td></tr>
+        <tr><td>MDD</td><td>global_slope</td><td class="num">&minus;0.046 (0.016)</td><td class="num ns">&minus;0.029 (0.111)</td><td class="num">0.00085</td></tr>
+        <tr><td>MDD</td><td>slope_PC2</td><td class="num">+0.051 (0.013)</td><td class="num ns">+0.030 (0.128)</td><td class="num">0.00087</td></tr>
+        <tr><td>MDD</td><td>baseline_thickness</td><td class="num">&minus;0.059 (0.032)</td><td class="num ns">&minus;0.032 (0.088)</td><td class="num">0.00104</td></tr>
+        <tr class="hi"><td>ASD</td><td>baseline_thickness</td><td class="num">&minus;0.047 <span class="sig">(8.4e&minus;05)</span></td><td class="num">&minus;0.015 <span class="ns">(0.250)</span></td><td class="num">0.00024</td></tr>
+        <tr><td>ASD</td><td>slope_PC3</td><td class="num">&minus;0.034 <span class="sig">(5.4e&minus;03)</span></td><td class="num">&minus;0.034 <span class="sig">(0.012)</span></td><td class="num">0.00117</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="measure">
+    <p><strong>The headline weakens badly.</strong> SCZ &rarr; <code>global_slope</code> goes from p = 4.3e&minus;03 (0.034 after correcting for the eight thresholds) to <strong>p = 0.195</strong> under a method needing no correction at all; the European arm gives p = 0.284. A result that survives one scoring method and not the other, at r&sup2; &asymp; 0.0007, is a lead rather than a finding.</p>
+    <p><strong>The ASD control evaporates exactly as predicted</strong> &mdash; 8.4e&minus;05 to 0.250. That confirms the threshold-profile diagnosis above: the ASD signal really was a 69-variant artefact, not polygenic sharing. The diagnostic worked.</p>
+    <p>Surviving: SCZ &rarr; <code>slope_PC1</code> (p = 0.011, r&sup2; = 0.0027, the only cell where PRS-CS beats C+T) and ASD &rarr; <code>slope_PC3</code> (p = 0.012). Neither survives correction across the 15 cells.</p>
+    <p>PRS-CS's weakness is not proof of absence, and three reasons are worth keeping in view: it is restricted to HapMap3 (about 1.1M variants against 7M for C+T); its 1000 Genomes European LD reference is mismatched for the 32% non-European target subjects, where C+T clumped on our own sample; and the automatic shrinkage may over-shrink at this discovery power.</p>
+  </div>
+</section>
+
+<section>
   <p class="eyebrow">Assessment</p>
   <h2>Did v2 add signal?</h2>
   <div class="verdict">
@@ -405,7 +436,7 @@
   <p class="eyebrow">The honest read</p>
   <h2>Are the PRS and MAGMA results convincing on their own?</h2>
   <div class="measure">
-    <p><strong>Not yet.</strong> They are a coherent, directionally consistent set of weak signals — and every one of the concerns below is about the same underlying limitation, which is that the phenotype carries very little genetic signal to work with.</p>
+    <p><strong>Less than when this page was first written.</strong> Of the three strands that supported a schizophrenia&ndash;thinning link, two have since weakened under their own follow-up tests: the local genetic correlation is not enriched in schizophrenia loci, and the polygenic association does not reproduce without threshold selection. The MAGMA locus-pool enrichment (p = 7.4e&minus;03, reproduced across both pipelines under different association models) is the strand still standing. Every concern below reduces to the same limitation &mdash; the phenotype carries very little genetic signal to work with.</p>
     <ol>
       <li><strong>The effect is at the edge of detectability.</strong> The SCZ polygenic score explains roughly 0.17% of variance in thinning rate. Effects that small are exactly where residual confounding lives.</li>
       <li><strong>The two surviving results are not independent.</strong> The polygenic association and the MAGMA locus-pool enrichment both aggregate SCZ discovery signal against ABCD signal, on the same two datasets. They are two views of one measurement, not two measurements.</li>

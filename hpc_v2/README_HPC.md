@@ -1263,3 +1263,64 @@ strands supporting SCZ → faster thinning are now weaker than reported: the loc
 genetic correlation is not enriched, and the polygenic association does not
 survive a method without threshold selection. The MAGMA locus-pool enrichment
 (p = 7.4e-03, reproduced across v1 and v2) is the strand still standing.
+
+### 13.6 The Alzheimer's arm completes the panel — and the panel does not discriminate
+
+All 88 PRS-CS tasks completed (0 failures). The Alzheimer's score is the last
+piece, and it needed one extra step to interpret.
+
+**Raw result:** ALZ → `global_slope`, β = −0.0248 ± 0.0126, **p = 0.0486** —
+nominally significant, same direction as SCZ, and with a *smaller* p-value than
+SCZ's own PRS-CS result. Taken at face value that is fatal to the specificity
+claim.
+
+**But 77.4 % of the score's squared posterior weight sits on 786 APOE-region
+variants** (chr19:44.4–46.5 Mb, of 1,085,921 total). PRS-CS concentrates weight
+where the evidence is, and in Alzheimer's that is overwhelmingly APOE. So the
+score is an APOE score wearing a polygenic label, and "does APOE predict
+adolescent cortical thinning" is a different question from "does polygenic
+Alzheimer's risk predict it".
+
+Re-scoring with the APOE region dropped (1,085,135 variants, same posteriors):
+
+| disorder (PRS-CS, pooled n = 8,082) | β | SE | p |
+|---|---|---|---|
+| SCZ | −0.0256 | 0.0198 | 0.195 |
+| MDD | −0.0292 | 0.0184 | 0.111 |
+| ASD | −0.0026 | 0.0131 | 0.841 |
+| **ALZ, APOE included** | **−0.0248** | 0.0126 | **0.0486** |
+| **ALZ, APOE excluded** | **−0.0201** | 0.0141 | **0.155** |
+
+**Two conclusions, and the second is the important one.**
+
+1. **The nominal Alzheimer's association is APOE-driven** — it halves in
+   significance and loses nominal significance once APOE is removed. Worth
+   recording as its own observation (APOE effects on adolescent cortex are a
+   real and separate literature), not as evidence about polygenic AD risk.
+2. **Under the untuned method, schizophrenia and non-APOE Alzheimer's are
+   statistically indistinguishable**: β = −0.026 (p = 0.195) against β = −0.020
+   (p = 0.155), same direction, overlapping intervals. The onset-age panel does
+   not discriminate — **not because the disorders differ, but because none of
+   them is significant.** A control panel can only demonstrate specificity when
+   the target effect is itself detectable, and here it is not.
+
+**Where the project's central claim now stands.** Of the three strands:
+
+| strand | status after this session |
+|---|---|
+| Local genetic correlation in SCZ loci | **retracted** — no enrichment over genome-wide background (§13.4) |
+| Polygenic score, SCZ → `global_slope` | **does not survive** an untuned method (p = 0.195), and is matched by a late-onset control (§13.5, §13.6) |
+| MAGMA SCZ locus pool → `global_slope` | **stands** — p = 7.0e-03 (v1) and 7.4e-03 (v2), reproduced under different association models |
+
+One strand, not three. The MAGMA result is also the one whose statistic depends
+least on our phenotype's heritability, which is consistent with h² being the
+binding constraint rather than the effect being absent. Nothing here refutes the
+hypothesis; what it removes is the impression that several independent lines of
+evidence supported it. They were not independent, and two of them do not hold up
+under their own follow-up tests.
+
+**What this argues for next.** Every failure in §13.4–§13.6 traces to the same
+root: `global_slope` has h² ≈ 0.137 with an LDSC h² z of 1.16, so no
+cross-trait method has the power to separate a real small effect from zero.
+Raising that number — MOSTest across parcels, a better-estimated slope, more
+waves — is worth more than any further re-analysis of the current phenotype.
