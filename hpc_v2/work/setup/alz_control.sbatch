@@ -49,7 +49,7 @@ PRS_GENO="$W/genotype_imputed/prs/abcd_imp_prs"
 if [[ ! -s "$OUTD/ALZ.tsv" ]]; then
   echo "=== map PGC-ALZ2 to rsIDs  $(date) ==="
   python3 "$SETUP/prepare_alz.py" \
-    "$PRS_GENO.bim" "$SRC/PGCALZ2sumstatsExcluding23andMe.txt" "$OUTD/ALZ.tsv"
+    "$MAGMA_REF.bim" "$SRC/PGCALZ2sumstatsExcluding23andMe.txt" "$OUTD/ALZ.tsv"
 fi
 echo "ALZ.tsv: $(( $(wc -l < "$OUTD/ALZ.tsv") - 1 )) SNPs"
 
@@ -97,9 +97,9 @@ done
 # --- 4. PRS, same P+T settings as v1's SCZ/MDD scores -------------------------
 # APOE-excluded copy first, so both variants clump independently.
 awk 'BEGIN{FS=OFS="\t"} NR==1{print; next} {print}' "$OUTD/ALZ.tsv" > "$PRSD/ALZ_norm.tsv"
-awk 'NR==FNR{if(FNR>1 && $1=="19" && $4>=44400000 && $4<=46500000) apoe[$2]=1; next}
+awk 'NR==FNR{if($1=="19" && $4>=44400000 && $4<=46500000) apoe[$2]=1; next}
      FNR==1{print; next} !($1 in apoe)' \
-     "$PRS_GENO.bim" "$OUTD/ALZ.tsv" > "$PRSD/ALZnoAPOE_norm.tsv"
+     "$MAGMA_REF.bim" "$OUTD/ALZ.tsv" > "$PRSD/ALZnoAPOE_norm.tsv"
 echo "ALZ SNPs: $(( $(wc -l < "$PRSD/ALZ_norm.tsv") - 1 ));  minus APOE: $(( $(wc -l < "$PRSD/ALZnoAPOE_norm.tsv") - 1 ))"
 
 for D in ALZ ALZnoAPOE; do

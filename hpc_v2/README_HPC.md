@@ -998,3 +998,149 @@ a curiosity to re-test in a larger release, not a result.
 project's scientific claims are where v1 left them, with one strengthened
 (SCZ locus pool → baseline thickness), one weakened (MDD high-confidence sets),
 and one retired (v1's 20 genome-wide hits).
+
+---
+
+## 13. Control disorders, local rg and PRS-CS — 2026-09-08
+
+Three additions aimed at the same question: **is the SCZ association specific to
+adolescent-onset illness, and is it real?**
+
+### 13.1 HEADLINE — the onset-age control panel does not behave as hoped, but the reason matters
+
+Two control disorders were run through the identical pipeline (rg, MAGMA, P+T
+polygenic scores): **ASD** (childhood onset; SPARK+iPSYCH+PGC, N = 58,794) and
+**Alzheimer's** (late onset; PGC-ALZ2, Wightman 2021 excl. 23andMe).  Both are
+already on disk; neither needed downloading.
+
+Naively the panel fails: ASD's polygenic score predicts `baseline_thickness` at
+**p = 8.4e-05**, *stronger* than any SCZ result, and `global_slope` at
+p = 1.9e-03.  Alzheimer's (APOE excluded) predicts `global_slope` at p = 0.021.
+Taken at face value that would say the association is not developmental at all.
+
+**But the threshold profile discriminates them, and it is decisive.**  A genuine
+polygenic overlap strengthens as more SNPs enter the score.  An artefact does
+not.  Pooled sample, β (p) by p-value threshold, `global_slope`:
+
+| disorder | 5e-8 | 1e-5 | 0.001 | 0.01 | 0.05 | 0.1 | 0.5 | 1 |
+|---|---|---|---|---|---|---|---|---|
+| **SCZ** | +0.006 | +0.003 | −0.005 | −0.020 | **−0.033** | **−0.033** | **−0.041** | **−0.039** |
+| **MDD** | −0.018 | −0.021 | −0.031 | **−0.046** | **−0.048** | **−0.057** | **−0.055** | **−0.056** |
+| ASD | +0.006 | **+0.036** | +0.007 | −0.012 | −0.010 | −0.011 | −0.009 | −0.009 |
+| ALZ (no APOE) | +0.008 | −0.010 | −0.020 | −0.014 | **−0.034** | −0.025 | −0.029 | −0.029 |
+
+(bold = p < 0.05; `baseline_thickness` shows the same pattern — ASD significant
+only at 5e-8 and 1e-5, sign reversing at looser thresholds.)
+
+- **SCZ and MDD are monotone**: null at stringent thresholds, strengthening
+  steadily as SNPs accumulate.  That is the signature of distributed polygenic
+  overlap.
+- **ASD is the opposite**: significant at 1e-5 on **69 SNPs**, dead null at
+  31,740 / 183,700 / 271,508 SNPs, and the sign flips.  That is a handful of
+  loci or a threshold-selection artefact, not polygenic sharing.  It is present
+  in EUR too (p = 3.2e-03), so it is not simply stratification.
+- **Alzheimer's is the genuinely awkward one**: weakly monotone in the SAME
+  direction as SCZ (p = 0.02 at 0.05, p ≈ 0.06–0.07 at the loosest thresholds),
+  never surviving correction.  It is not clean evidence against specificity, but
+  it is not the flat null the hypothesis wants either.
+
+**Reading.** The panel supports SCZ/MDD being polygenic in a way ASD is not, and
+that is a real discriminator the single-threshold summary would have missed.  It
+does **not** establish onset-age specificity, because Alzheimer's does not
+cleanly fail.  Both controls should be reported.
+
+**Caveat on the rg arm of the controls:** Alzheimer's LDSC h² on these sumstats
+is 0.005 ± 0.004, so its *genetic-correlation* null (all p > 0.6) is
+uninformative — the test could not have detected anything.  Only the polygenic
+arm of the ALZ control carries weight.
+
+### 13.2 Local genetic correlation (LAVA) — the MAGMA finding becomes testable
+
+Genome-wide rg averages over the whole genome and was null.  MAGMA said the
+signal concentrates in the SCZ **locus pool**.  LAVA tests that directly by
+estimating rg within each of 2,495 approximately independent LD blocks.
+
+**223 of 2,495 blocks contain a SCZ locus-pool gene.**  Restricting to those is
+pre-specified by MAGMA — computed before any local rg existed, so it is not
+selection on the outcome — and cuts the testing burden 11-fold.  1,053 bivariate
+tests ran (LAVA requires significant univariate local h² in both traits first;
+100–124 blocks passed per phenotype, 213–222 for the disorders).
+
+| phen1 | phen2 | LOC | rho [95% CI] | p | q (BH) | |
+|---|---|---|---|---|---|---|
+| baseline_thickness | MDD | 864 | −1.00 [−1.00,−0.54] | 2.5e-05 | 0.014 | **boundary — unstable** |
+| **slope_PC1** | **SCZ** | **335** | **+0.62 [+0.35,+0.91]** | **2.6e-05** | **0.014** | |
+| global_slope | SCZ | 335 | −0.63 [−1.00,−0.33] | 1.3e-04 | 0.046 | |
+| slope_PC3 | SCZ | 335 | −0.90 [−1.00,−0.47] | 1.9e-04 | 0.050 | |
+| slope_PC3 | MDD | 2483 | −1.00 [−1.00,−0.49] | 2.5e-04 | 0.052 | boundary |
+| slope_PC2 | SCZ | 1719 | −0.50 [−0.81,−0.24] | 3.5e-04 | 0.062 | |
+
+2 pass Bonferroni (p < 4.75e-05), 4 pass FDR q < 0.05.  What the loci contain:
+
+| LOC | region (GRCh37) | SCZ locus-pool genes |
+|---|---|---|
+| **335** | chr2:144.5–146.0 Mb | **ZEB2** |
+| **1719** | chr11:112.8–113.9 Mb | **DRD2** |
+| 2483 | chr22:38.7–40.4 Mb | ATF4, **CACNA1I**, MGAT3, MIEF1, RPS19BP1 |
+| 864 | chr5:106.4–107.3 Mb | EFNA5 |
+
+**Locus 335 is the result.**  Three phenotypes independently show local rg with
+SCZ in the same block, two of them past Bonferroni, and the block's only
+locus-pool gene is **ZEB2** — a transcription factor required for cortical
+interneuron migration and the gene behind Mowat-Wilson syndrome.  A
+developmental transcription factor is exactly the kind of locus this hypothesis
+predicts.  DRD2 at locus 1719 is the canonical SCZ gene and reaches p = 3.5e-04.
+
+**Three cautions, none of which the tables should hide.**
+1. The three locus-335 rows are **not independent** — the slope PCs and
+   `global_slope` come from the same measurements.  They are one finding seen
+   three ways, which is reassuring for consistency but is not triplicate
+   evidence.
+2. `slope_PC1` is +0.62 while `global_slope` is −0.63 at the same locus.  That
+   is coherent only if PC1 loads opposite to the global slope; **this has not
+   been checked and must be before the sign is interpreted.**
+3. Estimates of exactly ±1 with a CI touching the bound are boundary solutions,
+   not perfect correlations.  Both MDD rows above are of that kind.
+
+The genome-wide LAVA run is still going; it is needed to establish whether 4
+hits in 1,053 targeted tests exceeds the genome-wide background rate.  **Until
+that lands, the enrichment claim is not established** — only the individual loci.
+
+### 13.3 PRS-CS — set up, and four input defects found
+
+PRS-CS replaces clumping+thresholding with a Bayesian continuous-shrinkage prior
+over all HapMap3 SNPs, learning the global shrinkage from the data
+(PRS-CS-auto).  It removes the eight-threshold multiple-testing burden entirely
+and typically buys 1.5–2× the variance explained.  All four disorders are run
+through it, deliberately: a specificity claim resting on a better-powered SCZ
+score against weaker control scores would be an artefact of method.
+
+Four defects were found and fixed getting there, all of the silent kind:
+
+1. **One all-tab blank row** in `SCZ_core.tsv` made PRS-CS's parser raise
+   `IndexError` on every chromosome (it splits on whitespace and indexes
+   `ll[1]`).
+2. **`rs283815` in PGC-ALZ2 has z = inf.**  PLINK loaded it happily
+   ("50,440 valid predictors") and returned `SCORESUM = 0` for all 11,670
+   subjects.  The APOE-inclusive Alzheimer's score in `control_ALZ/` is
+   therefore void; the APOE-excluded score, which drops that variant, is
+   correct and is the one reported in §13.1.
+3. **A race across array tasks.**  All 22 chromosome tasks per disorder built
+   the same input file concurrently; each read a partial write.  SCZ came out
+   as **391 SNPs instead of 7,585,076** and would have produced a meaningless
+   score without ever failing.  Input preparation is now its own job
+   (`prscs_prep.sbatch`).
+4. **A "skip if it exists" guard** around that preparation also enclosed the
+   `n_gwas` assignment, so a stale file left the sample size unset and it fell
+   back to 100,000 — for MDD, whose real effective N is **927,713**.  PRS-CS
+   scales its shrinkage by n, so this would have quietly mis-weighted the score.
+
+Corrected inputs: SCZ 7,585,076 SNPs (n = 130,000), MDD 7,363,302 (927,713),
+ASD 2,910,895 (58,794), ALZ 1,121,059 (74,004).
+
+**Alzheimer's needed one further correction to be a fair control.**  PGC-ALZ2
+supplies Z, not beta, and no allele frequency.  Feeding Z to PRS-CS is worse
+than to P+T, because PRS-CS models `beta_hat ~ N(beta, sigma²/n)` and Z rescales
+every SNP by 1/SE, which varies with MAF.  Beta is reconstructed as
+`z / sqrt(2p(1-p)(n + z²))` using MAF from PRS-CS's own 1000G EUR reference, so
+the control is weighted on the same scale as the other three.

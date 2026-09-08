@@ -6,11 +6,15 @@ p / N and NO marker ID.  Everything downstream here -- MAGMA, LDSC and the PRS
 -- joins on rsID (hpc/README_HPC.md 8.16.7), so the file is unusable until the
 IDs are restored.
 
-Mapping target is the PRS genotype fileset's .bim, deliberately: that is the
-exact variant space the SCZ and MDD scores were built in, so the Alzheimer's
-control is scored over the same SNPs rather than a different subset.  Both
-sides are GRCh37 (the .bim after v1's rsID restore, and the file's own
-PosGRCh37 column), so positions are directly comparable.
+Mapping target is g1000_eur.bim (MAGMA's LD reference), NOT our own genotype
+fileset -- and that is a build question, measured rather than assumed.  v1
+restored rsIDs onto the imputed data instead of lifting it over
+(hpc/README_HPC.md 8.16.7), so our .bim carries GRCh38 positions while this file
+is GRCh37.  Tested on 199,636 ALZ positions: our PRS .bim matches 532 of them
+(0.3%, i.e. coincidence), g1000_eur.bim matches 177,773 (89.0%).  The first
+version of this script used our .bim and kept only 68,680 of 12.7M SNPs.
+Downstream this costs nothing: MAGMA uses g1000_eur as its panel anyway, LDSC
+restricts to HapMap3 which is a subset of it, and the PRS matches on rsID.
 
 Alleles are checked, not assumed: a position match is kept only if the tested/
 other pair equals the .bim pair, in either order or as its strand complement.
