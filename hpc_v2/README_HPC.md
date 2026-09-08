@@ -1205,3 +1205,61 @@ local-h² gate at locus 335 (p = 0.096) while all four slope phenotypes passed
 change rather than the cross-sectional measure. That is a statement about our
 phenotypes' own local h², independent of the disorder correlation and of the
 enrichment failure.
+
+### 13.5 PRS-CS — the headline SCZ association does not survive it
+
+PRS-CS-auto completed for SCZ, MDD and ASD (ALZ still running at time of
+writing). Posterior weights: SCZ 1,085,902 SNPs, MDD 1,029,904, ASD 369,623 —
+the HapMap3 intersection, against 7M for clumping+thresholding.
+
+**The comparison is not like-for-like in the direction that flatters C+T**, and
+that is the point. v1's reported p-values are the *best of eight thresholds*,
+already selected on the outcome and needing a Bonferroni factor of 8. PRS-CS-auto
+is a **single pre-specified test** with no threshold to tune.
+
+| disorder | phenotype | C+T best-of-8 β (p) | PRS-CS β (p) | PRS-CS r² |
+|---|---|---|---|---|
+| SCZ | **`global_slope`** | −0.041 (**4.3e-03**) | −0.026 (**0.195**) | 0.00066 |
+| SCZ | `slope_PC1` | +0.044 (3.3e-03) | **+0.052 (0.011)** | **0.00273** |
+| SCZ | `slope_PC2` | +0.033 (0.030) | +0.028 (0.186) | 0.00076 |
+| SCZ | `slope_PC3` | −0.029 (0.035) | −0.033 (0.105) | 0.00111 |
+| SCZ | `baseline_thickness` | +0.016 (0.282) | −0.021 (0.302) | 0.00044 |
+| MDD | `global_slope` | −0.046 (0.016) | −0.029 (0.111) | 0.00085 |
+| MDD | `slope_PC2` | +0.051 (0.013) | +0.030 (0.128) | 0.00087 |
+| MDD | `baseline_thickness` | −0.059 (0.032) | −0.032 (0.088) | 0.00104 |
+| ASD | `baseline_thickness` | −0.047 (**8.4e-05**) | −0.015 (**0.250**) | 0.00024 |
+| ASD | `slope_PC3` | −0.034 (5.4e-03) | −0.034 (**0.012**) | 0.00117 |
+
+**Two readings, and they point opposite ways.**
+
+1. **The project's headline result weakens badly.** SCZ → `global_slope` goes
+   from p = 4.3e-03 (p_adj = 0.034 after the eight-threshold correction) to
+   **p = 0.195** under a method that needs no correction at all. In the EUR arm
+   it is p = 0.284. A result that survives one scoring method and not the other,
+   at this effect size, is a lead and not a finding.
+2. **The ASD control result evaporates**, exactly as 13.1's threshold-profile
+   argument predicted: p = 8.4e-05 → 0.250. That is a genuine confirmation that
+   the ASD signal was a 69-SNP threshold artefact, and it is reassuring about
+   the diagnostic logic in 13.1.
+
+**What survives PRS-CS**: SCZ → `slope_PC1` (p = 0.011, r² = 0.0027 — the
+largest r² in the table, and the only cell where PRS-CS *beats* C+T), and
+ASD → `slope_PC3` (p = 0.012). Neither survives correction across the 15 cells
+above (threshold 0.0033).
+
+**Do not read PRS-CS's weakness as proof of absence.** Three caveats:
+- PRS-CS is restricted to HapMap3 (~1.1M SNPs) where C+T used the full 7M set.
+- Its LD reference is 1000G EUR while the pooled target sample is 32 %
+  non-European; the reference is mismatched for those subjects. (C+T's clumping
+  reference was our own sample, so this cuts the other way.)
+- PRS-CS-auto learns one global shrinkage parameter; if it over-shrinks at this
+  discovery power, real signal is attenuated.
+
+The EUR arm removes the ancestry mismatch and gives SCZ → `global_slope`
+β = −0.017, p = 0.284 — same direction, no significance, n = 4,116.
+
+**Net effect on the project's claims.** Combined with 13.4, two of the three
+strands supporting SCZ → faster thinning are now weaker than reported: the local
+genetic correlation is not enriched, and the polygenic association does not
+survive a method without threshold selection. The MAGMA locus-pool enrichment
+(p = 7.4e-03, reproduced across v1 and v2) is the strand still standing.
