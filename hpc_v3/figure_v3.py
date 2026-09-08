@@ -102,6 +102,10 @@ def recompute() -> None:
 
 
 # ---------------------------------------------------------------- plotting
+# Slide-deck dimensions (project convention: 13.333 x 7.5 in, dpi 200).
+# Layout: panel a = single column of definition maps (left); panel b = the
+# nine loading maps in two columns; right block = k-sensitivity (c) over the
+# two comparison matrices (d, e).
 
 BASE, MID, SMALL = 9.5, 8.5, 7.0
 
@@ -119,13 +123,13 @@ def _panel_letter(fig, x, y, s):
     fig.text(x, y, s, fontsize=BASE + 3, fontweight="bold", va="top")
 
 
-def _matrix(ax, M, title, star=None):
+def _matrix(ax, M, title, star=None, annot_size=SMALL - 1.5):
     """Annotated symmetric correlation matrix on a +/-1 diverging scale."""
     n = len(M)
     im = ax.imshow(M.to_numpy(), cmap="RdBu_r", vmin=-1, vmax=1)
-    ax.set_xticks(range(n), SHORT, rotation=45, ha="right")
-    ax.set_yticks(range(n), SHORT)
-    ax.set_title(title, pad=8, fontsize=BASE)
+    ax.set_xticks(range(n), SHORT, rotation=45, ha="right", fontsize=SMALL - 1)
+    ax.set_yticks(range(n), SHORT, fontsize=SMALL - 1)
+    ax.set_title(title, pad=4, fontsize=MID)
     for i in range(n):
         for j in range(n):
             v = M.iloc[i, j]
@@ -134,8 +138,7 @@ def _matrix(ax, M, title, star=None):
             txt = f"{v:.2f}".replace("0.", ".").replace("-.",  "\u2212.")
             if star is not None and star.iloc[i, j]:
                 txt += "*"
-            ax.text(j, i, txt, ha="center", va="center",
-                    fontsize=SMALL - 0.5,
+            ax.text(j, i, txt, ha="center", va="center", fontsize=annot_size,
                     color="white" if abs(v) > 0.6 else "black")
     ax.tick_params(length=0)
     for s in ax.spines.values():
@@ -157,81 +160,113 @@ def draw() -> Path:
         P.loc[r.map_x, r.map_y] = P.loc[r.map_y, r.map_x] = r.p_spin
     star = P < 0.05
 
+    cons = pd.read_csv(HERE / "phenotypes_v3_consistency.csv")
+
     _style()
-    fig = plt.figure(figsize=(13.2, 15.5))
-    # maps block: row a (definitions) + 3 rows of loading maps
-    gs = fig.add_gridspec(4, 3, hspace=0.42, wspace=0.05,
-                          left=0.03, right=0.985, top=0.925, bottom=0.36)
+    fig = plt.figure(figsize=(13.333, 7.5))
 
-    # --- row a: definitions -------------------------------------------------
-    ax = fig.add_subplot(gs[0, 0])
-    brainplot.plot_dk(maps["group_delta"], ax=ax, diverging=True, center=0.0,
-                      label="mm/year", fontsize=SMALL)
-    ax.set_title("group-mean thinning rate (ΔCT)", fontsize=MID)
+    def brain(rect, series, title, **kw):
+        ax = fig.add_axes(rect)
+        _, _, m = brainplot.plot_dk(series, ax=ax, colorbar=False,
+                                    fontsize=SMALL, **kw)
+        ax.set_title(title, fontsize=MID, pad=1.5)
+        return ax, m
 
-    ax = fig.add_subplot(gs[0, 1])
-    brainplot.plot_dk(maps["C3"], ax=ax, diverging=True, center=0.0,
-                      label="AHBA C3 (z)", fontsize=SMALL)
-    ax.set_title("AHBA C3 score (lh mirrored)", fontsize=MID)
+    def hcbar(rect, mappable, label):
+        cax = fig.add_axes(rect)
+        cb = fig.colorbar(mappable, cax=cax, orientation="horizontal")
+        cb.set_label(label, fontsize=SMALL, labelpad=1.5)
+        cb.ax.tick_params(labelsize=SMALL - 1, length=2)
+        cb.outline.set_visible(False)
 
-    ax = fig.add_subplot(gs[0, 2])
-    memb = maps["membership"]
+    # --- panel a: definitions, single column on the left ---------------------
+    AX_W, AX_H = 0.155, 0.215                     # one brain-map slot
+    _panel_letter(fig, 0.006, 0.985, "a")
+    fig.text(0.022, 0.972, "definitions (top-8 bilateral sets)",
+             fontsize=BASE)
+    _, m1 = brain([0.012, 0.715, AX_W, AX_H], maps["group_delta"],
+                  "group-mean thinning rate", diverging=True, center=0.0)
+    hcbar([0.037, 0.700, 0.105, 0.010], m1, "ΔCT (mm/year)")
+    _, m2 = brain([0.012, 0.415, AX_W, AX_H], maps["C3"],
+                  "AHBA C3 (lh mirrored)", diverging=True, center=0.0)
+    hcbar([0.037, 0.400, 0.105, 0.010], m2, "C3 score (z)")
     cmap = mpl.colors.ListedColormap([MEMBER_COLORS[k] for k in (1, 2, 3)])
-    brainplot.plot_dk(memb, ax=ax, cmap=cmap, vminmax=(0.5, 3.5),
-                      colorbar=False, fontsize=SMALL)
-    ax.set_title("selected regions (top-8 bilateral each)", fontsize=MID)
+    ax3, _ = brain([0.012, 0.125, AX_W, AX_H], maps["membership"],
+                   "selection sets (3 of 8 shared)", cmap=cmap,
+                   vminmax=(0.5, 3.5))
     handles = [mpl.patches.Patch(facecolor=MEMBER_COLORS[k],
                                  label=MEMBER_NAMES[k]) for k in (1, 2, 3)]
-    ax.legend(handles=handles, loc="lower center", ncol=3, frameon=False,
-              bbox_to_anchor=(0.5, -0.18), handlelength=1.2,
-              columnspacing=0.9, fontsize=SMALL)
+    ax3.legend(handles=handles, loc="upper center", ncol=1, frameon=False,
+               bbox_to_anchor=(0.5, -0.02), handlelength=1.1,
+               labelspacing=0.25, fontsize=SMALL)
 
-    fig.text(0.03, 0.952,
-             "Fast-thinning and high-C3 cortex overlap in 3 of 8 regions",
-             fontsize=BASE)
-    _panel_letter(fig, 0.008, 0.962, "a")
-
-    # --- rows b: loading maps, shared scale ---------------------------------
+    # --- panel b: loading maps, two columns -----------------------------------
     load = maps[PHENOS]
     lim = float(np.abs(load.to_numpy()).max())
-    mappable, axes_b = None, []
+    _panel_letter(fig, 0.185, 0.985, "b")
+    fig.text(0.202, 0.972, "loading maps: r(score, regional thinning rate), "
+             "n = 8,192", fontsize=BASE)
+    X0, PITCH_X, PITCH_Y = 0.195, 0.170, 0.185
+    BW, BH = 0.160, 0.158                       # map slot; title uses the rest
+    mappable = None
     for k, ph in enumerate(PHENOS):
-        ax = fig.add_subplot(gs[1 + k // 3, k % 3])
-        _, _, mappable = brainplot.plot_dk(
-            load[ph], ax=ax, diverging=True, center=0.0,
-            vminmax=(-lim, lim), colorbar=False, fontsize=SMALL)
-        ax.set_title(DISPLAY[ph], fontsize=MID)
-        axes_b.append(ax)
+        rect = [X0 + (k % 2) * PITCH_X, 0.790 - (k // 2) * PITCH_Y, BW, BH]
+        _, mappable = brain(rect, load[ph], DISPLAY[ph], diverging=True,
+                            center=0.0, vminmax=(-lim, lim))
+    # shared colorbar in the empty 10th slot
+    hcbar([X0 + PITCH_X + 0.025, 0.095, 0.110, 0.010],
+          mappable, "r (score vs regional thinning rate)")
 
-    # header sits in the gap above row 1, derived from real axes geometry
-    b_top = max(ax.get_position().y1 for ax in axes_b[:3])
-    fig.text(0.03, b_top + 0.030, "What each phenotype measures: correlation "
-             "of the score with each region's thinning rate (n = 8,192)",
-             fontsize=BASE)
-    _panel_letter(fig, 0.008, b_top + 0.040, "b")
+    # --- panel c: k-sensitivity ------------------------------------------------
+    axk = fig.add_axes([0.635, 0.615, 0.215, 0.30])
+    _panel_letter(fig, 0.578, 0.985, "c")
+    axk.set_title("choosing k: reliability falls before\ncollinearity does",
+                  fontsize=MID, pad=3)
+    kcol = {"topDelta": MEMBER_COLORS[1], "topC3": MEMBER_COLORS[3]}
+    for ph in ("topDelta", "topC3"):
+        d = cons[cons.phenotype == ph].sort_values("k_bilateral")
+        axk.plot(d.k_bilateral, d.r_with_global, "o-", color=kcol[ph],
+                 lw=1.6, ms=3.5)
+        axk.plot(d.k_bilateral, d.spearman_brown, "o--", color=kcol[ph],
+                 lw=1.3, ms=3.5, alpha=0.85)
+    g_sb = float(cons.loc[cons.phenotype == "global_slope",
+                          "spearman_brown"].iloc[0])
+    axk.axhline(g_sb, color="0.55", lw=0.8, ls=":")
+    axk.axvspan(7.2, 8.8, color="0.90", zorder=0)
+    axk.set_ylim(0.695, 1.0)
+    axk.set_xlim(3.2, 17.8)
+    axk.text(8, 0.703, "k = 8", ha="center", fontsize=SMALL, color="0.35")
+    axk.text(16.8, g_sb + 0.006, f"global-slope consistency ({g_sb:.2f})",
+             ha="right", va="bottom", fontsize=SMALL, color="0.35")
+    axk.text(0.03, 0.97, "— r with global slope (collinearity; 1 at k = 34)",
+             transform=axk.transAxes, ha="left", va="top", fontsize=SMALL)
+    axk.text(0.03, 0.90, "- - lh–rh consistency (reliability)",
+             transform=axk.transAxes, ha="left", va="top", fontsize=SMALL)
+    axk.set_xlabel("regions per set (k, bilateral)", fontsize=SMALL,
+                   labelpad=1.5)
+    axk.set_ylabel("correlation", fontsize=SMALL, labelpad=1.5)
+    axk.set_xticks([4, 8, 12, 17])
+    axk.tick_params(labelsize=SMALL - 1)
+    axk.spines[["top", "right"]].set_visible(False)
+    leg = [mpl.lines.Line2D([], [], color=kcol["topDelta"], lw=1.6,
+                            label="top-ΔCT"),
+           mpl.lines.Line2D([], [], color=kcol["topC3"], lw=1.6,
+                            label="top-C3")]
+    axk.legend(handles=leg, frameon=False, fontsize=SMALL,
+               loc="lower right", handlelength=1.3, borderaxespad=0.2)
 
-    # one shared colorbar just below the block, clear of the matrices
-    b_bot = min(ax.get_position().y0 for ax in axes_b[-3:])
-    cax = fig.add_axes([0.40, b_bot - 0.035, 0.22, 0.008])
-    cb = fig.colorbar(mappable, cax=cax, orientation="horizontal")
-    cb.set_label("r (phenotype vs regional thinning rate)", fontsize=SMALL)
-    cb.ax.tick_params(labelsize=SMALL)
-
-    # --- row c/d: matrices ---------------------------------------------------
-    axc = fig.add_axes([0.10, 0.035, 0.33, 0.20])
-    axd = fig.add_axes([0.585, 0.035, 0.33, 0.20])
-    _matrix(axc, char,
-            "subject space: subset means are near-collinear with global slope")
-    _matrix(axd, S, "map space: spatial correlation of loading maps",
-            star=star)
-    top_c = axc.get_position().y1
-    _panel_letter(fig, 0.008, top_c + 0.035, "c")
-    _panel_letter(fig, 0.50, top_c + 0.035, "d")
-    fig.text(0.585, 0.006, "* spin-test p < 0.05 (5,000 rotations)",
-             fontsize=SMALL)
+    # --- panels d, e: matrices --------------------------------------------------
+    axc = fig.add_axes([0.635, 0.115, 0.155, 0.36])
+    axd = fig.add_axes([0.828, 0.115, 0.155, 0.36])
+    _matrix(axc, char, "subject space:\ncorrelation of scores")
+    _matrix(axd, S, "map space: spatial corr.\nof loading maps*", star=star)
+    _panel_letter(fig, 0.578, 0.53, "d")
+    _panel_letter(fig, 0.795, 0.53, "e")
+    fig.text(0.828, 0.022, "* spin-test p < 0.05 (5,000 rotations)",
+             fontsize=SMALL - 1)
 
     out = HERE / "phenotypes_v3_figure.png"
-    fig.savefig(out, dpi=300)
+    fig.savefig(out, dpi=200)
     plt.close(fig)
     print(out)
     return out
