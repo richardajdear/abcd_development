@@ -55,7 +55,7 @@ sys.path.insert(0, str(REPO / "src"))
 from abcd import gcta_export  # noqa: E402
 
 K_BILATERAL = 8          # top-k bilateral base regions per subset (=16 labels)
-K_SENSITIVITY = (4, 8, 12, 17)
+K_SENSITIVITY = (4, 6, 8, 10, 12, 17)
 
 #: manifest rows for the new columns; priorities continue the settled 0-4.
 NEW_PHENOTYPES = (

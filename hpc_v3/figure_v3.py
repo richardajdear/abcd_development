@@ -208,9 +208,11 @@ def draw() -> Path:
              "n = 8,192", fontsize=BASE)
     X0, PITCH_X, PITCH_Y = 0.195, 0.170, 0.185
     BW, BH = 0.160, 0.158                       # map slot; title uses the rest
+    # column-wise: settled five down the left column, the four new on the right
     mappable = None
     for k, ph in enumerate(PHENOS):
-        rect = [X0 + (k % 2) * PITCH_X, 0.790 - (k // 2) * PITCH_Y, BW, BH]
+        col, row = k // 5, k % 5
+        rect = [X0 + col * PITCH_X, 0.790 - row * PITCH_Y, BW, BH]
         _, mappable = brain(rect, load[ph], DISPLAY[ph], diverging=True,
                             center=0.0, vminmax=(-lim, lim))
     # shared colorbar in the empty 10th slot
@@ -218,7 +220,7 @@ def draw() -> Path:
           mappable, "r (score vs regional thinning rate)")
 
     # --- panel c: k-sensitivity ------------------------------------------------
-    axk = fig.add_axes([0.635, 0.615, 0.215, 0.30])
+    axk = fig.add_axes([0.635, 0.615, 0.348, 0.30])
     _panel_letter(fig, 0.578, 0.985, "c")
     axk.set_title("choosing k: reliability falls before\ncollinearity does",
                   fontsize=MID, pad=3)
@@ -245,7 +247,7 @@ def draw() -> Path:
     axk.set_xlabel("regions per set (k, bilateral)", fontsize=SMALL,
                    labelpad=1.5)
     axk.set_ylabel("correlation", fontsize=SMALL, labelpad=1.5)
-    axk.set_xticks([4, 8, 12, 17])
+    axk.set_xticks([4, 6, 8, 10, 12, 17])
     axk.tick_params(labelsize=SMALL - 1)
     axk.spines[["top", "right"]].set_visible(False)
     leg = [mpl.lines.Line2D([], [], color=kcol["topDelta"], lw=1.6,
