@@ -242,7 +242,11 @@ SCZ, p<0.5:
 | pooled | `slope_projDelta` | −0.0082 | 0.59 | **+0.0354** | 0.0175 | **0.043** | [−0.0003, +0.0675] |
 | pooled | `slope_projC3` | −0.0093 | 0.54 | **+0.0342** | 0.0164 | **0.037** | [+0.0026, +0.0664] |
 
-**Every Δβ is positive.** The two subset means are statistically
+**No Δβ is negative beyond noise.** (Checked against
+`prs_paired_delta.tsv` across all 320 rows: 81 are negative, all trivially —
+max |Δβ| = 0.0065, every p ≥ 0.41, including this table's pooled
+`slope_topDelta` at −0.0003. An earlier draft of this section said "every Δβ
+is positive", which its own table contradicts.) The two subset means are statistically
 indistinguishable from `global_slope` (Δβ p = 0.15–0.96, bootstrap intervals
 straddling zero); the two projections — the traits that are genuinely different
 from the global mean (r = 0.28/0.41) — **significantly lose** the association.
@@ -613,8 +617,9 @@ hits**, h²_SNP 0.085–0.195 depending on threshold, LDSC h² z **0.30–0.66 �
 every one below `global_slope`'s 1.16**.
 
 **2. SCZ/MDD PRS β with ASD/AD controls, population + within-family, paired Δβ
-vs `global_slope`, permutation-corrected p.** §5. **Every Δβ is positive**
-(= weaker than the global mean). Subset means indistinguishable from
+vs `global_slope`, permutation-corrected p.** §5. **No Δβ is negative beyond
+noise** (81/320 rows < 0, max |Δβ| 0.0065, all p ≥ 0.41 — see §5.1; none
+indicates improvement on the global mean). Subset means indistinguishable from
 `global_slope`; projections significantly worse. Min-p permutation:
 `global_slope` p_perm = 0.007 (EUR), best new phenotype 0.027. Controls do not
 discriminate — ALZ → `slope_topC3` p = 0.023 against SCZ's 0.016.
