@@ -1324,3 +1324,125 @@ root: `global_slope` has h² ≈ 0.137 with an LDSC h² z of 1.16, so no
 cross-trait method has the power to separate a real small effect from zero.
 Raising that number — MOSTest across parcels, a better-estimated slope, more
 waves — is worth more than any further re-analysis of the current phenotype.
+
+### 13.7 CORRECTION to 12.5 — `core` is not the European-only SCZ release
+
+12.5 claimed to have built the first arm of this project that was
+"ancestry-matched on both sides", using `PGC3_SCZ_wave3.core`. That was wrong.
+The release README is explicit:
+
+> "The core meta-analysis consists of cohorts primarily of **east asian and
+> european** ancestry. The primary includes the core cohorts, and additionally
+> summary statistics from cohorts of african american and latino ancestry."
+
+So the hierarchy is `european` ⊂ `core` (EUR+EAS) ⊂ `primary` (+AFR+LAT).
+Case counts confirm it: `european` 53,386 / 77,258 against `core`
+55,085 / 78,957 — core carries ~1,700 extra non-European cases. **12.5 improved
+on v1's `primary` but stopped one step short of the matched pair it claimed**,
+and the same file went into the PRS-CS SCZ score.
+
+Redone with `PGC3_SCZ_wave3.european` (job 35088716):
+
+| phenotype | v1 EUR × SCZ-european | v2 EUR × SCZ-european | (v2 × SCZ-core, as in 12.5) |
+|---|---|---|---|
+| `baseline_thickness` | 0.033 ± 0.059 | 0.033 ± 0.054 | 0.022 ± 0.054 |
+| `global_slope` | −0.225 ± 0.229 | **−0.168 ± 0.113** | −0.121 ± 0.099 |
+| `slope_PC2` | −0.045 ± 0.066 | −0.030 ± 0.061 | −0.042 ± 0.059 |
+| `slope_PC1` | 0.199 ± 0.471 | 0.118 ± 0.169 | 0.077 ± 0.132 |
+
+**No conclusion changes.** `global_slope` moves from −0.121 to −0.168 (still
+p = 0.137, z = 1.49) — closer to the pooled estimate, still null, still the same
+sign. Every other cell moves less than half an SE. The correction matters for
+the accuracy of the label, not for the result: **the SCZ × `global_slope`
+genetic correlation is now negative in all seven specifications on record and
+significant in none.**
+
+The lesson is narrow and worth keeping: a file named `core` in a PGC release is
+not a synonym for "European", and the README is the only authority. This is the
+second ancestry-labelling error found in this project (v1's §8.16.3 was the
+first) — both were caught only by reading the release documentation rather than
+the filename.
+
+**SCZ EUR-only files now in use:** `PGC3_SCZ_wave3.european` for rg (13.7),
+SBayesR (13.8) and PRS-CSx's EUR stratum. The PRS-CS SCZ score in 13.5 still
+uses `core`; given the rg correction moved nothing, it is left as run and
+labelled accurately rather than recomputed.
+
+### 13.8 SBayesR — REVISES 13.5: the SCZ association does survive an untuned method
+
+SBayesR (GCTB 2.5.2) on the shrunk-sparse UKB HapMap3 LD reference (50k
+unrelated Europeans, 1,082,571 SNPs matched), EUR-only discovery GWAS for all
+four traits. All four converged; SNP h²: SCZ 0.466 ± 0.006, MDD 0.059 ± 0.001,
+ASD 0.157 ± 0.012, ALZ 0.025 ± 0.001.
+
+**13.5 concluded that SCZ → `global_slope` "does not survive a method without
+threshold selection". That was a conclusion drawn from one such method. With a
+second, it does — more strongly than C+T.**
+
+| disorder | phenotype | C+T best-of-8 | PRS-CS | **SBayesR** |
+|---|---|---|---|---|
+| SCZ | **`global_slope`** | −0.041 (4.3e-03) | −0.026 (0.195) | **−0.113 (7.3e-04)** |
+| SCZ | **`slope_PC1`** | +0.044 (3.3e-03) | +0.052 (0.011) | **+0.121 (4.8e-04)** |
+| SCZ | `slope_PC3` | −0.029 (0.035) | −0.033 (0.105) | **−0.095 (6.3e-03)** |
+| SCZ | `slope_PC2` | +0.033 (0.030) | +0.028 (0.186) | +0.030 (0.40) |
+| SCZ | `baseline_thickness` | +0.016 (0.282) | −0.021 (0.302) | +0.005 (0.89) |
+| MDD | `global_slope` | −0.046 (0.016) | −0.029 (0.111) | **−0.064 (5.9e-03)** |
+| MDD | `slope_PC1` | +0.041 (0.038) | +0.028 (0.141) | **+0.064 (7.7e-03)** |
+| MDD | `slope_PC2` | +0.051 (0.013) | +0.030 (0.128) | **+0.050 (0.044)** |
+| ASD | `baseline_thickness` | −0.047 (8.4e-05) | −0.015 (0.250) | +0.004 (0.75) |
+| ASD | `global_slope` | +0.036 (1.9e-03) | −0.003 (0.841) | −0.010 (0.44) |
+| ASD | `slope_PC3` | −0.034 (5.4e-03) | −0.034 (0.012) | **−0.029 (0.033)** |
+| ALZ | `global_slope` | −0.039 (7.2e-03) | −0.025 (0.049) | **−0.025 (0.039)** |
+
+**PRS-CS is the outlier, and there is a principled reason.** Its LD reference is
+1000 Genomes EUR — **503 individuals**. SBayesR's is **50,000** unrelated UK
+Biobank Europeans. At 1M SNPs the 1000G reference is badly under-powered for
+estimating LD, which attenuates posterior effects. So the ordering
+(SBayesR ≳ C+T > PRS-CS) is what LD-reference quality predicts, and 13.5's
+reading — that the C+T result was threshold selection — does not hold.
+
+**SBayesR is not simply inflating everything**, which is the check that makes
+this interpretable: ASD's two C+T artefacts go to p = 0.75 and 0.44, and ALZ is
+null on four of five phenotypes. It strengthens SCZ and MDD specifically.
+
+**Within-family under SBayesR** is the most encouraging version of that test so
+far, though still not significant:
+
+| disorder | phenotype | β_between | β_within | p_diff |
+|---|---|---|---|---|
+| SCZ | `global_slope` | −0.116 (8.0e-04) | **−0.083 (0.39)** | 0.73 |
+| SCZ | `slope_PC1` | +0.124 (5.5e-04) | **+0.091 (0.37)** | 0.75 |
+| MDD | `global_slope` | −0.060 (0.012) | −0.111 (0.16) | 0.54 |
+
+With C+T the SCZ within-family estimate was +0.007 — essentially zero and the
+wrong sign. With SBayesR's better-powered score it is **−0.083, i.e. 71 % of the
+between-family estimate and the same sign**, with p_diff = 0.73 giving no hint
+of between-family inflation. That is the pattern a largely causal effect
+produces. It remains p = 0.39 — **not evidence, but no longer evidence of
+nothing**, and the most informative version of the sibling test this project has
+produced.
+
+**Two cautions.**
+1. **The ALZ specificity problem persists and is still APOE.** ALZ →
+   `global_slope` is p = 0.039 under SBayesR, and **92.7 % of that score's
+   squared weight sits on 691 APOE-region variants** (even more concentrated
+   than PRS-CS's 77.4 %). So the late-onset control is nominally significant
+   again, and again for a reason that is one locus rather than polygenic AD risk.
+2. **One anomaly worth scrutiny, not reporting.** ALZ → `slope_PC1` gives
+   β_within = −0.119 (p = 0.005) against β_between = +0.020, with
+   p_diff = 0.0017 — the only significant p_diff in 20 tests, and in the
+   *opposite* direction to confounding (within exceeding between, sign-flipped).
+   With a score that is 93 % one locus and 20 tests on the table, this is far
+   more likely an APOE-in-siblings artefact than a finding. It should be chased
+   down before it is ever reported.
+
+**Revised standing of the three strands.**
+
+| strand | status |
+|---|---|
+| MAGMA SCZ locus pool → `global_slope` | stands (7.0e-03 v1, 7.4e-03 v2) |
+| **PRS, SCZ → `global_slope`** | **stands under 2 of 3 methods**, most strongly under the best-LD-reference method (7.3e-04); PRS-CS's null is attributable to a 503-individual LD panel |
+| Local rg in SCZ loci | retracted — no enrichment over background (13.4) |
+
+So two strands, not one — but the specificity problem is unresolved, because a
+late-onset control reaches nominal significance under both Bayesian methods.
