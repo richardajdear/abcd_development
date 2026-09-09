@@ -67,3 +67,5 @@ rg,baseline_thickness,v1,SCZ,EUR,hpc/work/results/ldsc_imp_eur/ldsc_rg_summary.t
 rg,baseline_thickness,v1,MDD,EUR,hpc/work/results/ldsc_imp_eur/ldsc_rg_summary.tsv,"v1 vs v2 GWAS, same LDSC code and LD reference",-0.02704,0.05786,0.6403,,observed,,,,3.62,yes
 rg,global_slope,v1,SCZ,EUR,hpc/work/results/ldsc_imp_eur/ldsc_rg_summary.tsv,"v1 vs v2 GWAS, same LDSC code and LD reference",-0.199,0.2178,0.361,,observed,,,,0.57,yes
 rg,global_slope,v1,MDD,EUR,hpc/work/results/ldsc_imp_eur/ldsc_rg_summary.tsv,"v1 vs v2 GWAS, same LDSC code and LD reference",-0.04301,0.151,0.7758,,observed,,,,0.58,yes
+prs,global_slope,avgfirst,SCZ,EUR,hpc_v3/prs_tables/prs_avgfirst.tsv,"array-score overlap (n=4,116), single p<0.5 score; same-sample current-definition beta -0.0395 (p=0.010)",-0.0347,0.0151,0.0219,4116.0,observed,1.0,0p5,,,
+prs,global_slope,avgfirst,MDD,EUR,hpc_v3/prs_tables/prs_avgfirst.tsv,"array-score overlap (n=4,116), single p<0.5 score; same-sample current-definition beta -0.0113 (p=0.468)",-0.019,0.0157,0.2254,4116.0,observed,1.0,0p5,,,

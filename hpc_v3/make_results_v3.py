@@ -235,6 +235,28 @@ def rows() -> list[dict]:
 
     build("v2", SOURCES, PHENOS)
     build("v1", SOURCES_V1, V1_PHENOS)
+
+    # ---- avg-first global slope (PRS panel only) ---------------------------
+    # Alternative definition tested 2026-09-08 (session "Leverage ABCD Sibling
+    # Design for GWAS"): average thickness across the 68 regions per scan,
+    # then ONE lmer per subject -- vs the settled mean-of-68-BLUPs.  r = 0.887
+    # between the two subject-level phenotypes.  PRS fitted locally on the
+    # array-genotyped C+T overlap (n = 4,116, single p<0.5 score, so m_eff=1);
+    # the same-sample CURRENT-definition comparators live in the same file and
+    # are folded into the caveat so the slide can state the paired contrast.
+    src_af = "hpc_v3/prs_tables/prs_avgfirst.tsv"
+    af = pd.read_csv(REPO / src_af, sep="\t")
+    af_ct = af[af.score == "ct"].set_index(["disorder", "definition"])
+    for dis in ("SCZ", "MDD"):
+        alt, cur = af_ct.loc[(dis, "avgfirst")], af_ct.loc[(dis, "current")]
+        out.append(dict(
+            panel="prs", phenotype="global_slope", pipeline="avgfirst",
+            disorder=dis, stratum="EUR", source=src_af,
+            caveat=(f"array-score overlap (n=4,116), single p<0.5 score; "
+                    f"same-sample current-definition beta "
+                    f"{cur.beta:+.4f} (p={cur.p:.3f})"),
+            estimate=float(alt.beta), se=float(alt.se), p=float(alt.p),
+            n=int(alt.n), status="observed", m_eff=1.0, threshold="0p5"))
     return out
 
 

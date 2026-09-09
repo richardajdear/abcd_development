@@ -1,0 +1,9 @@
+score	disorder	definition	beta	se	p	n
+ct	SCZ	current	-0.0395	0.0154	0.0103	4116
+ct	SCZ	avgfirst	-0.0347	0.0151	0.0219	4116
+prscs	SCZ	current	-0.0257	0.0155	0.0974	4116
+prscs	SCZ	avgfirst	-0.0301	0.0155	0.0517	4116
+ct	MDD	current	-0.0113	0.0156	0.4682	4116
+ct	MDD	avgfirst	-0.0190	0.0157	0.2254	4116
+prscs	MDD	current	-0.0177	0.0160	0.2695	4116
+prscs	MDD	avgfirst	-0.0257	0.0162	0.1119	4116

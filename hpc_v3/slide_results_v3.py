@@ -48,6 +48,7 @@ ROWS = [
     ("baseline_thickness", "v1", "     ↳ v1 pipeline", 0),
     ("global_slope", "v2", "global slope", 1),
     ("global_slope", "v1", "     ↳ v1 pipeline", 1),
+    ("global_slope", "avgfirst", "     ↳ avg-first definition", 1),
     ("slope_topDelta", "v2", "top-ΔCT mean", 2),
     ("slope_topC3", "v2", "top-C3 mean", 3),
     ("slope_projDelta", "v2", "ΔCT projection", 4),
@@ -56,7 +57,7 @@ ROWS = [
 ROW_INDEX = {(ph, pl): i for i, (ph, pl, _, _) in enumerate(ROWS)}
 YLAB = [lab for _, _, lab, _ in ROWS]
 #: the four new phenotypes start here -- used for the separating rule
-N_ANCHOR_ROWS = 4
+N_ANCHOR_ROWS = 5
 
 # Validated with the dataviz skill's checker (light mode, white surface):
 # lightness band PASS, chroma floor PASS, CVD separation PASS, normal-vision
@@ -102,15 +103,18 @@ def forest(ax, sub: pd.DataFrame, dodges: dict, annotate: str | None,
             ax.plot(0, y, marker="x", ms=5.5, mew=1.4,
                     color=DIS_COLOR[r.disorder], alpha=0.75, zorder=4)
             continue
+        # v1-pipeline rows are context, not the result: dim to the background
+        a = 0.5 if r.pipeline == "v1" else (0.55 if pending else 1)
         ax.errorbar(r.estimate, y, xerr=r.se, fmt="none", ecolor=color,
                     elinewidth=1.3, capsize=2, capthick=1.0,
-                    ls="--" if pending else "-", alpha=0.55 if pending else 1,
-                    zorder=2)
+                    ls="--" if pending else "-", alpha=a, zorder=2)
         # a surface ring keeps the marker legible where intervals overlap
         ax.plot(r.estimate, y, marker=marker, ms=5.5, mew=1.6,
-                mfc=color if filled else "white", mec="white", zorder=3)
+                mfc=color if filled else "white", mec="white", zorder=3,
+                alpha=a)
         ax.plot(r.estimate, y, marker=marker, ms=5.5, mew=1.1,
-                mfc=color if filled else "white", mec=color, zorder=4)
+                mfc=color if filled else "white", mec=color, zorder=4,
+                alpha=a)
         # dagger for rg rows LDSC itself flags as underpowered
         if (not pending and "underpowered" in sub.columns
                 and str(r.get("underpowered")) == "yes"):
@@ -247,6 +251,14 @@ def draw() -> Path:
     fig.text(0.008, 0.052,
              "v1 vs v2 — PRS: " + cav.get("prs", ""),
              fontsize=SMALL - 1.5, color="0.42")
+    af = df[(df.pipeline == "avgfirst") & (df.disorder == "SCZ")]
+    if len(af):
+        r = af.iloc[0]
+        fig.text(0.008, 0.092,
+                 "avg-first — global slope re-defined as region-mean CT per "
+                 "scan → one LMM (r = 0.887 with the settled definition); "
+                 f"PRS: {r.caveat}.",
+                 fontsize=SMALL - 1.5, color="0.42")
 
     srcs = sorted({"/".join(Path(s).parts[-2:]) for s in df.source.unique()})
     # one line ran off the right edge at 13.3in; wrap onto as many as needed
