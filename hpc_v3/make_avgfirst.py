@@ -30,6 +30,17 @@ the two constructions differ only in where BLUP shrinkage is applied — and
 empirically that is a wash, with the settled mean-of-BLUPs marginally ahead.
 The subset phenotypes' low h2 is therefore not a construction artefact.
 Global avg-first reproduces the 2026-09-08 session's r = 0.887 exactly.
+
+SECOND DIAGNOSTIC (user question, 2026-09-09): the imaging LMMs adjust for
+age, sex and site only — genetic ancestry PCs deliberately enter downstream
+(GENESIS null model, PRS covariates, EUR-stratified LDSC), never at phenotype
+construction.  To show that choice is inert, the avg-first fits are repeated
+with PC1-10 main effects PLUS PC x age_c interactions (the terms that can
+move a slope), on the 8,185 subjects with PCs, writing
+avgfirst_pc_comparison.csv / avgfirst_pc_density.csv (with-PCs vs without on
+the common subjects).  Requires the gitignored per-subject covariate export
+(out/<run>/gcta_inputs_v3/covar_quant.txt) — regenerate it with
+make_phenotypes_v3.py if absent.
 """
 from __future__ import annotations
 
@@ -135,12 +146,78 @@ def compare() -> None:
     print(pd.DataFrame(rows).round(4).to_string(index=False))
 
 
+R_FIT_PC = r"""
+suppressMessages({library(data.table); library(lme4)})
+d <- fread("hpc_v3/work/avgfirst_series_pc.csv")
+pcs <- paste0("PC", 1:10)
+rhs <- paste("age_c * (", paste(pcs, collapse=" + "),
+             ") + sex + (1 + age_c | subject) + (1 | site)")
+res <- list()
+for (nm in unique(d$series)) {
+  s <- d[series == nm]
+  m <- lmer(as.formula(paste("value ~", rhs)), data = s, REML = TRUE,
+            control = lmerControl(optimizer = "bobyqa", calc.derivs = FALSE))
+  re <- ranef(m)$subject
+  res[[nm]] <- data.table(subject = rownames(re), series = nm,
+                          slope = fixef(m)[["age_c"]] + re[["age_c"]])
+  cat(nm, "fixef age_c =", round(fixef(m)[["age_c"]], 5), "\n")
+}
+fwrite(rbindlist(res), "hpc_v3/work/avgfirst_slopes_pc.csv")
+"""
+
+
+def export_series_pc() -> None:
+    s = pd.read_csv(WORK / "avgfirst_series.csv")
+    cq = pd.read_csv(RUN / "gcta_inputs_v3/covar_quant.txt", sep=" ")
+    pcs = [f"PC{i}" for i in range(1, 11)]
+    cq["subject"] = "sub-" + cq.IID.str.replace("_", "", regex=False)
+    m = s.merge(cq[["subject"] + pcs].dropna(), on="subject", how="inner")
+    m.to_csv(WORK / "avgfirst_series_pc.csv", index=False)
+
+
+def compare_pc() -> None:
+    """with-PCs vs without, avg-first construction, common subjects."""
+    nopc = (pd.read_csv(WORK / "avgfirst_slopes.csv")
+            .pivot(index="subject", columns="series", values="slope"))
+    pc = (pd.read_csv(WORK / "avgfirst_slopes_pc.csv")
+          .pivot(index="subject", columns="series", values="slope"))
+    common = pc.index.intersection(nopc.index)
+    nopc, pc = nopc.loc[common], pc.loc[common]
+
+    def sb(x, y):
+        rr = x.corr(y)
+        return 2 * rr / (1 + rr)
+
+    rows, dens = [], []
+    for nm in ("global", "topDelta", "topC3"):
+        rows.append(dict(
+            phenotype=nm, n=len(common),
+            r_pc_vs_nopc=nopc[nm].corr(pc[nm]),
+            rho_pc_vs_nopc=nopc[nm].corr(pc[nm], method="spearman"),
+            sb_nopc=sb(nopc[f"{nm}_lh"], nopc[f"{nm}_rh"]),
+            sb_pc=sb(pc[f"{nm}_lh"], pc[f"{nm}_rh"])))
+        H, xe, ye = np.histogram2d(nopc[nm], pc[nm], bins=60)
+        nz = np.nonzero(H)
+        dens.append(pd.DataFrame(dict(
+            phenotype=nm, x_lo=xe[nz[0]], x_hi=xe[nz[0] + 1],
+            y_lo=ye[nz[1]], y_hi=ye[nz[1] + 1], count=H[nz].astype(int))))
+    pd.DataFrame(rows).round(4).to_csv(HERE / "avgfirst_pc_comparison.csv",
+                                       index=False)
+    pd.concat(dens).to_csv(HERE / "avgfirst_pc_density.csv", index=False)
+    print(pd.DataFrame(rows).round(4).to_string(index=False))
+
+
 def main() -> int:
     export_series()
     (WORK / "fit_avgfirst.R").write_text(R_FIT)
     subprocess.run(["Rscript", str(WORK / "fit_avgfirst.R")],
                    cwd=REPO, check=True)
     compare()
+    export_series_pc()
+    (WORK / "fit_avgfirst_pc.R").write_text(R_FIT_PC)
+    subprocess.run(["Rscript", str(WORK / "fit_avgfirst_pc.R")],
+                   cwd=REPO, check=True)
+    compare_pc()
     return 0
 
 
