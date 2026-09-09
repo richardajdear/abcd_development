@@ -88,16 +88,23 @@ def load() -> pd.DataFrame:
             rows.append(dict(method="prscs_ukbb", disorder=dis,
                              stratum=r.stratum, phenotype=r.phenotype,
                              beta=r.beta, se=r.se, p=r.p, p_corr=r.p, n=r.n))
-    # SBayesR: transcription of README 13.8 (pooled) + the cluster agent's
-    # 2026-09-09 report (EUR arm, ALZnoAPOE) -- see the tsv's source column;
-    # replace with results_v2/sbayesr/ tables when committed
-    sb = pd.read_csv(REPO / "hpc_v3/prs_tables/prs_sbayesr_readme.tsv",
-                     sep="\t")
-    for _, r in sb.iterrows():
-        se = abs(r.beta) / norm.ppf(1 - r.p / 2)
-        rows.append(dict(method="sbayesr", disorder=r.disorder,
-                         stratum=r.stratum, phenotype=r.phenotype,
-                         beta=r.beta, se=se, p=r.p, p_corr=r.p, n=np.nan))
+    # SBayesR: the real association tables (committed 2026-09-09), which
+    # retired the prs_sbayesr_readme.tsv transcription -- values verified
+    # identical where they overlapped
+    sb_files = {"SCZ": "prs_association_SCZ_sbayesr.tsv",
+                "MDD": "prs_association_MDD_sbayesr.tsv",
+                "ASD": "prs_association_ASD_sbayesr.tsv",
+                "ALZ": "prs_association_ALZ_sbayesr.tsv",
+                "ALZnoAPOE": "prs_association_ALZnoAPOE_sbayesr.tsv"}
+    for dis, fname in sb_files.items():
+        f = REPO / "hpc_v2/work/results_v2/sbayesr" / fname
+        if not f.exists():
+            continue
+        sb = pd.read_csv(f, sep="\t")
+        for _, r in sb.iterrows():
+            rows.append(dict(method="sbayesr", disorder=dis,
+                             stratum=r.stratum, phenotype=r.phenotype,
+                             beta=r.beta, se=r.se, p=r.p, p_corr=r.p, n=r.n))
     return pd.DataFrame(rows)
 
 
@@ -203,11 +210,12 @@ def draw() -> Path:
              "arm.",
              fontsize=SMALL - 1.5, color="0.42")
     fig.text(0.008, 0.022,
-             "SBayesR: transcribed (README §13.8 + agent report; SEs from β "
-             "and p, normal quantile; CSD3 tables pending).  ALZ contrast: "
-             "with APOE, nominal under both Bayesian methods (92.7% of "
-             "SBayesR's squared weight is APOE); APOE excluded, null — the "
-             "polygenic late-onset control is clean.",
+             "Pooled Bayesian-score betas are inflated with their SEs "
+             "(SBayesR SCZ: −0.113 pooled vs −0.035 EUR) — treat pooled "
+             "magnitudes as unreliable.  ALZ contrast: with APOE, nominal "
+             "under both Bayesian methods (92.7% of SBayesR's squared weight "
+             "is APOE); APOE excluded, null — the polygenic late-onset "
+             "control is clean.",
              fontsize=SMALL - 1.5, color="0.42")
 
     out = HERE / "slide_prs_methods.png"
