@@ -53,7 +53,13 @@ mkdir -p "$OUT"
 
 [[ -f "$SETS" ]] || { echo "FATAL: $SETS missing; run the make_*_genesets.py step" >&2; exit 2; }
 
-for name in baseline_thickness global_slope slope_PC1 slope_PC2 slope_PC3 SCZ MDD; do
+# NAMES was a hard-coded list, which pinned this harness to the settled five
+# phenotypes.  Parameterised for hpc_v3 (Experiment A) in the same spirit as
+# REPO/MAGMA_DIR/SETS/TAG/COND_SET above; the default is the original list
+# verbatim, so every existing caller is unaffected.
+NAMES=${NAMES:-"baseline_thickness global_slope slope_PC1 slope_PC2 slope_PC3 SCZ MDD"}
+
+for name in $NAMES; do
   raw="$MAGMA_DIR/$name.genes.raw"
   if [[ ! -f "$raw" ]]; then
     echo "SKIP $name ($raw absent)" >&2

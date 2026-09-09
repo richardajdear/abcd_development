@@ -744,3 +744,123 @@ conclusion the SNP component gives. (Two of them return GCTA's boundary
 | 35089930 | `02_ldsc_magma` (first attempt) | 1 | **cancelled** (§4.2) |
 | 35093677 | `hpc_v3/04_collect.sbatch` | 1 | 20 m 32 s |
 | 35093678 | `hpc_v3/02_ldsc_magma.sbatch` | 1 | 3 h 32 m |
+
+---
+
+## 12. MAGMA locus pools, and the collection slide — 2026-09-09
+
+Two additions after §11, both driven by the slide
+(`hpc_v3/slide_results_v3.py`, `make_results_v3.py`).
+
+### 12.1 The slide's PRS source was the wrong arm
+
+`make_results_v3.py` read `hpc/work/results/prs/prs_association.tsv` — the
+**array-genotype** arm (n = 3,725 EUR / 4,126 pooled). Every published PRS
+number in this project comes from the **imputed** arm. The difference is not
+cosmetic: `global_slope` × SCZ × EUR is −0.0385 (p = 0.015) under the array arm
+and −0.0468 (p = 0.0022) under the imputed one. Repointed at
+`hpc_v3/prs_tables/prs_association_v3.tsv`.
+
+That table was the only committed *imputed* PRS association in the repo —
+`hpc/work/results/prs_imp/` was gitignored, because `.gitignore` names
+`prs/prs_association.tsv` as a one-off exception and `prs_imp/` was never
+added. It is now (one line), so v1's own imputed PRS is reproducible from the
+repo rather than only from `$V1_ROOT`.
+
+### 12.2 The prioritised gene-set panel did not exist for the new phenotypes
+
+`02_ldsc_magma.sbatch` produced the `.genes.raw` files but not the
+**prioritised / high-confidence set tests** (`SCZ_locus_pool`, `MDD_pool`),
+which live in a separate harness (`hpc/work/prioritised_gsa.sbatch`, invoked
+for the settled five by `hpc_v2/work/setup/eur_prio_gsa.sbatch`). This is the
+panel carrying the project's one surviving strand (`hpc_v2/README_HPC.md`
+§13.6), so it mattered.
+
+**Job 35110779** (`hpc_v3/05_prio_gsa.sbatch`, 3 m 17 s), into
+`magma_prio_eur_v3/` — a fresh directory for the §4.2 reason: the collector
+globs `$OUT/*_$TAG.gsa.out` and rewrites `<TAG>_gsa_summary.tsv` from what it
+finds, so pointing it at `magma_prio_eur/` would have rewritten a published v2
+table.
+
+**One documented pipeline modification** (permitted by `README.md` §2, which
+says to document it here): `prioritised_gsa.sbatch` had its phenotype list
+hard-coded as `for name in baseline_thickness global_slope slope_PC1 ...`. It
+is now `NAMES=${NAMES:-<that exact list>}`, in the same spirit as the
+`REPO`/`MAGMA_DIR`/`SETS`/`TAG`/`COND_SET` overrides the script already had.
+Every existing caller is unaffected.
+
+**Results** (marginal model, EUR arm, gene-set β ± SE):
+
+| phenotype | SCZ locus pool | p | MDD pool | p |
+|:---|---:|---:|---:|---:|
+| `baseline_thickness` | 0.1874 ± 0.051 | **1.1e-04** | 0.0209 ± 0.026 | 0.21 |
+| `global_slope` | 0.1244 ± 0.051 | **0.0074** | 0.0293 ± 0.026 | 0.13 |
+| **`slope_topDelta`** | **0.1253 ± 0.051** | **0.0069** | **0.0502 ± 0.026** | **0.027** |
+| **`slope_topC3`** | 0.0918 ± 0.051 | 0.035 | 0.0242 ± 0.026 | 0.18 |
+| **`slope_projDelta`** | 0.0077 ± 0.051 | 0.44 | 0.0402 ± 0.026 | 0.064 |
+| **`slope_projC3`** | 0.0208 ± 0.051 | 0.34 | −0.0299 ± 0.026 | 0.87 |
+
+**This is the one readout on which a new phenotype does not simply lose.**
+
+- **SCZ locus pool: `slope_topDelta` matches `global_slope` almost exactly**
+  (β 0.1253 vs 0.1244, p 0.0069 vs 0.0074). It ties; it does not beat it.
+  `slope_topC3` is *lower* (0.0918, p = 0.035), consistent with everything in
+  §5 and §7.
+- **MDD pool: `slope_topDelta` is β = 0.0502, p = 0.027, against
+  `global_slope`'s 0.0293, p = 0.13** — nominally significant where the anchor
+  is not, and the only place in this experiment where a subset phenotype
+  exceeds the trait it was carved from.
+
+**Do not promote that MDD result.** Four reasons, and they are the same
+reasons the rest of this document gives for not promoting anything:
+
+1. It is **uncorrected across 12 gene-set tests** (6 phenotypes × 2 disorders)
+   in this panel alone; 0.027 × 12 = 0.33.
+2. `hpc_v2/README_HPC.md` §12.9 already records that **MDD gene-set results
+   weakened by 2–4× in p** between v1 and v2 — this is the arm with the known
+   instability.
+3. The **MAGMA test is unsigned**, so it cannot say thinning is *faster* with
+   higher MDD risk. §5's signed PRS Δβ for `slope_topDelta` × MDD is
+   **−0.0001 (p = 0.99)** — no difference from `global_slope` whatsoever.
+4. `slope_topDelta`'s **LDSC h² z is 0.30**, the lowest of the nine.
+
+Taken with §5 and §7, the honest summary is unchanged: **`slope_topDelta` ties
+`global_slope` on gene-set enrichment and loses or ties everywhere else.**
+The §11 verdict stands.
+
+### 12.3 The slide
+
+`slide_results_v3.png`, regenerated. Eight rows: the two anchors and the four
+Experiment A phenotypes through v2, plus the two anchors through v1's own
+pipeline, so the pipelines sit side by side.
+
+Encoding, and the reason there is no fourth channel: **colour = disorder**,
+**fill + shape = ancestry stratum**, **row = phenotype × pipeline**. Pipeline
+is deliberately not a colour or a fill — both are taken, and a third
+overlapping channel is how a forest plot stops being readable. The two-hue
+palette was checked with the `dataviz` skill's validator (light mode, white
+surface): lightness band, chroma floor, CVD separation (adjacent-pair ΔE 12.9
+deutan / 10.7 tritan), normal-vision floor (ΔE 19.9) and contrast all **PASS**.
+Every row is directly labelled, so identity is never colour-alone.
+
+Three things the first render got wrong, fixed:
+
+- **h² drew with the marker the legend defines as "EUR stratum."** Both REML
+  arms are the **pooled** multi-ancestry sample (n = 8,082 v2 / 5,649 v1), so
+  the rows now carry the pooled marker.
+- **v1's pooled PRS row duplicated v2's exactly.** A polygenic score never
+  touches our GWAS, so for the pooled stratum the two pipelines are the *same
+  estimate on the same 8,082 subjects* — drawn twice it reads as a replication
+  and is only a duplicate. `make_results_v3.py` now **asserts** the two agree
+  (to 1e-9; they do) and draws v1 only for EUR, which is what genuinely
+  differs: a PC-distance cut (n = 5,361) against the anchor set (n = 4,116).
+- **`p=%.3f` rounded 0.0014 to "0.001"**, an order of magnitude better than it
+  is. Now two significant figures.
+
+`results_v3_summary.csv` also gains a `pipeline` column, a `caveat` column (so
+the figure prints the two conditions under which the v1/v2 rows may be read as
+like-for-like, rather than the caveats living only in prose), and a
+`not_estimable` status distinct from `pending` — MDD × `slope_topDelta` rg is
+not a missing input, it is LDSC declining to divide by a heritability
+indistinguishable from zero (§7), and the slide draws it as an × rather than a
+grey placeholder.

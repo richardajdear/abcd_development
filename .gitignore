@@ -70,6 +70,10 @@ hpc/work/results/*
 hpc/work/results/*/*
 !hpc/work/results/*/*_summary.tsv
 !hpc/work/results/prs/prs_association.tsv
+# the IMPUTED PRS arm -- v1's actual headline PRS numbers come from here, not
+# from prs/ (array genotypes).  Same shape and size as the line above; it was
+# simply never added.  hpc_v3/make_results_v3.py reads it for the v1 rows.
+!hpc/work/results/prs_imp/prs_association.tsv
 
 # SLURM stderr scratch, and the convenience symlink to hpc/work/out.
 hpc/slurm/
