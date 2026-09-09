@@ -210,12 +210,11 @@ def draw() -> Path:
              "arm.",
              fontsize=SMALL - 1.5, color="0.42")
     fig.text(0.008, 0.022,
-             "Pooled Bayesian-score betas are inflated with their SEs "
-             "(SBayesR SCZ: −0.113 pooled vs −0.035 EUR) — treat pooled "
-             "magnitudes as unreliable.  ALZ contrast: with APOE, nominal "
-             "under both Bayesian methods (92.7% of SBayesR's squared weight "
-             "is APOE); APOE excluded, null — the polygenic late-onset "
-             "control is clean.",
+             "Pooled Bayesian-score betas inflate with their SEs (SBayesR "
+             "SCZ: −0.113 pooled vs −0.035 EUR) — pooled magnitudes are "
+             "unreliable.  ALZ: with APOE nominal under both Bayesian "
+             "methods (92.7% of SBayesR's weight); APOE excluded, null — "
+             "the polygenic control is clean.",
              fontsize=SMALL - 1.5, color="0.42")
 
     out = HERE / "slide_prs_methods.png"
