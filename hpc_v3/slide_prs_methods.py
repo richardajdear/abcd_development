@@ -72,28 +72,32 @@ def load() -> pd.DataFrame:
         rows.append(dict(method="ct", disorder=r.disorder, stratum=r.stratum,
                          phenotype=r.phenotype, beta=r.beta, se=r.se,
                          p=r.p, p_corr=min(1.0, r.p * M_EFF), n=r.n))
-    for method, d, suffix in (
-            ("prscs_ukbb", REPO / UKBB_DIR, "prscs_ukbb"),):
-        for dis in ("SCZ", "MDD", "ASD", "ALZ"):
-            f = d / f"prs_association_{dis}_{suffix}.tsv"
-            if not f.exists():
-                continue
-            cs = pd.read_csv(f, sep="\t")
-            cs = cs[cs.disorder == dis]
-            for _, r in cs.iterrows():
-                rows.append(dict(method=method, disorder=dis,
-                                 stratum=r.stratum, phenotype=r.phenotype,
-                                 beta=r.beta, se=r.se, p=r.p, p_corr=r.p,
-                                 n=r.n))
-    # SBayesR: README transcription is POOLED only -- no EUR rows until the
-    # real association tables are committed
+    # UKB-LD PRS-CS; note the cluster's filename inconsistency for ALZnoAPOE,
+    # whose file also tags the disorder column 'ALZnoAPOEukbb'
+    ukbb_files = {"SCZ": "prs_association_SCZ_prscs_ukbb.tsv",
+                  "MDD": "prs_association_MDD_prscs_ukbb.tsv",
+                  "ASD": "prs_association_ASD_prscs_ukbb.tsv",
+                  "ALZ": "prs_association_ALZ_prscs_ukbb.tsv",
+                  "ALZnoAPOE": "prs_association_ALZnoAPOE_ukbb.tsv"}
+    for dis, fname in ukbb_files.items():
+        f = REPO / UKBB_DIR / fname
+        if not f.exists():
+            continue
+        cs = pd.read_csv(f, sep="\t")
+        for _, r in cs.iterrows():
+            rows.append(dict(method="prscs_ukbb", disorder=dis,
+                             stratum=r.stratum, phenotype=r.phenotype,
+                             beta=r.beta, se=r.se, p=r.p, p_corr=r.p, n=r.n))
+    # SBayesR: transcription of README 13.8 (pooled) + the cluster agent's
+    # 2026-09-09 report (EUR arm, ALZnoAPOE) -- see the tsv's source column;
+    # replace with results_v2/sbayesr/ tables when committed
     sb = pd.read_csv(REPO / "hpc_v3/prs_tables/prs_sbayesr_readme.tsv",
                      sep="\t")
     for _, r in sb.iterrows():
         se = abs(r.beta) / norm.ppf(1 - r.p / 2)
         rows.append(dict(method="sbayesr", disorder=r.disorder,
-                         stratum="full", phenotype=r.phenotype, beta=r.beta,
-                         se=se, p=r.p, p_corr=r.p, n=np.nan))
+                         stratum=r.stratum, phenotype=r.phenotype,
+                         beta=r.beta, se=se, p=r.p, p_corr=r.p, n=np.nan))
     return pd.DataFrame(rows)
 
 
@@ -162,16 +166,20 @@ def draw() -> Path:
              "raw p) · ○ EUR stratum · ◇ pooled", fontsize=SMALL,
              color="0.35")
 
-    panel(fig, [0.135, 0.115, 0.255, 0.71], df[df.disorder == "SCZ"],
+    panel(fig, [0.135, 0.115, 0.225, 0.71], df[df.disorder == "SCZ"],
           PHENOS, YLAB, "SCZ", True)
-    panel(fig, [0.425, 0.115, 0.255, 0.71], df[df.disorder == "MDD"],
+    panel(fig, [0.395, 0.115, 0.225, 0.71], df[df.disorder == "MDD"],
           PHENOS, YLAB, "MDD", False)
     # controls share the same 7-row grid so rows align across all panels;
-    # points exist only where the disorder was scored on that phenotype
-    panel(fig, [0.72, 0.115, 0.125, 0.71], df[df.disorder == "ASD"],
+    # points exist only where the disorder was scored on that phenotype.
+    # ALZ appears twice: with APOE (nominally significant, ~one locus) and
+    # with APOE excluded (null) -- the specificity question is the contrast.
+    panel(fig, [0.655, 0.115, 0.095, 0.71], df[df.disorder == "ASD"],
           PHENOS, YLAB, "ASD (control)", False)
-    panel(fig, [0.875, 0.115, 0.115, 0.71], df[df.disorder == "ALZ"],
-          PHENOS, YLAB, "ALZ (control)", False, xlim=(-0.10, 0.145))
+    panel(fig, [0.775, 0.115, 0.095, 0.71], df[df.disorder == "ALZ"],
+          PHENOS, YLAB, "ALZ (control)", False, xlim=(-0.105, 0.15))
+    panel(fig, [0.895, 0.115, 0.095, 0.71], df[df.disorder == "ALZnoAPOE"],
+          PHENOS, YLAB, "ALZ, no APOE", False, xlim=(-0.105, 0.15))
 
     present = [m for m in METHODS if (df.method == m).any()]
     handles = [mpl.lines.Line2D([], [], color=METHOD_COLOR[m], marker="o",
@@ -182,10 +190,11 @@ def draw() -> Path:
                fontsize=SMALL, handletextpad=0.4, columnspacing=1.0)
 
     fig.text(0.008, 0.062,
-             "PRS-CS on the UKB LD panel (375k EUR, SBayesR's scale) does "
-             "NOT recover the SCZ association in the EUR arm (p = 0.12 vs "
-             "0.20 under 1000G): §13.8's LD-panel-size account fails — the "
-             "attenuation is PRS-CS's prior.",
+             "PRS-CS on the UKB LD panel (~375k EUR — 7× LARGER than "
+             "SBayesR's 50k) does NOT recover the SCZ association in the "
+             "EUR arm (p = 0.12 vs 0.20 under 1000G): §13.8's "
+             "LD-panel-size account fails a fortiori — the attenuation is "
+             "PRS-CS's prior.",
              fontsize=SMALL - 1.5, color="0.42")
     fig.text(0.008, 0.042,
              "Pooled-arm SE inflation worsens under UKB LD (SCZ SE 0.0267 "
@@ -194,10 +203,11 @@ def draw() -> Path:
              "arm.",
              fontsize=SMALL - 1.5, color="0.42")
     fig.text(0.008, 0.022,
-             "SBayesR: pooled only, transcribed from README §13.8 (SEs from "
-             "β and p, normal quantile).  ALZ: APOE dominates both Bayesian "
-             "scores (92.7% of SBayesR's squared weight) and sharpened under "
-             "UKB LD (pooled p = 0.0055).  Experiment A phenotypes C+T-only.",
+             "SBayesR: transcribed (README §13.8 + agent report; SEs from β "
+             "and p, normal quantile; CSD3 tables pending).  ALZ contrast: "
+             "with APOE, nominal under both Bayesian methods (92.7% of "
+             "SBayesR's squared weight is APOE); APOE excluded, null — the "
+             "polygenic late-onset control is clean.",
              fontsize=SMALL - 1.5, color="0.42")
 
     out = HERE / "slide_prs_methods.png"

@@ -1,13 +1,18 @@
-disorder	phenotype	beta	p
-SCZ	global_slope	-0.113	7.3e-04
-SCZ	slope_PC1	0.121	4.8e-04
-SCZ	slope_PC3	-0.095	6.3e-03
-SCZ	slope_PC2	0.030	0.40
-SCZ	baseline_thickness	0.005	0.89
-MDD	global_slope	-0.064	5.9e-03
-MDD	slope_PC1	0.064	7.7e-03
-MDD	slope_PC2	0.050	0.044
-ASD	baseline_thickness	0.004	0.75
-ASD	global_slope	-0.010	0.44
-ASD	slope_PC3	-0.029	0.033
-ALZ	global_slope	-0.025	0.039
+disorder	phenotype	stratum	beta	p	source
+SCZ	global_slope	full	-0.113	7.3e-04	README_13.8
+SCZ	slope_PC1	full	0.121	4.8e-04	README_13.8
+SCZ	slope_PC3	full	-0.095	6.3e-03	README_13.8
+SCZ	slope_PC2	full	0.030	0.40	README_13.8
+SCZ	baseline_thickness	full	0.005	0.89	README_13.8
+MDD	global_slope	full	-0.064	5.9e-03	README_13.8
+MDD	slope_PC1	full	0.064	7.7e-03	README_13.8
+MDD	slope_PC2	full	0.050	0.044	README_13.8
+ASD	baseline_thickness	full	0.004	0.75	README_13.8
+ASD	global_slope	full	-0.010	0.44	README_13.8
+ASD	slope_PC3	full	-0.029	0.033	README_13.8
+ALZ	global_slope	full	-0.025	0.039	README_13.8
+SCZ	global_slope	EUR	-0.035	0.022	agent_report_2026-09-09
+MDD	global_slope	EUR	-0.023	0.126	agent_report_2026-09-09
+ASD	global_slope	EUR	-0.006	0.675	agent_report_2026-09-09
+ALZnoAPOE	global_slope	full	-0.015	0.243	agent_report_2026-09-09
+ALZnoAPOE	global_slope	EUR	-0.012	0.433	agent_report_2026-09-09
