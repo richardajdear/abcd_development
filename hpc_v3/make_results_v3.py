@@ -63,8 +63,11 @@ import pandas as pd
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
 
-PHENOS = ["baseline_thickness", "global_slope", "slope_topDelta",
-          "slope_topC3", "slope_projDelta", "slope_projC3"]
+#: slope_PC2 rides along as the "a multivariate combination CAN be heritable"
+#: reference: LDSC h2 z = 3.46 vs global_slope's 1.16 -- the in-hand proof
+#: that low h2 is a property of the mean, not of rate phenotypes per se.
+PHENOS = ["baseline_thickness", "global_slope", "slope_PC2",
+          "slope_topDelta", "slope_topC3", "slope_projDelta", "slope_projC3"]
 #: the two anchors are additionally carried through v1's own pipeline
 V1_PHENOS = ["baseline_thickness", "global_slope"]
 

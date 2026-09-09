@@ -36,7 +36,8 @@ age, sex and site only — genetic ancestry PCs deliberately enter downstream
 (GENESIS null model, PRS covariates, EUR-stratified LDSC), never at phenotype
 construction.  To show that choice is inert, the avg-first fits are repeated
 with PC1-10 main effects PLUS PC x age_c interactions (the terms that can
-move a slope), on the 8,185 subjects with PCs, writing
+move a slope), on the 8,077 subjects with non-missing PCs in the covariate
+export (115 of 8,192 imaging subjects lack them), writing
 avgfirst_pc_comparison.csv / avgfirst_pc_density.csv (with-PCs vs without on
 the common subjects).  Requires the gitignored per-subject covariate export
 (out/<run>/gcta_inputs_v3/covar_quant.txt) — regenerate it with

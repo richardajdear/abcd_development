@@ -49,15 +49,17 @@ ROWS = [
     ("global_slope", "v2", "global slope", 1),
     ("global_slope", "v1", "     ↳ v1 pipeline", 1),
     ("global_slope", "avgfirst", "     ↳ avg-first definition", 1),
-    ("slope_topDelta", "v2", "top-ΔCT mean", 2),
-    ("slope_topC3", "v2", "top-C3 mean", 3),
-    ("slope_projDelta", "v2", "ΔCT projection", 4),
-    ("slope_projC3", "v2", "C3 projection", 5),
+    ("slope_PC2", "v2", "slope PC2 (h² reference)", 2),
+    ("slope_topDelta", "v2", "top-ΔCT mean", 3),
+    ("slope_topC3", "v2", "top-C3 mean", 4),
+    ("slope_projDelta", "v2", "ΔCT projection", 5),
+    ("slope_projC3", "v2", "C3 projection", 6),
 ]
 ROW_INDEX = {(ph, pl): i for i, (ph, pl, _, _) in enumerate(ROWS)}
 YLAB = [lab for _, _, lab, _ in ROWS]
 #: the four new phenotypes start here -- used for the separating rule
-N_ANCHOR_ROWS = 5
+#: (anchors + their pipeline variants + the slope_PC2 h2 reference)
+N_ANCHOR_ROWS = 6
 
 # Validated with the dataviz skill's checker (light mode, white surface):
 # lightness band PASS, chroma floor PASS, CVD separation PASS, normal-vision
@@ -105,7 +107,7 @@ def forest(ax, sub: pd.DataFrame, dodges: dict, annotate: str | None,
             continue
         # v1-pipeline rows are context, not the result: dim to the background
         a = 0.5 if r.pipeline == "v1" else (0.55 if pending else 1)
-        ax.errorbar(r.estimate, y, xerr=r.se, fmt="none", ecolor=color,
+        ax.errorbar(r.estimate, y, xerr=1.96 * r.se, fmt="none", ecolor=color,
                     elinewidth=1.3, capsize=2, capthick=1.0,
                     ls="--" if pending else "-", alpha=a, zorder=2)
         # a surface ring keeps the marker legible where intervals overlap
@@ -118,7 +120,7 @@ def forest(ax, sub: pd.DataFrame, dodges: dict, annotate: str | None,
         # dagger for rg rows LDSC itself flags as underpowered
         if (not pending and "underpowered" in sub.columns
                 and str(r.get("underpowered")) == "yes"):
-            ax.text(r.estimate + r.se + 0.02, y, "†", fontsize=SMALL,
+            ax.text(r.estimate + 1.96 * r.se + 0.02, y, "†", fontsize=SMALL,
                     va="center", color="0.35", zorder=5)
         if annotate and not pending:
             p_show = (min(1.0, r.p * r.m_eff) if annotate == "meff" else r.p)
@@ -127,7 +129,7 @@ def forest(ax, sub: pd.DataFrame, dodges: dict, annotate: str | None,
                 if annotate == "meff":
                     lbl = lbl.replace("p=", "p̃=")
                 sgn = 1 if r.estimate >= 0 else -1   # away from zero
-                ax.text(r.estimate + sgn * r.se * 1.45, y, lbl,
+                ax.text(r.estimate + sgn * r.se * 1.96 * 1.15, y, lbl,
                         fontsize=SMALL - 1, ha="left" if sgn > 0 else "right",
                         va="center", color="0.15", zorder=5)
     ax.set_ylim(-0.55, n - 0.45)
@@ -185,7 +187,7 @@ def draw() -> Path:
     # --- h2 ---
     ax = axes["h2"] = fig.add_axes(rects["h2"])
     forest(ax, df[df.panel == "h2"], {("", "full"): 0.0}, annotate=None,
-           xlabel="SNP h²", zero_line=False)
+           xlabel="SNP h² (95% CI)", zero_line=False)
     ax.set_xlim(0, 0.72)
     ax.axvline(0, color="0.4", lw=0.8)
     ax.set_yticklabels(YLAB[::-1], fontsize=MID)
@@ -202,7 +204,7 @@ def draw() -> Path:
     # --- PRS ---
     ax = axes["prs"] = fig.add_axes(rects["prs"])
     forest(ax, df[df.panel == "prs"], dodge4, annotate="meff",
-           xlabel="β per SD of score (± SE)")
+           xlabel="β per SD of score (95% CI)")
     ax.set_yticklabels([])
     ax.set_title("PRS association, imputed genotypes, C+T p < 0.5\n"
                  "(p̃ = m_eff-corrected across 8 thresholds)", pad=6)
@@ -210,14 +212,14 @@ def draw() -> Path:
     # --- MAGMA ---
     ax = axes["magma"] = fig.add_axes(rects["magma"])
     forest(ax, df[df.panel == "magma"], dodge2, annotate="raw",
-           xlabel="gene-set β (± SE)")
+           xlabel="gene-set β (95% CI)")
     ax.set_yticklabels([])
     ax.set_title("MAGMA locus-pool enrichment\n(unsigned test)", pad=6)
 
     # --- rg ---
     ax = axes["rg"] = fig.add_axes(rects["rg"])
     forest(ax, df[df.panel == "rg"], dodge2, annotate="raw",
-           xlabel="LDSC rg (± SE)")
+           xlabel="LDSC rg (95% CI)")
     ax.set_yticklabels([])
     ax.set_title("genetic correlation\n(† h² z < 4: uninformative)", pad=6)
 
