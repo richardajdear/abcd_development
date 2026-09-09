@@ -50,12 +50,14 @@ YLAB = ["baseline thickness\n(control)", "global slope",
         "ΔCT projection", "C3 projection"]
 N_SETTLED_ROWS = 3          # rule between settled phenotypes and Experiment A
 
-METHODS = ["ct", "prscs", "prscs_ukbb", "sbayesr"]
-METHOD_LABEL = {"ct": "C+T (p<0.5, p̃ = p×4.6)", "prscs": "PRS-CS (1000G LD)",
-                "prscs_ukbb": "PRS-CS (UKB LD)", "sbayesr": "SBayesR"}
-METHOD_COLOR = {"ct": "0.30", "prscs": "#56B4E9", "prscs_ukbb": "#0072B2",
-                "sbayesr": "#D55E00"}
-DODGE = {"ct": 0.27, "prscs": 0.09, "prscs_ukbb": -0.09, "sbayesr": -0.27}
+#: the 1000G PRS-CS run stays in results_v2/prscs/ for the record but is not
+#: drawn -- the UKB-LD re-run supersedes it (user decision 2026-09-09; the
+#: 1000G-vs-UKB contrast lives in the footnote and README §13.8 discussion)
+METHODS = ["ct", "prscs_ukbb", "sbayesr"]
+METHOD_LABEL = {"ct": "C+T", "prscs_ukbb": "PRS-CS (UKB LD)",
+                "sbayesr": "SBayesR"}
+METHOD_COLOR = {"ct": "0.30", "prscs_ukbb": "#0072B2", "sbayesr": "#D55E00"}
+DODGE = {"ct": 0.24, "prscs_ukbb": 0.0, "sbayesr": -0.24}
 #: the UKB-LD re-run (hpc_v2 commit 8fe2312's prscs_ukbb.sbatch) -- drawn
 #: automatically once its association tables are pulled from CSD3
 UKBB_DIR = "hpc_v2/work/results_v2/prscs_ukbb"
@@ -65,35 +67,42 @@ def load() -> pd.DataFrame:
     rows = []
     ct = pd.read_csv(REPO / "hpc_v3/prs_tables/prs_association_v3.tsv",
                      sep="\t")
-    ct = ct[(ct.threshold == "0p5") & (ct.stratum == "full")]
+    ct = ct[ct.threshold == "0p5"]
     for _, r in ct.iterrows():
-        rows.append(dict(method="ct", disorder=r.disorder,
+        rows.append(dict(method="ct", disorder=r.disorder, stratum=r.stratum,
                          phenotype=r.phenotype, beta=r.beta, se=r.se,
                          p=r.p, p_corr=min(1.0, r.p * M_EFF), n=r.n))
-    for method, d in (("prscs", REPO / "hpc_v2/work/results_v2/prscs"),
-                      ("prscs_ukbb", REPO / UKBB_DIR)):
+    for method, d, suffix in (
+            ("prscs_ukbb", REPO / UKBB_DIR, "prscs_ukbb"),):
         for dis in ("SCZ", "MDD", "ASD", "ALZ"):
-            f = d / f"prs_association_{dis}_prscs.tsv"
-            if not f.exists():      # UKB-LD tables not pulled from CSD3 yet
+            f = d / f"prs_association_{dis}_{suffix}.tsv"
+            if not f.exists():
                 continue
             cs = pd.read_csv(f, sep="\t")
-            cs = cs[(cs.stratum == "full") & (cs.disorder == dis)]
+            cs = cs[cs.disorder == dis]
             for _, r in cs.iterrows():
                 rows.append(dict(method=method, disorder=dis,
-                                 phenotype=r.phenotype, beta=r.beta, se=r.se,
-                                 p=r.p, p_corr=r.p, n=r.n))
+                                 stratum=r.stratum, phenotype=r.phenotype,
+                                 beta=r.beta, se=r.se, p=r.p, p_corr=r.p,
+                                 n=r.n))
+    # SBayesR: README transcription is POOLED only -- no EUR rows until the
+    # real association tables are committed
     sb = pd.read_csv(REPO / "hpc_v3/prs_tables/prs_sbayesr_readme.tsv",
                      sep="\t")
     for _, r in sb.iterrows():
         se = abs(r.beta) / norm.ppf(1 - r.p / 2)
         rows.append(dict(method="sbayesr", disorder=r.disorder,
-                         phenotype=r.phenotype, beta=r.beta, se=se,
-                         p=r.p, p_corr=r.p, n=np.nan))
+                         stratum="full", phenotype=r.phenotype, beta=r.beta,
+                         se=se, p=r.p, p_corr=r.p, n=np.nan))
     return pd.DataFrame(rows)
 
 
 def _fmt_p(p: float) -> str:
     return f"{p:.1e}" if p < 1e-3 else f"{p:.2g}"
+
+
+STRATUM_MARKER = {"EUR": "o", "full": "D"}    # matches slide_results_v3
+STRATUM_DODGE = {"EUR": 0.055, "full": -0.055}
 
 
 def panel(fig, rect, df, phenos, ylabels, title, show_ylab, xlim=None):
@@ -102,12 +111,14 @@ def panel(fig, rect, df, phenos, ylabels, title, show_ylab, xlim=None):
     for _, r in df.iterrows():
         if r.phenotype not in phenos:
             continue
-        y = (n - 1 - phenos.index(r.phenotype)) + DODGE[r.method]
+        y = (n - 1 - phenos.index(r.phenotype)) + DODGE[r.method] \
+            + STRATUM_DODGE[r.stratum]
         c = METHOD_COLOR[r.method]
         ax.errorbar(r.beta, y, xerr=1.96 * r.se, fmt="none", ecolor=c,
-                    elinewidth=1.4, capsize=2, zorder=2)
-        ax.plot(r.beta, y, "o", ms=5, mfc=c if r.p_corr < 0.05 else "white",
-                mec=c, mew=1.2, zorder=3)
+                    elinewidth=1.2, capsize=1.5, zorder=2)
+        ax.plot(r.beta, y, STRATUM_MARKER[r.stratum], ms=4.2,
+                mfc=c if r.p_corr < 0.05 else "white",
+                mec=c, mew=1.1, zorder=3)
         if r.p_corr < 0.05:
             sgn = 1 if r.beta >= 0 else -1
             ax.text(r.beta + sgn * r.se * 1.96 * 1.12, y, _fmt_p(r.p_corr),
@@ -131,7 +142,7 @@ def panel(fig, rect, df, phenos, ylabels, title, show_ylab, xlim=None):
     if xlim:
         ax.set_xlim(*xlim)
     else:
-        ax.margins(x=0.14)
+        ax.margins(x=0.22)
     return ax
 
 
@@ -143,12 +154,13 @@ def draw() -> Path:
         "ytick.labelsize": MID, "axes.titlelocation": "left",
         "figure.facecolor": "white", "savefig.facecolor": "white"})
     fig = plt.figure(figsize=(13.333, 7.5))
-    fig.text(0.008, 0.955, "PRS methods compared, pooled arm — SCZ → global "
-             "slope stands under C+T and SBayesR; PRS-CS is the outlier",
+    fig.text(0.008, 0.955, "PRS methods compared — SCZ → global slope stands "
+             "under C+T and SBayesR; PRS-CS attenuates under BOTH LD panels",
              fontsize=BASE + 1.5)
     fig.text(0.008, 0.915, "filled marker = p < 0.05 after its method's "
              "threshold correction (C+T: m_eff = 4.6; single-score methods: "
-             "raw p)", fontsize=SMALL, color="0.35")
+             "raw p) · ○ EUR stratum · ◇ pooled", fontsize=SMALL,
+             color="0.35")
 
     panel(fig, [0.135, 0.115, 0.255, 0.71], df[df.disorder == "SCZ"],
           PHENOS, YLAB, "SCZ", True)
@@ -159,7 +171,7 @@ def draw() -> Path:
     panel(fig, [0.72, 0.115, 0.125, 0.71], df[df.disorder == "ASD"],
           PHENOS, YLAB, "ASD (control)", False)
     panel(fig, [0.875, 0.115, 0.115, 0.71], df[df.disorder == "ALZ"],
-          PHENOS, YLAB, "ALZ (control)", False)
+          PHENOS, YLAB, "ALZ (control)", False, xlim=(-0.10, 0.145))
 
     present = [m for m in METHODS if (df.method == m).any()]
     handles = [mpl.lines.Line2D([], [], color=METHOD_COLOR[m], marker="o",
@@ -169,19 +181,23 @@ def draw() -> Path:
                bbox_to_anchor=(0.995, 0.995), ncol=3, frameon=False,
                fontsize=SMALL, handletextpad=0.4, columnspacing=1.0)
 
-    fig.text(0.008, 0.052,
-             "SBayesR: transcribed from hpc_v2/README_HPC.md §13.8 (pooled; "
-             "CSD3 tables not yet committed); SEs reconstructed from β and p "
-             "(normal quantile), exact for a Wald test.  LD references: "
-             "SBayesR 50k UKB EUR · PRS-CS 1000G EUR (503) — the attenuation "
-             "ordering SBayesR ≳ C+T > PRS-CS tracks LD-panel size.",
+    fig.text(0.008, 0.062,
+             "PRS-CS on the UKB LD panel (375k EUR, SBayesR's scale) does "
+             "NOT recover the SCZ association in the EUR arm (p = 0.12 vs "
+             "0.20 under 1000G): §13.8's LD-panel-size account fails — the "
+             "attenuation is PRS-CS's prior.",
              fontsize=SMALL - 1.5, color="0.42")
-    fig.text(0.008, 0.032,
-             "ALZ caution: 92.7% of the SBayesR ALZ score's squared weight "
-             "is APOE-region variants — its p = 0.039 on global slope is one "
-             "locus, not polygenic AD risk.  Experiment A phenotypes are "
-             "C+T-only so far; PRS-CS/SBayesR scores exist on CSD3, one "
-             "assoc job fills the gaps.",
+    fig.text(0.008, 0.042,
+             "Pooled-arm SE inflation worsens under UKB LD (SCZ SE 0.0267 "
+             "pooled vs 0.0157 EUR): expected — no EUR panel of any size "
+             "fits the 32% non-EUR subjects; the EUR arm is the inference "
+             "arm.",
+             fontsize=SMALL - 1.5, color="0.42")
+    fig.text(0.008, 0.022,
+             "SBayesR: pooled only, transcribed from README §13.8 (SEs from "
+             "β and p, normal quantile).  ALZ: APOE dominates both Bayesian "
+             "scores (92.7% of SBayesR's squared weight) and sharpened under "
+             "UKB LD (pooled p = 0.0055).  Experiment A phenotypes C+T-only.",
              fontsize=SMALL - 1.5, color="0.42")
 
     out = HERE / "slide_prs_methods.png"
