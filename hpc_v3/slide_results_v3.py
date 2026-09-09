@@ -196,6 +196,20 @@ def draw() -> Path:
             t.set_color("0.42")
             t.set_fontsize(SMALL)
     ax.set_title("heritability\n(v2 Zaitlen two-GRM · v1 single-GRM)", pad=6)
+    # second estimator as a text column: LDSC h2 z from the EUR sumstats
+    # (carried on the rg rows).  The two disagree where it matters -- Zaitlen
+    # puts PC2 (0.230+/-0.050) beside global (0.183+/-0.049); LDSC separates
+    # them 3x (z 3.46 vs 1.16) -- so the panel shows both.
+    h2z = (df[(df.panel == "rg") & (df.pipeline == "v2")]
+           .dropna(subset=["h2_z"]).drop_duplicates("phenotype")
+           .set_index("phenotype").h2_z)
+    n = len(ROWS)
+    for (ph, pl), i in ROW_INDEX.items():
+        if pl == "v2" and ph in h2z.index:
+            ax.text(0.71, n - 1 - i, f"{h2z[ph]:.2f}", fontsize=SMALL - 1,
+                    ha="right", va="center", color="0.35")
+    ax.text(0.71, n - 0.52, "LDSC z", fontsize=SMALL - 1, ha="right",
+            va="top", color="0.35", style="italic", clip_on=True)
 
     dodge4 = {("SCZ", "EUR"): 0.28, ("SCZ", "full"): 0.10,
               ("MDD", "EUR"): -0.10, ("MDD", "full"): -0.28}
