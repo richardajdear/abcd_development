@@ -50,11 +50,15 @@ YLAB = ["baseline thickness\n(control)", "global slope",
         "ΔCT projection", "C3 projection"]
 N_SETTLED_ROWS = 3          # rule between settled phenotypes and Experiment A
 
-METHODS = ["ct", "prscs", "sbayesr"]
-METHOD_LABEL = {"ct": "C+T (p<0.5, p̃ = p×4.6)", "prscs": "PRS-CS (auto)",
-                "sbayesr": "SBayesR"}
-METHOD_COLOR = {"ct": "0.30", "prscs": "#56B4E9", "sbayesr": "#D55E00"}
-DODGE = {"ct": 0.24, "prscs": 0.0, "sbayesr": -0.24}
+METHODS = ["ct", "prscs", "prscs_ukbb", "sbayesr"]
+METHOD_LABEL = {"ct": "C+T (p<0.5, p̃ = p×4.6)", "prscs": "PRS-CS (1000G LD)",
+                "prscs_ukbb": "PRS-CS (UKB LD)", "sbayesr": "SBayesR"}
+METHOD_COLOR = {"ct": "0.30", "prscs": "#56B4E9", "prscs_ukbb": "#0072B2",
+                "sbayesr": "#D55E00"}
+DODGE = {"ct": 0.27, "prscs": 0.09, "prscs_ukbb": -0.09, "sbayesr": -0.27}
+#: the UKB-LD re-run (hpc_v2 commit 8fe2312's prscs_ukbb.sbatch) -- drawn
+#: automatically once its association tables are pulled from CSD3
+UKBB_DIR = "hpc_v2/work/results_v2/prscs_ukbb"
 
 
 def load() -> pd.DataFrame:
@@ -66,14 +70,18 @@ def load() -> pd.DataFrame:
         rows.append(dict(method="ct", disorder=r.disorder,
                          phenotype=r.phenotype, beta=r.beta, se=r.se,
                          p=r.p, p_corr=min(1.0, r.p * M_EFF), n=r.n))
-    for dis in ("SCZ", "MDD", "ASD", "ALZ"):
-        cs = pd.read_csv(REPO / "hpc_v2/work/results_v2/prscs/"
-                         f"prs_association_{dis}_prscs.tsv", sep="\t")
-        cs = cs[(cs.stratum == "full") & (cs.disorder == dis)]
-        for _, r in cs.iterrows():
-            rows.append(dict(method="prscs", disorder=dis,
-                             phenotype=r.phenotype, beta=r.beta, se=r.se,
-                             p=r.p, p_corr=r.p, n=r.n))
+    for method, d in (("prscs", REPO / "hpc_v2/work/results_v2/prscs"),
+                      ("prscs_ukbb", REPO / UKBB_DIR)):
+        for dis in ("SCZ", "MDD", "ASD", "ALZ"):
+            f = d / f"prs_association_{dis}_prscs.tsv"
+            if not f.exists():      # UKB-LD tables not pulled from CSD3 yet
+                continue
+            cs = pd.read_csv(f, sep="\t")
+            cs = cs[(cs.stratum == "full") & (cs.disorder == dis)]
+            for _, r in cs.iterrows():
+                rows.append(dict(method=method, disorder=dis,
+                                 phenotype=r.phenotype, beta=r.beta, se=r.se,
+                                 p=r.p, p_corr=r.p, n=r.n))
     sb = pd.read_csv(REPO / "hpc_v3/prs_tables/prs_sbayesr_readme.tsv",
                      sep="\t")
     for _, r in sb.iterrows():
@@ -153,9 +161,10 @@ def draw() -> Path:
     panel(fig, [0.875, 0.115, 0.115, 0.71], df[df.disorder == "ALZ"],
           PHENOS, YLAB, "ALZ (control)", False)
 
+    present = [m for m in METHODS if (df.method == m).any()]
     handles = [mpl.lines.Line2D([], [], color=METHOD_COLOR[m], marker="o",
                                 ls="", mfc=METHOD_COLOR[m],
-                                label=METHOD_LABEL[m]) for m in METHODS]
+                                label=METHOD_LABEL[m]) for m in present]
     fig.legend(handles=handles, loc="upper right",
                bbox_to_anchor=(0.995, 0.995), ncol=3, frameon=False,
                fontsize=SMALL, handletextpad=0.4, columnspacing=1.0)
