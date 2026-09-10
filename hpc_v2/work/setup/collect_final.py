@@ -38,6 +38,10 @@ ARMS = OrderedDict([
     ("MDD_eur",    ("MDD", "EUR",    "PGC MDD2025 eur",                "EUR")),
     ("ASD",        ("ASD", "pooled", "SPARK+iPSYCH+PGC (no strata)",   "full")),
     ("ALZ",        ("ALZ", "pooled", "PGC-ALZ2 Wightman (no strata)",   "full")),
+    # The APOE-excluded score is the one the specificity claim rests on: with
+    # APOE in, ALZ looks as strong as SCZ, and that is one large-effect locus
+    # rather than polygenic AD risk.
+    ("ALZ_noAPOE", ("ALZnoAPOE", "pooled", "PGC-ALZ2 minus chr19:44.4-46.5Mb", "full")),
 ])
 HEADLINE = ["global_slope", "baseline_thickness"]
 
@@ -65,6 +69,10 @@ def best(rows, stratum):
             out[ph] = r
     return out
 
+# (method, trait-arm, phenotype, threshold) -> n_snps, filled from the raw
+# tables so the standardised rows can borrow it: same weights, same SNPs.
+NSNP = {}
+
 main, allrows, famrows = [], [], []
 for meth in METHODS:
     for key, (trait, arm, gwas, stratum) in ARMS.items():
@@ -85,6 +93,11 @@ for meth in METHODS:
                     ("beta", r.get("beta", "")), ("se", r.get("se", "")),
                     ("p", r.get("p", "")), ("p_adj", r.get("p_adj", r.get("p", ""))),
                 ])
+                k = (meth, key, ph, rec["threshold"])
+                if ver == "raw" and rec["n_snps"]:
+                    NSNP[k] = rec["n_snps"]
+                elif not rec["n_snps"]:
+                    rec["n_snps"] = NSNP.get(k, "")
                 allrows.append(rec)
                 if ph in HEADLINE: main.append(rec)
         for ver in ("raw", "zanc"):

@@ -5,7 +5,7 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=96G
 #SBATCH --time=12:00:00
-#SBATCH --array=1-24%8
+#SBATCH --array=1-28%8
 #
 # FINAL PRS MATRIX: four methods x the discovery GWAS matched to the target arm.
 #
@@ -37,16 +37,47 @@ MA_DIR="$FINAL/gwas"
 mkdir -p "$FINAL"
 
 # task -> (method, trait-arm label)
-T=$(( ${SLURM_ARRAY_TASK_ID:-1} - 1 ))
+# Normally task i runs cell i.  A subset can be re-run after a fix without
+# recomputing the whole grid by passing the cell list as the FIRST POSITIONAL
+# ARGUMENT:  sbatch --array=1-7 prs_final.sbatch 11,14,17,18,21,24,25
+#
+# It has to be a positional argument, NOT --export=ALL,ONLY_CELLS=11,14,...
+# sbatch splits --export on commas itself, so only ONLY_CELLS=11 reached the
+# job; tasks 2+ then indexed an unset array element, ${CELLS[1]} expanded to
+# nothing, T became -1, and bash's negative indexing quietly ran TODO[-1] --
+# the LAST cell in the grid.  Three jobs reported COMPLETED having silently
+# re-run the same wrong cell instead of the six requested ones.  Fail loudly
+# now rather than compute the wrong thing successfully.
+CELL_LIST="${1:-${ONLY_CELLS:-}}"
+if [[ -n "$CELL_LIST" ]]; then
+  IFS=, read -r -a CELLS <<< "$CELL_LIST"
+  IDX=$(( ${SLURM_ARRAY_TASK_ID:-1} - 1 ))
+  if (( IDX < 0 || IDX >= ${#CELLS[@]} )); then
+    echo "FATAL: task $SLURM_ARRAY_TASK_ID has no entry in cell list '$CELL_LIST'" >&2
+    echo "       (array range must match the number of cells requested)" >&2
+    exit 2
+  fi
+  T=$(( ${CELLS[$IDX]} - 1 ))
+else
+  T=$(( ${SLURM_ARRAY_TASK_ID:-1} - 1 ))
+fi
 METHODS=(CT PRSCS SBayesR SBayesRC)
-TRAITS=(SCZ_pooled SCZ_eur MDD_pooled MDD_eur ASD ALZ)
-# The full 4 x 6 grid.  Every cell is recomputed from the unified .ma files so
+# ALZ_noAPOE is a seventh cell, not a footnote: with APOE in, ALZ looks as
+# strong as SCZ, and APOE is one large-effect locus rather than polygenic AD
+# risk.  Adding it here changes the index mapping -- with 7 traits, cell
+# indices are method*7 + trait, so ALZ_noAPOE is 7, 14, 21, 28.
+TRAITS=(SCZ_pooled SCZ_eur MDD_pooled MDD_eur ASD ALZ ALZ_noAPOE)
+# The full 4 x 7 grid.  Every cell is recomputed from the unified .ma files so
 # that no number in the final tables inherits an older, differently-prepared
 # input -- ASD and ALZ in particular changed a lot once their allele
 # frequencies came from our own target rather than the HapMap3 panel
 # (ASD 378,844 -> 2,389,935 SNPs; ALZ 1,110,485 -> 5,994,563).
 TODO=()
 for m in "${METHODS[@]}"; do for t in "${TRAITS[@]}"; do TODO+=("$m:$t"); done; done
+if (( T < 0 || T >= ${#TODO[@]} )); then
+  echo "FATAL: resolved cell index $((T+1)) is outside 1-${#TODO[@]}" >&2
+  exit 2
+fi
 SPEC="${TODO[$T]}"
 METH="${SPEC%%:*}"; TRAIT="${SPEC##*:}"
 MA="$MA_DIR/${TRAIT}.ma"
@@ -75,8 +106,13 @@ CT)
       --out "$OUTD/score_${TAG}_$tag" >/dev/null 2>&1 || true
   done ;;
 PRSCS)
+  # PRS-CS turns P back into a z-score, so an underflowed p of exactly 0 becomes
+  # an infinite effect and poisons that whole LD block.  ALZ has 8 such rows,
+  # all APOE.  Floor at the smallest value that survives the round trip.  (The
+  # same class of bug -- one non-finite effect -- made PLINK return SCORESUM=0
+  # for every subject in the ALZ C+T score, README §13.6.)
   awk 'BEGIN{FS=" "; OFS="\t"} NR==1{print "SNP","A1","A2","BETA","P"; next}
-       {print $1,$2,$3,$5,$7}' "$MA" > "$OUTD/sst.txt"
+       {p=$7+0; if (p<=0) p=1e-300; print $1,$2,$3,$5,p}' "$MA" > "$OUTD/sst.txt"
   # per-SNP N varies; PRS-CS takes one number, so use the max (the full
   # discovery sample) rather than whichever row happens to come first.
   NG=$(awk 'NR>1 && $8+0>m{m=$8+0} END{printf "%d", m}' "$MA")
@@ -124,6 +160,9 @@ esac
   --out "$FINAL/fam_${METH}_${TRAIT}.tsv" || true
 ZD="$OUTD/_zanc"; mkdir -p "$ZD"
 "$PYTHON" "$V2ROOT/work/setup/standardise_within_ancestry.py" "$STRATA" "$OUTD" "$ZD"
+# prs_assoc.R reads the SNP count from <disorder>_<threshold>.weights next to
+# the profile, so the standardised copies need them too.
+for wf in "$OUTD"/*.weights; do [[ -e "$wf" ]] && ln -sf "$wf" "$ZD/"; done
 "$RSCRIPT" "$ASSOC_R" --prs-dir "$ZD" --pheno "$PHENO" --covar-quant "$COVQ" \
   --covar-cat "$COVC" --manifest "$MANIF" --eur-ids "$EURKEEP" \
   --out "$FINAL/assoc_${METH}_${TRAIT}_zanc.tsv" || true

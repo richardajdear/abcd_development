@@ -1580,3 +1580,122 @@ C+T and the Bayesian methods disagree in the pooled arm specifically, C+T is
 the one to believe on LD grounds — which is the opposite of the ranking that
 applies in the EUR arm, where the Bayesian methods' larger LD reference is a
 genuine advantage.
+
+### 14.7 Results, and three defects found while producing them — 2026-09-10
+
+`global_slope`, beta in SD of phenotype per SD of score, best threshold with
+Bonferroni adjustment across thresholds for C+T. `zanc` = score z-standardised
+within ancestry cluster before the regression.
+
+| trait | arm | score | C+T | PRS-CS | SBayesR | SBayesRC |
+|---|---|---|---|---|---|---|
+| SCZ | pooled | raw | −0.038 (.033) | −0.025 (.154) | −0.071 (.0024) | −0.041 (.017) |
+| SCZ | pooled | zanc | −0.033 (.019) | −0.015 (.170) | −0.029 (.0083) | −0.025 (.024) |
+| SCZ | EUR | raw | −0.047 (.017) | −0.027 (.092) | −0.035 (.022) | −0.036 (.019) |
+| MDD | pooled | raw | −0.044 (.291) | pending | pending | pending |
+| MDD | EUR | raw | −0.026 (.705) | pending | pending | pending |
+| ASD | pooled | raw | +0.036 (.016) | +0.005 (.672) | −0.010 (.448) | +0.009 (.405) |
+| ALZ | pooled | raw | −0.041 (.0087) | −0.040 (.0037) | −0.025 (.034) | −0.028 (.016) |
+| ALZ_noAPOE | pooled | raw | −0.036 (.034) | pending | pending | −0.009 (.452) |
+| ALZ_noAPOE | pooled | zanc | −0.033 (.018) | pending | pending | −0.009 (.409) |
+
+**SCZ is the one consistent result.** Negative in all 12 cells, significant in
+9, and the three methods agree closely in the EUR arm where the UKB LD
+reference actually matches the target (−0.035, −0.036, −0.047). PRS-CS is
+systematically the weakest even with UKB LD, which is worth remembering against
+§13.5, where its 1000G version being the *only* null led me to the wrong
+conclusion.
+
+**ASD's C+T cell is not a polygenic signal.** +0.036 comes from one sparse
+threshold (69 index SNPs at 1e-5) while every dense threshold, 8,636 to 271,508
+SNPs, sits at −0.01 and null, and all three Bayesian methods give ~0. SCZ
+behaves the opposite way, strengthening as thresholds densify. Reported as what
+it is rather than as a control failure.
+
+**ALZ_noAPOE is unresolved and is the thing to watch.** C+T says −0.036
+(p_adj = .034), indistinguishable from SCZ; SBayesRC says −0.009 (p = .45).
+Checks already done:
+- the exclusion is clean — 0 SNPs with p < 1e-8 remain in chr19:43.5–46.5 Mb
+  (GRCh38 check against the target .bim, independent of the GRCh37 window used
+  to build the file); rs7412 (p = 5.4e-157) is gone; strongest remaining SNP is
+  rs4663105 at p = 6.7e-55, which is BIN1 on chr2, so real polygenic AD signal
+  is retained
+- it is not ancestry — it survives both the EUR restriction (β = −0.044,
+  p_adj = .029) and within-ancestry standardisation (β = −0.033, p_adj = .018)
+- it is not the SCZ signal double-counted: within EUR the two scores correlate
+  **r = 0.03**
+
+That last diagnostic is worth keeping as a tool. Score-score correlations in a
+pooled multi-ancestry sample are almost entirely ancestry, and the EUR-only
+value is the informative one:
+
+| score pair | r pooled | r within EUR | r after within-anc z |
+|---|---|---|---|
+| SCZ vs ALZ_noAPOE | +0.331 | **+0.031** | +0.093 |
+| SCZ vs MDD | +0.357 | **+0.201** | +0.210 |
+| ALZ_noAPOE vs MDD | +0.382 | +0.040 | +0.100 |
+
+SCZ–MDD retains 0.20 within EUR, which is about their published rg; SCZ–ALZ
+collapses to 0.03, which is about their published rg too (~0). So the scores
+behave correctly and the pooled-sample correlations were structure, not biology.
+
+**Leading hypothesis for ALZ_noAPOE**, and why two GWAS are being added.
+Wightman 2021 includes UK Biobank **by-proxy** cases — dementia inferred from
+parental history. Proxy phenotypes are contaminated by parental longevity, SES
+and education, so an AD-by-proxy score partly indexes educational attainment,
+and EA associates with cortical structure in ABCD. If that is what is
+happening, it is a question about the SCZ result too, not only the control. Two
+additions test it:
+- **Kunkle 2019 / IGAP (GCST007511)**, 21,982 clinically diagnosed cases vs
+  41,944 controls, European, **no proxy cases**. If ALZ_noAPOE's association
+  disappears here, proxy contamination is the driver.
+- **Okbay 2016 educational attainment (GCST003676)**, N = 405,072, as a
+  positive control and a covariate. Lee 2018 EA3 would be far better powered
+  but its full sumstats are 23andMe-restricted and need an SSGAC data-use
+  agreement, which is the user's to sign, not mine to click through.
+
+#### The within-family test cannot arbitrate, and no method choice fixes that
+
+`06_prs_family.R` reports this itself: at 1,339 informative sibling pairs
+(686 in the EUR arm), an effect of 0.040 SD/SD gives z ≈ 1.03, i.e. **power
+≈ 18%** at α = 0.05. So se_within runs ~3.2× se_between, the within-family
+point estimates disagree across methods (C+T −0.115, SBayesR −0.0005 in the
+same EUR arm), and `p_diff` is never significant — equally consistent with no
+stratification and with a great deal of it. Significance is carried by the
+between-family component throughout, which is where both stratification and
+genuine direct/indirect genetic effects live. This is ABCD's sibling count, not
+a modelling choice.
+
+#### Three defects, all mine, all found by checking rather than by failure
+
+**1. Borrowed allele frequencies silently gutted both controls** (§14.4). ASD
+ran at 378,844 of 3,085,577 SNPs, ALZ at 1,110,485 of 5,994,563, because a SNP
+with no frequency in the HapMap3 panel was dropped. This is the defect that
+matters most scientifically, because it manufactured the specificity gradient I
+reported in §13.6: at 1.1M SNPs ALZ-noAPOE was null (p = .255–.925); at 5.99M
+it is not. **A control that is under-covered relative to the exposure makes any
+specificity claim look stronger than the evidence supports.**
+
+**2. A sample-size "fix" that was wrong, and is reverted.** I concluded MDD was
+on raw N while SCZ was on Neff, and substituted 4/(1/ncas + 1/ncon). The
+giveaway against me was one glance at the file: MDD's `n` is **non-integer**
+(1,183,604.88 where ncases+ncontrols = 2,288,955). A sample-size column with a
+fractional part is already an effective N — here the per-cohort sum of
+4/(1/ncas_i + 1/ncon_i), which is the *correct* quantity and strictly smaller
+than the pooled-ratio formula (1.18M vs 1.36M) because pooling hides each
+cohort's imbalance. My substitution made MDD's N too large, which is the error
+I thought I was correcting. Six cells were cancelled and re-run for nothing.
+
+**3. `sbatch --export` splits on commas, so the wrong cells ran and reported
+success.** `--export=ALL,ONLY_CELLS=7,14,21,28` delivers `ONLY_CELLS=7`; sbatch
+consumed the rest as its own list entries. Tasks 2+ then indexed an unset array
+element, `${CELLS[1]}` expanded to empty, `T` became −1, and bash's negative
+indexing ran `TODO[-1]` — the last cell in the grid. Eight array tasks across
+two jobs reported COMPLETED having redundantly recomputed one wrong cell while
+the MDD Bayesian cells never ran at all. The cell list is now a positional
+argument with an explicit bounds check that exits 2, because the failure mode
+here was not a crash but a confident wrong answer.
+
+The common thread in all three: each produced plausible output. The grid looked
+complete, the controls looked null, the jobs looked COMPLETED. None of them
+would have been caught by checking whether the pipeline ran.

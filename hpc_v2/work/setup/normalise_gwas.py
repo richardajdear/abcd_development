@@ -15,7 +15,15 @@ Missing pieces, filled the same way for every trait that needs it:
   se    from |b| and p when the file carries none (ASD)
   b,se  from Z when the file carries only Z (ALZ), via the standard
         b = z/sqrt(2p(1-p)(n+z^2)), se = 1/sqrt(2p(1-p)(n+z^2))
-  N     2 x NEFF for the PGC case/control files (their NEFF is Neff/2)
+  N     EFFECTIVE sample size, which both case/control files already supply:
+          SCZ  2 x NEFFDIV2 (the PGC convention stores Neff/2)
+          MDD  the "n" column, which is non-integer and so already Neff
+        ASD and ALZ supply no case/control split, only a total, so those two
+        remain on raw N.  That over-states their precision, so the Bayesian
+        methods shrink them less than they should and their scores are noisier
+        than a like-for-like Neff version would be.  Both are negative controls
+        and this works against them, so it is recorded rather than hidden --
+        but it is a reason not to read their nulls as strongly as SCZ's signal.
 """
 import csv, gzip, math, os, sys
 from statistics import NormalDist
@@ -74,6 +82,21 @@ def mdd(path):
             try:
                 fr = float(r["effect_allele_frequency"]); b = float(r["beta"])
                 se = float(r["standard_error"]); pv = float(r["p_value"])
+                # The file's "n" is ALREADY an effective sample size, not a
+                # headcount: it is non-integer (e.g. 1183604.88 where
+                # ncases+ncontrols = 2288955).  It is the per-cohort sum of
+                # 4/(1/ncas_i + 1/ncon_i), which is the right quantity and is
+                # strictly SMALLER than the same formula applied to the pooled
+                # totals (1.18M vs 1.36M here) because pooling hides each
+                # cohort's case/control imbalance.  So use it as given.
+                #
+                # I briefly replaced this with the pooled-ratio formula on the
+                # theory that MDD was on a raw-N convention while SCZ was on
+                # Neff (2 x NEFFDIV2).  It is not -- both are Neff, and the
+                # substitution made MDD's N too large, which would have made
+                # PRS-CS/SBayesR shrink MDD too little.  Recorded because the
+                # giveaway is cheap to check and easy to miss: an N column with
+                # a fractional part is not a headcount.
                 N = float(r.get("N") or r.get("n"))
             except (ValueError, TypeError):
                 continue
