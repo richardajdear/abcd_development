@@ -72,6 +72,24 @@ d <- merge(d, ccov[, c("FID", "IID", "sex", "site"), with = FALSE],
            by = c("FID", "IID"))
 # FID is the family identifier in the GCTA export, so it IS family_id.
 d[, family_id := FID]
+# ---------------------------------------------------------------------------
+# Age covariate.  The model below asks for `age_c`, but the ABCD covariate
+# export names the column `baseline_age` -- so for the whole history of this
+# pipeline the term was silently dropped by the `terms %in% names(sub)` filter
+# and every association was fitted WITHOUT any age adjustment, while the header
+# above claimed otherwise.  Derive age_c here so the documented model is
+# literally the fitted model, and make a genuinely missing covariate loud.
+# ---------------------------------------------------------------------------
+if (!"age_c" %in% names(d)) {
+  if ("baseline_age" %in% names(d)) {
+    d[, age_c := baseline_age - mean(baseline_age, na.rm = TRUE)]
+    message("age_c derived by centring baseline_age")
+  } else {
+    warning("no age column found (age_c / baseline_age) -- models will be ",
+            "UNADJUSTED for age; this is almost certainly wrong")
+  }
+}
+
 
 # ---------------------------------------------------------------------------
 # Ancestry strata.
@@ -131,6 +149,12 @@ for (f in prof) {
       # A random intercept needs replicated families to be identifiable.
       if (nrow(sub) < 100 || uniqueN(sub$family_id) < 50) next
 
+      dropped <- setdiff(c("sex", "age_c", pc_cols), names(sub))
+      if (length(dropped) && !exists(".warned_dropped")) {
+        warning("covariates requested but absent, so NOT in the model: ",
+                paste(dropped, collapse = ", "))
+        .warned_dropped <- TRUE
+      }
       terms <- c("scale(PRS)", "sex", "age_c", pc_cols)
       terms <- terms[terms %in% names(sub) | terms == "scale(PRS)"]
       fml <- as.formula(sprintf("scale(%s) ~ %s + (1 | family_id)",
