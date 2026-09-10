@@ -42,6 +42,18 @@ ARMS = OrderedDict([
     # APOE in, ALZ looks as strong as SCZ, and that is one large-effect locus
     # rather than polygenic AD risk.
     ("ALZ_noAPOE", ("ALZnoAPOE", "pooled", "PGC-ALZ2 minus chr19:44.4-46.5Mb", "full")),
+    # Kunkle/IGAP: clinically diagnosed AD only, no UK Biobank by-proxy cases.
+    # The ALZ_IGAP_noAPOE cell is the test -- if Wightman's APOE-excluded
+    # association is proxy contamination (parental longevity, SES, education),
+    # it should not reproduce here.  Neff 57,706 vs Wightman's 762,917, so a
+    # null is suggestive rather than decisive.
+    ("ALZ_IGAP",   ("ALZigap", "pooled", "Kunkle 2019 IGAP, diagnosed only", "full")),
+    ("ALZ_IGAP_noAPOE", ("ALZigapNoAPOE", "pooled",
+                         "Kunkle 2019 minus chr19:44.4-46.5Mb", "full")),
+    # EA is a positive control for the confound, not a disorder control: if
+    # polygenic education associates at the magnitudes reported for SCZ, every
+    # disorder association here has to be read as possibly an SES signal.
+    ("EA",         ("EA", "pooled", "Okbay 2016 EduYears, N=405,072", "full")),
 ])
 HEADLINE = ["global_slope", "baseline_thickness"]
 

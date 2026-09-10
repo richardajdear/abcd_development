@@ -5,7 +5,7 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=96G
 #SBATCH --time=12:00:00
-#SBATCH --array=1-28%8
+#SBATCH --array=1-40%8
 #
 # FINAL PRS MATRIX: four methods x the discovery GWAS matched to the target arm.
 #
@@ -57,7 +57,7 @@ if [[ -n "$CELL_LIST" ]]; then
     echo "       (array range must match the number of cells requested)" >&2
     exit 2
   fi
-  T=$(( ${CELLS[$IDX]} - 1 ))
+  SEL="${CELLS[$IDX]}"
 else
   T=$(( ${SLURM_ARRAY_TASK_ID:-1} - 1 ))
 fi
@@ -66,7 +66,8 @@ METHODS=(CT PRSCS SBayesR SBayesRC)
 # strong as SCZ, and APOE is one large-effect locus rather than polygenic AD
 # risk.  Adding it here changes the index mapping -- with 7 traits, cell
 # indices are method*7 + trait, so ALZ_noAPOE is 7, 14, 21, 28.
-TRAITS=(SCZ_pooled SCZ_eur MDD_pooled MDD_eur ASD ALZ ALZ_noAPOE)
+TRAITS=(SCZ_pooled SCZ_eur MDD_pooled MDD_eur ASD ALZ ALZ_noAPOE
+        ALZ_IGAP ALZ_IGAP_noAPOE EA)
 # The full 4 x 7 grid.  Every cell is recomputed from the unified .ma files so
 # that no number in the final tables inherits an older, differently-prepared
 # input -- ASD and ALZ in particular changed a lot once their allele
@@ -74,6 +75,22 @@ TRAITS=(SCZ_pooled SCZ_eur MDD_pooled MDD_eur ASD ALZ ALZ_noAPOE)
 # (ASD 378,844 -> 2,389,935 SNPs; ALZ 1,110,485 -> 5,994,563).
 TODO=()
 for m in "${METHODS[@]}"; do for t in "${TRAITS[@]}"; do TODO+=("$m:$t"); done; done
+# Resolve the selection.  METHOD:TRAIT is preferred over a number: adding a
+# trait renumbers every cell after it, and a stale numeric list then runs the
+# wrong cell without complaining.  A name that no longer exists fails loudly.
+if [[ -n "${SEL:-}" ]]; then
+  if [[ "$SEL" =~ ^[0-9]+$ ]]; then
+    T=$(( SEL - 1 ))
+  else
+    T=-1
+    for i in "${!TODO[@]}"; do [[ "${TODO[$i]}" == "$SEL" ]] && { T=$i; break; }; done
+    if (( T < 0 )); then
+      echo "FATAL: '$SEL' is not a cell.  Valid cells:" >&2
+      printf '  %s\n' "${TODO[@]}" >&2
+      exit 2
+    fi
+  fi
+fi
 if (( T < 0 || T >= ${#TODO[@]} )); then
   echo "FATAL: resolved cell index $((T+1)) is outside 1-${#TODO[@]}" >&2
   exit 2

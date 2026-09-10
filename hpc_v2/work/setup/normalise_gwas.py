@@ -8,6 +8,9 @@ same columns and any difference between methods is the method.
   MDD_pooled  pgc-mdd2025 ..._div      trans-ancestry
   MDD_eur     pgc-mdd2025 ..._eur      European only
   ASD         SPARK+iPSYCH+PGC         no ancestry-stratified release exists
+  ALZ_IGAP    Kunkle 2019 IGAP stage1  clinically diagnosed only, NO proxy cases
+  EA          Okbay 2016 EduYears      positive control for the SES/education
+                                       confound, not a disorder control
   ALZ         PGC-ALZ2 (Wightman)      no ancestry-stratified release exists
 
 Missing pieces, filled the same way for every trait that needs it:
@@ -140,9 +143,79 @@ def alz(path):
             if d <= 0: continue
             yield snp, a1, a2, fr, z/d, 1.0/d, pv, N
 
+def kunkle(path):
+    """Kunkle et al. 2019, IGAP stage 1 (GWAS Catalog GCST007511): 21,982
+    CLINICALLY DIAGNOSED late-onset AD cases vs 41,944 controls, European.
+
+    The point of adding it is what it does NOT contain.  Wightman 2021 (our
+    other ALZ file) includes UK Biobank by-proxy cases, where the phenotype is
+    parental dementia reported by the participant -- contaminated by parental
+    longevity, SES and education.  An AD-by-proxy score therefore partly indexes
+    educational attainment, and EA associates with cortical structure in ABCD.
+    Kunkle has no proxy cases, so if the ALZ_noAPOE association survives here it
+    is not proxy contamination; if it vanishes, it is.
+
+    No frequency column (borrow from the target, as for ASD/ALZ) and no N
+    column: N is constant by design, Neff = 4/(1/21982 + 1/41944) = 57,706.
+    That is a third of Wightman's Neff, so a null here is weaker evidence than
+    a null in a comparably powered file -- stated so the comparison is not
+    over-read."""
+    NEFF = 4.0 / (1.0/21982 + 1.0/41944)
+    with opener(path) as f:
+        for r in csv.DictReader(f, delimiter=" ", skipinitialspace=True):
+            snp = r.get("MarkerName") or ""
+            fr = MAF.get(snp)
+            if not snp or fr is None: continue
+            try:
+                b = float(r["Beta"]); se = float(r["SE"]); pv = float(r["Pvalue"])
+            except (ValueError, TypeError, KeyError):
+                continue
+            a1, a2 = r["Effect_allele"].upper(), r["Non_Effect_allele"].upper()
+            if a1 not in "ACGT" or a2 not in "ACGT" or not (0 < fr < 1) or se <= 0:
+                continue
+            yield snp, a1, a2, fr, b, se, pv, NEFF
+
+def okbay(path, cols):
+    """Okbay et al. 2016 educational attainment, years of education
+    (GCST003676), N = 405,072 European.  Not a disorder control -- a POSITIVE
+    control for the confound itself.  If polygenic EA associates with
+    global_slope at the magnitudes we are reporting for SCZ, then the whole set
+    of disorder associations has to be read as possibly an SES/education signal,
+    and conditioning on it becomes the test that matters.
+
+    Lee 2018 EA3 (N up to 1.1M) would be far better powered, but its full
+    summary statistics are 23andMe-restricted behind an SSGAC data-use
+    agreement, which is the user's to sign rather than mine to click through.
+    Column names vary between Okbay releases, so they are passed in."""
+    c_snp, c_a1, c_a2, c_frq, c_b, c_se, c_p = cols
+    with opener(path) as f:
+        rd = csv.DictReader(f, delimiter="\t")
+        for r in rd:
+            snp = r.get(c_snp) or ""
+            if not snp: continue
+            try:
+                b = float(r[c_b]); se = float(r[c_se]); pv = float(r[c_p])
+            except (ValueError, TypeError, KeyError):
+                continue
+            fr = None
+            if c_frq and r.get(c_frq) not in (None, "", "NA"):
+                try: fr = float(r[c_frq])
+                except ValueError: fr = None
+            if fr is None: fr = MAF.get(snp)
+            if fr is None: continue
+            a1, a2 = r[c_a1].upper(), r[c_a2].upper()
+            if a1 not in "ACGT" or a2 not in "ACGT" or not (0 < fr < 1) or se <= 0:
+                continue
+            yield snp, a1, a2, fr, b, se, pv, 405072.0
+
 emit("SCZ_pooled", pgc_vcf(os.path.join(IN, "SCZ_primary.tsv")))
 emit("SCZ_eur",    pgc_vcf(os.path.join(IN, "SCZ_european.tsv.gz")))
 emit("MDD_pooled", mdd(os.path.join(IN, "MDD_div_raw.tsv")))
 emit("MDD_eur",    mdd(os.path.join(IN, "MDD_eur_raw.tsv.gz")))
 emit("ASD",        asd(os.path.join(IN, "ASD_raw.tsv")))
 emit("ALZ",        alz(os.path.join(IN, "ALZ_rsid.tsv")))
+emit("ALZ_IGAP",   kunkle(os.path.join(IN, "Kunkle_etal_Stage1_results.txt")))
+# Okbay column names are supplied by the caller via OKBAY_COLS so a different
+# release can be swapped in without editing this file.
+_oc = os.environ.get("OKBAY_COLS", "MarkerName,A1,A2,EAF,Beta,SE,Pval").split(",")
+emit("EA",         okbay(os.path.join(IN, "Okbay_EduYears_Main.txt.gz"), _oc))
