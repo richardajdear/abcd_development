@@ -1446,3 +1446,137 @@ produced.
 
 So two strands, not one — but the specificity problem is unresolved, because a
 late-onset control reaches nominal significance under both Bayesian methods.
+
+---
+
+## 14. Final restructure — one input tree, four methods, arms matched — 2026-09-10
+
+### 14.1 Why this run exists
+
+The audit at the end of §13 found a confound in my own comparison table, not in
+the data. C+T had inherited its discovery sumstats from v1, which used the
+**multi-ancestry** releases (`PGC3_SCZ_wave3.primary`, MDD2025 `div`), while
+every Bayesian method had been built on the **European** releases
+(`.european.`, `eur`). So "method" and "discovery GWAS" varied together, and
+any difference between C+T and SBayesR was uninterpretable — it could have
+been the shrinkage model or it could have been the ancestry of the discovery
+sample. That is the specific thing this run fixes.
+
+The rule now applied everywhere: **the discovery GWAS is matched to the target
+arm.**
+
+| arm | target n | SCZ discovery | MDD discovery |
+|---|---|---|---|
+| pooled | 8,082 (multi-ancestry) | `PGC3_SCZ_wave3.primary` — EUR+EAS+AFR+LAT | MDD2025 `div` — trans-ancestry |
+| EUR | 4,116 (European) | `PGC3_SCZ_wave3.european` | MDD2025 `eur` |
+
+ASD and ALZ have no ancestry-stratified release, so one file serves both arms.
+That is marked in every table rather than hidden.
+
+### 14.2 The method set, reduced to four
+
+| method | shrinkage | LD reference |
+|---|---|---|
+| C+T | none; clump at r²<0.1/250kb, best of 8 p-thresholds | **our own sample** |
+| PRS-CS | continuous shrinkage, φ learned | UKB EUR, ~50k individuals |
+| SBayesR | mixture of four normals | UKB EUR shrunk-sparse, 50k |
+| SBayesRC | mixture + 97 functional annotations | UKB EUR eigen-decomposed |
+
+Dropped, with reasons recorded in `results_v2/retired/README.md`:
+
+- **PRS-CS with the 1000G EUR panel.** 503 individuals against 50,000. This was
+  not a cosmetic difference — the 1000G run was the single outlier that made me
+  write in §13.5 that the SCZ association did not survive continuous shrinkage,
+  which §13.8 then had to retract once SBayesR on the same sumstats gave
+  p = 7.3e-04. Only the UKB-LD PRS-CS is reported.
+- **PRS-CSx.** It was brought in to fix the pooled-arm ancestry inflation and
+  cannot: the PGC SCZ `afram` and `latino` files carry 11 columns with no
+  NCAS/NCON/NEFF and no daner equivalent, so the two ancestries our target
+  actually needs cannot enter the model, and I was not willing to invent their
+  sample sizes. Beyond that it addresses the wrong side of the problem. The
+  inflation is **target-side** — the score correlates with the subject's
+  ancestry and so does cortical thickness. A multi-ancestry *discovery* prior
+  does nothing about that. Within-ancestry standardisation (§13.x,
+  `standardise_within_ancestry.py`) is the correction that does.
+
+### 14.3 One input tree
+
+`hpc_v2/work/inputs/` is now the only place any v2 script reads from — symlinks
+to the real files, so nothing reaches into `hpc/work/` (v1) or scattered
+`/rds/user/` locations, and nothing is duplicated on disk:
+
+```
+inputs/gwas/      SCZ_primary SCZ_european MDD_div MDD_eur ASD ALZ(+rsID-mapped)
+inputs/pheno/     phenotypes_gcta covar_quant covar_categorical manifest
+inputs/geno/      abcd_imp_prs.{bed,bim,fam}   7,068,032 SNPs x 11,670
+inputs/ancestry/  eur_anchor.keep  strata_k4.tsv
+inputs/bin/       plink magma gctb munge_sumstats.py ldsc.py python Rscript PRScs
+inputs/ref/       eur_w_ld_chr ldblk_ukbb_eur sbayesr_ldm sbayesrc_eigen
+                  annot_baseline2.2.txt target.frq maf_union.tsv
+inputs/genesets/  AHBA C1-C3 and the MAGMA priority sets
+```
+
+`work/setup/paths.sh` names every one of these, and is sourced by the run
+script; there are no literal paths in the analysis code any more.
+
+### 14.4 A real bug this restructure exposed: borrowed allele frequencies
+
+ASD and ALZ ship no allele frequency column, so the normaliser has to borrow
+one — ALZ needs it twice over, since that file carries only Z and b/se must be
+reconstructed as `b = z/sqrt(2p(1-p)(N+z²))`.
+
+The frequency was being borrowed from the PRS-CS UKB **HapMap3** panel, 1,117,425
+SNPs. That silently discarded most of both control files, because a SNP with no
+frequency was dropped:
+
+| trait | raw file | with HapMap3 MAF | with target MAF |
+|---|---|---|---|
+| ASD | 3,085,577 | 378,844 (12%) | **2,389,935 (77%)** |
+| ALZ | 12.7M (→1.1M rsID-mapped) | 1,110,485 | **5,994,563** |
+
+The right frequency for scoring is the frequency **in our own target sample** —
+and a SNP absent from the target cannot be scored at all, so nothing is lost by
+preferring it. `maf_union.tsv` is target frequency first (7,068,032 SNPs), with
+the HapMap3 panel filling only the 28,597 SNPs the target lacks; those still
+matter because the SBayesR/SBayesRC LD matrices are HapMap3.
+
+This mattered for interpretation, not just tidiness. ASD and ALZ are the
+**negative controls** in the specificity claim (SCZ > MDD > ALZ-noAPOE ≈ ASD).
+A control run on 12% of its SNPs is underpowered by construction, so it would
+have come out null for a reason that has nothing to do with biology — making
+the specificity gradient look stronger than the evidence supports. Both
+controls are now on a footing comparable to SCZ and MDD.
+
+### 14.5 What runs
+
+`work/setup/prs_final.sbatch`, a 24-task array = 4 methods × 6 trait-arms, every
+cell recomputed from the same six normalised `SNP A1 A2 freq b se p N` files so
+that no reported number inherits an older, differently-prepared input. Each task
+produces four association tables: the score as PLINK wrote it and the score
+z-standardised within ancestry cluster, each tested both marginally
+(`prs_assoc.R`, mixed model with a family random intercept) and decomposed into
+between- and within-family components (`06_prs_family.R`).
+
+`work/setup/collect_final.py` assembles `table_main.tsv`, `table_all.tsv` and
+`table_family.tsv` in `results_v2/prs_final/`, selecting the stratum matched to
+each score's discovery GWAS and reporting the threshold-adjusted p for C+T
+rather than the raw minimum across its eight thresholds.
+
+### 14.6 The caveat that cannot be engineered away
+
+PRS-CS, SBayesR and SBayesRC all use a **European** UKB LD reference, because no
+multi-ancestry UKB LD panel is distributed for any of them. Running them on the
+trans-ancestry `primary`/`div` sumstats is therefore LD-mismatched on the
+*discovery* side: the model assumes the LD structure that generated the
+summary statistics is the LD structure in its reference panel, and for a
+meta-analysis spanning four ancestries it is not. So the pooled-arm Bayesian
+cells are the methodologically weakest in the grid, and they are reported with
+that label attached.
+
+C+T is the exception and this is why it is worth keeping despite being the
+crudest method: it clumps on **our own genotypes**, so its LD model is the
+target sample's by construction and the pooled arm is not mismatched. Where
+C+T and the Bayesian methods disagree in the pooled arm specifically, C+T is
+the one to believe on LD grounds — which is the opposite of the ranking that
+applies in the EUR arm, where the Bayesian methods' larger LD reference is a
+genuine advantage.

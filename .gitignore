@@ -97,3 +97,20 @@ hpc_v2/work/results_v2/*
 hpc_v2/work/results_v2/*/*
 !hpc_v2/work/results_v2/*/*_summary.tsv
 !hpc_v2/work/results_v2/prs_family/prs_withinfamily.tsv
+
+# Reported result tables.  The *_summary.tsv glob above misses these because
+# they are named by what they are, not by the convention -- and the PRS tables
+# in particular ARE the work product, so they belong in the repo:
+#   prs_final/table_*.tsv        the four-method x two-arm digest (sec 14)
+#   prs_final/assoc_*.tsv        per-cell association, raw and within-ancestry
+#   prs_final/fam_*.tsv          Fulker between/within-family decomposition
+#   within_ancestry/*.tsv        ancestry-standardised scores (sec 13)
+#   retired/README.md            why PRS-CS/1000G and PRS-CSx were dropped
+!hpc_v2/work/results_v2/prs_final/table_*.tsv
+!hpc_v2/work/results_v2/prs_final/assoc_*.tsv
+!hpc_v2/work/results_v2/prs_final/fam_*.tsv
+!hpc_v2/work/results_v2/within_ancestry/*.tsv
+!hpc_v2/work/results_v2/retired/README.md
+
+# SLURM job logs land in the repo root because that is the submit directory.
+slurm-*.out
