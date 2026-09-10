@@ -161,16 +161,28 @@ def kunkle(path):
     a null in a comparably powered file -- stated so the comparison is not
     over-read."""
     NEFF = 4.0 / (1.0/21982 + 1.0/41944)
+    # Split on whitespace rather than using csv: this file is space-delimited and
+    # contains a stray double quote, which csv treats as opening a quoted field
+    # and then reads to EOF looking for its partner -- "field larger than field
+    # limit (131072)".  Manual splitting has no quoting rules to trip over.
     with opener(path) as f:
-        for r in csv.DictReader(f, delimiter=" ", skipinitialspace=True):
-            snp = r.get("MarkerName") or ""
+        hdr = f.readline().split()
+        c = {name: i for i, name in enumerate(hdr)}
+        need = ("MarkerName", "Effect_allele", "Non_Effect_allele", "Beta", "SE", "Pvalue")
+        missing = [k for k in need if k not in c]
+        if missing:
+            raise SystemExit(f"Kunkle: header lacks {missing}; got {hdr}")
+        for ln in f:
+            v = ln.split()
+            if len(v) < len(hdr): continue
+            snp = v[c["MarkerName"]]
             fr = MAF.get(snp)
-            if not snp or fr is None: continue
+            if fr is None: continue
             try:
-                b = float(r["Beta"]); se = float(r["SE"]); pv = float(r["Pvalue"])
-            except (ValueError, TypeError, KeyError):
+                b = float(v[c["Beta"]]); se = float(v[c["SE"]]); pv = float(v[c["Pvalue"]])
+            except ValueError:
                 continue
-            a1, a2 = r["Effect_allele"].upper(), r["Non_Effect_allele"].upper()
+            a1, a2 = v[c["Effect_allele"]].upper(), v[c["Non_Effect_allele"]].upper()
             if a1 not in "ACGT" or a2 not in "ACGT" or not (0 < fr < 1) or se <= 0:
                 continue
             yield snp, a1, a2, fr, b, se, pv, NEFF
