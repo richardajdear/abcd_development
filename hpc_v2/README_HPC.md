@@ -1699,3 +1699,104 @@ here was not a crash but a confident wrong answer.
 The common thread in all three: each produced plausible output. The grid looked
 complete, the controls looked null, the jobs looked COMPLETED. None of them
 would have been caught by checking whether the pipeline ran.
+
+### 14.8 Matched-stratum results, and a wrong call that matching corrected
+
+Two new controls were added to test whether the disorder associations are an
+SES/education signal (§14.7): **ALZ_IGAP** (Kunkle 2019, GCST007511, 21,982
+clinically diagnosed cases, **no UK Biobank by-proxy cases**, Neff 57,706) and
+**EA** (Okbay 2016 EduYears, GCST003676, N = 405,072). Building them exposed one
+defect and corrected one of my conclusions.
+
+#### The APOE exclusion was incomplete, and the check caught it
+
+The exclusion matched rsIDs against the GRCh37 reference `.bim` only, so any
+APOE-region SNP **absent from that reference** could not be excluded at all.
+Kunkle has four, all in the APOE cluster (APOE is at chr19:44.90 Mb GRCh38):
+
+| SNP | position | p |
+|---|---|---|
+| rs4803758 | chr19:44,824,166 | 1.8e-74 |
+| rs73052307 | chr19:44,881,148 | 2.0e-69 |
+| rs4803781 | chr19:44,956,414 | 1.4e-13 |
+| rs187270432 | chr19:45,010,803 | 9.3e-17 |
+
+At p = 1.8e-74 these dominate a C+T score, so the run would have reported
+"polygenic AD risk excluding APOE is significant" from a score built largely out
+of APOE — the exact artefact the control exists to exclude. Wightman escaped only
+because its APOE-region SNPs all happen to be in the reference. The fix excludes
+the rsID **union of both builds' windows**, and the verification is now fatal
+(exit 4), because an APOE-excluded score that still contains APOE is worse than
+no control at all. Both files now verify clean: ALZ_noAPOE 5,987,441 SNPs and
+ALZ_IGAP_noAPOE 6,996,400 SNPs, each with 0 residual SNPs at p < 1e-8 in the
+region.
+
+#### Reading controls in the wrong stratum produced a false positive
+
+Every trait except SCZ_pooled and MDD_pooled has a **European-only** discovery
+GWAS — including all four controls. `collect_final.py` had been assigning them to
+the pooled stratum because they have no ancestry-stratified release. That is true
+but is not a reason to read them in the mismatched stratum, and it produced a
+wrong call: **ASD looked significant at +0.036 (p_adj = .015) in the pooled
+stratum and is null in all four methods in the matched EUR stratum** (+0.030,
++0.016, −0.005, −0.004). I had explained the pooled number as a sparse-threshold
+artefact, which was beside the point.
+
+The two mismatch directions are not equivalent and the table now says so:
+- **European GWAS → pooled target is confounded**, not merely noisier: the score
+  tracks ancestry and so does the phenotype. It is visible as an SE that inflates
+  with threshold density — ALZ_IGAP pooled runs 0.014 → 0.046, the signature of
+  collinearity with the PCs. Such a cell is **not** a robustness check on the
+  matched one.
+- multi-ancestry GWAS → EUR target loses power but is not confounded.
+
+#### Matched cells, `global_slope`, threshold-adjusted p (* = p_adj < .05)
+
+| trait_arm | strat | C+T | PRS-CS | SBayesR | SBayesRC |
+|---|---|---|---|---|---|
+| SCZ_pooled | full | −0.038* | −0.025 | −0.071* | −0.041* |
+| SCZ_pooled | full zanc | −0.033* | −0.015 | −0.029* | −0.025* |
+| SCZ_eur | EUR | −0.047* | −0.027 | −0.035* | −0.036* |
+| MDD_pooled | full | −0.044 | pending | −0.079* | pending |
+| MDD_pooled | full zanc | −0.020 | pending | −0.028* | pending |
+| MDD_eur | EUR | −0.026 | pending | −0.023 | pending |
+| ASD | EUR | +0.030 | +0.016 | −0.005 | −0.004 |
+| ALZ | EUR | −0.049* | −0.033* | −0.025 | −0.025 |
+| ALZ_noAPOE | EUR | −0.044* | pending | −0.013 | +0.002 |
+| ALZ_IGAP | EUR | −0.040 | pending | −0.024 | pending |
+| EA | EUR | +0.036 | pending | pending | pending |
+
+**The discriminating pattern is agreement across methods, not magnitude.**
+
+- **SCZ** is significant in 3 of 4 methods in *both* arms, and the three agree
+  closely in the EUR arm (−0.035, −0.036, −0.047).
+- **ALZ_noAPOE** is significant under C+T alone; SBayesR puts it at −0.013
+  (p = .39) and SBayesRC at +0.002 (p = .90). This is not a power difference —
+  its discovery GWAS has **13x** SCZ's effective N, so it should be the better
+  predictor. C+T sums unshrunk marginal effects over ~50,000 clumped SNPs, so
+  diffuse LD-driven signal can accumulate there and then vanish once SNPs are fit
+  jointly. **SCZ's signal survives joint modelling; AD-without-APOE's does not.**
+- **ALZ with APOE** is significant under C+T (−0.049) and PRS-CS (−0.033) but not
+  SBayesR or SBayesRC (both −0.025, p ≈ .10) — consistent with one large-effect
+  locus that clumping and continuous shrinkage propagate into a score more
+  readily than mixture models do.
+- **EA runs the opposite way** (+0.036; +0.040 pooled, nominal p = .007, not
+  surviving adjustment). Higher polygenic education, *slower* thinning. So an
+  EA-mediated confound cannot directly manufacture the negative disorder
+  coefficients — though note the sign is what the AD-by-proxy story predicts,
+  since proxy-AD indexes *low* parental education.
+- **Kunkle argues against the proxy explanation.** With no proxy cases at all it
+  reproduces Wightman's direction and magnitude in the matched arm (−0.040 vs
+  −0.044), missing corrected significance on a 13x smaller Neff. So the
+  hypothesis in §14.7 is **not supported**: what separates AD from SCZ is
+  robustness to shrinkage, not proxy contamination.
+- **MDD** reached significance for the first time, under SBayesR pooled
+  (−0.079, p_adj = .0015). Read it via the standardised value: SBayesR's pooled
+  raw betas are inflated for *both* disorders (SCZ −0.071, MDD −0.079) and both
+  fall to ≈ −0.028 under within-ancestry standardisation, where MDD still
+  survives (p_adj = .010). In the matched EUR arm it is −0.023 (p = .13).
+
+Still running: PRS-CS on ALZ_noAPOE (the cell that decides the C+T-vs-Bayesian
+split), the four ALZ_IGAP_noAPOE cells, three EA cells, and the PRS-CS MDD cells.
+I revised the reading of ALZ_noAPOE twice before the Bayesian cells landed, which
+is the argument for not reporting a four-method grid one method at a time.
