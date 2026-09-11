@@ -159,7 +159,8 @@ NOTES = [
     ]),
     ("Verdict (cross-method agreement)", [
         "SCZ: 3/4 methods, BOTH arms (PRS-CS same sign, n.s.).",
-        "MDD: 3/4 pooled only; EUR arm n.s. at n = 4,116.",
+        "MDD: pooled only — 2/4 as shown (standardised); 3/4 on the",
+        "raw pooled score.  EUR arm n.s. at n = 4,116.",
         "ALZ without APOE: C+T alone; null under joint modelling",
         "(SBayesR/RC) and null in Kunkle under all 4 — diffuse LD",
         "accumulation, not polygenic AD signal.  ASD: 0/4.",
