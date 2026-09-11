@@ -39,17 +39,27 @@ PHENOS = ["global_slope", "baseline_thickness"]
 PHENO_TITLE = {"global_slope": "global slope (thinning rate)",
                "baseline_thickness": "baseline thickness (control)"}
 
-#: facet rows, top to bottom: hypothesis traits, then controls
+#: facet rows, top to bottom: hypothesis traits, then controls.  The height
+#: field gives two-arm bands proportionally more vertical space (8 markers vs
+#: 4) -- the ggplot space='free_y' behaviour.
 BANDS = [
-    ("SCZ", "schizophrenia", ("SCZ_eur", "SCZ_pooled")),
-    ("MDD", "depression", ("MDD_eur", "MDD_pooled")),
-    ("ASD", "autism (control)", ("ASD",)),
-    ("ALZ", "Alzheimer's — Wightman", ("ALZ",)),
-    ("ALZ_noAPOE", "  ↳ APOE excluded", ("ALZ_noAPOE",)),
-    ("ALZ_IGAP", "Alzheimer's — Kunkle, no proxy", ("ALZ_IGAP",)),
-    ("ALZ_IGAP_noAPOE", "  ↳ APOE excluded", ("ALZ_IGAP_noAPOE",)),
-    ("EA", "education (Okbay, + control)", ("EA",)),
+    ("SCZ", "schizophrenia", ("SCZ_eur", "SCZ_pooled"), 1.8),
+    ("MDD", "depression", ("MDD_eur", "MDD_pooled"), 1.8),
+    ("ASD", "autism (control)", ("ASD",), 1.0),
+    ("ALZ", "Alzheimer's — Wightman", ("ALZ",), 1.0),
+    ("ALZ_noAPOE", "  ↳ APOE excluded", ("ALZ_noAPOE",), 1.0),
+    ("ALZ_IGAP", "Alzheimer's — Kunkle, no proxy", ("ALZ_IGAP",), 1.0),
+    ("ALZ_IGAP_noAPOE", "  ↳ APOE excluded", ("ALZ_IGAP_noAPOE",), 1.0),
+    ("EA", "education (Okbay, + control)", ("EA",), 1.0),
 ]
+
+#: band geometry, top to bottom (y decreasing)
+_TOTAL_H = sum(b[3] for b in BANDS)
+BAND_GEOM = {}
+_y = _TOTAL_H
+for _key, _lab, _tas, _h in BANDS:
+    BAND_GEOM[_key] = dict(top=_y, bottom=_y - _h, center=_y - _h / 2, h=_h)
+    _y -= _h
 
 # Okabe-Ito, one hue per method (grey = the non-Bayesian baseline)
 METHOD_ORDER = ["CT", "PRSCS", "SBayesR", "SBayesRC"]
@@ -74,7 +84,7 @@ def load() -> pd.DataFrame:
            ((t.target_stratum == "full") & (t.score == "zanc"))
     t = t[keep].copy()
     t["arm"] = t.target_stratum.map({"EUR": "EUR", "full": "pooled"})
-    band_of = {ta: name for name, _, tas in BANDS for ta in tas}
+    band_of = {ta: name for name, _, tas, _h in BANDS for ta in tas}
     t["band"] = t.trait_arm.map(band_of)
     assert t.band.notna().all(), sorted(t[t.band.isna()].trait_arm.unique())
     # one row per cell (C+T rows are already the selected best threshold)
@@ -85,10 +95,10 @@ def load() -> pd.DataFrame:
 
 def panel(fig, rect, d, title, show_ylab):
     ax = fig.add_axes(rect)
-    n = len(BANDS)
     for _, r in d.iterrows():
-        bi = [b[0] for b in BANDS].index(r.band)
-        y = (n - 1 - bi) + DODGE[r.method] + ARM_DODGE[r.arm]
+        g = BAND_GEOM[r.band]
+        # dodge in units of THIS band's height, so markers fill it evenly
+        y = g["center"] + (DODGE[r.method] + ARM_DODGE[r.arm]) * g["h"]
         c = METHOD_COLOR[r.method]
         sig = r.p_adj < 0.05
         ax.errorbar(r.beta, y, xerr=1.96 * r.se, fmt="none", ecolor=c,
@@ -100,15 +110,16 @@ def panel(fig, rect, d, title, show_ylab):
             ax.text(r.beta + sgn * (1.96 * r.se + 0.004), y, _fmt_p(r.p_adj),
                     fontsize=SMALL - 2, ha="left" if sgn > 0 else "right",
                     va="center", color="0.15", zorder=4)
-    ax.set_ylim(-0.55, n - 0.45)
-    for i in range(n):
+    ax.set_ylim(0, _TOTAL_H)
+    for i, (key, *_rest) in enumerate(BANDS):
         if i % 2 == 1:
-            ax.axhspan(i - 0.5, i + 0.5, color="0.955", zorder=0)
+            g = BAND_GEOM[key]
+            ax.axhspan(g["bottom"], g["top"], color="0.955", zorder=0)
     ax.axvline(0, color="0.4", lw=0.8, zorder=1)
     ax.set_xlim(-0.105, 0.105)
-    ax.set_yticks(range(n))
+    ax.set_yticks([BAND_GEOM[b[0]]["center"] for b in BANDS])
     if show_ylab:
-        ax.set_yticklabels([b[1] for b in BANDS[::-1]], fontsize=SMALL + 0.5)
+        ax.set_yticklabels([b[1] for b in BANDS], fontsize=SMALL + 0.5)
     else:
         ax.set_yticklabels([])
     ax.set_xlabel("β per SD of score (95% CI)", fontsize=SMALL, labelpad=2)
