@@ -1,28 +1,22 @@
-"""Slide: the three PRS methods (C+T, PRS-CS, SBayesR) side by side.
+"""Slide: the four-method PRS grid (C+T, PRS-CS, SBayesR, SBayesRC).
 
 Usage (repo root):  python hpc_v3/slide_prs_methods.py
 
-Context (hpc_v2/README_HPC.md §13.5 → §13.8): §13.5 concluded the SCZ →
-global_slope association "does not survive a method without threshold
-selection" from PRS-CS alone; SBayesR — a second untuned method, with a
-50,000-individual LD reference against PRS-CS's 503 — reverses that reading.
-This slide puts the three methods on one axis for every phenotype each has
-been scored on, POOLED stratum (the only stratum the SBayesR record covers).
+Reads ONLY hpc_v2/work/results_v2/prs_final/table_main.tsv -- the canonical
+grid built by collect_final.py (commit 9c64dc6: 40 cells complete, age
+covariate restored, discovery GWAS matched to target arm).  Layout: GWAS
+traits as facet rows, phenotypes as columns, a reading-guide column on the
+right carrying the caveats a reader seeing only this slide needs.
 
-Sources (all committed):
-  C+T      hpc_v3/prs_tables/prs_association_v3.tsv  (p<0.5 score; imputed;
-           p̃ = p x m_eff, m_eff = 4.6, as on slide_results_v3)
-  PRS-CS   hpc_v2/work/results_v2/prscs/prs_association_<DIS>_prscs.tsv
-           (threshold "auto"; single score, no correction needed)
-  SBayesR  hpc_v3/prs_tables/prs_sbayesr_readme.tsv — transcribed from
-           hpc_v2/README_HPC.md §13.8 (the association tables live on CSD3
-           and are not yet committed).  SEs are RECONSTRUCTED from beta and p
-           via the normal quantile, se = |beta| / Phi^-1(1 - p/2) — exact for
-           a Wald z test, so intervals are faithful to the reported p.
+Cell selection (the honest subset, per README 14.8):
+  * matched cells only -- EUR-only discovery GWAS are never read against the
+    pooled target (that mismatch produced the ASD false positive);
+  * pooled cells are shown WITHIN-ANCESTRY STANDARDISED (score='zanc') --
+    raw pooled Bayesian betas inflate 2-3x with their SEs because EUR-panel
+    re-weighting makes score variance ancestry-dependent.
 
-The four Experiment A phenotypes exist under C+T only — PRS-CS and SBayesR
-have not been scored against them (single-score files exist on CSD3; a
-one-line assoc job would fill them).
+Superseded versions of this slide (pre-ff63dd8) compared methods whose
+discovery GWAS differed; nothing from them should be quoted.
 
 Output: hpc_v3/slide_prs_methods.png  (13.333 x 7.5 in, dpi 200)
 """
@@ -33,189 +27,184 @@ from pathlib import Path
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
-from scipy.stats import norm
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
+TABLE = REPO / "hpc_v2/work/results_v2/prs_final/table_main.tsv"
 
 BASE, MID, SMALL = 10.5, 9.0, 7.5
-M_EFF = 4.6
 
-PHENOS = ["baseline_thickness", "global_slope", "slope_PC2",
-          "slope_topDelta", "slope_topC3", "slope_projDelta", "slope_projC3"]
-YLAB = ["baseline thickness\n(control)", "global slope",
-        "slope PC2 (h² reference)", "top-ΔCT mean", "top-C3 mean",
-        "ΔCT projection", "C3 projection"]
-N_SETTLED_ROWS = 3          # rule between settled phenotypes and Experiment A
+PHENOS = ["global_slope", "baseline_thickness"]
+PHENO_TITLE = {"global_slope": "global slope (thinning rate)",
+               "baseline_thickness": "baseline thickness (control)"}
 
-#: the 1000G PRS-CS run stays in results_v2/prscs/ for the record but is not
-#: drawn -- the UKB-LD re-run supersedes it (user decision 2026-09-09; the
-#: 1000G-vs-UKB contrast lives in the footnote and README §13.8 discussion)
-METHODS = ["ct", "prscs_ukbb", "sbayesr"]
-METHOD_LABEL = {"ct": "C+T", "prscs_ukbb": "PRS-CS (UKB LD)",
-                "sbayesr": "SBayesR"}
-METHOD_COLOR = {"ct": "0.30", "prscs_ukbb": "#0072B2", "sbayesr": "#D55E00"}
-DODGE = {"ct": 0.24, "prscs_ukbb": 0.0, "sbayesr": -0.24}
-#: the UKB-LD re-run (hpc_v2 commit 8fe2312's prscs_ukbb.sbatch) -- drawn
-#: automatically once its association tables are pulled from CSD3
-UKBB_DIR = "hpc_v2/work/results_v2/prscs_ukbb"
+#: facet rows, top to bottom: hypothesis traits, then controls
+BANDS = [
+    ("SCZ", "schizophrenia", ("SCZ_eur", "SCZ_pooled")),
+    ("MDD", "depression", ("MDD_eur", "MDD_pooled")),
+    ("ASD", "autism (control)", ("ASD",)),
+    ("ALZ", "Alzheimer's — Wightman", ("ALZ",)),
+    ("ALZ_noAPOE", "  ↳ APOE excluded", ("ALZ_noAPOE",)),
+    ("ALZ_IGAP", "Alzheimer's — Kunkle, no proxy", ("ALZ_IGAP",)),
+    ("ALZ_IGAP_noAPOE", "  ↳ APOE excluded", ("ALZ_IGAP_noAPOE",)),
+    ("EA", "education (Okbay, + control)", ("EA",)),
+]
 
-
-def load() -> pd.DataFrame:
-    rows = []
-    ct = pd.read_csv(REPO / "hpc_v3/prs_tables/prs_association_v3.tsv",
-                     sep="\t")
-    ct = ct[ct.threshold == "0p5"]
-    for _, r in ct.iterrows():
-        rows.append(dict(method="ct", disorder=r.disorder, stratum=r.stratum,
-                         phenotype=r.phenotype, beta=r.beta, se=r.se,
-                         p=r.p, p_corr=min(1.0, r.p * M_EFF), n=r.n))
-    # UKB-LD PRS-CS; note the cluster's filename inconsistency for ALZnoAPOE,
-    # whose file also tags the disorder column 'ALZnoAPOEukbb'
-    ukbb_files = {"SCZ": "prs_association_SCZ_prscs_ukbb.tsv",
-                  "MDD": "prs_association_MDD_prscs_ukbb.tsv",
-                  "ASD": "prs_association_ASD_prscs_ukbb.tsv",
-                  "ALZ": "prs_association_ALZ_prscs_ukbb.tsv",
-                  "ALZnoAPOE": "prs_association_ALZnoAPOE_ukbb.tsv"}
-    for dis, fname in ukbb_files.items():
-        f = REPO / UKBB_DIR / fname
-        if not f.exists():
-            continue
-        cs = pd.read_csv(f, sep="\t")
-        for _, r in cs.iterrows():
-            rows.append(dict(method="prscs_ukbb", disorder=dis,
-                             stratum=r.stratum, phenotype=r.phenotype,
-                             beta=r.beta, se=r.se, p=r.p, p_corr=r.p, n=r.n))
-    # SBayesR: the real association tables (committed 2026-09-09), which
-    # retired the prs_sbayesr_readme.tsv transcription -- values verified
-    # identical where they overlapped
-    sb_files = {"SCZ": "prs_association_SCZ_sbayesr.tsv",
-                "MDD": "prs_association_MDD_sbayesr.tsv",
-                "ASD": "prs_association_ASD_sbayesr.tsv",
-                "ALZ": "prs_association_ALZ_sbayesr.tsv",
-                "ALZnoAPOE": "prs_association_ALZnoAPOE_sbayesr.tsv"}
-    for dis, fname in sb_files.items():
-        f = REPO / "hpc_v2/work/results_v2/sbayesr" / fname
-        if not f.exists():
-            continue
-        sb = pd.read_csv(f, sep="\t")
-        for _, r in sb.iterrows():
-            rows.append(dict(method="sbayesr", disorder=dis,
-                             stratum=r.stratum, phenotype=r.phenotype,
-                             beta=r.beta, se=r.se, p=r.p, p_corr=r.p, n=r.n))
-    return pd.DataFrame(rows)
+# Okabe-Ito, one hue per method (grey = the non-Bayesian baseline)
+METHOD_ORDER = ["CT", "PRSCS", "SBayesR", "SBayesRC"]
+METHOD_LABEL = {"CT": "C+T", "PRSCS": "PRS-CS", "SBayesR": "SBayesR",
+                "SBayesRC": "SBayesRC"}
+METHOD_COLOR = {"CT": "0.30", "PRSCS": "#56B4E9", "SBayesR": "#D55E00",
+                "SBayesRC": "#CC79A7"}
+DODGE = {"CT": 0.30, "PRSCS": 0.10, "SBayesR": -0.10, "SBayesRC": -0.30}
+ARM_MARKER = {"EUR": "o", "pooled": "D"}
+ARM_DODGE = {"EUR": 0.045, "pooled": -0.045}
 
 
 def _fmt_p(p: float) -> str:
-    return f"{p:.1e}" if p < 1e-3 else f"{p:.2g}"
+    return f"{p:.0e}".replace("e-0", "e-") if p < 1e-3 else f"{p:.3f}"[1:]
 
 
-STRATUM_MARKER = {"EUR": "o", "full": "D"}    # matches slide_results_v3
-STRATUM_DODGE = {"EUR": 0.055, "full": -0.055}
+def load() -> pd.DataFrame:
+    t = pd.read_csv(TABLE, sep="\t")
+    t = t[t.phenotype.isin(PHENOS) & (t.matched == "yes")]
+    # pooled arm: standardized score only; EUR arm: raw
+    keep = ((t.target_stratum == "EUR") & (t.score == "raw")) | \
+           ((t.target_stratum == "full") & (t.score == "zanc"))
+    t = t[keep].copy()
+    t["arm"] = t.target_stratum.map({"EUR": "EUR", "full": "pooled"})
+    band_of = {ta: name for name, _, tas in BANDS for ta in tas}
+    t["band"] = t.trait_arm.map(band_of)
+    assert t.band.notna().all(), sorted(t[t.band.isna()].trait_arm.unique())
+    # one row per cell (C+T rows are already the selected best threshold)
+    dup = t.duplicated(["band", "arm", "method", "phenotype"], keep=False)
+    assert not dup.any(), t[dup][["trait_arm", "method", "threshold"]]
+    return t
 
 
-def panel(fig, rect, df, phenos, ylabels, title, show_ylab, xlim=None):
+def panel(fig, rect, d, title, show_ylab):
     ax = fig.add_axes(rect)
-    n = len(phenos)
-    for _, r in df.iterrows():
-        if r.phenotype not in phenos:
-            continue
-        y = (n - 1 - phenos.index(r.phenotype)) + DODGE[r.method] \
-            + STRATUM_DODGE[r.stratum]
+    n = len(BANDS)
+    for _, r in d.iterrows():
+        bi = [b[0] for b in BANDS].index(r.band)
+        y = (n - 1 - bi) + DODGE[r.method] + ARM_DODGE[r.arm]
         c = METHOD_COLOR[r.method]
+        sig = r.p_adj < 0.05
         ax.errorbar(r.beta, y, xerr=1.96 * r.se, fmt="none", ecolor=c,
-                    elinewidth=1.2, capsize=1.5, zorder=2)
-        ax.plot(r.beta, y, STRATUM_MARKER[r.stratum], ms=4.2,
-                mfc=c if r.p_corr < 0.05 else "white",
-                mec=c, mew=1.1, zorder=3)
-        if r.p_corr < 0.05:
+                    elinewidth=1.1, capsize=1.5, zorder=2)
+        ax.plot(r.beta, y, ARM_MARKER[r.arm], ms=4.0,
+                mfc=c if sig else "white", mec=c, mew=1.0, zorder=3)
+        if sig:
             sgn = 1 if r.beta >= 0 else -1
-            ax.text(r.beta + sgn * r.se * 1.96 * 1.12, y, _fmt_p(r.p_corr),
-                    fontsize=SMALL - 1.5, ha="left" if sgn > 0 else "right",
+            ax.text(r.beta + sgn * (1.96 * r.se + 0.004), y, _fmt_p(r.p_adj),
+                    fontsize=SMALL - 2, ha="left" if sgn > 0 else "right",
                     va="center", color="0.15", zorder=4)
+    ax.set_ylim(-0.55, n - 0.45)
     for i in range(n):
         if i % 2 == 1:
             ax.axhspan(i - 0.5, i + 0.5, color="0.955", zorder=0)
-    if n > N_SETTLED_ROWS and phenos is PHENOS:
-        ax.axhline(n - N_SETTLED_ROWS - 0.5, color="0.75", lw=0.8,
-                   ls=(0, (4, 3)), zorder=1)
     ax.axvline(0, color="0.4", lw=0.8, zorder=1)
-    ax.set_ylim(-0.55, n - 0.45)
+    ax.set_xlim(-0.105, 0.105)
     ax.set_yticks(range(n))
-    ax.set_yticklabels(ylabels[::-1] if show_ylab else [],
-                       fontsize=MID if show_ylab else 0)
-    ax.set_xlabel("β per SD of score (95% CI)", fontsize=SMALL, labelpad=2)
-    ax.set_title(title, pad=6)
-    ax.tick_params(axis="y", length=0)
-    ax.spines[["top", "right", "left"]].set_visible(False)
-    if xlim:
-        ax.set_xlim(*xlim)
+    if show_ylab:
+        ax.set_yticklabels([b[1] for b in BANDS[::-1]], fontsize=SMALL + 0.5)
     else:
-        ax.margins(x=0.22)
+        ax.set_yticklabels([])
+    ax.set_xlabel("β per SD of score (95% CI)", fontsize=SMALL, labelpad=2)
+    ax.set_title(title, fontsize=MID, loc="left")
+    ax.tick_params(axis="y", length=0)
+    ax.tick_params(axis="x", labelsize=SMALL - 1)
+    ax.spines[["top", "right", "left"]].set_visible(False)
     return ax
 
 
+NOTES = [
+    ("Model & samples", [
+        "phenotype ~ score + age + sex + PC1–10 + (1 | family), score",
+        "standardised.  EUR arm n = 4,116; pooled arm n = 8,082 (all",
+        "ancestries).  β per SD of score; 95% CI.",
+    ]),
+    ("Discovery GWAS matched to arm", [
+        "Pooled arm ← multi-ancestry releases (SCZ: PGC3 primary",
+        "EUR+EAS+AFR+LAT; MDD: MDD2025 trans-ancestry).  EUR arm ←",
+        "European-only releases.  ASD, both ALZ releases and EA exist",
+        "only as European GWAS, so they appear in the EUR arm ONLY:",
+        "read against the pooled target they are confounded (score and",
+        "phenotype both track ancestry) — doing so had made ASD appear",
+        "significant (+0.036, p̃=.015); it is null in all 4 methods here.",
+    ]),
+    ("Pooled cells are standardised", [
+        "Pooled points use the within-ancestry-standardised score (z-",
+        "scored inside each genetic-ancestry stratum).  Raw pooled",
+        "Bayesian βs run 2–3× larger with matching SEs — an artefact of",
+        "EUR-panel re-weighting making score variance ancestry-",
+        "dependent — so raw pooled magnitudes are never quoted.",
+    ]),
+    ("LD references", [
+        "PRS-CS / SBayesR / SBayesRC all use UK Biobank EUROPEAN LD",
+        "(no multi-ancestry panel is distributed), so pooled Bayesian",
+        "cells stay LD-mismatched on the discovery side.  C+T clumps on",
+        "the target genotypes themselves and is the exception.",
+    ]),
+    ("Multiplicity & controls", [
+        "C+T: best of 8 p-thresholds, p̃ threshold-adjusted.  Bayesian",
+        "methods: one score, raw p.  APOE exclusion: chr19 windows",
+        "removed on BOTH builds (GRCh37 44.4–46.5 ∪ GRCh38 43.5–46.5",
+        "Mb), verified 0 residual genome-wide-significant SNPs.  Kunkle",
+        "= clinically diagnosed cases only (no UKB by-proxy), but Neff",
+        "57.7k vs Wightman's 763k — its nulls are suggestive, not",
+        "decisive.  EA is a positive control for SES confounding: it",
+        "runs OPPOSITE in sign (+) to the disorders (−).",
+    ]),
+    ("Verdict (cross-method agreement)", [
+        "SCZ: 3/4 methods, BOTH arms (PRS-CS same sign, n.s.).",
+        "MDD: 3/4 pooled only; EUR arm n.s. at n = 4,116.",
+        "ALZ without APOE: C+T alone; null under joint modelling",
+        "(SBayesR/RC) and null in Kunkle under all 4 — diffuse LD",
+        "accumulation, not polygenic AD signal.  ASD: 0/4.",
+    ]),
+]
+
+
 def draw() -> Path:
-    df = load()
+    d = load()
     mpl.rcParams.update({
-        "font.size": BASE, "axes.titlesize": MID, "axes.labelsize": SMALL,
-        "legend.fontsize": SMALL, "xtick.labelsize": SMALL,
-        "ytick.labelsize": MID, "axes.titlelocation": "left",
-        "figure.facecolor": "white", "savefig.facecolor": "white"})
+        "font.size": BASE, "axes.titlesize": MID,
+        "figure.facecolor": "white", "savefig.facecolor": "white",
+    })
     fig = plt.figure(figsize=(13.333, 7.5))
-    fig.text(0.008, 0.955, "PRS methods compared — SCZ → global slope stands "
-             "under C+T and SBayesR; PRS-CS attenuates under BOTH LD panels",
-             fontsize=BASE + 1.5)
-    fig.text(0.008, 0.915, "filled marker = p < 0.05 after its method's "
-             "threshold correction (C+T: m_eff = 4.6; single-score methods: "
-             "raw p) · ○ EUR stratum · ◇ pooled", fontsize=SMALL,
-             color="0.35")
+    fig.text(0.008, 0.955, "PRS → cortical development, four methods on one "
+             "grid — SCZ is the only association robust across methods and "
+             "arms", fontsize=BASE + 1.5)
+    fig.text(0.008, 0.917, "ancestry-matched cells from "
+             "results_v2/prs_final/table_main.tsv (commit 9c64dc6, "
+             "age-adjusted) · filled = p̃ < .05 · ○ EUR arm · ◇ pooled, "
+             "within-ancestry standardised", fontsize=SMALL, color="0.35")
 
-    panel(fig, [0.135, 0.115, 0.225, 0.71], df[df.disorder == "SCZ"],
-          PHENOS, YLAB, "SCZ", True)
-    panel(fig, [0.395, 0.115, 0.225, 0.71], df[df.disorder == "MDD"],
-          PHENOS, YLAB, "MDD", False)
-    # controls share the same 7-row grid so rows align across all panels;
-    # points exist only where the disorder was scored on that phenotype.
-    # ALZ appears twice: with APOE (nominally significant, ~one locus) and
-    # with APOE excluded (null) -- the specificity question is the contrast.
-    panel(fig, [0.655, 0.115, 0.095, 0.71], df[df.disorder == "ASD"],
-          PHENOS, YLAB, "ASD (control)", False)
-    panel(fig, [0.775, 0.115, 0.095, 0.71], df[df.disorder == "ALZ"],
-          PHENOS, YLAB, "ALZ (control)", False, xlim=(-0.105, 0.15))
-    panel(fig, [0.895, 0.115, 0.095, 0.71], df[df.disorder == "ALZnoAPOE"],
-          PHENOS, YLAB, "ALZ, no APOE", False, xlim=(-0.105, 0.15))
+    panel(fig, [0.145, 0.085, 0.26, 0.77], d[d.phenotype == "global_slope"],
+          PHENO_TITLE["global_slope"], show_ylab=True)
+    panel(fig, [0.435, 0.085, 0.26, 0.77],
+          d[d.phenotype == "baseline_thickness"],
+          PHENO_TITLE["baseline_thickness"], show_ylab=False)
 
-    present = [m for m in METHODS if (df.method == m).any()]
     handles = [mpl.lines.Line2D([], [], color=METHOD_COLOR[m], marker="o",
                                 ls="", mfc=METHOD_COLOR[m],
-                                label=METHOD_LABEL[m]) for m in present]
+                                label=METHOD_LABEL[m]) for m in METHOD_ORDER]
     fig.legend(handles=handles, loc="upper right",
-               bbox_to_anchor=(0.995, 0.995), ncol=3, frameon=False,
-               fontsize=SMALL, handletextpad=0.4, columnspacing=1.0)
+               bbox_to_anchor=(0.995, 0.995), ncol=4, frameon=False,
+               fontsize=SMALL, handletextpad=0.3, columnspacing=0.9)
 
-    fig.text(0.008, 0.062,
-             "PRS-CS on the UKB LD panel (~375k EUR — 7× LARGER than "
-             "SBayesR's 50k) does NOT recover the SCZ association in the "
-             "EUR arm (p = 0.12 vs 0.20 under 1000G): §13.8's "
-             "LD-panel-size account fails a fortiori — the attenuation is "
-             "PRS-CS's prior.",
-             fontsize=SMALL - 1.5, color="0.42")
-    fig.text(0.008, 0.042,
-             "Pooled-arm SE inflation worsens under UKB LD (SCZ SE 0.0267 "
-             "pooled vs 0.0157 EUR): expected — no EUR panel of any size "
-             "fits the 32% non-EUR subjects; the EUR arm is the inference "
-             "arm.",
-             fontsize=SMALL - 1.5, color="0.42")
-    fig.text(0.008, 0.022,
-             "Pooled Bayesian-score betas inflate with their SEs (SBayesR "
-             "SCZ: −0.113 pooled vs −0.035 EUR) — pooled magnitudes are "
-             "unreliable.  ALZ: with APOE nominal under both Bayesian "
-             "methods (92.7% of SBayesR's weight); APOE excluded, null — "
-             "the polygenic control is clean.",
-             fontsize=SMALL - 1.5, color="0.42")
+    # reading-guide column
+    x0, y = 0.725, 0.875
+    for head, lines in NOTES:
+        fig.text(x0, y, head, fontsize=SMALL - 0.5, fontweight="bold",
+                 color="0.20", va="top")
+        y -= 0.023
+        for ln in lines:
+            fig.text(x0, y, ln, fontsize=SMALL - 1.5, color="0.30", va="top")
+            y -= 0.0178
+        y -= 0.009
 
     out = HERE / "slide_prs_methods.png"
     fig.savefig(out, dpi=200)
