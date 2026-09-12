@@ -32,6 +32,7 @@ scores <- read.csv(file.path(RES, "lead_signature_scores.csv"))
 wts    <- read.delim(file.path(RES, "lead_signature_weights.tsv"))
 ct     <- read.delim(file.path(RES, "lead_celltype_enrichment.tsv"))
 conc   <- read.delim(file.path(RES, "concordance_scores.tsv"))
+wconc  <- read.delim(file.path(RES, "concordance_weights.tsv"))
 ymaps  <- read.delim(file.path(RES, "ymaps_vs_nspn.tsv"))
 comps  <- read.delim(file.path(RES, "pls_components.tsv"))
 ovl    <- read.delim(file.path(RES, "lead_overlap_with_references.tsv"))
@@ -125,23 +126,31 @@ pg <- sc_panel(scores$NSPN_PLS2, scores$thinning_scores_gene_side, "NSPN PLS2 sc
 
 # ---------------------------------------------------------------- genes -------
 z25 <- setNames(wts$thinning_Z_ds25, wts$gene)
-hex_panel <- function(ref_vec, xlab, title, subtitle) {
+# rho and n come from concordance_weights.tsv (thinning orientation = -rho there);
+# the panel only draws the points.
+cw <- function(ref) {
+  r <- wconc |> filter(option == LEAD_OPT, ds == LEAD_DS, component == LEAD_COMP, reference == ref)
+  list(rho = -r$rho[1], n = r$n_genes[1])
+}
+hex_panel <- function(ref_vec, xlab, title, subtitle, ref_key) {
   sh <- intersect(names(z25), names(ref_vec)); sh <- sh[!is.na(ref_vec[sh]) & !is.na(z25[sh])]
   d <- data.frame(x = as.numeric(ref_vec[sh]), y = as.numeric(z25[sh]))
-  rho <- cor(d$x, d$y, method = "spearman")
+  st <- cw(ref_key)
+  stopifnot(length(sh) == st$n)
+  rho <- st$rho
   ggplot(d, aes(x, y)) + geom_hex(bins = 38) +
     scale_fill_gradient(low = "grey88", high = "grey12", trans = "log10", guide = "none") +
     geom_hline(yintercept = 0, linewidth = 0.2, colour = "grey60") +
     geom_vline(xintercept = 0, linewidth = 0.2, colour = "grey60") +
     labs(x = xlab, y = "ABCD PLS2 gene Z (bootstrap)",
-         title = sprintf(title, rho), subtitle = sprintf(subtitle, length(sh) / 1000))
+         title = sprintf(title, rho), subtitle = sprintf(subtitle, st$n / 1000))
 }
 ph <- hex_panel(setNames(c3w$C3, c3w[[1]]), "AHBA C3 gene weight",
                 "h   Gene weights track C3 (rho = %.2f)",
-                sprintf("%%.1fk shared genes; top deciles overlap %.1fx", fold("C3", "top")))
+                sprintf("%%.1fk shared genes; top deciles overlap %.1fx", fold("C3", "top")), "C3")
 pi_ <- hex_panel(setNames(nspnw$PLS2_z, nspnw$gene), "NSPN PLS2 gene Z",
                  "i   ...and NSPN PLS2 (rho = %.2f)",
-                 sprintf("%%.1fk shared genes; top deciles overlap %.1fx", fold("NSPN_PLS2_z", "top")))
+                 sprintf("%%.1fk shared genes; top deciles overlap %.1fx", fold("NSPN_PLS2_z", "top")), "NSPN_PLS2_z")
 
 ctp <- ct |> mutate(cell_class = factor(cell_class, levels = cell_class[order(z)]),
                     dir = ifelse(z > 0, "neuronal", "glial / vascular"))
@@ -154,7 +163,9 @@ pj <- ggplot(ctp, aes(z, cell_class, fill = dir)) +
   scale_x_continuous(expand = expansion(mult = 0.18)) +
   labs(x = "marker enrichment z", y = NULL,
        title = "j   Signature is neuronal, not glial",
-       subtitle = "Seidlitz 2020 marker sets, all p_perm < 0.001")
+       subtitle = sprintf("%d of %d Seidlitz 2020 sets p_perm<0.001\n(%s weakest, p = %.2f)",
+                          sum(ct$p_perm < 0.001), nrow(ct),
+                          ct$cell_class[which.max(ct$p_perm)], max(ct$p_perm)))
 
 # ---------------------------------------------------------------- assemble ----
 methods <- paste(

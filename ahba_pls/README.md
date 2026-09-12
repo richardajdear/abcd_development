@@ -60,7 +60,9 @@ NSPN's 308 — power is bounded and DS-filter sensitivity matters.
 
 **GWAS gene sets for H2.** SCZ: Trubetskoy 2022 prioritised / fine-mapped /
 locus pool (`AHBA/data/gwas/`, and the sets used in `hpc/` MAGMA). MDD: Adams 2025.
-MAGMA gene-level Z for SCZ and MDD: `../hpc/work/results/magma/{SCZ,MDD}.genes.raw`.
+MAGMA gene-level Z for SCZ and MDD: `../hpc/work/results/magma/{SCZ,MDD}.genes.raw` — present on this
+machine but **gitignored**, so on a fresh clone they must be re-fetched from the cluster before
+`08_magma_gene_property.py` will run.
 
 ## Layout
 
@@ -112,7 +114,7 @@ Signs above are reported in the *thinning* orientation (positive = higher expres
 Reading:
 - **dCT alone does not isolate the signature.** Its gene vector loads equally on C1 (the dominant static axis) and C3, and it is only marginal under the spin null. The thinning map carries the static transcriptional gradient because thinning rate covaries with baseline thickness / myelination.
 - **Adding CT as a second Y column absorbs the static axis into PLS1** (opt2 PLS1 weights ρ = −0.92 with C1) and leaves a spin-significant PLS2 that is the C3-like thinning signature at both levels — the same structure as NSPN, where the thinning signal also appeared as the second component.
-- The dCT-carrying components of options 2, 3 and 4 are one signature (pairwise weight ρ 0.83–0.94) and are stable across DS filters (ρ ≥ 0.99 between ds0/ds25/ds50), so gene filtering is not the limiting factor here as it was for deriving C3 by PCA.
+- The dCT-carrying components of options 2, 3 and 4 are one signature (pairwise weight ρ 0.83–0.94) and are stable across DS filters (weight ρ = 0.995–0.999 between adjacent filters, 0.981–0.998 between the ds0/ds50 extremes), so gene filtering is not the limiting factor here as it was for deriving C3 by PCA.
 - The ABCD thinning map itself matches the NSPN thinning map (ρ = 0.64, p_spin = 0.002), so the replication is not an artefact of a shared atlas.
 
 **Lead signature = option 2, PLS2, ds25** (`results/lead_signature_weights.tsv`, `lead_signature_scores.csv`). Top-decile overlap with C3 top decile 5.3×, with NSPN-PLS2 4.1× (hypergeometric p ≈ 0). Top genes: *AGBL4, CHRM3, CPNE8, PRSS12, LRRTM4, RAPGEF2, CCK*; bottom: *CAPN2, GIT2, PDE9A, HDAC1, MCM3, HLA-E*. Cell-class markers (Seidlitz 2020 compilation): neuronal (Ex, In) strongly positive, all glial/vascular classes negative (`lead_celltype_enrichment.tsv`; z values are descriptive — genes are not independent).
@@ -142,7 +144,7 @@ No SCZ set is enriched in the thinning signature by this test; the MDD high-conf
 | ABCD PLS2 ds25 | 0.028 (0.022) | 0.028 (0.021) |
 | ABCD PLS2 ds50 | 0.034 (0.034) | 0.041 (0.006) |
 | dCT alone (opt 1) | 0.041 (0.001) | 0.031 (0.010) |
-| dCT+dT1T2 PLS2 (opt 3) | 0.033 (0.009) | 0.039 (0.001) |
+| dCT+dT1T2 PLS2 (opt 3) | 0.033 (0.008) | 0.039 (0.001) |
 | static PLS1 (control) | 0.026 (0.037) | 0.015 (0.20) |
 | AHBA C1 | 0.026 (0.09) | 0.008 (0.58) |
 | **AHBA C3** | **0.064 (7e-5)** | **0.075 (1e-6)** |
@@ -150,7 +152,7 @@ No SCZ set is enriched in the thinning signature by this test; the MDD high-conf
 
 The thinning signature is positively associated with both SCZ and MDD gene-level association at every DS level and for every Y-option that isolates it — effect sizes ≈ half of C3's. Top-decile indicators are weaker (opt2 ds0 SCZ p = 0.03; others n.s.), i.e. the effect is spread along the continuum rather than concentrated in the extreme genes.
 
-**C. Conditional models** (shared universe n = 6,672): ABCD PLS2 keeps its association when conditioned on C1 (SCZ p = 0.004, MDD 0.002) or on the static PLS1 (0.008, 0.002), so it is not the static gradient. But conditioned on **C3 it drops to zero** (SCZ β = −0.01 p = 0.62; MDD −0.03 p = 0.17), whereas C3 conditioned on ABCD PLS2 retains its signal (SCZ p = 0.006, MDD 2e-5). ABCD PLS2 and NSPN PLS2 are mutually attenuating rather than nested: in the joint model neither SCZ coefficient survives (ABCD PLS2 p = 0.36, NSPN PLS2 p = 0.085, from p = 0.014 and 0.004 alone), while for MDD only ABCD PLS2 retains its association (p = 0.015 vs 0.87).
+**C. Conditional models** (shared universe n = 6,672): ABCD PLS2 keeps its association when conditioned on C1 (SCZ p = 0.004, MDD 0.002) or on the static PLS1 (0.008, 0.002), so it is not the static gradient. But conditioned on **C3 it drops to zero** (SCZ β = −0.01 p = 0.62; MDD −0.03 p = 0.17), whereas C3 conditioned on ABCD PLS2 retains its signal (SCZ p = 0.006, MDD 1e-5). ABCD PLS2 and NSPN PLS2 are mutually attenuating rather than nested: in the joint model neither SCZ coefficient survives (ABCD PLS2 p = 0.36, NSPN PLS2 p = 0.085, from p = 0.014 and 0.004 alone), while for MDD only ABCD PLS2 retains its association (p = 0.015 vs 0.87).
 
 Reading: the data-driven ABCD signature recovers the disorder-relevant part of C3, but does not add to it — C3 (derived from AHBA alone, with careful gene filtering) remains the sharper gene ranking for SCZ/MDD. This is the expected order: the ABCD component is a 33-region projection and can only capture the part of C3 that is expressed in the DK-resolution thinning map. The gain from ABCD is therefore in *validation* (an independent, 20× larger imaging sample reproduces the signature and its disorder enrichment) rather than in a sharper gene list.
 
@@ -178,5 +180,5 @@ per-option weight tables, spin nulls, MAGMA run directories).
 
 - 2026-09-12: ds75 dropped (user). H3 deferred until a clean ABCD GWAS exists; H4 deferred to a cluster run (user).
 - All PLS runs on the 33 AHBA-covered bilateral DK regions; the missing region is recorded in `data/`.
-- 2026-09-12: figures are built in R (`ggplot2` + `patchwork` + `ggseg` 2.2.1 from CRAN, env `ahba-pls-r`), not matplotlib. ggseg's R atlas renders frontal and temporal pole correctly, unlike the python polygon set. The R scripts read saved tables only — no statistic is recomputed or hardcoded at plot time — and DK polygons are cached to `data/dk_polygons.csv`.
+- 2026-09-12: figures are built in R (`ggplot2` + `patchwork` + `ggseg` 2.2.1 from CRAN, env `ahba-pls-r`), not matplotlib. ggseg's R atlas renders frontal and temporal pole correctly, unlike the python polygon set. The R scripts fit nothing and hardcode nothing: every statistic printed on a figure is read from the `results/` table it plots. DK polygons are cached to `data/dk_polygons.csv`.
 - Figure conventions: one-line interpretation per panel subtitle, overall interpretation as the figure subtitle, methods as short bullets in the caption.

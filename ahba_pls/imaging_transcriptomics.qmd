@@ -125,7 +125,8 @@ show(k[["option", "component", "sal_dCT", "reference", "rho", "p_spin"]].round(3
 ```
 
 Options 3 and 4 find the same component (pairwise gene-weight ρ 0.83–0.94 with option 2),
-and the signature is essentially invariant to the DS filter (ρ ≥ 0.99 across ds0/ds25/ds50) —
+and the signature is essentially invariant to the DS filter (weight ρ = 0.995–0.999 between adjacent
+filters, 0.98 between the extremes) —
 unlike C3 itself, whose derivation by PCA needs careful gene filtering. The lead signature
 is taken as **option 2, PLS2, ds25**.
 
@@ -236,8 +237,9 @@ Rscript code/fig2_enrichment.R            # Figure 2
 
 Environments. Analysis and tables: python (pandas/scipy) — env `ahba-pls`. Figures: R with
 `ggplot2`, `patchwork`, `ggrepel` and `ggseg` 2.2.1 from CRAN — env `ahba-pls-r`. The R
-scripts read only saved tables and recompute nothing, so every number printed on a figure
-comes from the file it is plotting; DK polygon coordinates are cached once to
-`data/dk_polygons.csv` from the ggseg atlas. MAGMA v1.10 binaries and their provenance are
+scripts fit no models and run no tests: every statistic printed on a figure is read from the
+table it is plotting (correlations, spin p-values, counts and fold-enrichments all come from
+`results/*.tsv`). DK polygon coordinates are cached once to `data/dk_polygons.csv` from the
+ggseg atlas. MAGMA v1.10 binaries and their provenance are
 documented in `../tools/bin/README.md` (the vendored Linux build in `~/Git/AHBA/magma` does
 not run on macOS; the macOS build is fetched from the CNCR distribution).
