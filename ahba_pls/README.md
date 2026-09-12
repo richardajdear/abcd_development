@@ -114,7 +114,7 @@ Signs above are reported in the *thinning* orientation (positive = higher expres
 Reading:
 - **dCT alone does not isolate the signature.** Its gene vector loads equally on C1 (the dominant static axis) and C3, and it is only marginal under the spin null. The thinning map carries the static transcriptional gradient because thinning rate covaries with baseline thickness / myelination.
 - **Adding CT as a second Y column absorbs the static axis into PLS1** (opt2 PLS1 weights ρ = −0.92 with C1) and leaves a spin-significant PLS2 that is the C3-like thinning signature at both levels — the same structure as NSPN, where the thinning signal also appeared as the second component.
-- The dCT-carrying components of options 2, 3 and 4 are one signature (pairwise weight ρ 0.83–0.94) and are stable across DS filters (weight ρ = 0.995–0.999 between adjacent filters, 0.981–0.998 between the ds0/ds50 extremes), so gene filtering is not the limiting factor here as it was for deriving C3 by PCA.
+- The dCT-carrying components of options 2, 3 and 4 are one signature (pairwise weight ρ 0.83–0.94) and are stable across DS filters (weight ρ = 0.995–0.999 between adjacent filters, 0.981–0.994 between the ds0/ds50 extremes), so gene filtering is not the limiting factor here as it was for deriving C3 by PCA.
 - The ABCD thinning map itself matches the NSPN thinning map (ρ = 0.64, p_spin = 0.002), so the replication is not an artefact of a shared atlas.
 
 **Lead signature = option 2, PLS2, ds25** (`results/lead_signature_weights.tsv`, `lead_signature_scores.csv`). Top-decile overlap with C3 top decile 5.3×, with NSPN-PLS2 4.1× (hypergeometric p ≈ 0). Top genes: *AGBL4, CHRM3, CPNE8, PRSS12, LRRTM4, RAPGEF2, CCK*; bottom: *CAPN2, GIT2, PDE9A, HDAC1, MCM3, HLA-E*. Cell-class markers (Seidlitz 2020 compilation): neuronal (Ex, In) strongly positive, all glial/vascular classes negative (`lead_celltype_enrichment.tsv`; z values are descriptive — genes are not independent).
@@ -189,7 +189,7 @@ difference; plus an *oracle* PLS whose Y is the C3 score map itself at DK resolu
 | ABCD PLS2 (Y = thinning), DK | 33 | 0.040 (0.016) | 0.041 (0.015) | 0.77 |
 
 **Coarsening the parcellation costs almost nothing.** Re-deriving C3 at 33 regions keeps
-the full effect (HCP-vs-DK difference |z| ≤ 0.6 for both disorders), and an oracle PLS at
+the full effect (HCP-vs-DK difference |z| ≤ 0.63 for both disorders), and an oracle PLS at
 33 regions keeps it too — so neither the parcellation nor the PLS step is the bottleneck.
 What costs ~40 % of the effect is that **thinning is an imperfect proxy for the axis**:
 the ABCD weights correlate ρ = 0.77 with C3, and simple regression dilution predicts
