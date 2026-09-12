@@ -1,0 +1,49 @@
+# Example local override for hpc_v2/config.sh.  Copy to hpc_v2/config.local.sh
+# (gitignored -- NEVER commit it) and edit.  Sourced before the defaults, so a
+# root set here relocates every derived path.
+#
+# This example is the LOCAL-TEST configuration (synthetic fixture, no SLURM).
+# The commented block below shows what the CSD3 values looked like at the time
+# of writing -- verify against the filesystem before trusting any of them.
+
+# EVERY assignment here uses the ${VAR:-...} form, deliberately.  config.sh's
+# contract is that the pipeline relocates by *exporting* variables; a plain
+# `VAR=value` here would silently beat an exported override, because this file
+# is sourced FIRST.  That is not hypothetical -- it made the local test's
+# integrity-gate check pass a deliberately-broken fileset, because the override
+# never took effect.  Keep the `:-`.
+#
+# Exception: GENO_IMP_TPL, because a {CHR} placeholder inside ${...:-...} hits
+# the bash brace trap (bash ends the expansion at the brace closing {CHR}).
+# Use the `if [[ -z ]]` form for that one, as config.sh does.
+
+# Everything under one scratch root.
+ABCD_HPC_ROOT="${ABCD_HPC_ROOT:-$REPO_ROOT/scratch/hpc_v2_test}"
+
+# Synthetic fixture written by: python tools/make_test_genotypes_v2.py
+GENO_ARRAY="${GENO_ARRAY:-$ABCD_HPC_ROOT/genotype/synthetic}"
+# The fixture is small enough that array == imputed: the per-chromosome
+# "imputed" filesets are cut from the same synthetic genotypes.
+GENO_IMP_DIR="${GENO_IMP_DIR:-$ABCD_HPC_ROOT/genotype_imp}"
+if [[ -z "${GENO_IMP_TPL:-}" ]]; then
+  GENO_IMP_TPL='synthetic_chr{CHR}'
+fi
+
+GRM_FULL="${GRM_FULL:-$ABCD_HPC_ROOT/grm/synthetic_full}"
+PRS_PROFILE_DIR="${PRS_PROFILE_DIR:-$ABCD_HPC_ROOT/prs_profiles}"
+EUR_IDS="${EUR_IDS:-$ABCD_HPC_ROOT/keep/eur.keep}"
+
+THREADS="${THREADS:-4}"
+
+# --- CSD3 values (2026-08; VERIFY before use) ------------------------------
+# ABCD70="/rds/project/rds-CeXlNYOYMxw/Data_Genetics/genotype_microarray"
+# GENO_ARRAY="$ABCD70/smokescreen/merged_chroms"        # 11,670 x 515,228, hg19
+# GENO_IMP_DIR="$ABCD_HPC_ROOT/genotype_imputed"        # v1 conversion output
+# GENO_IMP_TPL='abcd_imp_chr{CHR}'
+# GRM_FULL="$ABCD_HPC_ROOT/results/grm_imp/abcd_imp"    # v1 dense imputed GRM (§8.15)
+# PRS_PROFILE_DIR="$ABCD_HPC_ROOT/results/prs_imp"      # v1 imputed score profiles
+# EUR_IDS="$ABCD_HPC_ROOT/keep/eur_anchor.keep"
+# STRATA_FILE="$ABCD_HPC_ROOT/keep/strata_k4.tsv"       # optional group.var
+# RSCRIPT="$HOME/rds/hpc-work/envs/genesis/bin/Rscript" # R with GENESIS (see README)
+# GCTA="$HOME/bin/gcta64"
+# PLINK="$HOME/bin/plink"

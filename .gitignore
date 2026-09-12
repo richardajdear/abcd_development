@@ -14,9 +14,12 @@ Rplots.pdf
 # working directory is the repo root; they are never analysis outputs.
 _view_*.png
 
-# Quarto
+# Quarto render output.  The exception below is a hand-authored report, not a
+# rendered notebook -- it is the shareable version of hpc_v2/README_HPC.md 11-13
+# and is a work product like the *_summary.tsv tables.
 *_files/
 *.html
+!docs/abcd_v2_findings.html
 
 # setuptools build artefacts (created by `pip install -e .`, machine-specific)
 src/*.egg-info/
@@ -25,6 +28,7 @@ dist/
 
 # Machine-specific HPC path overrides (see hpc/config.local.sh.example).
 hpc/config.local.sh
+hpc_v2/config.local.sh
 
 # Scratch tree for local pipeline tests: synthetic genotypes, GRMs, GWAS output.
 scratch/
@@ -37,3 +41,78 @@ abcd-[0-9]*.[0-9]*/
 # Manifest written by `make audit-artifacts`: a snapshot of local file sizes and
 # checksums, meaningful only on the machine that produced it.
 .artifact_audit.json
+
+# ---------------------------------------------------------------------------
+# CSD3 working tree (hpc/work/).  Everything in here is either huge, rebuildable,
+# machine-specific, or access-controlled:
+#
+#   pheno/ pheno_prs/   SUBJECT-LEVEL ABCD phenotypes and covariates -- never
+#                       commit these, they are access-controlled data
+#   results/gwas/       ~620 MB per phenotype of fastGWA output
+#   sumstats/           ~1.5 GB of PGC summary statistics
+#   envs/ mamba/ bin/   micromamba environments and vendored binaries
+#   genotype/ ldsc_ref/ copies of reference and genotype data
+#   genesets/           third-party published supplementary tables; the
+#                       make_*_genesets.py scripts record the URLs and md5s
+#
+# The exceptions are the scripts written for this run and the small result
+# summary tables, which are the actual work product.
+hpc/work/*
+!hpc/work/*.py
+!hpc/work/*.sbatch
+!hpc/work/*.sh
+
+# Result summaries only (a few KB each); everything else under results/ is
+# regenerable output measured in hundreds of megabytes.
+!hpc/work/results/
+hpc/work/results/*
+!hpc/work/results/*/
+hpc/work/results/*/*
+!hpc/work/results/*/*_summary.tsv
+!hpc/work/results/prs/prs_association.tsv
+# the IMPUTED PRS arm -- v1's actual headline PRS numbers come from here, not
+# from prs/ (array genotypes).  Same shape and size as the line above; it was
+# simply never added.  hpc_v3/make_results_v3.py reads it for the v1 rows.
+!hpc/work/results/prs_imp/prs_association.tsv
+
+# SLURM stderr scratch, and the convenience symlink to hpc/work/out.
+hpc/slurm/
+/out
+
+# ---------------------------------------------------------------------------
+# hpc_v2 working tree, same contract as hpc/work/ above: setup scripts and the
+# small *_summary.tsv tables are the work product, everything else (GDS files,
+# per-chromosome association output, GRM id views, conda logs) is huge or
+# rebuildable.
+hpc_v2/work/*
+!hpc_v2/work/setup/
+hpc_v2/work/setup/*
+!hpc_v2/work/setup/*.sh
+!hpc_v2/work/setup/*.sbatch
+!hpc_v2/work/setup/*.py
+!hpc_v2/work/setup/*.R
+!hpc_v2/work/results_v2/
+hpc_v2/work/results_v2/*
+!hpc_v2/work/results_v2/*/
+hpc_v2/work/results_v2/*/*
+!hpc_v2/work/results_v2/*/*_summary.tsv
+!hpc_v2/work/results_v2/prs_family/prs_withinfamily.tsv
+
+# Reported result tables.  The *_summary.tsv glob above misses these because
+# they are named by what they are, not by the convention -- and the PRS tables
+# in particular ARE the work product, so they belong in the repo:
+#   prs_final/table_*.tsv        the four-method x two-arm digest (sec 14)
+#   prs_final/assoc_*.tsv        per-cell association, raw and within-ancestry
+#   prs_final/fam_*.tsv          Fulker between/within-family decomposition
+#   within_ancestry/*.tsv        ancestry-standardised scores (sec 13)
+#   retired/README.md            why PRS-CS/1000G and PRS-CSx were dropped
+!hpc_v2/work/results_v2/prs_final/table_*.tsv
+!hpc_v2/work/results_v2/prs_final/assoc_*.tsv
+!hpc_v2/work/results_v2/prs_final/fam_*.tsv
+!hpc_v2/work/results_v2/within_ancestry/*.tsv
+!hpc_v2/work/results_v2/retired/README.md
+
+# SLURM job logs land in the repo root because that is the submit directory.
+slurm-*.out
+hpc_v2/work/downloads/
+synapse_download/

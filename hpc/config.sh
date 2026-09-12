@@ -40,6 +40,35 @@ ABCD_HPC_ROOT="${ABCD_HPC_ROOT:-$HOME/rds/hpc-work/ABCD}"
 # PLINK binary fileset prefix (expects $GENO.bed/.bim/.fam).
 GENO="${GENO:-$ABCD_HPC_ROOT/genotype/ABCD_release_7.0_QCed}"
 
+# ALL-ANCESTRY genotypes, supplied per-chromosome rather than as one fileset.
+# $GENO above is the single-ancestry (EUR) merged fileset every step defaults
+# to; these two build the cross-ancestry GRM that raises N.
+#
+# GENO_ALLANC_DIR holds the per-chromosome filesets and GENO_ALLANC_TPL is the
+# basename with {CHR} standing in for the chromosome number, because the naming
+# differs between releases -- 4.0 shipped ABCD_chr1_hg19, and a 7.0 tree will
+# not necessarily match.  Keeping the template a variable means a release
+# change is one line in config.local.sh rather than an edit to the sbatch.
+GENO_ALLANC_DIR="${GENO_ALLANC_DIR:-$ABCD_HPC_ROOT/genotype_allanc}"
+# NOTE the two-step default.  Writing ${GENO_ALLANC_TPL:-ABCD_chr{CHR}_hg19}
+# does NOT work: bash ends the parameter expansion at the first unquoted '}',
+# which is the one closing {CHR}, so '_hg19}' is appended as literal text and
+# an overridden template silently gains a '_hg19}' suffix.  Caught by the
+# expansion test below; keep the placeholder out of ${...:-...} defaults.
+if [[ -z "${GENO_ALLANC_TPL:-}" ]]; then
+  GENO_ALLANC_TPL='ABCD_chr{CHR}_hg19'
+fi
+
+# Expand the template for one chromosome: geno_allanc_prefix 7 -> /path/ABCD_chr7_hg19
+geno_allanc_prefix() {
+  local chr="${1:?geno_allanc_prefix needs a chromosome number}"
+  # Brace-literal substitution: ${var//\{CHR\}/...} escapes the OPENING brace
+  # only, so the closing one is left in the output as a literal '}'. Assigning
+  # the pattern to a variable first sidesteps the quoting entirely.
+  local pat='{CHR}'
+  printf '%s/%s\n' "$GENO_ALLANC_DIR" "${GENO_ALLANC_TPL//"$pat"/$chr}"
+}
+
 # Directory written by `python -m abcd.gcta_export`.
 PHENO_DIR="${PHENO_DIR:-$ABCD_HPC_ROOT/pheno}"
 PHENO="${PHENO:-$PHENO_DIR/phenotypes_gcta.txt}"
@@ -122,6 +151,17 @@ GRM="${GRM:-$GRM_DIR/abcd_full}"
 # missing pruned GRM is reported as such instead of as a GCTA read error.
 GRM_UNREL="${GRM_UNREL:-$GRM.unrel}"
 GRM_SPARSE="${GRM_SPARSE:-$GRM_DIR/abcd_sparse}"
+
+# All-ancestry GRM tree, written by work/grm_allanc*.sbatch.  Separate from the
+# EUR paths above so both can coexist: the switch-over is done by pointing GRM,
+# GRM_UNREL and GRM_SPARSE at these in config.local.sh, which keeps the EUR
+# results reproducible rather than overwriting them.
+GRM_ALLANC_DIR="${GRM_ALLANC_DIR:-$OUT/grm_allanc}"
+GRM_ALLANC="${GRM_ALLANC:-$GRM_ALLANC_DIR/abcd_all}"
+GRM_ALLANC_UNREL="${GRM_ALLANC_UNREL:-$GRM_ALLANC.unrel}"
+GRM_ALLANC_SPARSE="${GRM_ALLANC_SPARSE:-$GRM_ALLANC_DIR/abcd_all_sp}"
+GRM_ALLANC_PCA="${GRM_ALLANC_PCA:-$GRM_ALLANC_DIR/abcd_all_pca}"
+
 REML_DIR="${REML_DIR:-$OUT/reml}"
 GWAS_DIR="${GWAS_DIR:-$OUT/gwas}"
 MAGMA_DIR="${MAGMA_DIR:-$OUT/magma}"
@@ -196,7 +236,25 @@ require_paths() {
     # valid GRM present.  Check the member file that must exist.
     if [[ "$name" == "GENO" || "$name" == "MAGMA_REF" ]]; then
       [[ -f "$value.bed" ]] || { echo "ERROR: $name=$value -- $value.bed not found" >&2; missing=1; }
-    elif [[ "$name" == GRM || "$name" == GRM_SPARSE || "$name" == GRM_UNREL ]]; then
+    elif [[ "$name" == GRM_SPARSE || "$name" == GRM_ALLANC_SPARSE ]]; then
+      # A sparse GRM is NOT a dense one with fewer entries: --make-bK-sparse
+      # writes .grm.sp (a three-column list of retained pairs) and .grm.id, and
+      # no .grm.bin at all.  Checking for .grm.bin here rejected every valid
+      # sparse GRM, so 03_gwas aborted in require_paths before running.
+      if [[ ! -f "$value.grm.sp" ]]; then
+        echo "ERROR: $name=$value -- $value.grm.sp not found (--make-bK-sparse output)" >&2
+        missing=1
+      elif [[ ! -f "$value.grm.id" ]]; then
+        echo "ERROR: $name=$value -- $value.grm.id missing (GRM is incomplete)" >&2
+        missing=1
+      fi
+    # The GRM_ALLANC* names are the same kind of object as GRM*, so they must be
+    # matched here too.  Without them they fell through to the `-e "$value"`
+    # branch at the bottom, which tests the PREFIX, can never succeed, and would
+    # abort the script before it ran -- the exact failure the GRM/GRM_UNREL case
+    # was added to fix, repeated for the all-ancestry names.
+    elif [[ "$name" == GRM || "$name" == GRM_UNREL \
+         || "$name" == GRM_ALLANC || "$name" == GRM_ALLANC_UNREL ]]; then
       # GCTA writes .grm.bin/.grm.id (binary) or .grm.gz/.grm.id (list).
       if [[ ! -f "$value.grm.bin" && ! -f "$value.grm.gz" ]]; then
         echo "ERROR: $name=$value -- neither $value.grm.bin nor $value.grm.gz found" >&2

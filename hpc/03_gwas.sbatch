@@ -19,8 +19,24 @@
 # defensible readouts are lambda_GC (is the model calibrated?) and the
 # gene-level enrichment in 04_magma, which aggregates over SNPs.  Treat a null
 # genome-wide scan as the expected outcome, not as a failed run.
-source "$(dirname "$0")/config.sh"
-require_paths GENO GRM_SPARSE PHENO COVAR_QUANT COVAR_CAT MANIFEST GCTA
+# Locate config.sh.  Under sbatch, $0 is a COPY of this script in
+# /var/spool/slurm/slurmd/jobNNN/, so `dirname "$0"` does not contain
+# config.sh -- run_all.sh's SLURM mode therefore sourced nothing, and because
+# `set -euo pipefail` lives INSIDE config.sh it was never enabled either, so
+# every step ran to completion with undefined functions and exited 0.  Search
+# the submit directory too ($PWD, which run_all.sh sets via --chdir).
+set -e
+_cfg=""
+for _d in "$(dirname "$0")" "$PWD" "${SLURM_SUBMIT_DIR:-}"; do
+  if [[ -n "$_d" && -f "$_d/config.sh" ]]; then _cfg="$_d/config.sh"; break; fi
+done
+[[ -n "$_cfg" ]] || { echo "FATAL: cannot locate hpc/config.sh (looked in $(dirname "$0"), $PWD, ${SLURM_SUBMIT_DIR:-unset})" >&2; exit 2; }
+source "$_cfg"
+if [[ -n "${GENO_MBFILE:-}" ]]; then
+  require_paths GRM_SPARSE PHENO COVAR_QUANT COVAR_CAT MANIFEST GCTA
+else
+  require_paths GENO GRM_SPARSE PHENO COVAR_QUANT COVAR_CAT MANIFEST GCTA
+fi
 ensure_dirs "$GWAS_DIR"
 
 names=()   # not mapfile: bash 3.2 compatibility, see 02_reml.sbatch
@@ -40,8 +56,21 @@ for pheno in "${todo[@]}"; do
   mpheno=$(mpheno_for "$pheno") || { echo "ERROR: '$pheno' not in $MANIFEST" >&2; exit 3; }
   echo "=== 03_gwas  $pheno  (--mpheno $mpheno)  $(date) ==="
 
+  # GENO_MBFILE lets fastGWA read a LIST of per-chromosome filesets instead of
+  # one merged one.  The imputed genotypes arrive per chromosome (26M variants,
+  # 72 GB); merging them would duplicate all of that on a filesystem with far
+  # less headroom, to produce a file GCTA can already read as a list.  Verified
+  # --mbfile works with this GCTA build before relying on it.
+  if [[ -n "${GENO_MBFILE:-}" ]]; then
+    [[ -f "$GENO_MBFILE" ]] || { echo "FATAL: GENO_MBFILE=$GENO_MBFILE not found" >&2; exit 4; }
+    _geno_args=(--mbfile "$GENO_MBFILE")
+    echo "genotypes: $(wc -l < "$GENO_MBFILE") filesets from $GENO_MBFILE"
+  else
+    _geno_args=(--bfile "$GENO")
+  fi
+
   run "$GCTA" \
-    --bfile "$GENO" \
+    "${_geno_args[@]}" \
     --grm-sparse "$GRM_SPARSE" \
     --fastGWA-mlm \
     --pheno "$PHENO" \

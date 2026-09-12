@@ -1,0 +1,86 @@
+{
+ "n_set_symbols": 4697,
+ "n_absent_ds0_before": 2681,
+ "n_renamed": 11,
+ "rename_examples": [
+  [
+   "ALMS1P",
+   "ALMS1P1"
+  ],
+  [
+   "B3GALTL",
+   "B3GLCT"
+  ],
+  [
+   "BAI3",
+   "ADGRB3"
+  ],
+  [
+   "BRE",
+   "BABAM2"
+  ],
+  [
+   "CEBPZ-AS1",
+   "CEBPZOS"
+  ],
+  [
+   "CRHR1-IT1",
+   "LINC02210"
+  ],
+  [
+   "EFTUD1P1",
+   "EFL1P1"
+  ],
+  [
+   "GPR98",
+   "ADGRV1"
+  ],
+  [
+   "LINC00925",
+   "MIR9-3HG"
+  ],
+  [
+   "PCNXL3",
+   "PCNX3"
+  ]
+ ],
+ "magma": {
+  "SCZ": {
+   "n_genes": 18447,
+   "n_with_symbol": 18321,
+   "n_symbol_from_symbol2entrez": 15555,
+   "n_symbol_from_mygene": 2766,
+   "n_symbol_in_ds0": 13789,
+   "n_duplicate_symbols": 0
+  },
+  "MDD": {
+   "n_genes": 19040,
+   "n_with_symbol": 18922,
+   "n_symbol_from_symbol2entrez": 16150,
+   "n_symbol_from_mygene": 2772,
+   "n_symbol_in_ds0": 14271,
+   "n_duplicate_symbols": 0
+  }
+ },
+ "background": {
+  "0": 13763,
+  "25": 10322,
+  "50": 6931
+ },
+ "hpc_entrez_sets": {
+  "SCZ_locus_pool (hpc Entrez file)": "scz_prioritised.txt: 462 Entrez ids, 462 with symbol, 406 in ds0",
+  "SCZ_pool_not_prio (hpc Entrez file)": "scz_prioritised.txt: 358 Entrez ids, 358 with symbol, 310 in ds0",
+  "SCZ_prio_finemap (hpc Entrez file)": "scz_prioritised.txt: 64 Entrez ids, 64 with symbol, 61 in ds0",
+  "SCZ_prio_rare (hpc Entrez file)": "scz_prioritised.txt: 7 Entrez ids, 7 with symbol, 7 in ds0",
+  "SCZ_prio_smr (hpc Entrez file)": "scz_prioritised.txt: 44 Entrez ids, 44 with symbol, 39 in ds0",
+  "SCZ_prioritised (hpc Entrez file)": "scz_prioritised.txt: 104 Entrez ids, 104 with symbol, 96 in ds0",
+  "SCZ_prioritised_pc (hpc Entrez file)": "scz_prioritised.txt: 104 Entrez ids, 104 with symbol, 96 in ds0",
+  "MDD_hc_expression (hpc Entrez file)": "mdd_highconf.txt: 56 Entrez ids, 56 with symbol, 53 in ds0",
+  "MDD_hc_finemap (hpc Entrez file)": "mdd_highconf.txt: 160 Entrez ids, 160 with symbol, 147 in ds0",
+  "MDD_hc_protein (hpc Entrez file)": "mdd_highconf.txt: 10 Entrez ids, 10 with symbol, 10 in ds0",
+  "MDD_highconf (hpc Entrez file)": "mdd_highconf.txt: 213 Entrez ids, 213 with symbol, 198 in ds0",
+  "MDD_pool (hpc Entrez file)": "mdd_highconf.txt: 1885 Entrez ids, 1884 with symbol, 1593 in ds0",
+  "MDD_pool_not_hc (hpc Entrez file)": "mdd_highconf.txt: 1672 Entrez ids, 1671 with symbol, 1395 in ds0"
+ },
+ "symbol2entrez_rows": 17619
+}

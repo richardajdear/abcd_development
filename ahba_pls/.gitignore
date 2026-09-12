@@ -1,0 +1,18 @@
+# Regenerable intermediates. Everything here is rebuilt by code/ in minutes;
+# the committed set is code, README/notebook, figures, the summary tables and
+# the cluster exports.
+# (inline comments are NOT valid in .gitignore -- keep them on their own lines)
+# aligned expression matrices, rebuilt from AHBA_updated
+data/X_ds*.parquet
+# DK polygon cache, re-exported from the ggseg R atlas
+data/dk_polygons.csv
+# 15 full gene-weight tables (14 MB)
+results/pls_weights/
+# spin null singular values
+results/pls_null/
+# MAGMA covar inputs, .gsa.out and logs
+results/magma_runs/
+# cached mygene.info responses and symbol-mapping scratch
+data/reference/*mygene_raw.json
+data/reference/nspn_symbol_map.csv
+data/reference/nspn_genes_absent_ds0.txt

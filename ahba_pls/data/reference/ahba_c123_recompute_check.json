@@ -1,0 +1,45 @@
+{
+ "weights_shape": [
+  7973,
+  3
+ ],
+ "scores_shape": [
+  34,
+  3
+ ],
+ "scores_regions_not_in_ds0": [
+  "lh_frontalpole"
+ ],
+ "ds": {
+  "0": {
+   "n_shared_genes": 7971,
+   "n_regions": 33,
+   "C1_spearman": 0.991,
+   "C1_pearson": 0.991,
+   "C2_spearman": 0.944,
+   "C2_pearson": 0.969,
+   "C3_spearman": 0.906,
+   "C3_pearson": 0.891
+  },
+  "25": {
+   "n_shared_genes": 7873,
+   "n_regions": 33,
+   "C1_spearman": 0.991,
+   "C1_pearson": 0.991,
+   "C2_spearman": 0.944,
+   "C2_pearson": 0.969,
+   "C3_spearman": 0.906,
+   "C3_pearson": 0.894
+  },
+  "50": {
+   "n_shared_genes": 6969,
+   "n_regions": 33,
+   "C1_spearman": 0.99,
+   "C1_pearson": 0.99,
+   "C2_spearman": 0.952,
+   "C2_pearson": 0.971,
+   "C3_spearman": 0.907,
+   "C3_pearson": 0.898
+  }
+ }
+}

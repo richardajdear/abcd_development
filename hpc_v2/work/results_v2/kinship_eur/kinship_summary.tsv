@@ -1,0 +1,13 @@
+quantity	value
+n_samples	5656
+n_pruned_snps	90950
+n_pcair_unrelated	4573
+n_pcair_related	1083
+pairs_kin_ge_0.354 (dup/MZ)	227
+pairs_kin_0.177_0.354 (1st deg)	748
+pairs_kin_0.088_0.177 (2nd deg)	14
+pairs_kin_0.044_0.088 (3rd deg)	106
+sparse_nonzero_offdiag	1134
+sparse_density	0.00025
+sparse_largest_block	5
+sparse_thresh_used	0.04419417

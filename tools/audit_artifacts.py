@@ -33,6 +33,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import subprocess
 from pathlib import Path
 
@@ -67,15 +68,35 @@ def _gitignored(paths: list[Path]) -> set[Path]:
     """Which of ``paths`` git ignores.
 
     Batched through one ``check-ignore --stdin`` call rather than one per file.
-    A non-zero exit just means "nothing matched", which is not an error here.
+
+    Two things this must get right, both learned the hard way:
+
+    * ``check-ignore`` exits **1** when nothing matched (fine) but **128** on a
+      real failure.  Under a sandboxed kernel it fails with 128 because
+      ``~/.gitconfig`` is unreadable, and the previous version treated any
+      non-zero exit as "nothing matched" -- so every gitignored file, including
+      ``hpc/config.local.sh``, was silently offered for publishing.  A failure
+      here must raise, because the safe-looking answer is the dangerous one.
+    * Pointing the config vars at ``/dev/null`` stops git reading the
+      unreadable user config in the first place, which is what makes the call
+      work from a kernel at all.
     """
     if not paths:
         return set()
     rel = [str(p.relative_to(ROOT)) for p in paths]
+    env = {**os.environ, "GIT_CONFIG_GLOBAL": "/dev/null",
+           "GIT_CONFIG_SYSTEM": "/dev/null"}
     proc = subprocess.run(
         ["git", "-C", str(ROOT), "check-ignore", "--stdin"],
-        input="\n".join(rel), capture_output=True, text=True,
+        input="\n".join(rel), capture_output=True, text=True, env=env,
     )
+    if proc.returncode not in (0, 1):
+        raise RuntimeError(
+            f"git check-ignore failed (rc={proc.returncode}): "
+            f"{proc.stderr.strip()[:200]}\n"
+            "Refusing to continue: without it, gitignored files (local configs, "
+            "credentials) would be reported as publishable deliverables."
+        )
     return {ROOT / line for line in proc.stdout.splitlines() if line}
 
 

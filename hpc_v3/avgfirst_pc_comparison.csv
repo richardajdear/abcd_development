@@ -1,0 +1,4 @@
+phenotype,n,r_pc_vs_nopc,rho_pc_vs_nopc,sb_nopc,sb_pc
+global,8077,0.9955,0.9941,0.8598,0.859
+topDelta,8077,0.9953,0.994,0.795,0.7942
+topC3,8077,0.9956,0.9943,0.7725,0.7714

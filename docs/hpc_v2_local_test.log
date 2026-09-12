@@ -1,0 +1,112 @@
+
+==============================================================
+Stage 0: preflight (00_check_inputs.sh)
+==============================================================
+  PASS  00_check_inputs passed
+  PASS  integrity gate rejects a bed/bim size mismatch
+
+==============================================================
+Stage 1: 01_gds.sbatch (PLINK -> GDS, array + 22 chromosomes)
+==============================================================
+  PASS  01_gds exited 0
+  PASS  array.gds written
+  PASS  22 per-chromosome GDS written
+  PASS  re-run detects existing GDS and skips (idempotent)
+
+==============================================================
+Stage 2: 02_kinship.sbatch (KING -> PC-AiR -> PC-Relate)
+==============================================================
+  PASS  02_kinship exited 0
+  PASS  wrote kinship_sparse.rds
+  PASS  wrote pcair_pcs.tsv
+  PASS  wrote pcair_unrelated.txt
+  PASS  wrote kinship_summary.tsv
+  PASS  wrote pcrelate.rds
+  PASS  PC-Relate found 783 first-degree pairs (fixture has ~739 sib families)
+  PASS  PC-AiR unrelated partition is 642/1500 (0.43) -- prunes relatives, keeps the bulk
+  PASS  sparse kinship has 1082670 non-zero off-diagonal pairs
+  PASS  first-degree pair count 783 matches the fixture's true 783 (within 10%)
+  PASS  kinship summary reports sparse_density=0.96304 and largest block=1472
+  PASS  density 0.96304 exceeds 0.10 and the warning FIRED (guard works)
+  PASS  pcair_pcs.tsv carries 32 PCs (>= N_PCS=10)
+
+==============================================================
+Stage 3: 03_null_model.sbatch (GENESIS fitNullModel)
+==============================================================
+  PASS  03_null_model exited 0
+  PASS  6 null models for 6 phenotypes
+  PASS  null model fitted on n=1500 > 642 unrelated -- relatives RETAINED
+
+==============================================================
+Stage 4: 04_assoc.sbatch (assocTestSingle + collector)
+==============================================================
+  PASS  04_assoc exited 0
+  PASS  22 per-chromosome association files for global_slope
+  PASS  gwas_summary.tsv written
+  PASS  summary columns match the v1 layout
+  PASS  lambda_GC = 0.9935 (calibrated; mixed model is not inflated)
+  PASS  summary has one row per phenotype (6)
+  PASS  seeded phenotype sim_h2_50 yields 8 genome-wide-significant SNPs (min p=2.16149198196746e-23) -- genotypes and phenotypes are correctly aligned
+  PASS  unseeded global_slope yields 0 hits (no spurious signal)
+  PASS  collector is idempotent (still 6 rows after re-run)
+  PASS  sumstats columns complete (SNP CHR POS A1 A2 AF1 N BETA SE P)
+  PASS  per-variant N up to 1500 > 642 unrelated -- the scan uses relatives
+
+==============================================================
+Stage 5: 05_reml_zaitlen.sbatch (GCTA two-GRM; options + collector)
+==============================================================
+  GCTA not available at '/Users/richard/bin/gcta64'; skipping 5a (option validation).
+  PASS  two-GRM .hsq collector parses h2_snp, h2_ped, Pval and n correctly
+  PASS  collector yields no row for a single-GRM .hsq (cannot mislabel it Zaitlen)
+
+==============================================================
+Stage 6: 06_prs_family.sbatch (between/within decomposition)
+==============================================================
+  PASS  06_prs_family exited 0
+  PASS  prs_withinfamily.tsv written
+  PASS  output carries the between/within contrast columns
+        (SCZ x global_slope, full: b_W=-0.163247406163196 p_W=0.00123745126252072  b_B=-0.328471030452064  p_diff=0.0044389600463383  pairs=783)
+  PASS  beta_within = -0.163247406163196 recovers the planted -0.20
+  PASS  within-family effect is significant (p_within = 0.00123745126252072)
+  PASS  beta_between (-0.328471030452064) is more negative than beta_within (-0.163247406163196) -- confounding visible
+  PASS  beta_diff detects the planted confounding (p_diff = 0.0044389600463383)
+  PASS  783 informative sibling pairs counted
+  PASS  MDD null score is not significant within-family (p = 0.757581825320002)
+  PASS  06_prs_family refuses a FID==IID phenotype file (guard fires)
+
+==============================================================
+Stage 7: syntax + portability of every script
+==============================================================
+  PASS  bash -n hpc_v2/00_check_inputs.sh
+  PASS  bash -n hpc_v2/config.local.sh
+  PASS  bash -n hpc_v2/config.sh
+  PASS  bash -n hpc_v2/run_all.sh
+  PASS  bash -n hpc_v2/01_gds.sbatch
+  PASS  bash -n hpc_v2/02_kinship.sbatch
+  PASS  bash -n hpc_v2/03_null_model.sbatch
+  PASS  bash -n hpc_v2/04_assoc.sbatch
+  PASS  bash -n hpc_v2/05_reml_zaitlen.sbatch
+  PASS  bash -n hpc_v2/06_prs_family.sbatch
+  PASS  bash -n tools/local_test_v2.sh
+  PASS  no bash 4+ constructs (mapfile / declare -A)
+  PASS  optional-argument arrays use the ${arr[@]+...} guard
+  PASS  01_gds.sbatch declares --partition
+  PASS  02_kinship.sbatch declares --partition
+  PASS  03_null_model.sbatch declares --partition
+  PASS  04_assoc.sbatch declares --partition
+  PASS  05_reml_zaitlen.sbatch declares --partition
+  PASS  06_prs_family.sbatch declares --partition
+  PASS  no hard-coded cluster paths outside ${VAR:-default} roots
+  PASS  no hard-coded cluster paths in the R scripts
+  PASS  no {CHR} placeholder inside ${...:-...} defaults
+  PASS  R parse 01_make_gds.R
+  PASS  R parse 02_kinship.R
+  PASS  R parse 03_null_model.R
+  PASS  R parse 04_assoc.R
+  PASS  R parse 05_collect_assoc.R
+  PASS  R parse 06_prs_family.R
+
+==============================================================
+RESULT
+==============================================================
+  73 passed, 0 failed

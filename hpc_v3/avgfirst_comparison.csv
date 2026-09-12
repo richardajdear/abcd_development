@@ -1,0 +1,4 @@
+phenotype,r_methods,rho_methods,sb_blupmean,sb_avgfirst,r_avgfirst_vs_global_avgfirst,r_blupmean_vs_global_blupmean
+global,0.8874,0.8484,0.8715,0.8603,1.0,1.0
+topDelta,0.9363,0.9159,0.8161,0.7959,0.8437,0.8876
+topC3,0.9239,0.8981,0.7873,0.7729,0.8828,0.9156

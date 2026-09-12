@@ -1,0 +1,5 @@
+,global_slope,slope_PC1,slope_PC2,slope_PC3
+global_slope,1.0,-0.991,-0.0767,0.0827
+slope_PC1,-0.991,1.0,-0.0,-0.0
+slope_PC2,-0.0767,-0.0,1.0,-0.0
+slope_PC3,0.0827,-0.0,-0.0,1.0

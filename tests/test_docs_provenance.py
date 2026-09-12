@@ -70,14 +70,14 @@ def test_no_serial_level_scanner_claims_outside_the_withdrawal():
     assert not offending, f"serial-level claim stated as fact: {offending}"
 
 
-HPC_README = ROOT / "hpc" / "README.md"
+HPC_README = ROOT / "hpc" / "README_HPC.md"
 
 
-@pytest.mark.skipif(not HPC_README.exists(), reason="hpc/README.md not present")
+@pytest.mark.skipif(not HPC_README.exists(), reason="hpc/README_HPC.md not present")
 def test_no_null_ahba_map_claim_in_hpc_readme():
     """The map-level AHBA result is positive; prose must not say otherwise.
 
-    hpc/README.md asserted "no correlation between the group-mean developmental
+    hpc/README_HPC.md asserted "no correlation between the group-mean developmental
     change map and AHBA C1-C3" long after that null had been superseded. The
     null was real but came from the GLOBAL-ADJUSTED age coefficient; the settled
     no-global specification gives 8 of 18 map x component pairs surviving the
@@ -111,14 +111,14 @@ def test_no_null_ahba_map_claim_in_hpc_readme():
         r"no (?:correlation|association)(?:(?!\bno\b).){0,90}?(?:AHBA|\bC1\b|\bC2\b|\bC3\b)",
         flat, re.I)
     assert not offending or n_sig == 0, (
-        f"hpc/README.md asserts a null map-level AHBA result, but "
+        f"hpc/README_HPC.md asserts a null map-level AHBA result, but "
         f"{n_sig} of 18 pairs survive the spin test: {offending}"
     )
 
 
-@pytest.mark.skipif(not HPC_README.exists(), reason="hpc/README.md not present")
+@pytest.mark.skipif(not HPC_README.exists(), reason="hpc/README_HPC.md not present")
 def test_hpc_readme_figure_references_exist():
-    """Every ``figures/x.png`` hpc/README.md names must be in docs/figures/.
+    """Every ``figures/x.png`` hpc/README_HPC.md names must be in docs/figures/.
 
     It cited ``figures/abcd_spatial_nulls.png``, which no longer exists -- a
     dangling reference is the visible symptom of a claim that outlived its
@@ -126,7 +126,7 @@ def test_hpc_readme_figure_references_exist():
     """
     missing = [f for f in set(re.findall(r"figures/[\w.-]+\.png", HPC_README.read_text()))
                if not (DOCS / f).exists()]
-    assert not missing, f"hpc/README.md cites missing figures: {sorted(missing)}"
+    assert not missing, f"hpc/README_HPC.md cites missing figures: {sorted(missing)}"
 
 
 def test_artifact_audit_covers_every_report_deliverable():
@@ -145,7 +145,7 @@ def test_artifact_audit_covers_every_report_deliverable():
 
     covered = {r["path"] for r in audit_artifacts.collect()}
 
-    required = {"README.md", "hpc/README.md", "docs/REPORT_7.0.md"}
+    required = {"README.md", "hpc/README_HPC.md", "docs/REPORT_7.0.md"}
     # Everything the report cites as a table or figure.
     required |= {f"docs/{t}" for t in _cited(r"`docs/([\w.-]+\.csv)`")}
     required |= {f"docs/figures/{f}" for f in
