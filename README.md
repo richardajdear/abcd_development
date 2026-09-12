@@ -16,26 +16,38 @@ not resemble that of a static measure. Almost all published brain-imaging GWAS
 use cross-sectional phenotypes, which average over exactly the variation of
 interest.
 
-## Status — 2026-08-17
+## Status — 2026-09-11
 
-Modelling settled on release 7.0. **The genetic pipeline has run end to end on
-CSD3.** Headline: no genome-wide-significant loci at N = 4,119 (expected), but a
-coherent lead — higher SCZ polygenic score predicts faster cortical thinning
-(β = −0.038, p = 0.015 in the EUR stratum, n = 3,725; β = −0.040, p = 0.009 in
-the full stratum, n = 4,126), monotone across score thresholds, and the age × PRS
-interaction confirms the effect is on the *rate* rather than the level attained.
-Nothing survives the original correction; a corrected multiple-testing treatment
-puts it at p = 0.024–0.041.
+Genetics now runs on the **full 7.0 sample** (11,670 genotyped, all ancestries;
+cross-ancestry GRM built), and the PRS work has settled into a **four-method
+grid** — C+T, PRS-CS, SBayesR, SBayesRC — with the discovery GWAS matched to
+the target arm and a control battery (ASD, two ALZ releases ± APOE, polygenic
+education). Canonical results: `hpc_v2/work/results_v2/prs_final/table_main.tsv`
+(documented in [`hpc_v2/README_HPC.md`](hpc_v2/README_HPC.md) §14; one-slide
+summary [`hpc_v3/slide_prs_methods.png`](hpc_v3/slide_prs_methods.png)).
 
-**N is the binding constraint on everything.** The 7.0 genetics has now been
-acquired, and building a cross-ancestry GRM from it is the live task — see
-[`hpc/README_HPC.md`](hpc/README_HPC.md).
+- **SCZ PRS → faster thinning is the robust result**: significant in 3 of 4
+  methods in *both* the EUR arm (n = 4,116; β −0.035 to −0.047 SD/SD) and the
+  within-ancestry-standardised pooled arm (n = 8,082), and it survives
+  family-level FDR under 3 of 4 method choices
+  (`hpc_v3/prs_tables/prs_fdr_sensitivity.tsv`).
+- **MDD is suggestive, not established**: same (negative) direction under every
+  method, arm and design, but significant only in the pooled arm (2/4 methods
+  after within-ancestry standardisation); the EUR arm has ~46 % power for the
+  observed effect size, so its null is uninformative.
+- **The controls behave**: ASD null in all four methods (its one earlier hit
+  was a mismatched-stratum artifact); AD-without-APOE is a C+T-only signal that
+  vanishes under joint SNP modelling and in the proxy-free Kunkle release;
+  polygenic education runs the *opposite* direction to the disorders.
+- **Do not quote pre-grid PRS numbers** — everything before
+  `prs_final/` predates the age-covariate fix, the allele-frequency fix and
+  the discovery-to-arm matching (`hpc_v2/README_HPC.md` §14.5–14.8).
 
 ## Where to look
 
 | you want | go to |
 |:---|:---|
-| **the cluster genetics: state, results, and the current task** | [`hpc/README_HPC.md`](hpc/README_HPC.md) |
+| **the cluster genetics: state, results, and the current task** | [`hpc_v2/README_HPC.md`](hpc_v2/README_HPC.md) (v1 pipeline: `hpc/README_HPC.md`) |
 | the findings, their caveats and the corrections | [`docs/REPORT_7.0.md`](docs/REPORT_7.0.md) |
 | how the mixed model works and why | [`notebooks/01_longitudinal_model.qmd`](notebooks/01_longitudinal_model.qmd) |
 | spatial nulls and the map-to-gene tests | [`notebooks/02_maps_and_genes.qmd`](notebooks/02_maps_and_genes.qmd) |
@@ -61,7 +73,8 @@ acquired, and building a cross-ancestry GRM from it is the live task — see
   a release change and a pipeline rewrite. The strongest couplings are on the
   slope components (PC3–C2 ρ = +0.854, PC2–C1 ρ = −0.812).
 
-**Genetics (release 4.0 genotypes, EUR only, N = 4,119)**
+**Genetics (v1 run: release 4.0 genotypes, EUR only, N = 4,119 — the PRS rows
+are superseded by the 7.0 grid in Status above; h²/rg/GWAS conclusions stand)**
 
 - **h² of `baseline_thickness` = 0.575 ± 0.147**, independently corroborated by
   LDSC at 0.584 ± 0.131 — a joint validation of the GRM, ID alignment and

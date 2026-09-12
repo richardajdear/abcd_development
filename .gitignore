@@ -115,3 +115,4 @@ hpc_v2/work/results_v2/*/*
 # SLURM job logs land in the repo root because that is the submit directory.
 slurm-*.out
 hpc_v2/work/downloads/
+synapse_download/
