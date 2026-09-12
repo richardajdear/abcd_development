@@ -126,7 +126,7 @@ show(k[["option", "component", "sal_dCT", "reference", "rho", "p_spin"]].round(3
 
 Options 3 and 4 find the same component (pairwise gene-weight ρ 0.83–0.94 with option 2),
 and the signature is essentially invariant to the DS filter (weight ρ = 0.995–0.999 between adjacent
-filters, 0.98 between the extremes) —
+filters, 0.981–0.994 between the ds0/ds50 extremes) —
 unlike C3 itself, whose derivation by PCA needs careful gene filtering. The lead signature
 is taken as **option 2, PLS2, ds25**.
 
