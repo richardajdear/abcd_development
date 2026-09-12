@@ -1,0 +1,46 @@
+{
+ "n_absent_ds0_before": 7155,
+ "n_queries_with_hit": 5738,
+ "n_unique_mapping": 5550,
+ "n_ambiguous_multi_hit": 188,
+ "n_new_in_ds0": 1337,
+ "n_collide_with_existing_nspn": 19,
+ "n_renamed": 1310,
+ "examples": [
+  [
+   "A26C1B",
+   "POTEF"
+  ],
+  [
+   "A2BP1",
+   "RBFOX1"
+  ],
+  [
+   "A2LD1",
+   "GGACT"
+  ],
+  [
+   "A3GALT2P",
+   "A3GALT2"
+  ],
+  [
+   "AADACL1",
+   "NCEH1"
+  ],
+  [
+   "ACCN1",
+   "ASIC2"
+  ],
+  [
+   "ACCN2",
+   "ASIC1"
+  ],
+  [
+   "ACCN3",
+   "ASIC3"
+  ]
+ ],
+ "n_nspn_in_ds0_after": 14865,
+ "n_nspn_in_ds25_after": 11175,
+ "n_nspn_in_ds50_after": 7454
+}

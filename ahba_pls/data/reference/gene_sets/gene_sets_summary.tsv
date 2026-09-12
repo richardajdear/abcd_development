@@ -1,0 +1,17 @@
+set	n_genes	n_renamed	n_ds0	n_ds25	n_ds50	n_bg0	n_bg25	n_bg50	source
+SCZ_prioritised	120	4	99	85	63	92	78	58	Trubetskoy2022 ED Table 1 (all 120 prioritised)
+SCZ_prioritised_pc	106	3	96	82	60	92	78	58	ED Table 1, protein_coding only
+SCZ_prio_finemap	70	3	63	58	42	58	53	39	ED Table 1, FINEMAP.priority.gene == 1
+SCZ_prio_smr	55	1	41	31	23	38	28	20	ED Table 1, SMR.priority.gene == 1
+SCZ_prio_rare	7	0	7	6	5	7	6	5	ED Table 1, Rare.priority.gene == 1
+SCZ_locus_pool	682	10	422	333	238	394	311	221	Trubetskoy2022 ST12 all criteria (685-gene candidate pool at GWS loci)
+SCZ_pool_not_prio	562	6	323	248	175	302	233	163	ST12 minus ED Table 1
+MDD_highconf	295	0	208	189	148	202	185	145	Adams2025 Table S21 High-confidence Gene List (308; finemapping, expression or protein)
+MDD_hc_finemap	225	0	155	142	115	150	139	112	High-confidence list, Fine_mapping == TRUE
+MDD_hc_expression	75	0	57	49	32	55	48	32	High-confidence list, Expression == TRUE
+MDD_hc_protein	10	0	10	9	9	10	9	9	High-confidence list, Protein == TRUE
+MDD_pool	4180	0	1713	1322	941	1626	1263	903	Adams2025 Table S21 all mapped genes (4,600; any of 7 methods incl. fastBAT/H-MAGMA)
+MDD_pool_not_hc	3885	0	1505	1133	793	1424	1078	758	Table S21 pool minus high-confidence
+MDD_howard2019_32	32	0	24	19	15	23	18	15	AHBA/data/gwas/hammerschlag2020_howard2019_trubetskoy2022.csv MDD column (Howard 2019; 32 genes, exact derivation not recorded — legacy Dear2024 set)
+SCZ_trubetskoy_smr101	101	3	63	51	37	54	43	30	same file, SCZ column = Trubetskoy2022 SMR P+F genes (trubetskoy2022_data.csv; legacy Dear2024 set)
+MDD_howard2019_magma	269	1	226	192	133	214	181	125	Howard2019 Table S9: MAGMA genome-wide significant genes (P<2.8e-6)

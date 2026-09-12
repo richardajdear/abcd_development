@@ -16,7 +16,7 @@ not resemble that of a static measure. Almost all published brain-imaging GWAS
 use cross-sectional phenotypes, which average over exactly the variation of
 interest.
 
-## Status — 2026-09-11
+## Status — 2026-09-12
 
 Genetics now runs on the **full 7.0 sample** (11,670 genotyped, all ancestries;
 cross-ancestry GRM built), and the PRS work has settled into a **four-method
@@ -25,6 +25,12 @@ the target arm and a control battery (ASD, two ALZ releases ± APOE, polygenic
 education). Canonical results: `hpc_v2/work/results_v2/prs_final/table_main.tsv`
 (documented in [`hpc_v2/README_HPC.md`](hpc_v2/README_HPC.md) §14; one-slide
 summary [`hpc_v3/slide_prs_methods.png`](hpc_v3/slide_prs_methods.png)).
+
+Alongside it, `ahba_pls/` adds the **imaging-transcriptomics arm**: the
+NSPN-PLS2 / AHBA-C3 transcriptomic signature of adolescent thinning, re-derived
+from the ABCD maps and tested against SCZ and MDD genetics
+([`ahba_pls/README.md`](ahba_pls/README.md)). It replicates, but it does not
+improve on C3 as a gene ranking — see *Imaging transcriptomics* below.
 
 - **SCZ PRS → faster thinning is the robust result**: significant in 3 of 4
   methods in *both* the EUR arm (n = 4,116; β −0.035 to −0.047 SD/SD) and the
@@ -52,6 +58,7 @@ summary [`hpc_v3/slide_prs_methods.png`](hpc_v3/slide_prs_methods.png)).
 | how the mixed model works and why | [`notebooks/01_longitudinal_model.qmd`](notebooks/01_longitudinal_model.qmd) |
 | spatial nulls and the map-to-gene tests | [`notebooks/02_maps_and_genes.qmd`](notebooks/02_maps_and_genes.qmd) |
 | heritability and phenotype choice | [`notebooks/04_heritability.qmd`](notebooks/04_heritability.qmd) |
+| the imaging-transcriptomics PLS study (NSPN-PLS2 / AHBA-C3 re-derivation, SCZ & MDD enrichment) | [`ahba_pls/README.md`](ahba_pls/README.md), notebook [`ahba_pls/imaging_transcriptomics.qmd`](ahba_pls/imaging_transcriptomics.qmd) |
 | the 5.1 draft this supersedes | [`docs/REPORT_5.1_legacy.md`](docs/REPORT_5.1_legacy.md) |
 
 ## Key findings so far
@@ -72,6 +79,35 @@ summary [`hpc_v3/slide_prs_methods.png`](hpc_v3/slide_prs_methods.png)).
   rate vs AHBA C3: ρ = −0.546, p_spin = 0.0016, reproducing the 5.1 result across
   a release change and a pipeline rewrite. The strongest couplings are on the
   slope components (PC3–C2 ρ = +0.854, PC2–C1 ρ = −0.812).
+
+**Imaging transcriptomics** (`ahba_pls/`, 2026-09-12)
+
+- **The NSPN-PLS2 / AHBA-C3 "signature of adolescent thinning" re-derives from
+  the ABCD.** PLS of AHBA expression on the ABCD thinning map recovers a
+  component that matches both prior signatures in regional scores (ρ = 0.76 with
+  NSPN-PLS2, 0.85 with C3; p_spin = 0.001) and in gene weights (ρ = 0.61 and
+  0.77 over 11.2k / 7.9k genes), with the same neuronal-up / glial-down cell-class
+  profile. The ABCD and NSPN thinning maps themselves agree (ρ = 0.64,
+  p_spin = 0.002), so this is replication in a 20× larger cohort, not atlas
+  circularity.
+- **Thinning rate alone does not isolate it.** With dCT as the only Y variable
+  the component is marginal (p_spin = 0.06–0.10) and loads as heavily on C1, the
+  static expression gradient, as on C3. Adding baseline thickness as a second Y
+  column pushes the static axis into PLS1 and leaves the thinning signature as
+  PLS2 — the same structure as the PNAS 2016 design. It is stable across
+  differential-stability filters (ρ ≥ 0.99), so gene filtering is not the
+  constraint it was for deriving C3 by PCA.
+- **It carries SCZ and MDD risk, but adds nothing to C3.** MAGMA gene-property
+  regression is positive for both disorders at every filter (SCZ β 0.028–0.037,
+  MDD 0.026–0.041) at about half C3's effect size; conditioning on C3 removes it
+  entirely, while C3 survives conditioning on it. The prioritised-gene
+  permutation test detects only the MDD high-confidence set (z = 2.4) — and the
+  SCZ locus-pool signal sits on the static axis, not on thinning. **The
+  contribution is a developmental warrant for C3, not a better gene list.**
+- Still open (specified for the cluster in
+  [`ahba_pls/FOLLOWUP_GENETICS.md`](ahba_pls/FOLLOWUP_GENETICS.md)): whether the
+  signature weights relate to ABCD's own thinning GWAS, and whether projecting
+  subject slopes onto the component beats `global_slope` for heritability.
 
 **Genetics (v1 run: release 4.0 genotypes, EUR only, N = 4,119 — the PRS rows
 are superseded by the 7.0 grid in Status above; h²/rg/GWAS conclusions stand)**
@@ -130,6 +166,9 @@ docs/            # REPORT_7.0.md + every table and figure it cites
 tools/           # regenerators for every table and figure in the report
 hpc/             # SLURM genetics pipeline  -- see hpc/README_HPC.md
   legacy/          superseded HPC docs; read only if the repo contradicts the current one
+ahba_pls/        # imaging transcriptomics: PLS of AHBA expression on the ABCD
+                 # thinning maps, and its SCZ/MDD enrichment -- self-contained,
+                 # see ahba_pls/README.md
 notebooks/       # explanatory documents, not analysis scripts
 tests/           # 152 tests, incl. provenance and README checks
 ```
