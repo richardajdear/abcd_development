@@ -63,6 +63,8 @@ Y180 = wide.groupby("region")[["dCT", "CT"]].mean()
 Y180 = Y180.drop(index=[r for r in BAD_PARCELS if r in Y180.index])
 Y180.index = "lh_" + Y180.index
 print(f"HCP Y: {Y180.shape[0]} bilateral parcels (dropped {BAD_PARCELS})", file=sys.stderr)
+# the complete map (all parcels, not just AHBA-covered) for figures
+Y180.to_csv(RES / "hcp_y_maps_180.csv", float_format="%.6g")
 
 # ------------------------------------------------------------------ X --------
 c123w = pd.read_csv(REPO / "data" / "weights.csv", index_col=0)

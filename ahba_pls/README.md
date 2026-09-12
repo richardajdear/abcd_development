@@ -275,6 +275,42 @@ six-year), only **12** have an age row and 10 a QC row — so the extra scans HC
 offers are unusable until the 7.0 tabulated release lands. A re-run with the missing
 parcellations plus 7.0 covariates is the version to trust.
 
+### Two summary figures (2026-09-12)
+
+Built from single-universe re-runs so every number on them is comparable:
+`code/14_magma_all_options.py` (one MAGMA covar file with all eight rankings →
+`results/magma_all_marginal.tsv`, `magma_all_joint.tsv`) and
+`code/13_celltype_compare.py` (→ `results/celltype_compare.tsv`).
+
+| figure | script | content |
+|:--|:--|:--|
+| `figures/fig_signature_both.png` | `code/fig1_signature_both.R` | the signature derived in **both** parcellations: brain maps (DK row, HCP-MMP row), six small concordance panels, and the cell-class profile of three rankings |
+| `figures/fig_enrichment_combined.png` | `code/fig2_enrichment_combined.R` | MAGMA only: every ranking's SCZ/MDD β alone, then the seven head-to-head joint models |
+
+HCP-MMP brain rendering needs `ggsegGlasser`, which is not on CRAN for this R
+version; it is installed from GitHub into `ahba_pls/.Rlib` (gitignored) —
+`remotes::install_github("ggseg/ggsegGlasser", lib = "ahba_pls/.Rlib")`. The
+polygons are cached to `data/hcp_polygons.csv`, so the figure renders without it.
+
+**New result — the astrocyte loading flips between parcellations.** Across the
+nine Seidlitz 2020 cell classes the three rankings agree closely (rank ρ 0.80–0.87):
+the three neuronal classes load positively in all three, and
+Endo, Micro, Oligo load negatively in all three.
+Astrocytes are the exception — **positive** in the HCP-MMP signature
+(z = +5.6) against -7.3 in DK and -8.7 in C3 —
+and oligodendrocytes are far more negative in HCP (-13.8) than in DK
+(-5.7), close to C3's -15.5. OPC and pericytes are weak throughout
+and not significant in the HCP fit (OPC p = 0.85, Per p = 0.91).
+The permutation null treats genes as independent, so read the signs and the pattern,
+not the magnitudes. Worth following up: this is the one place where the finer
+parcellation changes the biological reading rather than just the effect size.
+
+**Single-universe enrichment** (n = 6,672 SCZ / 6,662 MDD genes) reproduces the
+separate runs: all five ABCD-derived rankings are enriched for both disorders,
+NSPN-PLS2 reaches SCZ only (MDD p = 0.10) and C1 neither. In the joint
+models the HCP ranking beats DK for MDD (0.069, p = 0.003 vs -0.004, p = 0.86)
+and beats NSPN-PLS2 for MDD, survives C1 for both disorders, and loses to C3.
+
 ## Reproducing
 
 Analysis (python, env `ahba-pls`): `code/01_*` → `code/12_*` in order (`11_` is the
