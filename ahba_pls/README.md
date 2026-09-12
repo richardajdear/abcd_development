@@ -168,6 +168,45 @@ every MAGMA test in `hpc_v3` §10 was null). Exports, all in the thinning orient
 | `hpc/lead_pls2_gene_covar_entrez.txt` | MAGMA `--gene-covar` file, Entrez-keyed: `thinning_Z_ds0/25/50` + `AHBA_C3` for conditioning |
 | `hpc/lead_pls2_gene_weights_symbol.tsv` | the same weights by gene symbol, with rank and decile |
 
+### Parcellation control — is the weaker enrichment a DK-resolution artefact? (**no**)
+
+`code/11_parcellation_test.py` → `results/parcellation_test.tsv`, `parcellation_test_weights.tsv`.
+
+C3's weights were fitted on the HCP-MMP matrix (`hcp_3d.csv`, **137** left parcels ×
+7,973 genes); this project's PLS ran on DK (**33** regions) — 4.2× fewer observations per
+gene weight, so granularity was a live explanation for C3's ~2× larger gene-property
+effect. Controlled test: the same 7,973 genes, the same PCA, parcellation the only
+difference; plus an *oracle* PLS whose Y is the C3 score map itself at DK resolution
+(what a 33-region PLS can recover with a perfect phenotype). One shared universe of
+6,839 genes, so the βs are directly comparable.
+
+| gene weights | regions | SCZ β_std (se) | MDD β_std (se) | ρ with shipped C3 |
+|:--|--:|--:|--:|--:|
+| C3 shipped (DME, HCP) | 137 | 0.061 (0.016) | 0.076 (0.016) | — |
+| C3 by PCA, HCP | 137 | 0.059 (0.016) | 0.066 (0.015) | 0.92 |
+| **C3 by PCA, DK** | **33** | **0.047 (0.016)** | **0.080 (0.016)** | 0.80 |
+| oracle PLS (Y = C3 map), DK | 33 | 0.057 (0.016) | 0.063 (0.016) | 0.91 |
+| ABCD PLS2 (Y = thinning), DK | 33 | 0.040 (0.016) | 0.041 (0.015) | 0.77 |
+
+**Coarsening the parcellation costs almost nothing.** Re-deriving C3 at 33 regions keeps
+the full effect (HCP-vs-DK difference |z| ≤ 0.6 for both disorders), and an oracle PLS at
+33 regions keeps it too — so neither the parcellation nor the PLS step is the bottleneck.
+What costs ~40 % of the effect is that **thinning is an imperfect proxy for the axis**:
+the ABCD weights correlate ρ = 0.77 with C3, and simple regression dilution predicts
+β ≈ ρ²·β_C3 = 0.036 (SCZ) / 0.044 (MDD) against 0.040 / 0.041 observed. The attenuation
+is fully accounted for by that fidelity, with nothing left over for resolution.
+
+Implication: **a finer imaging parcellation should not be expected to close the gap.** It
+would be worth doing if finer parcels made the *thinning map itself* a better proxy for
+C3 (DK parcels straddle the gradient), and that is cheap to check first — HCP-MMP
+thickness for ABCD 5.1 already exists at `ABCD/abcd-data-release-5.1/processed/` (360
+ROIs; 10,778 / 7,092 / 2,800 subjects at v0 / v2 / v4) and `src/abcd/io.py` already loads
+it (`parcellation: hcp`). If the dCT–C3 score correlation rises appreciably above the
+DK value (ρ = −0.55 for the rate map, 0.85 for the PLS scores), a 7.0 re-parcellation on
+the cluster is justified; if it does not, the limit is the phenotype, not the atlas. Note
+7.0 has no `processed/` directory, so 7.0 HCP thickness needs the surface parcellation
+re-run.
+
 ## Reproducing
 
 Analysis (python, env `ahba-pls`): `code/01_*` → `code/10_*` in order. Figures (R, env
