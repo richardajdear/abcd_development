@@ -311,6 +311,47 @@ NSPN-PLS2 reaches SCZ only (MDD p = 0.10) and C1 neither. In the joint
 models the HCP ranking beats DK for MDD (0.069, p = 0.003 vs -0.004, p = 0.86)
 and beats NSPN-PLS2 for MDD, survives C1 for both disorders, and loses to C3.
 
+### Cell-class profiles of all eight rankings — the astrocyte flip is a parcellation effect
+
+`code/15_celltype_all_options.py` → `results/celltype_all_options.tsv`;
+figure `figures/fig_celltypes.png` (`code/fig4_celltypes.R`). Supersedes
+`13_celltype_compare.py` (three rankings) for figure purposes. Every ranking is
+tested on **one shared universe** of 7,338 genes, so a difference between two
+columns cannot come from a difference in universe; running each on its own
+universe instead gives z agreeing at Spearman 0.995 over all 72 cells (both are
+in the table).
+
+| class | PLS2 HCP | dCT HCP | PLS2 DK | dCT DK | dCT+dT1T2 DK | C3 | NSPN PLS2 | C1 |
+|:--|--:|--:|--:|--:|--:|--:|--:|--:|
+| Neuro-Ex | +12.1 | +11.8 | +13.6 | +13.7 | +12.9 | +19.3 | +9.7 | +2.5 |
+| **Astro** | **+5.1** | +1.2 | -5.3 | -12.4 | -2.9 | -8.9 | -11.3 | -11.9 |
+| **Oligo** | **-12.3** | -9.1 | -5.7 | -1.5 | -7.0 | -13.2 | +1.8 | +5.5 |
+| Micro | -10.9 | -11.6 | -9.9 | -11.8 | -8.6 | -8.8 | -1.6 | -4.1 |
+
+(full 9 × 8 matrix with p_perm in the table and figure; Endo, OPC and Per omitted here)
+
+- **Neuronal up, microglia/endothelia down in all seven thinning-derived rankings** —
+  the Y-matrix option matters far less than the atlas (profiles correlate ρ 0.65–0.98
+  among the five ABCD vectors; ρ 0.98 between the two HCP-MMP fits).
+- **Astrocytes split by atlas, not by option.** Both HCP-MMP rankings are the only
+  ones in the astrocyte-positive half (+5.1, p < 0.001; +1.2, p = 0.23);
+  all three DK rankings and all three published components are negative
+  (-5.3 to -12.4).
+- **Oligodendrocytes move the same way with the atlas**: -12.3 in HCP-MMP against
+  -5.7 in DK, i.e. the HCP version sits next to C3 (-13.2) while the DK
+  version does not. On this axis the finer parcellation moves the ABCD signature
+  *towards* C3 even though its SCZ/MDD β does not overtake it.
+- **C1 is the control that behaves differently**, as it should: weakly neuronal
+  (+2.5) and oligodendrocyte-**positive** (+5.5).
+- Caveat: marker genes are co-expressed, so the independent-gene null is
+  anti-conservative. The signs and the column-to-column pattern are the result;
+  the magnitudes are not calibrated.
+
+**Open question.** Whether the astrocyte flip reflects real biology resolved by
+137 parcels or a parcel-size artefact is not settled here. The cheap test is
+whether it survives restricting the HCP fit to parcels inside DK regions that
+are astrocyte-marker-rich, or a leave-one-region-out refit.
+
 ## Reproducing
 
 Analysis (python, env `ahba-pls`): `code/01_*` → `code/12_*` in order (`11_` is the
