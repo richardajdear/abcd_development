@@ -143,6 +143,20 @@ ABCD tabulates only Desikan (`dsk`). The HCP-MMP1.0 parcellation now exists for
 
 **Imaging transcriptomics** (`ahba_pls/`, 2026-09-12)
 
+- **Parcellation matters for MDD, not for SCZ.** Re-fitting the same PLS on the
+  new HCP-MMP thickness table (137 AHBA-covered parcels, C3's own space) raises
+  the MDD gene-property β from 0.055 to 0.070 and survives conditioning on the
+  DK version (p = 0.009) while DK does not survive conditioning on it (p = 0.78);
+  SCZ is unchanged (0.046 vs 0.044, mutual attenuation). Both remain absorbed by
+  C3. A controlled test rules out granularity per se as the explanation for C3's
+  advantage — re-deriving C3 at 33 DK regions loses nothing — so what the finer
+  atlas buys is a better *thinning map*, not more regions
+  (`ahba_pls/` §HCP-MMP arm and §Parcellation control).
+- **Release-vintage caveat, quantified.** The tabulated tables this repo reads are
+  6.0-sized: 4,086 six-year thickness sessions against 7,612 six-year FreeSurfer
+  sessions, and 5,056 six-year covariate rows. Of the 2,646 sessions the HCP table
+  has that DK lacks, only 12 carry an age row — so the extra scans cannot be used
+  until the 7.0 tabulated release is in place.
 - **The NSPN-PLS2 / AHBA-C3 "signature of adolescent thinning" re-derives from
   the ABCD.** PLS of AHBA expression on the ABCD thinning map recovers a
   component that matches both prior signatures in regional scores (ρ = 0.76 with

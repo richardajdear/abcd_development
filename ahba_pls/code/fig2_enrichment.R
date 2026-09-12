@@ -15,13 +15,16 @@ M <- read.delim(file.path(RES, "magma_gene_property.tsv"))
 P <- read.delim(file.path(RES, "permutation_enrichment.tsv"))
 C <- read.delim(file.path(RES, "magma_conditional.tsv"))
 
-lvl <- c("ABCD PLS2 (dCT+CT), ds0", "ABCD PLS2 (dCT+CT), ds25", "ABCD PLS2 (dCT+CT), ds50",
-         "dCT alone (opt 1)", "dCT+dT1T2 PLS2 (opt 3)", "4-map PLS2 (opt 4)",
-         "slope-PC PLS2 (opt 5)", "static PLS1 (control)",
+# Rows dropped from the figure on 2026-09-12 (they stay in
+# results/enrichment_summary.tsv): the ds25 filter level (ds0 and ds50 bracket
+# it), the 4-map and slope-PC options, and the static PLS1 control.
+lvl <- c("ABCD PLS2 (dCT+CT), ds0", "ABCD PLS2 (dCT+CT), ds50",
+         "dCT alone (opt 1)", "dCT+dT1T2 PLS2 (opt 3)",
          "AHBA C1", "AHBA C2", "AHBA C3 (Dear 2024)", "NSPN PLS1", "NSPN PLS2 (Whitaker 2016)")
-grp <- c(rep("ABCD signature", 3), rep("other Y options", 5), rep("published", 5))
+grp <- c(rep("ABCD signature", 2), rep("other Y options", 2), rep("published", 5))
 meta <- data.frame(label = lvl, grp = factor(grp, levels = unique(grp)))
-S <- S |> mutate(label = factor(label, levels = rev(lvl)), disorder = factor(disorder, c("SCZ", "MDD")))
+S <- S |> filter(label %in% lvl) |>
+  mutate(label = factor(label, levels = rev(lvl)), disorder = factor(disorder, c("SCZ", "MDD")))
 
 base <- theme_bw(base_size = 7.6) +
   theme(panel.grid = element_blank(),
@@ -35,7 +38,7 @@ theme_set(base)
 
 # ---- panel a: MAGMA gene-property ------------------------------------------
 n_sig <- S |> filter(grepl("^ABCD PLS2", label)) |> summarise(n = sum(magma_p < 0.05)) |> pull(n)
-a_lead <- S |> filter(label == "ABCD PLS2 (dCT+CT), ds25")
+a_lead <- S |> filter(label == "ABCD PLS2 (dCT+CT), ds50")
 a_c3 <- S |> filter(label == "AHBA C3 (Dear 2024)")
 pa <- ggplot(S, aes(disorder, label, fill = sign(magma_beta_std) * -log10(magma_p))) +
   geom_tile(colour = "white", linewidth = 0.4) +
@@ -45,7 +48,7 @@ pa <- ggplot(S, aes(disorder, label, fill = sign(magma_beta_std) * -log10(magma_
                        name = "sign(\u03b2) \u00d7\n\u2212log10 p") +
   labs(x = NULL, y = NULL, title = "a   Continuous test: disorder gene Z on weight",
        subtitle = sprintf("all %d of %d ABCD-signature tests p<0.05,\nbut \u03b2 is ~half C3's (%.3f vs %.3f, MDD)",
-                          n_sig, 6, a_lead$magma_beta_std[a_lead$disorder == "MDD"],
+                          n_sig, 2 * n_distinct(S$disorder), a_lead$magma_beta_std[a_lead$disorder == "MDD"],
                           a_c3$magma_beta_std[a_c3$disorder == "MDD"])) +
   theme(axis.text.y = element_text(size = 6.4))
 
@@ -55,15 +58,19 @@ setcols <- c(perm_SCZ_prioritised_z = "SCZ\nprio.\n(120)", perm_SCZ_locus_pool_z
 B <- S |> select(label, disorder, all_of(names(setcols))) |>
   pivot_longer(-c(label, disorder), names_to = "set", values_to = "z") |>
   filter(!is.na(z)) |> mutate(set = factor(setcols[set], levels = setcols))
-lead_b <- B |> filter(label == "ABCD PLS2 (dCT+CT), ds25")
-stat_b <- B |> filter(label == "static PLS1 (control)", set == setcols[2])
+lead_b <- B |> filter(label == "ABCD PLS2 (dCT+CT), ds50")
+# the static control is no longer a plotted row; read its z from the full table
+stat_b <- read.delim(file.path(RES, "permutation_enrichment.tsv")) |>
+  filter(vector == "control_opt2_PLS1_static", gene_set == "SCZ_locus_pool") |>
+  transmute(z = z_lengthmatched)
 pb <- ggplot(B, aes(set, label, fill = z)) +
   geom_tile(colour = "white", linewidth = 0.4) +
   geom_text(aes(label = sprintf("%.1f", z)), size = 2.1,
             colour = ifelse(abs(B$z) > 2.6, "white", "grey10")) +
   scale_fill_distiller(palette = "RdBu", direction = -1, limits = c(-4, 4), oob = squish, name = "z") +
   labs(x = NULL, y = NULL, title = "b   Set test: prioritised genes over-weighted?",
-       subtitle = sprintf("only MDD high-confidence is enriched (z = %.1f);\nthe SCZ pool signal sits on the static axis (z = %.1f)",
+       subtitle = sprintf("MDD high-confidence enriched only at the looser filter (z = %.1f ds0, %.1f ds50);\nthe SCZ pool signal sits on the static axis (z = %.1f, not plotted)",
+                          B$z[B$label == "ABCD PLS2 (dCT+CT), ds0" & B$set == setcols[3]],
                           lead_b$z[lead_b$set == setcols[3]], stat_b$z[1])) +
   theme(axis.text.y = element_blank(), axis.ticks.y = element_blank(), plot.margin = margin(2, 4, 2, 6))
 

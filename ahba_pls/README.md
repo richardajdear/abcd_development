@@ -207,10 +207,81 @@ the cluster is justified; if it does not, the limit is the phenotype, not the at
 7.0 has no `processed/` directory, so 7.0 HCP thickness needs the surface parcellation
 re-run.
 
+### HCP-MMP arm — fitting the PLS in C3's own parcellation (**adds MDD signal, not SCZ**)
+
+`code/12_hcp_pls.py` → `results/hcp_pls_{components,weights,scores}`, `hcp_concordance.tsv`,
+`hcp_vs_dk_enrichment.tsv`, `hcp_vs_dk_conditional.tsv`; figure `figures/fig_hcp_vs_dk.png`.
+
+The parcellation control above said a coarse atlas costs nothing *when the phenotype is
+already the axis*, and left open the one case that would matter: whether finer parcels make
+the thinning map a better proxy. HCP-MMP thickness for 7.0 now exists (commit 3961821,
+`configs/ct_70_hcp_noglobal_mv2.yaml`), so this tests it directly.
+
+**The run.** `thickness_hcp_70_fec93121f0dd` — the settled specification on HCP-MMP.
+Assemble keeps **5,947 subjects** with ≥2 QC-passing visits (DK: 8,192); 360 regions fit in
+2 min, 4/360 singular, 4 non-converged, 0 errors. The PLS uses the 137 left parcels with
+AHBA donor coverage, bilateral (lh/rh mean), with the medial-wall parcel `H` dropped.
+
+**The component is the same axis, now measured in its native space.** PLS2 carries dCT
+(salience 0.99), explains 14% of the cross-covariance, spin p = 0.012 (5,000 rotations of
+the complete 180-parcel map), bootstrap reproducibility 0.90. Scores vs C3
+ρ = 0.69 (p_spin < 0.001, 137 parcels), gene weights ρ = 0.67; weights vs the DK signature
+ρ = 0.73. The DK score correlation of 0.85 was over 33 regions — 0.69 over 137 is the more
+honest number, not a loss of signal.
+
+**Enrichment** (one shared MAGMA universe of 6,063 genes; the DK comparator is
+refitted on `dk_3d.csv`, the same abagen build and the same 7,973 genes as the HCP matrix, so
+parcellation is not confounded with pipeline):
+
+| gene weights | parcels | SCZ β_std (p) | MDD β_std (p) |
+|:--|--:|--:|--:|
+| **HCP-MMP PLS2** | **137** | 0.044 (0.012) | **0.070** (2e-05) |
+| DK PLS2, matched genes | 33 | 0.046 (0.007) | 0.055 (0.0007) |
+| HCP-MMP, dCT alone | 137 | 0.053 (0.0022) | 0.079 (2e-06) |
+| AHBA C3 | 137 | 0.068 (9e-05) | 0.082 (9e-07) |
+
+Because the two weight vectors are correlated (ρ = 0.73), the comparison is made inside
+MAGMA rather than by differencing βs:
+
+| model | SCZ β (p) | MDD β (p) |
+|:--|--:|--:|
+| HCP PLS2 \| DK PLS2 | 0.020 (0.45) | **0.065 (0.0092)** |
+| DK PLS2 \| HCP PLS2 | 0.031 (0.23) | 0.007 (0.78) |
+| HCP PLS2 \| AHBA C3 | -0.003 (0.89) | 0.029 (0.19) |
+| AHBA C3 \| HCP PLS2 | 0.071 (0.0026) | 0.062 (0.0055) |
+
+**Reading.** For **MDD** the finer parcellation adds real signal: β rises 0.055 → 0.070, HCP
+survives conditioning on DK (p = 0.009) and DK does not survive conditioning on HCP
+(p = 0.78) — the DK version is a degraded copy of the HCP one. For **SCZ** there is no gain;
+the two attenuate each other and neither dominates. Both remain absorbed by C3, which keeps
+its association conditioned on either. So the HCP arm improves the *ABCD-derived* ranking for
+MDD without changing the headline conclusion that C3 is the sharper ranking.
+
+Also notable: in HCP space **dCT alone** (option 1) is the strongest ABCD vector
+(MDD 0.079, SCZ 0.053). In DK its enrichment was already competitive (SCZ 0.041, MDD 0.031,
+vs 0.037/0.026 for the lead at ds0); what disqualified it there was not the enrichment but
+that it fails to *isolate* the axis — its weights load equally on C1 (ρ = −0.59) and C3
+(−0.58) — and that its component is marginal under the spin null. The same caution applies
+here: spin p = 0.27, so the map-level covariance with expression is not spatially specific.
+Treat the single-Y option as a gene-level result without a spatial claim.
+
+**Caveats.** (i) 5,947 subjects, not 8,192 — 8,001 sessions are missing from the parcellated
+table (3,435 never reached by the array job, 5,439 `mri_surf2surf` stubs), so this is not a
+like-for-like sample comparison with the DK run. (ii) Release vintage, checked against the
+tables this repo reads: the DK thickness table has **4,086** six-year sessions against 7,612
+six-year FreeSurfer sessions, i.e. it is 6.0-sized; the covariate table `ab_g_dyn` has 5,056
+six-year rows. Of the **2,646** sessions the HCP table has that DK lacks (2,639 of them
+six-year), only **12** have an age row and 10 a QC row — so the extra scans HCP uniquely
+offers are unusable until the 7.0 tabulated release lands. A re-run with the missing
+parcellations plus 7.0 covariates is the version to trust.
+
 ## Reproducing
 
-Analysis (python, env `ahba-pls`): `code/01_*` → `code/10_*` in order. Figures (R, env
-`ahba-pls-r`): `Rscript code/fig1_lead_signature.R`, `Rscript code/fig2_enrichment.R`.
+Analysis (python, env `ahba-pls`): `code/01_*` → `code/12_*` in order (`11_` is the
+parcellation control, `12_` the HCP-MMP arm; `12_` needs the
+`thickness_hcp_70_*` run — `ABCD_CONFIG=ct_70_hcp_noglobal_mv2 python -m abcd.assemble`
+then `Rscript R/fit_lmm.R --run-dir out/thickness_hcp_70_* --cores 8`). Figures (R, env
+`ahba-pls-r`): `Rscript code/fig1_lead_signature.R`, `fig2_enrichment.R`, `fig3_hcp_vs_dk.R`.
 The full command list with timings is at the end of `imaging_transcriptomics.qmd`.
 `.gitignore` here excludes the regenerable intermediates (aligned X matrices, full
 per-option weight tables, spin nulls, MAGMA run directories).
