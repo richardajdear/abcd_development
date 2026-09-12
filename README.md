@@ -49,11 +49,72 @@ improve on C3 as a gene ranking — see *Imaging transcriptomics* below.
   `prs_final/` predates the age-covariate fix, the allele-frequency fix and
   the discovery-to-arm matching (`hpc_v2/README_HPC.md` §14.5–14.8).
 
+## HCP-MMP (Glasser) thickness — added 2026-09-12
+
+ABCD tabulates only Desikan (`dsk`). The HCP-MMP1.0 parcellation now exists for
+7.0 as a **derived** table, so `parcellation: hcp` works on release 7.0
+(`configs/ct_70_hcp_noglobal_mv2.yaml`). What an agent needs to know:
+
+- **Source.** The release FreeSurfer 7.1.1 reconstructions (run by the ABCD
+  DAIRC, distributed as per-session zips) are unpacked on CSD3 at
+  `/rds/project/rds-CeXlNYOYMxw/derivatives/freesurfer/` — 33,825 sessions,
+  11,823 subjects. Their DK `aparc.stats` values are identical to the release
+  tables, so these are the surfaces the DK phenotype came from. R. Romero-Garcia
+  (`rr480`) projected the fsaverage HCP-MMP1.0 annotation onto them and ran
+  `mris_anatomical_stats`, writing per-session tables under
+  `derivatives/parcellations/T1/<sub>/<ses>/HCP.fsaverage.aparc/`.
+- **What this repo adds.** `src/abcd/hcp_stats.py` parses those tables into
+  `abcd-7.0/processed/hcp/` (gitignored with the rest of the release data):
+  `mr_y_smri__{thk,area,vol}__hcp.tsv` in the DK column convention
+  (`mr_y_smri__thk__hcp__V1__lh_mean`, whole-cortex `_mean` vertex-weighted),
+  a long parquet with every `mris_anatomical_stats` measure, and
+  `hcp_session_qc.tsv` with parcel/vertex counts and FreeSurfer surface-hole
+  counts (Euler proxy) per session. `Release70Adapter.imaging(metric, "hcp")`
+  reads them; labels (`lh_V1`) match `data/hcp_centroids.csv`. Regenerate with
+  `sbatch hpc/hcp_extract.sbatch` from the repo root (about 10 min).
+- **Coverage is incomplete, deliberately flagged, not hidden.** The table
+  holds **24,921 sessions / 10,248 subjects** (7,849 with ≥2 sessions), against
+  33,825 FreeSurfer sessions. The shortfall has two causes, both on the
+  parcellation side, not ours: 3,435 sessions were never reached by the
+  28–31 July 2026 array job (last batch hit its time limit), and 5,439 have
+  only empty stub stats because `mri_surf2surf` failed — the failure rate rises
+  from 6 % in single-session subjects to 22 % in four-session subjects, which
+  points at the script's per-subject `fsaverageSubP` symlink being removed and
+  recreated by concurrent array tasks. Every rejected session is listed with its
+  reason in `hcp_session_qc.tsv`, and the re-run list for rr480 (8,874 sessions)
+  is `abcd-7.0/processed/hcp/sessions_to_reparcellate.txt`. His script skips
+  sessions that already have non-empty output, so the 5,439 stubs must be
+  deleted (or the script's `-s` test replaced) before re-running. Missing
+  sessions simply have no row, so `assemble` reports fewer scans than DK.
+- **Known parcel artefact.** HCP-MMP region `H` (hippocampus) lies on the
+  FreeSurfer medial wall and has thickness 0 in ~6,350 sessions (lh far more than
+  rh). Values are left as written; exclude `H` from thickness analyses or treat
+  0 as missing. No parcel has fewer than 30 vertices.
+- **Smoke-tested end to end (2026-09-12)** in an isolated tree using the 6.0
+  tables for age/site/QC: the adapter returns 360 labels matching
+  `hcp_centroids.csv`; the vertex-weighted HCP whole-cortex mean correlates
+  0.9993 with the DK release mean over 22,275 shared sessions; `assemble` with
+  `ct_70_hcp_noglobal_mv2` reaches 5,947 subjects with ≥2 QC-passing visits
+  (DK: 8,192). That number will rise with the re-parcellation and with 7.0
+  covariates for the new six-year sessions.
+- **Release vintage — a caveat that also touches the DK work.** The tabulated
+  copy on rds (`derivatives/tabulated/`) is byte-identical to release **6.0**
+  and stops at 4,103 six-year sessions, whereas the FreeSurfer derivatives hold
+  7,612 six-year sessions with scans to July 2025. Roughly 3,500 six-year
+  sessions therefore have surfaces (and HCP thickness) but no age, scanner or
+  release-QC row until the 7.0 tabulated release is in place. The settled DK run
+  ends with 3,539 six-year scans, which matches a 6.0-sized input; check the
+  six-year row count of the `mr_y_smri__thk__dsk` table this repo actually reads
+  before treating it as 7.0.
+- Full investigation and the step-by-step plan (census, gap-fill, QC policy,
+  validation): [`docs/PLAN_HCP_thickness.md`](docs/PLAN_HCP_thickness.md).
+
 ## Where to look
 
 | you want | go to |
 |:---|:---|
 | **the cluster genetics: state, results, and the current task** | [`hpc_v2/README_HPC.md`](hpc_v2/README_HPC.md) (v1 pipeline: `hpc/README_HPC.md`) |
+| HCP-MMP thickness: where it comes from, coverage, how to regenerate | [`docs/PLAN_HCP_thickness.md`](docs/PLAN_HCP_thickness.md) and the section above |
 | the findings, their caveats and the corrections | [`docs/REPORT_7.0.md`](docs/REPORT_7.0.md) |
 | how the mixed model works and why | [`notebooks/01_longitudinal_model.qmd`](notebooks/01_longitudinal_model.qmd) |
 | spatial nulls and the map-to-gene tests | [`notebooks/02_maps_and_genes.qmd`](notebooks/02_maps_and_genes.qmd) |
@@ -165,12 +226,13 @@ configs/         # one YAML per specification; the run_id is a hash of it
 docs/            # REPORT_7.0.md + every table and figure it cites
 tools/           # regenerators for every table and figure in the report
 hpc/             # SLURM genetics pipeline  -- see hpc/README_HPC.md
+  hcp_extract.sbatch   builds abcd-7.0/processed/hcp/ from the FreeSurfer surfaces (CSD3)
   legacy/          superseded HPC docs; read only if the repo contradicts the current one
 ahba_pls/        # imaging transcriptomics: PLS of AHBA expression on the ABCD
                  # thinning maps, and its SCZ/MDD enrichment -- self-contained,
                  # see ahba_pls/README.md
 notebooks/       # explanatory documents, not analysis scripts
-tests/           # 152 tests, incl. provenance and README checks
+tests/           # 160 tests, incl. provenance and README checks
 ```
 
 The Python/R seam is Parquet in `out/<run_id>/`. Computation is kept separate
@@ -183,6 +245,7 @@ from plotting throughout.
 | `ct_70_global_mv3_genetic.yaml` | global-covariate contrast |
 | `ct_51_noglobal_mv2_matched.yaml` | 5.1 on the same specification |
 | `t1t2_70_noglobal_mv2_genetic.yaml` | T1w/T2w ratio, matched to the settled spec |
+| `ct_70_hcp_noglobal_mv2.yaml` | the settled spec on HCP-MMP (Glasser); derived table, partial coverage — see above |
 
 ## Reproducing the report
 
@@ -194,7 +257,7 @@ python tools/regen_report_tables.py     # spatial/covariance/site tables
 python tools/regen_h2_tables.py         # heritability tables (bootstrap; slow)
 python tools/regen_report_figures.py    # table-based figures
 python tools/regen_brain_maps.py        # DK surface maps
-python -m pytest tests/ -q              # 152 tests
+python -m pytest tests/ -q              # 160 tests
 ```
 
 This is enforced, not trusted: `tests/test_docs_provenance.py` checks that every

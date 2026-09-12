@@ -13,11 +13,26 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from abcd import io, paths  # noqa: E402
 
-try:
-    paths.abcd_root()
-    HAVE_DATA = True
-except paths.DataRootError:
-    HAVE_DATA = False
+def _have_release_tables() -> bool:
+    """True only if a release *table* is readable, not merely a release directory.
+
+    ``abcd-7.0/`` may hold only derived ``processed/hcp/`` output (built on
+    CSD3 before the tabulated release was in place); that is not release data.
+    """
+    try:
+        paths.abcd_root()
+    except paths.DataRootError:
+        return False
+    for rel, stem in (("7.0", "ab_g_dyn"), ("5.1", "abcd_y_lt")):
+        try:
+            paths.find_table(paths.release_dir(rel), stem)
+            return True
+        except paths.DataRootError:
+            continue
+    return False
+
+
+HAVE_DATA = _have_release_tables()
 
 needs_data = pytest.mark.skipif(not HAVE_DATA, reason="ABCD release tree not available")
 
