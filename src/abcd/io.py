@@ -433,6 +433,9 @@ class Release70Adapter(Release51Adapter):
        site and scanner; ``ab_g_stc`` (per subject) carries sex, family,
        birth event, twin flags and 32 genetic ancestry PCs -- so no separate
        genetics file is needed for GWAS covariates.
+    9. **HCP-MMP is derived, not shipped.** ``imaging(..., "hcp")`` reads
+       ``processed/hcp/`` written by :mod:`abcd.hcp_stats` from the release
+       FreeSurfer surfaces (see :meth:`_imaging_hcp`).
     8. **QC is renamed, not removed.** There is no Euler column; the
        equivalent is ``topodfct_count`` (topological defect count), which is
        what the Euler number is computed from.  Validated against the 5.1
@@ -518,18 +521,26 @@ class Release70Adapter(Release51Adapter):
         return pd.read_csv(path, sep=sep, low_memory=False)
 
     # ------------------------------------------------------------------
+    #: HCP-MMP tables are not part of the release; :mod:`abcd.hcp_stats`
+    #: derives them from the release FreeSurfer surfaces into
+    #: ``<release>/processed/hcp/`` in the DK column convention.
+    #: metric -> (column infix, per-parcel aggregation suffix).
+    HCP_METRICS = {
+        "thickness": ("thk", "mean"),
+        "area": ("area", "sum"),
+        "volume": ("vol", "sum"),
+    }
+
+    @property
+    def hcp_dir(self) -> Path:
+        return self.root / "processed" / "hcp"
+
     def imaging(self, metric: str, parcellation: str = "dsk") -> pd.DataFrame:
         if parcellation == "hcp":
-            # HCP-MMP parcellations were produced locally from 5.1 surfaces and
-            # have not been re-run on the 7.0 release.
-            raise SourceUnavailable(
-                "HCP-MMP parcellation is not available for release 7.0; it was "
-                "produced locally from 5.1 surfaces. Use parcellation='dsk', or "
-                "re-run the surface parcellation on 7.0 first."
-            )
+            return self._imaging_hcp(metric)
         if parcellation != "dsk":
             raise NotImplementedError(
-                f"parcellation {parcellation!r} not wired for 7.0; only 'dsk'"
+                f"parcellation {parcellation!r} not wired for 7.0; only 'dsk' and 'hcp'"
             )
         if metric not in self.METRIC_TABLES:
             raise KeyError(
@@ -599,6 +610,79 @@ class Release70Adapter(Release51Adapter):
         meta["label"] = np.where(
             meta.is_global, meta.region, meta.hemi + "_" + meta.region
         )
+
+        long = long.merge(meta, on="column", how="inner")
+        long["subject"] = self._to_bids(long.participant_id)
+        long["visit"] = self._map_visits(long.session_id)
+        long["metric"] = metric
+        long = long.dropna(subset=["visit", "value"])
+        return long[
+            ["subject", "visit", "metric", "hemi", "region", "label",
+             "is_global", "value"]
+        ].reset_index(drop=True)
+
+    # ------------------------------------------------------------------
+    def _imaging_hcp(self, metric: str) -> pd.DataFrame:
+        """HCP-MMP1.0 (Glasser, 180 regions x 2 hemispheres) from ``processed/hcp/``.
+
+        These are **derived, not release, tables**: :mod:`abcd.hcp_stats`
+        parses ``mris_anatomical_stats`` output computed on the release
+        FreeSurfer 7.1.1 surfaces (the same reconstructions the DK release
+        tables are tabulated from) and writes them in the DK column
+        convention, ``mr_y_smri__thk__hcp__<region>__<hemi>_mean``.  Region
+        names are the HCP-MMP names verbatim (``V1``, ``a9-46v``, ``TE1m``),
+        case preserved, and labels ``lh_V1`` match ``data/hcp_centroids.csv``.
+
+        Coverage is whatever the parcellation pipeline has reached -- on
+        2026-09-12, 30,360 of 33,825 FreeSurfer sessions -- so
+        ``complete_regions`` QC and the run manifest, not this method, are
+        where the shortfall shows up.  There is no release QC row for
+        sessions newer than the tabulated release; ``hcp_session_qc.tsv``
+        beside the table carries FreeSurfer surface-hole counts for those.
+
+        The whole-cortex ``_mean`` is vertex-weighted over the 360 parcels,
+        as the DK ``_mean`` columns are.
+        """
+        if metric not in self.HCP_METRICS:
+            raise KeyError(
+                f"metric {metric!r} not available in HCP-MMP; have "
+                f"{sorted(self.HCP_METRICS)}"
+            )
+        infix, agg = self.HCP_METRICS[metric]
+        path = self.hcp_dir / f"mr_y_smri__{infix}__hcp.tsv"
+        if not path.exists():
+            raise SourceUnavailable(
+                f"HCP-MMP table absent: {path}. Generate it with "
+                "`sbatch hpc/hcp_extract.sbatch` (see abcd.hcp_stats)."
+            )
+        raw = pd.read_csv(path, sep="\t", low_memory=False)
+
+        pat = re.compile(rf"^mr_y_smri__{re.escape(infix)}__hcp__(.+)__(lh|rh)_{agg}$")
+        region_cols = {c: m for c in raw.columns if (m := pat.match(c))}
+        if len(region_cols) != 360:
+            raise KeyError(
+                f"{path.name}: expected 360 region columns matching "
+                f"{pat.pattern}, found {len(region_cols)}"
+            )
+        global_col = f"mr_y_smri__{infix}__hcp_{agg}"
+        has_global = global_col in raw.columns
+
+        keep = ["participant_id", "session_id", *region_cols]
+        if has_global:
+            keep.append(global_col)
+        long = raw[keep].melt(id_vars=["participant_id", "session_id"],
+                              var_name="column", value_name="value")
+
+        meta = pd.DataFrame([
+            {"column": c, "hemi": m.group(2), "region": m.group(1), "is_global": False}
+            for c, m in region_cols.items()
+        ])
+        if has_global:
+            meta = pd.concat([meta, pd.DataFrame([{
+                "column": global_col, "hemi": "both",
+                "region": "global_mean", "is_global": True,
+            }])], ignore_index=True)
+        meta["label"] = np.where(meta.is_global, meta.region, meta.hemi + "_" + meta.region)
 
         long = long.merge(meta, on="column", how="inner")
         long["subject"] = self._to_bids(long.participant_id)

@@ -47,6 +47,8 @@ from scipy.optimize import linear_sum_assignment
 
 REPO = Path(__file__).resolve().parents[2]
 DK_CENTROIDS = REPO / "data" / "dk_centroids.csv"
+HCP_CENTROIDS = REPO / "data" / "hcp_centroids.csv"
+CENTROIDS = {"dsk": DK_CENTROIDS, "hcp": HCP_CENTROIDS}
 
 
 # --------------------------------------------------------------------------
@@ -168,14 +170,15 @@ def spin_permutations(coords: np.ndarray, n_perm: int = 1000, seed: int = 0) -> 
 
 
 def spin_test_pls(X: pd.DataFrame, Y_full: pd.DataFrame, n_perm: int = 5000,
-                  seed: int = 0) -> dict:
+                  seed: int = 0, centroids: Path = DK_CENTROIDS) -> dict:
     """Spin-permutation p-values for PLS singular values.
 
-    X is on the covered regions (33); Y_full is on ALL LH parcels (34) so
-    that the rotation is performed on the complete map and the uncovered
-    parcel is dropped afterwards.
+    X is on the covered regions (33 in DK, 137 in HCP-MMP); Y_full is on ALL
+    LH parcels (34 / 180) so that the rotation is performed on the complete
+    map and the uncovered parcels are dropped afterwards.  ``centroids``
+    selects the parcellation geometry (``pls.CENTROIDS['hcp']``).
     """
-    cov = load_lh_centroids(Y_full.index)
+    cov = load_lh_centroids(Y_full.index, path=centroids)
     perms = spin_permutations(cov.to_numpy(float), n_perm=n_perm, seed=seed)
     pos = {l: i for i, l in enumerate(Y_full.index)}
     keep = np.array([pos[l] for l in X.index])
@@ -199,17 +202,19 @@ def spin_test_pls(X: pd.DataFrame, Y_full: pd.DataFrame, n_perm: int = 5000,
 _PERM_CACHE: dict = {}
 
 
-def cached_spin_permutations(labels, n_perm: int = 5000, seed: int = 0) -> np.ndarray:
-    """spin_permutations for a label set, memoised on (labels, n_perm, seed)."""
-    key = (tuple(labels), n_perm, seed)
+def cached_spin_permutations(labels, n_perm: int = 5000, seed: int = 0,
+                             path: Path = DK_CENTROIDS) -> np.ndarray:
+    """spin_permutations for a label set, memoised on (labels, n_perm, seed, path)."""
+    key = (tuple(labels), n_perm, seed, str(path))
     if key not in _PERM_CACHE:
-        cov = load_lh_centroids(list(labels))
+        cov = load_lh_centroids(list(labels), path=path)
         _PERM_CACHE[key] = spin_permutations(cov.to_numpy(float), n_perm=n_perm, seed=seed)
     return _PERM_CACHE[key]
 
 
 def spin_corr(a: pd.Series, b_full: pd.Series, n_perm: int = 5000, seed: int = 0,
-              method: str = "spearman") -> tuple[float, float, np.ndarray]:
+              method: str = "spearman",
+              centroids: Path = DK_CENTROIDS) -> tuple[float, float, np.ndarray]:
     """Spin-test the correlation of map `a` (covered regions) with `b_full`.
 
     `b_full` should be the more complete map (it is the one rotated); it is
@@ -221,7 +226,7 @@ def spin_corr(a: pd.Series, b_full: pd.Series, n_perm: int = 5000, seed: int = 0
     b_full = b_full.dropna()
     common = a.index.intersection(b_full.index)
     a = a.loc[common]
-    perms = cached_spin_permutations(b_full.index, n_perm=n_perm, seed=seed)
+    perms = cached_spin_permutations(b_full.index, n_perm=n_perm, seed=seed, path=centroids)
     pos = {l: i for i, l in enumerate(b_full.index)}
     keep = np.array([pos[l] for l in common])
     bv = b_full.to_numpy(float)

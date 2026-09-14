@@ -1,0 +1,27 @@
+release: '7.0'
+metric: thickness
+parcellation: hcp
+hemisphere: both
+qc_policy: coded
+sample_rule: min_visits
+min_visits: 2
+visits:
+- v0
+- v2
+- v4
+- v6
+age_basis: linear
+spline_df: 3
+age_centre: null
+re_structure: slope_correlated
+global_covariate: none
+covariates:
+- sex
+family_effect: false
+site_effect: true
+note: 'The settled DK specification (ct_70_noglobal_mv2_genetic) on the HCP-MMP1.0
+  (Glasser, 360-region) parcellation. Thickness comes from abcd-7.0/processed/hcp/,
+  parsed from the release FreeSurfer surfaces by abcd.hcp_stats -- not from a release
+  table. As of 2026-09-12 that file covers 24,921 of 33,825 FreeSurfer sessions
+  (8,874 await re-parcellation by rr480); see README "HCP-MMP thickness". Purpose: AHBA C1-C3 are defined on HCP-MMP regions, so fitting here
+  avoids averaging expression components across DK parcel boundaries.'

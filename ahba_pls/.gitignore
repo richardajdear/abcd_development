@@ -16,3 +16,9 @@ results/magma_runs/
 data/reference/*mygene_raw.json
 data/reference/nspn_symbol_map.csv
 data/reference/nspn_genes_absent_ds0.txt
+
+# full HCP gene-weight table (7,973 x 6, regenerable by 12_hcp_pls.py)
+results/hcp_pls_weights.tsv
+
+# local R library for ggsegGlasser (installed from GitHub)
+.Rlib/

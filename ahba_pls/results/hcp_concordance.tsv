@@ -1,0 +1,8 @@
+reference	level	rho	p_spin	n
+C1	scores	-0.2602	0.1472	137
+C1	weights	-0.1202		7973
+C2	scores	-0.1378	0.5249	137
+C2	weights	-0.2253		7973
+C3	scores	0.6887	0.0003999	137
+C3	weights	0.6725		7973
+DK_PLS2_ds25	weights	0.7308		7873
