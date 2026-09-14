@@ -107,16 +107,16 @@ def test_extract_session_ok_when_parcel_count_relaxed(tmp_path, monkeypatch):
     assert "???" not in set(long.region)
 
 
-def test_wide_table_is_vertex_weighted(tmp_path, monkeypatch):
+def test_wide_table_is_area_weighted(tmp_path, monkeypatch):
     monkeypatch.setattr(hcp_stats, "N_PARCELS_PER_HEMI", 2)
     sess = _write_session(tmp_path / "parc")
     long, _ = hcp_stats.extract_session(sess, tmp_path / "parc", tmp_path / "fs")
     w = hcp_stats.wide_table(long, "thickness_mm").iloc[0]
     assert w["mr_y_smri__thk__hcp__V1__lh_mean"] == 1.773
     assert w["mr_y_smri__thk__hcp__MST__rh_mean"] == 2.5
-    lh = (5852 * 1.773 + 386 * 2.400) / (5852 + 386)
+    lh = (3949 * 1.773 + 240 * 2.400) / (3949 + 240)          # area-weighted
     assert w["mr_y_smri__thk__hcp__lh_mean"] == pytest.approx(lh)
-    tot = (5852 * 1.773 + 386 * 2.4 + 6000 * 1.8 + 400 * 2.5) / (5852 + 386 + 6000 + 400)
+    tot = (3949 * 1.773 + 240 * 2.4 + 4000 * 1.8 + 250 * 2.5) / (3949 + 240 + 4000 + 250)
     assert w["mr_y_smri__thk__hcp_mean"] == pytest.approx(tot)
     a = hcp_stats.wide_table(long, "area_mm2").iloc[0]
     assert a["mr_y_smri__area__hcp__lh_sum"] == 3949 + 240

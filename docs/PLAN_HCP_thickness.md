@@ -28,7 +28,7 @@ Nothing needs to be downloaded and no `recon-all` needs to be run.
    parcellable** (complete surfaces, no HCP annotation — the array jobs never
    reached them; two ran into the time limit). Only 30 sessions are unusable
    reconstructions. Together with the 5,439 stubs that is **8,874 sessions to
-   (re)run**, listed in `abcd-7.0/processed/hcp/sessions_to_reparcellate.txt`;
+   (re)run**, listed in `abcd-data-release-7.0/processed/hcp/sessions_to_reparcellate.txt`;
    roughly 750 CPU-hours, one array job (§3.2).
 4. The `derivatives/tabulated/` copy on rds is **release 6.0, not 7.0**: it is
    byte-identical to `Data_Phenotype/ABCD60/`, its scan dates stop in
@@ -94,7 +94,7 @@ This repo's settled run (`out/thickness_dsk_70_*/manifest.json`, labelled
 release 7.0) ends with **3,539** six-year scans after QC and the ≥2-visit
 filter. That is consistent with a 4,083-row six-year input and **not** with
 the ~7,600 six-year sessions the FreeSurfer derivatives show 7.0 to contain.
-Either the tables vendored as `abcd-7.0/` are actually the 6.0 tabulation, or
+Either the tables vendored as `abcd-data-release-7.0/` are actually the 6.0 tabulation, or
 7.0's imaging tables lag its imaging derivatives. The former is much more
 likely. **Action:** count ses-06A rows in the `mr_y_smri__thk__dsk` table the
 repo actually reads. If it is ~4,100, the "7.0" phenotype is 6.0-vintage and
@@ -213,9 +213,9 @@ cross-check on overlapping sessions (§4.3).
 ### 3.0 Settle the release vintage (blocking for the model, not for the parcellation)
 
 1. Count ses-06A rows in the thickness table this repo reads under its
-   `abcd-7.0/` directory. Check `mr_y_adm__info` max scan date there.
+   `abcd-data-release-7.0/` directory. Check `mr_y_adm__info` max scan date there.
 2. If it is 6.0-vintage, obtain the 7.0 tabulated release (imaging QC,
-   `ab_g_dyn` ages/site/scanner, `ab_g_stc`) and place it as `abcd-7.0/`.
+   `ab_g_dyn` ages/site/scanner, `ab_g_stc`) and place it as `abcd-data-release-7.0/`.
    Without it the 3,516 new six-year sessions have surfaces but no age,
    scanner, or release QC flag, and cannot enter the model.
 3. Record the answer in `README.md` §Status and in `io.py`'s
@@ -223,7 +223,7 @@ cross-check on overlapping sessions (§4.3).
 
 ### 3.1 Census (one sbatch job, ~10 min on 16 cores)
 
-Script: `legacy/hpc/hcp/00_census.sbatch` → `docs/hcp_census/session_status.csv`,
+Script: `tools/hcp_census.sbatch` (not yet written) → `docs/hcp_census/session_status.csv`,
 one row per FreeSurfer session:
 
 - `recon_done` (`scripts/recon-all.done` present), `recon_ok` (`finished
@@ -273,9 +273,9 @@ Before running: tell rr480 and rb643. The tidy thing is for rr480 to re-run
 their own array on `to_parcellate.txt` so everything stays in one tree; the
 scratch route is the fallback if that is slow to arrange.
 
-### 3.3 Extraction to a tidy table (Python, minutes)
+### 3.3 Extraction to a tidy table — DONE 2026-09-12 (`src/abcd/hcp_stats.py`, `tools/hcp_extract.sbatch`)
 
-`src/abcd/hcp_extract.py` (or `legacy/hpc/hcp/01_extract.py`): parse every
+`src/abcd/hcp_extract.py` : parse every
 `{lh,rh}.HCP.fsaverage.aparc.log`, drop the `???` row, emit
 
 ```
@@ -315,7 +315,7 @@ the parcel-level checks that DK does not need:
 1. **DK consistency**: for a random 500 sessions, parse local `aparc.stats`
    and compare to the release DK table — must be bit-identical (it was for
    the one session checked). This proves the local surfaces *are* the release.
-2. **Whole-cortex mean**: HCP vertex-weighted mean vs DK `_mean` column,
+2. **Whole-cortex mean**: HCP area-weighted mean vs DK `_mean` column,
    expect r > 0.99 per session.
 3. **Against the 5.1 HCP files**: for sessions present in both, per-region ρ of
    thickness; 7.0 re-uses 5.1 reconstructions for shared waves (99.94 %
@@ -330,8 +330,10 @@ the parcel-level checks that DK does not need:
 - `Release70Adapter._imaging_hcp(metric)` reading
   `processed/hcp70_anatomical_stats.parquet`; expose `thickness`, `area`,
   `volume` at least. Return the same long format as the DK path, `is_global`
-  row computed as the vertex-weighted mean (note: the 5.1 path used the
-  unweighted parcel mean — decide once and document).
+  row computed as the surface-area-weighted mean, the release's own
+  convention (established 2026-09-14: the release ``__lh_mean`` equals the
+  area-weighted mean over the 34 DK regions, not FreeSurfer's vertex-weighted
+  cortex mean; the 5.1 HCP path used the unweighted parcel mean).
 - `qc.py`: predicates `surface_holes_predicate(max_holes)` and
   `parcel_coverage_predicate(min_verts)`; the release-include and
   complete-regions predicates already exist.
@@ -384,3 +386,135 @@ Risks, in order of importance:
 | `Code/check_bids_derivatives.py`, `derivatives/test_qc.csv` | rb643's derivative checker (includes FS holes) |
 | `userdata/rr480/fsaverageSubP/label/{lh,rh}.HCP.fsaverage.aparc.annot` | the fsaverage HCP-MMP1.0 annotation (2016) |
 | `logs/parcellation_T1/` | 30,441 array-task logs, July 2026 |
+
+## 6. Backfill run plan — 2026-09-14 (branch `hcp-backfill`; for review before the array is submitted)
+
+rr480 has not replied, so the missing parcellations are run by us, read-only
+against his tree and the FreeSurfer derivatives. Everything below runs on
+`vertes-sl3-cpu` / `icelake` (SL2 has no CPU-minutes left; cclake is slow).
+
+### 6.1 HCP-MMP backfill
+
+**Input.** `abcd-data-release-7.0/processed/hcp/sessions_to_reparcellate.txt` — 8,874
+sessions = 5,439 with empty stub stats + 3,435 never run. Sessions with
+incomplete surfaces are skipped by the worker (exit 3), so the ~30 unusable
+reconstructions cost nothing.
+
+**Scripts** (committed on this branch):
+
+| file | role |
+|:--|:--|
+| `tools/hcp_backfill_session.sh` | one session: private `SUBJECTS_DIR` of two symlinks (`fsaverageSubP`, the session), `mri_surf2surf` of the 2016 fsaverage HCP annotation through `sphere.reg`, `mris_anatomical_stats -a -b` per hemisphere; exit 0 only if both hemispheres have 180 `*_ROI` rows |
+| `tools/hcp_backfill.sbatch` | array wrapper: `CHUNK=50` sessions per task, 1 core, 4 GB, 1 h 30 wall; skips sessions already complete, so a partial array is simply resubmitted |
+
+Design decisions worth reviewing:
+
+- **No writes to `derivatives/`.** Output mirrors rr480's layout under
+  `work/parcellations_backfill/T1/<sub>/<ses>/HCP.fsaverage.aparc/`
+  (gitignored). The annotation and stats live there, plus the surf2surf and
+  stats stderr logs per hemisphere for post-mortems.
+- **Same annotation, same FreeSurfer major version.** `fsaverageSubP`'s
+  `sphere.reg` is byte-identical to the stock fsaverage, so it contributes
+  only the HCP `.annot`; FreeSurfer 7.1.0 module against 7.1.1 surfaces, as in
+  the July run. Backfilled and existing sessions are therefore the same
+  measurement; §6.3 checks this on the sessions where both exist.
+- **The race is designed out.** Each task gets its own `mktemp` `SUBJECTS_DIR`
+  removed on exit; nothing is shared between tasks.
+- **Idempotent and resumable.** Both the wrapper's completeness test and the
+  worker's `-s` test on the annotation require real content (180 rows / a
+  non-empty annot), so stubs can never be mistaken for done.
+
+**Resources.** Measured 40 s per session in the test job (not the 5 min
+assumed earlier), so 8,874 sessions ≈ 100 CPU-h: 178 array tasks of 50
+sessions (`--array=0-177%100`), ≈35 min each, done within an hour or two of
+scheduling. Disk: two annotations ≈ 2.4 MB per session → ≈21 GB under
+`hpc/work/`; `/rds/user/rajd2` has 214 GB free of its 1 TB quota.
+
+**Mechanism test — passed.** Job 35544957 ran `sub-00LH735Y/ses-00A` (a July
+stub) with the identical scripts: 40 s, 180 `*_ROI` rows per hemisphere,
+V1 = 1.974 mm and TE1m = 3.426 mm (plausible), stderr shows FreeSurfer
+reading the session only through the private symlink, and the session's
+`label/` directory in `derivatives/` keeps its 28 July mtime — nothing was
+written there. Output at `work/parcellations_backfill_test/`.
+
+**Then re-extract.** `abcd.hcp_stats` gains `--extra-parc-root`: sessions are
+discovered in both trees, and for a session present in both the backfill tree
+wins (it is only ever populated for sessions that were broken or absent in
+rr480's). `hcp_session_qc.tsv` gains a `parc_source` column. Expected
+coverage after the run: ≈33,790 of 33,825 sessions.
+
+### 6.2 Desikan-Killiany — does the backfill apply, and can we check it against the release?
+
+**No parcellation job is needed for DK.** `recon-all` writes the DK tables
+itself (`stats/{lh,rh}.aparc.stats`), and every one of the 33,825 sessions
+already has them; rr480's `parcellations/T1/<ses>/aparc/` output re-derives
+the same thing and is redundant. What is missing is only the *extraction*
+into release-shaped tables, and that is a parse, not a FreeSurfer run
+(≈10 min, one 16-core job, same pattern as `hcp_extract.sbatch`).
+
+Plan: `src/abcd/dk_stats.py` (+ `tools/dk_extract.sbatch`) parsing
+`aparc.stats` — note the different layout from `mris_anatomical_stats -b`:
+`StructName` is the *first* column, and the header carries
+`# Measure Cortex, MeanThickness` and `NumVert`, which are the values the
+release's `__lh_mean` columns should equal. Output to
+`abcd-data-release-7.0/processed/dsk_local/`:
+
+- `mr_y_smri__{thk,area,vol}__dsk.tsv` with the **exact release column names**
+  (`mr_y_smri__thk__dsk__bstmps__lh_mean`, …) via the inverse of
+  `Release70Adapter.REGION_CODES` and `data/region_labels.csv` (mapping
+  completeness for all 34 regions is asserted, not assumed);
+- a long parquet with every `aparc.stats` measure plus hemisphere `NumVert`,
+  `MeanThickness`, and the `aseg.stats` hole counts.
+
+The release table stays the canonical DK source for the pipeline. The local
+table is (a) the comparison object, and (b) the only DK thickness that exists
+for the ~3,500 six-year sessions newer than the tabulated release.
+
+### 6.3 Validation report
+
+`tools/validate_local_vs_release.py` → `docs/hcp_census/local_vs_release.md`
+(+ TSVs), run once now against the 6.0 tables on rds and again when the 7.0
+tables arrive:
+
+1. **DK local vs release**, joined on participant × session: fraction of
+   values equal at the release's 3-decimal precision, per-region max |Δ|,
+   hemisphere mean vs `__lh_mean`/`__rh_mean`, and the list of sessions
+   present on one side only. Expectation from the one-session check:
+   identical. Disagreement would mean the release reprocessed or replaced
+   sessions after these surfaces were produced, which matters for every DK
+   result in this repo.
+   Two known asymmetries to report rather than hide: 3,524 FreeSurfer sessions
+   are absent from the 6.0 tables (newer scans), and **90 sessions are in the
+   6.0 tables but have no FreeSurfer directory on rds** — worth knowing which.
+2. **HCP backfill vs July run** on sessions with valid output in both trees
+   (some stub sessions have a valid *other* session of the same subject; a
+   direct same-session overlap exists only if we deliberately re-run a sample
+   of 200 already-good sessions — proposed, cheap, and the only way to prove
+   the two runs are interchangeable).
+3. **HCP vs DK** on the same surfaces: area-weighted whole-cortex means
+   close to within the medial-wall difference (the 0.9993 correlation in §3.5 becomes an
+   equality check once DK comes from the same files).
+
+### 6.4 Sequence
+
+| step | what | gate |
+|:--|:--|:--|
+| 1 | one-session test job 35544957 | done: 180 rows per hemisphere, 40 s |
+| 2 | check `hpc-work` quota headroom ≥ 30 GB | done: 214 GB free |
+| 3 | submit the 178-task array (+ a 4-task array re-running 200 good sessions for §6.3.2) | **your go-ahead on this plan** |
+| 4 | DK extraction job (independent of 3) | |
+| 5 | re-run `hcp_extract.sbatch --extra-parc-root …` | array finished; FAILED lines reviewed and resubmitted once |
+| 6 | validation report, README coverage numbers, commit, push `hcp-backfill`, PR | |
+
+### 6.5 Failure modes considered
+
+- `mri_surf2surf` cannot write into a read-only subject: it writes only to
+  `--trgsurfval`, which is our path. `mris_anatomical_stats -b` writes only to
+  stdout. Verified by the test job (nothing appears in `derivatives/`).
+- A task dying mid-session leaves a partial annot → the worker's `-s` test
+  would accept a non-empty partial file. Mitigation: the wrapper's 180-row
+  test governs "done", and the worker regenerates stats every time; a corrupt
+  annot fails the row count and is reported as FAILED for a manual re-run
+  with the annot deleted.
+- Sessions of the same subject in different tasks: independent
+  `SUBJECTS_DIR`s, so no interaction.

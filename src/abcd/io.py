@@ -644,8 +644,9 @@ class Release70Adapter(Release51Adapter):
         sessions newer than the tabulated release; ``hcp_session_qc.tsv``
         beside the table carries FreeSurfer surface-hole counts for those.
 
-        The whole-cortex ``_mean`` is vertex-weighted over the 360 parcels,
-        as the DK ``_mean`` columns are.
+        The whole-cortex ``_mean`` is surface-area-weighted over the 360
+        parcels, which is how the release computes its DK ``__lh_mean``
+        (verified in :mod:`abcd.dk_stats`).
         """
         if metric not in self.HCP_METRICS:
             raise KeyError(

@@ -160,28 +160,48 @@ def region_from_structure(structure: str) -> str | None:
 class Session:
     subject: str   # sub-003RTV85
     session: str   # ses-00A
+    #: which parcellation tree this session is read from (see
+    #: :func:`discover_sessions`); recorded as ``parc_source`` in the QC table
+    source: str = "primary"
 
     @property
     def key(self) -> str:
         return f"{self.subject}/{self.session}"
 
 
-def discover_sessions(parc_root: Path) -> list[Session]:
-    """Every ``<sub>/<ses>`` under the parcellation tree, sorted.
-
-    Uses ``os.scandir`` rather than ``glob`` so a 30k-session tree is two
-    directory listings deep, not a stat per file.
-    """
-    out = []
+def _scan_tree(parc_root: Path) -> set[tuple[str, str]]:
+    out = set()
     with os.scandir(parc_root) as subs:
         for sub in subs:
-            if not (sub.is_dir() and sub.name.startswith("sub-")):
+            if not (sub.is_dir(follow_symlinks=False) and sub.name.startswith("sub-")):
                 continue
             with os.scandir(sub.path) as sess:
                 for s in sess:
-                    if s.is_dir() and s.name.startswith("ses-"):
-                        out.append(Session(sub.name, s.name))
-    return sorted(out, key=lambda s: s.key)
+                    if s.is_dir(follow_symlinks=False) and s.name.startswith("ses-"):
+                        out.add((sub.name, s.name))
+    return out
+
+
+def discover_sessions(parc_root: Path, extra_roots: dict[str, Path] | None = None
+                      ) -> list[Session]:
+    """Every ``<sub>/<ses>`` under the parcellation tree(s), sorted.
+
+    Uses ``os.scandir`` rather than ``glob`` so a 30k-session tree is two
+    directory listings deep, not a stat per file.
+
+    ``extra_roots`` maps a source name to another tree in the same layout
+    (the backfill of sessions rr480's run left broken or absent -- see
+    ``hpc/hcp_backfill.sbatch``).  A session present in an extra tree is read
+    from there **in preference to** the primary tree: the extra trees are only
+    ever populated for sessions whose primary output was unusable, so
+    preferring them is what repairs the table.  Later roots win over earlier.
+    """
+    chosen: dict[tuple[str, str], str] = {k: "primary" for k in _scan_tree(parc_root)}
+    for name, root in (extra_roots or {}).items():
+        for k in _scan_tree(root):
+            chosen[k] = name
+    return sorted((Session(sub, ses, src) for (sub, ses), src in chosen.items()),
+                  key=lambda s: s.key)
 
 
 def extract_session(sess: Session, parc_root: Path, fs_root: Path
@@ -194,7 +214,8 @@ def extract_session(sess: Session, parc_root: Path, fs_root: Path
     """
     qc: dict = {
         "participant_id": sess.subject, "session_id": sess.session,
-        "status": "ok", "n_parcels_lh": 0, "n_parcels_rh": 0,
+        "status": "ok", "parc_source": sess.source,
+        "n_parcels_lh": 0, "n_parcels_rh": 0,
         "nverts_lh": 0, "nverts_rh": 0, "medial_wall_verts": 0,
     }
     qc.update(parse_aseg_holes(fs_root / sess.subject / sess.session / "stats" / "aseg.stats"))
@@ -237,8 +258,8 @@ def extract_session(sess: Session, parc_root: Path, fs_root: Path
 
 
 def _worker(args):
-    sess, parc_root, fs_root = args
-    return extract_session(sess, Path(parc_root), Path(fs_root))
+    sess, roots, fs_root = args
+    return extract_session(sess, Path(roots[sess.source]), Path(fs_root))
 
 
 # --------------------------------------------------------------------------
@@ -248,11 +269,11 @@ def _worker(args):
 def wide_table(long: pd.DataFrame, measure: str) -> pd.DataFrame:
     """Pivot one measure to ``participant_id, session_id, mr_y_smri__<infix>__hcp__<region>__<hemi>_<agg>``.
 
-    Whole-cortex and per-hemisphere summaries follow the DK tables:
-    ``..._mean`` columns are **vertex-weighted** means over the 360 (or 180)
-    parcels, ``..._sum`` columns are totals.  The DK release tables are
-    computed the same way (a mean over all cortical vertices), which is why the
-    weighted rather than the parcel-average form is used here.
+    Whole-cortex and per-hemisphere summaries follow the release DK tables:
+    ``..._mean`` columns are **surface-area-weighted** means over the 360 (or
+    180) parcels, ``..._sum`` columns are totals.  The release's ``__lh_mean``
+    was shown (see :mod:`abcd.dk_stats`) to be the area-weighted mean over
+    regions, so the same definition is used here for comparability.
     """
     infix, agg = WIDE_METRICS[measure]
     prefix = f"mr_y_smri__{infix}__hcp"
@@ -262,12 +283,12 @@ def wide_table(long: pd.DataFrame, measure: str) -> pd.DataFrame:
                            aggfunc="first")
     piv.columns = [f"{prefix}__{r}__{h}_{agg}" for r, h in piv.columns]
 
-    g = long.assign(w=long.nverts * long[measure] if agg == "mean" else long[measure])
+    g = long.assign(w=long.area_mm2 * long[measure] if agg == "mean" else long[measure])
     grp = g.groupby(["participant_id", "session_id"], sort=False)
     per_hemi = g.groupby(["participant_id", "session_id", "hemi"], sort=False)
     if agg == "mean":
-        tot = grp.w.sum() / grp.nverts.sum()
-        hemi = per_hemi.w.sum() / per_hemi.nverts.sum()
+        tot = grp.w.sum() / grp.area_mm2.sum()
+        hemi = per_hemi.w.sum() / per_hemi.area_mm2.sum()
     else:
         tot = grp.w.sum()
         hemi = per_hemi.w.sum()
@@ -283,16 +304,24 @@ def wide_table(long: pd.DataFrame, measure: str) -> pd.DataFrame:
 # --------------------------------------------------------------------------
 
 def run(parc_root: Path, fs_root: Path, out_dir: Path, workers: int = 8,
-        limit: int | None = None, log=print) -> dict:
+        limit: int | None = None, extra_roots: list[Path] | None = None,
+        log=print) -> dict:
     t0 = time.time()
-    sessions = discover_sessions(parc_root)
-    log(f"{len(sessions)} sessions under {parc_root}")
+    extras = {f"extra{i}" if len(extra_roots or []) > 1 else "backfill": Path(r)
+              for i, r in enumerate(extra_roots or [])}
+    sessions = discover_sessions(parc_root, extras)
+    roots = {"primary": str(parc_root), **{k: str(v) for k, v in extras.items()}}
+    log(f"{len(sessions)} sessions under {parc_root}"
+        + (f" + {list(extras.values())}" if extras else ""))
+    if extras:
+        from collections import Counter
+        log(f"  by source: {dict(Counter(s.source for s in sessions))}")
     if limit:
         sessions = sessions[:limit]
         log(f"limiting to first {limit}")
 
     longs, qcs = [], []
-    tasks = [(s, str(parc_root), str(fs_root)) for s in sessions]
+    tasks = [(s, roots, str(fs_root)) for s in sessions]
     with ProcessPoolExecutor(max_workers=workers) as ex:
         for i, (long, qc) in enumerate(ex.map(_worker, tasks, chunksize=64), 1):
             qcs.append(qc)
@@ -323,11 +352,12 @@ def run(parc_root: Path, fs_root: Path, out_dir: Path, workers: int = 8,
         "HCP-MMP1.0 cortical statistics parsed from mris_anatomical_stats tables\n"
         f"generated {time.strftime('%Y-%m-%d %H:%M')} by abcd.hcp_stats\n"
         f"parcellation tree : {parc_root}\n"
+        f"extra trees       : {[str(v) for v in extras.values()] or 'none'} (win over primary)\n"
         f"freesurfer tree   : {fs_root}\n"
         f"sessions found    : {len(qc)}\n"
         f"sessions parsed   : {ok}\n"
         "column convention : mr_y_smri__{thk,area,vol}__hcp__<region>__<hemi>_{mean,sum};"
-        " whole-cortex/hemisphere means are vertex-weighted\n"
+        " whole-cortex/hemisphere means are surface-area-weighted over parcels (release convention)\n"
         "medial wall (???) excluded; its vertex count is in hcp_session_qc.tsv\n"
     )
     log(f"done in {time.time() - t0:.0f}s -> {out_dir}")
@@ -343,6 +373,9 @@ def main(argv=None) -> int:
     ap.add_argument("--workers", type=int, default=8)
     ap.add_argument("--limit", type=int, default=None,
                     help="parse only the first N sessions (testing)")
+    ap.add_argument("--extra-parc-root", type=Path, action="append", default=None,
+                    help="additional parcellation tree(s) in the same layout, e.g. the "
+                         "hcp_backfill output; sessions found there take precedence")
     a = ap.parse_args(argv)
 
     out_dir = a.out_dir
@@ -353,7 +386,8 @@ def main(argv=None) -> int:
     def log(msg):
         print(msg, flush=True)
 
-    run(a.parc_root, a.fs_root, out_dir, workers=a.workers, limit=a.limit, log=log)
+    run(a.parc_root, a.fs_root, out_dir, workers=a.workers, limit=a.limit,
+        extra_roots=a.extra_parc_root, log=log)
     return 0
 
 
