@@ -518,3 +518,17 @@ tables arrive:
   with the annot deleted.
 - Sessions of the same subject in different tasks: independent
   `SUBJECTS_DIR`s, so no interaction.
+
+## 7. Results of the backfill run — 2026-09-14
+
+| step | outcome |
+|:--|:--|
+| HCP backfill array (8,874 sessions) | **8,874 OK, 0 failed**, ~40 s/session. Two false starts: the first array lost 756 sessions and the second all 8,874 with `rc=127`, because the repo's `hpc/` directory was renamed to `legacy/hpc/` by a concurrent session while the wrapper referenced the worker by relative path. Fixed with an absolute path; resubmission skipped the 8,118 already complete. |
+| 200-session overlap re-run | **bit-identical** to rr480's July output for `nverts`, thickness, area and volume in all 200 sessions. |
+| HCP re-extraction with `--extra-parc-root` | **33,795 / 33,795 sessions parsed** (24,921 primary + 8,874 backfill); 30 FreeSurfer sessions have no surfaces and no parcellation. |
+| DK from `aparc.stats` | 33,794 / 33,825 sessions (31 lack a stats file). |
+| DK local vs release **7.0** | 33,792 shared sessions; identical at 3 dp in 33,791. The exception `sub-9RRGXBK5/ses-06A` differs in 67/68 regions (max 0.49 mm): its 6.0 value equals the local surface, so 7.0 re-tabulated that session and the rds derivatives hold the older reconstruction. 2 sessions local-only, 2 release-only (all six-year). |
+| DK local vs release **6.0** | 30,260 shared; 3,534 local-only (3,520 six-year — the sessions newer than 6.0), 16 release-only. |
+| Hemisphere means | release `__lh_mean` = **surface-area-weighted mean over regions** (max deviation 0.014 mm, mean 0.00000); FreeSurfer's vertex-weighted `Cortex MeanThickness` and the unweighted region mean do not match. Both derived tables now use area weighting. |
+
+Conclusion for the DK question: the published DK tables are these surfaces, value for value, bar one re-tabulated session. The HCP table is therefore on exactly the same footing as the DK phenotype.

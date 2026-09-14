@@ -40,6 +40,19 @@ from abcd import hcp_stats  # noqa: E402
 KEY = ["participant_id", "session_id"]
 
 
+def _md(df: pd.DataFrame, floatfmt: str = ".5f", index: bool = False) -> str:
+    """Minimal Markdown table (avoids the optional ``tabulate`` dependency)."""
+    if index:
+        df = df.reset_index()
+    def fmt(v):
+        if isinstance(v, float):
+            return format(v, floatfmt)
+        return str(v)
+    head = "| " + " | ".join(map(str, df.columns)) + " |"
+    sep = "|" + "|".join("---" for _ in df.columns) + "|"
+    rows = ["| " + " | ".join(fmt(v) for v in r) + " |" for r in df.itertuples(index=False)]
+    return "\n".join([head, sep, *rows])
+
 def _read(p: Path) -> pd.DataFrame:
     return pd.read_csv(p, sep="\t", low_memory=False)
 
@@ -85,11 +98,11 @@ def compare_dk(local: pd.DataFrame, release: pd.DataFrame, out: Path, label: str
         "",
         "Hemisphere / whole-cortex means (local FreeSurfer `Cortex MeanThickness` vs release):",
         "",
-        glob.to_markdown(index=False, floatfmt=".5f"),
+        _md(glob),
         "",
     ]
     if len(bad):
-        txt += ["Columns with any unequal cell:", "", bad.to_markdown(index=False, floatfmt=".4f"), ""]
+        txt += ["Columns with any unequal cell:", "", _md(bad, ".4f"), ""]
     return "\n".join(txt)
 
 
@@ -113,9 +126,9 @@ def compare_hcp_overlap(primary_root: Path, overlap_root: Path, fs_root: Path, o
     if len(ok):
         summ = ok.groupby("measure").max_abs_diff.agg(["max", lambda x: (x == 0).mean()])
         summ.columns = ["max_abs_diff", "frac_sessions_identical"]
-        txt += ["", summ.to_markdown(floatfmt=".4f"), ""]
+        txt += ["", _md(summ, ".4f", index=True), ""]
     if "status" in df and df.status.notna().any():
-        txt += ["Sessions not comparable:", df[df.status.notna()].to_markdown(index=False), ""]
+        txt += ["Sessions not comparable:", _md(df[df.status.notna()]), ""]
     return "\n".join(txt)
 
 
