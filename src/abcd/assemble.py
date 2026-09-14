@@ -125,6 +125,16 @@ def assemble(cfg: RunConfig, adapter=None, verbose: bool = True
         "release": cfg.release,
         "stages": [],
     }
+    # Which tables this run actually saw.  The 6.0 and 7.0 tabulations are
+    # column-identical; only the six-year row count distinguishes them, and it
+    # was not recorded anywhere for two months.  ``assert_vintage`` refuses to
+    # assemble a 7.0 run from 6.0-sized tables.
+    if hasattr(adapter, "assert_vintage"):
+        base_metric = cfg.metric if cfg.metric in getattr(adapter, "METRIC_TABLES", {}) else "thickness"
+        manifest["data_vintage"] = adapter.assert_vintage(base_metric)
+        if verbose:
+            six = manifest["data_vintage"]["imaging_rows_by_session"]
+            print(f"  data vintage: {manifest['data_vintage']['release_dir']}  rows/session={six}")
 
     def stage(name, df, **extra):
         rec = {"stage": name, "n_rows": len(df),

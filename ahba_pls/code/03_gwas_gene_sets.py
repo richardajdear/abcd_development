@@ -1,11 +1,11 @@
 """03_gwas_gene_sets.py — SCZ / MDD GWAS gene sets, MAGMA gene-level Z, and brain-expressed background universes.
 
 Sources
-  hpc/work/genesets/scz2022_ExtendedDataTable1.xlsx   Trubetskoy 2022 ED Table 1 (120 prioritised) + ST12 (685 locus pool)
-  hpc/work/genesets/mdd2024_TableS21.xlsx             Adams 2025 Cell (doi 10.1016/j.cell.2024.12.002) Table S21: 308 high-confidence + 4,600 pool
-  hpc/work/genesets/{scz_prioritised,mdd_highconf}.txt  the Entrez-keyed MAGMA set-annot files actually used in the hpc MAGMA run
+  legacy/hpc/work/genesets/scz2022_ExtendedDataTable1.xlsx   Trubetskoy 2022 ED Table 1 (120 prioritised) + ST12 (685 locus pool)
+  legacy/hpc/work/genesets/mdd2024_TableS21.xlsx             Adams 2025 Cell (doi 10.1016/j.cell.2024.12.002) Table S21: 308 high-confidence + 4,600 pool
+  legacy/hpc/work/genesets/{scz_prioritised,mdd_highconf}.txt  the Entrez-keyed MAGMA set-annot files actually used in the hpc MAGMA run
   AHBA/data/gwas/hammerschlag2020_howard2019_trubetskoy2022.csv, howard2019_tableS9.csv   Howard 2019 MDD lists
-  hpc/work/results/magma/{SCZ,MDD}.genes.out           MAGMA gene-level results (GENE = Entrez)
+  genetic_analysis/inputs/magma/{SCZ,MDD}.genes.out           MAGMA gene-level results (GENE = Entrez)
   data/symbol2entrez.csv                               symbol <-> Entrez map
 Set definitions replicate hpc/work/make_prioritised_genesets.py and make_mdd_genesets.py exactly, but in SYMBOL space
 (the hpc files are Entrez-keyed and restricted to genes in NCBI37.3 gene.loc). Symbols absent from the AHBA ds0 universe are
@@ -15,7 +15,7 @@ import json, time
 from pathlib import Path
 import pandas as pd, requests
 
-HPC = Path('/Users/richard/Git/abcd_development/hpc/work')
+HPC = Path('/Users/richard/Git/abcd_development/legacy/hpc/work')
 D = Path('/Users/richard/Git/abcd_development/data')
 GW = Path('/Users/richard/Git/AHBA/data/gwas')
 AHBA_UPD = Path('/Users/richard/Git/AHBA_updated/outputs/expression_levels')

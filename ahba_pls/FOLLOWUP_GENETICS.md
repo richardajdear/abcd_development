@@ -4,7 +4,7 @@ Specification for the agent running on CSD3. Nothing here has been run. Phases 1
 (the PLS derivation and the SCZ/MDD enrichment) are complete and local — see
 `README.md`. This document defines the two arms that need ABCD genetics.
 
-Read `../hpc_v2/README_HPC.md` §4 (setup), §7 (gotchas) and `../hpc_v3/README_HPC.md`
+Read `../legacy/hpc_v2/README_HPC.md` §4 (setup), §7 (gotchas) and `../legacy/hpc_v3/README_HPC.md`
 §1 (the export and its three silent mismatches) before submitting anything. The
 conventions below are theirs, not new ones.
 
@@ -13,7 +13,7 @@ conventions below are theirs, not new ones.
 | file | what |
 |:--|:--|
 | `hpc/lead_pls2_dk_scores_68.csv` | the lead component's regional scores (gene-side, thinning-oriented), 68 DK labels; `lh_frontalpole`/`rh_frontalpole` are **NA** (no AHBA coverage) |
-| `hpc/lead_pls2_gene_covar_entrez.txt` | MAGMA `--gene-covar` file, GENE = Entrez (NCBI37.3, same ids as `hpc/work/results/magma/*.genes.raw`): `thinning_Z_ds0/ds25/ds50` + `AHBA_C3` |
+| `hpc/lead_pls2_gene_covar_entrez.txt` | MAGMA `--gene-covar` file, GENE = Entrez (NCBI37.3, same ids as `legacy/hpc/work/results/magma/*.genes.raw`): `thinning_Z_ds0/ds25/ds50` + `AHBA_C3` |
 | `hpc/lead_pls2_gene_weights_symbol.tsv` | the same weights keyed by gene symbol, with rank and decile |
 | `results/lead_signature_scores.csv` | 33-region scores with the reference maps alongside |
 
@@ -23,10 +23,10 @@ expression where adolescent thinning is faster.** Do not re-sign anything.
 ## H3 — are the signature genes the genes driving global thinning?
 
 **Test.** MAGMA gene-property regression in the *reverse* direction used by
-`hpc_v3/README_HPC.md` §10: the ABCD phenotype's own gene-level Z regressed on the
+`legacy/hpc_v3/README_HPC.md` §10: the ABCD phenotype's own gene-level Z regressed on the
 signature weights.
 
-1. Take the phenotype `.genes.raw` from the EUR arm (`hpc_v2/work/results_v2/magma_eur_v3/`,
+1. Take the phenotype `.genes.raw` from the EUR arm (`legacy/hpc_v2/work/results_v2/magma_eur_v3/`,
    or regenerate for a phenotype that has no gene analysis yet — the gene analysis is the
    expensive step, so reuse where possible).
 2. `magma --gene-results <pheno>.genes.raw --gene-covar ahba_pls/hpc/lead_pls2_gene_covar_entrez.txt --out <...>`
@@ -45,7 +45,7 @@ Report it as null if it is null — do not hunt for the one cell below 0.05 amon
 
 ## H4 — a PLS-derived phenotype for GWAS
 
-**Construction** (follow `hpc_v3/make_phenotypes_v3.py`, which already implements the
+**Construction** (follow `legacy/hpc_v3/make_phenotypes_v3.py`, which already implements the
 projection idiom and its characterisation):
 
 ```
@@ -66,7 +66,7 @@ consistency; and the phenotype's distribution. Add to `gcta_inputs_v*/phenotypes
 plus `phenotype_manifest.tsv`.
 
 **Then**, in the pipeline's own order: GCTA REML (Zaitlen two-GRM, PC-Relate second
-component — §11.9 of `hpc_v2/README_HPC.md`), GENESIS association scan, LDSC, and MAGMA
+component — §11.9 of `legacy/hpc_v2/README_HPC.md`), GENESIS association scan, LDSC, and MAGMA
 in both directions.
 
 **Benchmarks to beat.** `global_slope` h² = 0.115 ± 0.056; `slope_projC3` h² = 0.121 ± 0.057

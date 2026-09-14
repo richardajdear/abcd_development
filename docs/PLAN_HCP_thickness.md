@@ -223,7 +223,7 @@ cross-check on overlapping sessions (§4.3).
 
 ### 3.1 Census (one sbatch job, ~10 min on 16 cores)
 
-Script: `hpc/hcp/00_census.sbatch` → `docs/hcp_census/session_status.csv`,
+Script: `legacy/hpc/hcp/00_census.sbatch` → `docs/hcp_census/session_status.csv`,
 one row per FreeSurfer session:
 
 - `recon_done` (`scripts/recon-all.done` present), `recon_ok` (`finished
@@ -275,7 +275,7 @@ scratch route is the fallback if that is slow to arrange.
 
 ### 3.3 Extraction to a tidy table (Python, minutes)
 
-`src/abcd/hcp_extract.py` (or `hpc/hcp/01_extract.py`): parse every
+`src/abcd/hcp_extract.py` (or `legacy/hpc/hcp/01_extract.py`): parse every
 `{lh,rh}.HCP.fsaverage.aparc.log`, drop the `???` row, emit
 
 ```

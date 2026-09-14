@@ -30,7 +30,7 @@ a second, divergent read of the raw data.
 **Left out of scope on purpose**: the CBCL behavioural-association panel (it
 would need a fresh loader for raw behavioural data not otherwise touched by
 this pipeline) and the GPS genetic-similarity panel (it needs bivariate GCTA
-GREML output; `hpc/` has the pipeline written but, per `REPORT.md`, not yet
+GREML output; `legacy/hpc/` has the pipeline written but, per `REPORT.md`, not yet
 run). Nothing below should be read as a discovery result -- see the
 reliability caveat right after the data is loaded.
 

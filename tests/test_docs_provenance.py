@@ -70,7 +70,7 @@ def test_no_serial_level_scanner_claims_outside_the_withdrawal():
     assert not offending, f"serial-level claim stated as fact: {offending}"
 
 
-HPC_README = ROOT / "hpc" / "README_HPC.md"
+HPC_README = ROOT / "legacy" / "hpc" / "README_HPC.md"
 
 
 @pytest.mark.skipif(not HPC_README.exists(), reason="hpc/README_HPC.md not present")

@@ -1,9 +1,9 @@
 dz_class,comparison,delta,sd,t,p,n_splits
-pooled,top-10 h2 regions (mean) - global mean slope,0.00229069,0.113098,0.128097,0.89873,40
-pooled,slope PC1 - global mean slope,-0.0821,0.151075,-3.437,0.00141167,40
-pooled,slope PC3 - global mean slope,-0.155586,0.178697,-5.50661,2.50686e-06,40
-pooled,slope PC2 - global mean slope,-0.263029,0.138439,-12.0164,1.1027e-14,40
-twins_only,slope PC1 - global mean slope,-0.00178574,0.177999,-0.06345,0.949732,40
-twins_only,slope PC3 - global mean slope,-0.0583114,0.184179,-2.00236,0.0522336,40
-twins_only,top-10 h2 regions (mean) - global mean slope,-0.060837,0.118675,-3.2422,0.00243181,40
-twins_only,slope PC2 - global mean slope,-0.200935,0.192833,-6.59026,7.86395e-08,40
+pooled,top-10 h2 regions (mean) - global mean slope,-0.0207998,0.103671,-1.26891,0.211994,40
+pooled,slope PC1 - global mean slope,-0.0300195,0.141678,-1.34008,0.187976,40
+pooled,slope PC3 - global mean slope,-0.232705,0.163549,-8.99884,4.64749e-11,40
+pooled,slope PC2 - global mean slope,-0.245091,0.157996,-9.81099,4.38059e-12,40
+twins_only,slope PC1 - global mean slope,-0.00270397,0.160598,-0.106486,0.915743,40
+twins_only,top-10 h2 regions (mean) - global mean slope,-0.0506919,0.138431,-2.31598,0.0259059,40
+twins_only,slope PC3 - global mean slope,-0.153651,0.178799,-5.43501,3.14975e-06,40
+twins_only,slope PC2 - global mean slope,-0.254977,0.181771,-8.87168,6.77713e-11,40

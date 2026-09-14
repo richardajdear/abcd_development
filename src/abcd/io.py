@@ -408,8 +408,12 @@ class Release70Adapter(Release51Adapter):
     of the same study, and every one of the stub's original guesses was wrong.
     The differences that matter, each verified against the release:
 
-    1. **Directory name.** ``abcd-7.0/``, not ``abcd-data-release-7.0/``
-       (handled in :func:`paths.release_dir`).
+    1. **Directory name.** Vendored as ``abcd-data-release-7.0/`` (the
+       tabulated tables downloaded from the NBDC Data Hub, 2026-09-14, plus the
+       derived ``processed/hcp/``); :func:`paths.release_dir` also accepts
+       ``abcd-7.0/``.  **Vintage matters more than the name**: the 6.0 tables
+       are column-identical and sat under this label for two months.  Every
+       run manifest now records :meth:`vintage` and assembly asserts it.
     2. **Session codes.** ``ses-00A``/``ses-02A``/``ses-04A``/``ses-06A``, not
        ``*_year_follow_up_y_arm_1``.  The release also contains odd-year
        sessions (``ses-01A``, ``ses-03A``, ``ses-05A``) which carry no imaging;
@@ -740,17 +744,85 @@ class Release70Adapter(Release51Adapter):
         out = out.merge(fam, on="subject", how="left")
         return out[["subject", "visit", "age", "site", "family_id"]].reset_index(drop=True)
 
+    #: ``ab_g_dyn__design_mr__manufact`` is a *coded* integer in the 7.0
+    #: tabulation (1/2/3) where the 6.0 tabulation carried vendor strings.  The
+    #: map was established empirically on the 30,367 imaging visits present in
+    #: both tabulations (a perfect block-diagonal cross-tab; 2026-09-14):
+    #: 1 = "GE MEDICAL SYSTEMS" (7,923), 2 = "Philips Medical Systems" (3,615),
+    #: 3 = "SIEMENS" / "Siemens Healthineers" (18,829).  Strings pass through
+    #: unchanged, so the 6.0 tables read through the same code path.
+    MANUFACTURER_CODES = {1: "GE", 2: "Philips", 3: "Siemens"}
+
     def scanner(self) -> pd.DataFrame:
-        """Per-visit scanner manufacturer, for the Philips exclusion."""
+        """Per-visit scanner manufacturer, for the Philips exclusion.
+
+        Returns vendor *labels*.  Without the decoding step the Philips
+        exclusion in :func:`qc.scanner_predicate` -- a case-insensitive
+        substring match -- would silently match nothing on the 7.0 tables and
+        keep every Philips scan.
+        """
         dy = self._table("ab_g_dyn")
         col = "ab_g_dyn__design_mr__manufact"
         if col not in dy.columns:
             raise SourceUnavailable(f"ab_g_dyn has no column {col}")
+        raw = dy[col]
+        if pd.api.types.is_numeric_dtype(raw):
+            codes = raw.dropna().astype(int).unique()
+            unknown = sorted(set(codes) - set(self.MANUFACTURER_CODES))
+            if unknown:
+                raise SourceUnavailable(
+                    f"{col} has manufacturer codes {unknown} not in "
+                    f"MANUFACTURER_CODES; the data dictionary must be checked"
+                )
+            label = raw.map(lambda v: self.MANUFACTURER_CODES.get(int(v)) if pd.notna(v) else None)
+        else:
+            label = raw
         return pd.DataFrame({
             "subject": self._to_bids(dy.participant_id),
             "visit": self._map_visits(dy.session_id),
-            "manufacturer": dy[col],
+            "manufacturer": label,
         }).dropna(subset=["visit"]).reset_index(drop=True)
+
+    # ------------------------------------------------------------------
+    #: Six-year imaging rows expected of a genuine 7.0 tabulation.  The 6.0
+    #: tabulation (data freeze February 2024) has 4,086; 7.0 (freeze 1 August
+    #: 2025) has 7,607.  Anything below this is not the release it claims to be.
+    MIN_SIX_YEAR_ROWS = 7000
+
+    def vintage(self, metric: str = "thickness") -> dict:
+        """Row counts per session of the imaging and covariate tables.
+
+        Exists because this repo spent July-September 2026 analysing the 6.0
+        tabulation under a directory labelled 7.0 -- every check passed, since
+        the two tabulations share every column name.  Only the six-year row
+        count tells them apart, so it is recorded in each run manifest and
+        asserted by :meth:`assert_vintage`.
+        """
+        stem = self.METRIC_TABLES[metric][0]
+        img = self._table(stem)
+        dyn = self._table("ab_g_dyn")
+        out = {
+            "release_dir": str(self.root),
+            "imaging_table": stem,
+            "imaging_rows_by_session": img.session_id.value_counts().sort_index().to_dict(),
+            "covariate_rows_by_session": dyn.session_id.value_counts().sort_index().to_dict(),
+        }
+        for k in ("imaging_rows_by_session", "covariate_rows_by_session"):
+            out[k] = {str(a): int(b) for a, b in out[k].items()}
+        return out
+
+    def assert_vintage(self, metric: str = "thickness") -> dict:
+        """Raise unless the tables have the six-year coverage of this release."""
+        v = self.vintage(metric)
+        six = v["imaging_rows_by_session"].get(self.VISITS["v6"], 0)
+        if self.release == "7.0" and six < self.MIN_SIX_YEAR_ROWS:
+            raise SourceUnavailable(
+                f"{v['release_dir']} has {six} six-year rows in {v['imaging_table']}; "
+                f"a 7.0 tabulation has >= {self.MIN_SIX_YEAR_ROWS}. These are the 6.0 "
+                "tables (or an older partial download). Place them as "
+                "abcd-data-release-6.0/ and download the 7.0 tabulated release."
+            )
+        return v
 
     def qc_include(self) -> pd.DataFrame:
         """The release's own recommended-inclusion flag for T1w."""
@@ -957,8 +1029,25 @@ class Release70Adapter(Release51Adapter):
         }).sort_values("r").reset_index(drop=True)
 
 
+class Release60Adapter(Release70Adapter):
+    """ABCD data release 6.0 -- the same tabulation format as 7.0.
+
+    Exists for one reason: this repo's July-September 2026 results were
+    computed on 6.0 tables that sat in a directory labelled 7.0.  Those tables
+    now live at ``abcd-data-release-6.0/`` and a config with ``release: "6.0"``
+    reproduces the earlier sample exactly, so that the effect of the added
+    six-year sessions can be isolated from any code change.  Column names,
+    session codes and id forms are identical to 7.0; the one difference that
+    touches this adapter (vendor strings rather than codes in
+    ``ab_g_dyn__design_mr__manufact``) is handled by :meth:`scanner`.
+    """
+
+    release = "6.0"
+
+
 ADAPTERS: dict[str, type[ReleaseAdapter]] = {
     "5.1": Release51Adapter,
+    "6.0": Release60Adapter,
     "7.0": Release70Adapter,
 }
 

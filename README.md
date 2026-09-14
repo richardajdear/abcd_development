@@ -16,196 +16,139 @@ not resemble that of a static measure. Almost all published brain-imaging GWAS
 use cross-sectional phenotypes, which average over exactly the variation of
 interest.
 
-## Status — 2026-09-12
+## Status — 2026-09-14: re-run on the true 7.0 tabulation
 
-Genetics now runs on the **full 7.0 sample** (11,670 genotyped, all ancestries;
-cross-ancestry GRM built), and the PRS work has settled into a **four-method
-grid** — C+T, PRS-CS, SBayesR, SBayesRC — with the discovery GWAS matched to
-the target arm and a control battery (ASD, two ALZ releases ± APOE, polygenic
-education). Canonical results: `hpc_v2/work/results_v2/prs_final/table_main.tsv`
-(documented in [`hpc_v2/README_HPC.md`](hpc_v2/README_HPC.md) §14; one-slide
-summary [`hpc_v3/slide_prs_methods.png`](hpc_v3/slide_prs_methods.png)).
+**What happened.** Every result in this repo dated before 2026-09-14 was
+computed from the ABCD **6.0** tabulated tables, which sat in a directory
+labelled 7.0. The two tabulations are column-identical; only the six-year row
+count tells them apart (4,086 vs 7,607 thickness rows). The FreeSurfer
+surfaces and the genotypes on the cluster were 7.0 throughout. The 7.0
+tabulated tables were downloaded on 2026-09-14 and every **local** analysis
+was re-run on them; the **cluster genetics has not yet been re-run** and is
+specified, step by step, in
+[`genetic_analysis/README_HPC.md`](genetic_analysis/README_HPC.md).
 
-Alongside it, `ahba_pls/` adds the **imaging-transcriptomics arm**: the
-NSPN-PLS2 / AHBA-C3 transcriptomic signature of adolescent thinning, re-derived
-from the ABCD maps and tested against SCZ and MDD genetics
-([`ahba_pls/README.md`](ahba_pls/README.md)). It replicates, but it does not
-improve on C3 as a gene ranking — see *Imaging transcriptomics* below.
+**What the 7.0 tables buy** (settled specification, `ct_70_noglobal_mv2_genetic`;
+full table in [`docs/RERUN_7.0_TABULATED.md`](docs/RERUN_7.0_TABULATED.md)):
 
-- **SCZ PRS → faster thinning is the robust result**: significant in 3 of 4
-  methods in *both* the EUR arm (n = 4,116; β −0.035 to −0.047 SD/SD) and the
-  within-ancestry-standardised pooled arm (n = 8,082), and it survives
-  family-level FDR under 3 of 4 method choices
-  (`hpc_v3/prs_tables/prs_fdr_sensitivity.tsv`).
-- **MDD is suggestive, not established**: same (negative) direction under every
-  method, arm and design, but significant only in the pooled arm (2/4 methods
-  after within-ancestry standardisation); the EUR arm has ~46 % power for the
-  observed effect size, so its null is uninformative.
-- **The controls behave**: ASD null in all four methods (its one earlier hit
-  was a mismatched-stratum artifact); AD-without-APOE is a C+T-only signal that
-  vanishes under joint SNP modelling and in the proxy-free Kunkle release;
-  polygenic education runs the *opposite* direction to the disorders.
-- **Do not quote pre-grid PRS numbers** — everything before
-  `prs_final/` predates the age-covariate fix, the allele-frequency fix and
-  the discovery-to-arm matching (`hpc_v2/README_HPC.md` §14.5–14.8).
+| | 6.0 tables | 7.0 tables |
+|:--|--:|--:|
+| six-year scans in the model | 3,539 | 6,510 |
+| children with ≥2 QC-passing scans | 8,192 | **8,716** |
+| … with all four scans | 1,830 | **3,005** |
+| … phenotyped and genotyped | 8,082 | **8,596** |
+| median slope reliability | 0.157 | **0.211** |
+| effective N for the slope | 1,361 | **1,752** |
+| group thinning map, old vs new (Spearman) | | 0.996 |
 
-## HCP-MMP (Glasser) thickness — added 2026-09-12
+The map did not change; the per-child slopes did (r = 0.92 on shared children),
+which is where heritability and polygenic-score analyses spend their power.
 
-ABCD tabulates only Desikan (`dsk`). The HCP-MMP1.0 parcellation now exists for
-7.0 as a **derived** table, so `parcellation: hcp` works on release 7.0
-(`configs/ct_70_hcp_noglobal_mv2.yaml`). What an agent needs to know:
+**What stands from the earlier work**, re-checked on the new tables:
 
-- **Source.** The release FreeSurfer 7.1.1 reconstructions (run by the ABCD
-  DAIRC, distributed as per-session zips) are unpacked on CSD3 at
-  `/rds/project/rds-CeXlNYOYMxw/derivatives/freesurfer/` — 33,825 sessions,
-  11,823 subjects. Their DK `aparc.stats` values are identical to the release
-  tables, so these are the surfaces the DK phenotype came from. R. Romero-Garcia
-  (`rr480`) projected the fsaverage HCP-MMP1.0 annotation onto them and ran
-  `mris_anatomical_stats`, writing per-session tables under
-  `derivatives/parcellations/T1/<sub>/<ses>/HCP.fsaverage.aparc/`.
-- **What this repo adds.** `src/abcd/hcp_stats.py` parses those tables into
-  `abcd-7.0/processed/hcp/` (gitignored with the rest of the release data):
-  `mr_y_smri__{thk,area,vol}__hcp.tsv` in the DK column convention
-  (`mr_y_smri__thk__hcp__V1__lh_mean`, whole-cortex `_mean` vertex-weighted),
-  a long parquet with every `mris_anatomical_stats` measure, and
-  `hcp_session_qc.tsv` with parcel/vertex counts and FreeSurfer surface-hole
-  counts (Euler proxy) per session. `Release70Adapter.imaging(metric, "hcp")`
-  reads them; labels (`lh_V1`) match `data/hcp_centroids.csv`. Regenerate with
-  `sbatch hpc/hcp_extract.sbatch` from the repo root (about 10 min).
-- **Coverage is incomplete, deliberately flagged, not hidden.** The table
-  holds **24,921 sessions / 10,248 subjects** (7,849 with ≥2 sessions), against
-  33,825 FreeSurfer sessions. The shortfall has two causes, both on the
-  parcellation side, not ours: 3,435 sessions were never reached by the
-  28–31 July 2026 array job (last batch hit its time limit), and 5,439 have
-  only empty stub stats because `mri_surf2surf` failed — the failure rate rises
-  from 6 % in single-session subjects to 22 % in four-session subjects, which
-  points at the script's per-subject `fsaverageSubP` symlink being removed and
-  recreated by concurrent array tasks. Every rejected session is listed with its
-  reason in `hcp_session_qc.tsv`, and the re-run list for rr480 (8,874 sessions)
-  is `abcd-7.0/processed/hcp/sessions_to_reparcellate.txt`. His script skips
-  sessions that already have non-empty output, so the 5,439 stubs must be
-  deleted (or the script's `-s` test replaced) before re-running. Missing
-  sessions simply have no row, so `assemble` reports fewer scans than DK.
-- **Known parcel artefact.** HCP-MMP region `H` (hippocampus) lies on the
-  FreeSurfer medial wall and has thickness 0 in ~6,350 sessions (lh far more than
-  rh). Values are left as written; exclude `H` from thickness analyses or treat
-  0 as missing. No parcel has fewer than 30 vertices.
-- **Smoke-tested end to end (2026-09-12)** in an isolated tree using the 6.0
-  tables for age/site/QC: the adapter returns 360 labels matching
-  `hcp_centroids.csv`; the vertex-weighted HCP whole-cortex mean correlates
-  0.9993 with the DK release mean over 22,275 shared sessions; `assemble` with
-  `ct_70_hcp_noglobal_mv2` reaches 5,947 subjects with ≥2 QC-passing visits
-  (DK: 8,192). That number will rise with the re-parcellation and with 7.0
-  covariates for the new six-year sessions.
-- **Release vintage — a caveat that also touches the DK work.** The tabulated
-  copy on rds (`derivatives/tabulated/`) is byte-identical to release **6.0**
-  and stops at 4,103 six-year sessions, whereas the FreeSurfer derivatives hold
-  7,612 six-year sessions with scans to July 2025. Roughly 3,500 six-year
-  sessions therefore have surfaces (and HCP thickness) but no age, scanner or
-  release-QC row until the 7.0 tabulated release is in place. The settled DK run
-  ends with 3,539 six-year scans, which matches a 6.0-sized input; check the
-  six-year row count of the `mr_y_smri__thk__dsk` table this repo actually reads
-  before treating it as 7.0.
-- Full investigation and the step-by-step plan (census, gap-fill, QC policy,
-  validation): [`docs/PLAN_HCP_thickness.md`](docs/PLAN_HCP_thickness.md).
+- The design decisions — no global covariate, no family random effect, ≥2
+  visits, the coded QC stack — hold (§Key findings; `docs/reliability_grid.csv`,
+  `docs/h2_family_effect_contrast.csv`).
+- **Absolute thinning rate vs AHBA C3: ρ = −0.546, p_spin = 0.002**, identical
+  to before; the slope-component couplings (PC3–C2 +0.854, PC2–C1 −0.812) too
+  (`docs/ahba_vs_maps_noglobal.csv`).
+- The imaging-transcriptomics arm (`ahba_pls/`) re-derives the NSPN-PLS2 /
+  AHBA-C3 signature from the new maps — see the dated section at the end of
+  [`ahba_pls/README.md`](ahba_pls/README.md).
+
+**What is superseded.** All cluster genetics numbers (h², GWAS, LDSC, MAGMA,
+PRS) were computed on the 6.0-vintage phenotypes and now live under
+[`legacy/`](legacy/README.md). The last canonical result there — SCZ polygenic
+score → faster thinning, β −0.035 to −0.047 SD/SD, significant in 3 of 4 PRS
+methods in both ancestry arms; MDD same direction, significant only pooled;
+ASD and education null or opposite — is the benchmark the re-run must be read
+against (`genetic_analysis/README_HPC.md` §5). Do not quote legacy genetics
+numbers as current.
+
+**Next step (needs the user's go-ahead):** rsync the tables to CSD3 and start
+`genetic_analysis/README_HPC.md` step 0. HCP-MMP runs on the new tables as
+well (`configs/ct_70_hcp_noglobal_mv2.yaml`); the DK arm remains primary until
+the HCP re-parcellation on CSD3 is complete.
 
 ## Where to look
 
 | you want | go to |
 |:---|:---|
-| **the cluster genetics: state, results, and the current task** | [`hpc_v2/README_HPC.md`](hpc_v2/README_HPC.md) (v1 pipeline: `hpc/README_HPC.md`) |
-| HCP-MMP thickness: where it comes from, coverage, how to regenerate | [`docs/PLAN_HCP_thickness.md`](docs/PLAN_HCP_thickness.md) and the section above |
-| the findings, their caveats and the corrections | [`docs/REPORT_7.0.md`](docs/REPORT_7.0.md) |
+| **what changed with the 7.0 tables, old vs new** | [`docs/RERUN_7.0_TABULATED.md`](docs/RERUN_7.0_TABULATED.md), `docs/vintage_comparison.csv` |
+| **the cluster genetics: state, what was learnt, the steps to run** | [`genetic_analysis/README_HPC.md`](genetic_analysis/README_HPC.md) |
+| the findings, their caveats and the corrections (prose numbers are 6.0-vintage; tables and figures are current) | [`docs/REPORT_7.0.md`](docs/REPORT_7.0.md) |
 | how the mixed model works and why | [`notebooks/01_longitudinal_model.qmd`](notebooks/01_longitudinal_model.qmd) |
 | spatial nulls and the map-to-gene tests | [`notebooks/02_maps_and_genes.qmd`](notebooks/02_maps_and_genes.qmd) |
 | heritability and phenotype choice | [`notebooks/04_heritability.qmd`](notebooks/04_heritability.qmd) |
 | the imaging-transcriptomics PLS study (NSPN-PLS2 / AHBA-C3 re-derivation, SCZ & MDD enrichment) | [`ahba_pls/README.md`](ahba_pls/README.md), notebook [`ahba_pls/imaging_transcriptomics.qmd`](ahba_pls/imaging_transcriptomics.qmd) |
-| the 5.1 draft this supersedes | [`docs/REPORT_5.1_legacy.md`](docs/REPORT_5.1_legacy.md) |
+| HCP-MMP thickness: where it comes from, coverage, how to regenerate | [`docs/PLAN_HCP_thickness.md`](docs/PLAN_HCP_thickness.md) and §HCP-MMP below |
+| superseded pipelines and the 5.1 draft | [`legacy/README.md`](legacy/README.md), [`docs/REPORT_5.1_legacy.md`](docs/REPORT_5.1_legacy.md) |
 
 ## Key findings so far
 
-**Phenotype and modelling**
+**Phenotype and modelling** (7.0 tables, 2026-09-14)
 
 - **Slope reliability, not sample size, binds.** Median regional slope
-  reliability is 0.149 at ≥2 visits, 0.229 at ≥3. Effective N rises from 833 on
-  release 5.1 to 1,361 on 7.0 at the same filter.
-- **Use `min_visits: 2`, not 3.** The ≥3 filter buys per-subject precision but
-  discards 37 % of subjects; effective N falls and the group map is unchanged
-  (ρ = 0.998).
-- **The family random effect must be omitted for genetic phenotypes.** With it
-  enabled the baseline-thickness control returns *h²* = 1.46 — impossible. It
-  leaves the group map exactly unchanged (ρ = 1.000) while destroying the
-  subject-level genetic signal, which is why it went undetected in the 5.1 draft.
+  reliability is 0.211 at ≥2 visits, 0.242 at ≥3, 0.262 at 4. Effective N is
+  1,752 at ≥2 visits — 2.1× release 5.1 at the same filter
+  (`docs/handoff_release_comparison.csv`).
+- **Use `min_visits: 2`, not 3.** The ≥3 filter discards 25 % of subjects and
+  effective N falls (1,752 → 1,504); the group map is unchanged.
+- **The family random effect must be omitted for genetic phenotypes.** It
+  centres each family at zero, so the subject-level BLUPs lose the
+  between-family variance that relatedness explains; the h² of the
+  baseline-thickness control becomes impossible while the group map is
+  untouched (`docs/h2_family_effect_contrast.csv`).
 - **The developmental map is transcriptionally patterned.** Absolute thinning
-  rate vs AHBA C3: ρ = −0.546, p_spin = 0.0016, reproducing the 5.1 result across
-  a release change and a pipeline rewrite. The strongest couplings are on the
-  slope components (PC3–C2 ρ = +0.854, PC2–C1 ρ = −0.812).
+  rate vs AHBA C3: ρ = −0.546, p_spin = 0.002, now reproduced across two
+  releases, two tabulations and a pipeline rewrite. The strongest couplings are
+  on the slope components (PC3–C2 ρ = +0.854, PC2–C1 ρ = −0.812).
+- **Site explains 2.9 % of global-slope variance, scanner manufacturer 0.1 %**
+  (`docs/site_scanner_icc.csv`); the model carries a site random effect.
 
-**Imaging transcriptomics** (`ahba_pls/`, 2026-09-12)
+**Imaging transcriptomics** (`ahba_pls/`; DK arm re-run on the 7.0 maps
+2026-09-14, HCP-MMP arm likewise — numbers in its README)
 
-- **Parcellation matters for MDD, not for SCZ.** Re-fitting the same PLS on the
-  new HCP-MMP thickness table (137 AHBA-covered parcels, C3's own space) raises
-  the MDD gene-property β from 0.055 to 0.070 and survives conditioning on the
-  DK version (p = 0.009) while DK does not survive conditioning on it (p = 0.78);
-  SCZ is unchanged (0.046 vs 0.044, mutual attenuation). Both remain absorbed by
-  C3. A controlled test rules out granularity per se as the explanation for C3's
-  advantage — re-deriving C3 at 33 DK regions loses nothing — so what the finer
-  atlas buys is a better *thinning map*, not more regions
-  (`ahba_pls/` §HCP-MMP arm and §Parcellation control).
-- **Release-vintage caveat, quantified.** The tabulated tables this repo reads are
-  6.0-sized: 4,086 six-year thickness sessions against 7,612 six-year FreeSurfer
-  sessions, and 5,056 six-year covariate rows. Of the 2,646 sessions the HCP table
-  has that DK lacks, only 12 carry an age row — so the extra scans cannot be used
-  until the 7.0 tabulated release is in place.
-- **The NSPN-PLS2 / AHBA-C3 "signature of adolescent thinning" re-derives from
-  the ABCD.** PLS of AHBA expression on the ABCD thinning map recovers a
-  component that matches both prior signatures in regional scores (ρ = 0.76 with
-  NSPN-PLS2, 0.85 with C3; p_spin = 0.001) and in gene weights (ρ = 0.61 and
-  0.77 over 11.2k / 7.9k genes), with the same neuronal-up / glial-down cell-class
-  profile. The ABCD and NSPN thinning maps themselves agree (ρ = 0.64,
-  p_spin = 0.002), so this is replication in a 20× larger cohort, not atlas
-  circularity.
-- **Thinning rate alone does not isolate it.** With dCT as the only Y variable
-  the component is marginal (p_spin = 0.06–0.10) and loads as heavily on C1, the
-  static expression gradient, as on C3. Adding baseline thickness as a second Y
-  column pushes the static axis into PLS1 and leaves the thinning signature as
-  PLS2 — the same structure as the PNAS 2016 design. It is stable across
-  differential-stability filters (ρ ≥ 0.99), so gene filtering is not the
-  constraint it was for deriving C3 by PCA.
-- **It carries SCZ and MDD risk, but adds nothing to C3.** MAGMA gene-property
-  regression is positive for both disorders at every filter (SCZ β 0.028–0.037,
-  MDD 0.026–0.041) at about half C3's effect size; conditioning on C3 removes it
-  entirely, while C3 survives conditioning on it. The prioritised-gene
-  permutation test detects only the MDD high-confidence set (z = 2.4) — and the
-  SCZ locus-pool signal sits on the static axis, not on thinning. **The
-  contribution is a developmental warrant for C3, not a better gene list.**
-- Still open (specified for the cluster in
-  [`ahba_pls/FOLLOWUP_GENETICS.md`](ahba_pls/FOLLOWUP_GENETICS.md)): whether the
-  signature weights relate to ABCD's own thinning GWAS, and whether projecting
-  subject slopes onto the component beats `global_slope` for heritability.
+- The NSPN-PLS2 / AHBA-C3 "signature of adolescent thinning" re-derives from
+  the ABCD maps: PLS of AHBA expression on thinning rate plus baseline
+  thickness recovers a component matching both prior signatures in regional
+  scores and gene weights, with the same neuronal-up / glial-down cell-class
+  profile.
+- It carries SCZ and MDD GWAS signal at about half C3's effect size and adds
+  nothing once C3 is in the model: a developmental warrant for C3, not a
+  better gene list.
+- Parcellation matters for MDD, not SCZ: the HCP-MMP version of the signature
+  carries more MDD signal than the DK version. Whether the finer atlas' astrocyte
+  sign flip is biology or parcel size is open.
 
-**Genetics (v1 run: release 4.0 genotypes, EUR only, N = 4,119 — the PRS rows
-are superseded by the 7.0 grid in Status above; h²/rg/GWAS conclusions stand)**
+**Genetics** — see the Status section: the legacy result is a benchmark, the
+re-run is pending. The reasoning that governs it (PRS as the primary
+disorder test, why rg is uninformative at this h², why controls are mandatory,
+why region selection is not a lever) is in `genetic_analysis/README_HPC.md` §4.
 
-- **h² of `baseline_thickness` = 0.575 ± 0.147**, independently corroborated by
-  LDSC at 0.584 ± 0.131 — a joint validation of the GRM, ID alignment and
-  covariates. `global_slope` h² = 0.228 ± 0.141.
-- **No genome-wide-significant loci**, as expected at this N. λ_GC 1.00–1.03.
-- **Genetic correlation is uninformative for the slope**, not merely null: h² z =
-  1.45 against LDSC's z > 4 guidance. An interpretable rg needs N ≈ 11,300 —
-  above ABCD's phenotyped ceiling of 8,192, so rg is out of reach in ABCD alone.
-- **SCZ PRS → faster thinning** is the lead worth pursuing, and it is
-  disorder-specific: the regional SCZ and MDD PRS maps are uncorrelated.
-- **T1w/T2w** was tested as an alternative metric: more heritable (0.595 vs
-  0.444) but 3.4× more site-confounded, with no PRS association. A different
-  phenotype, not a replication.
+## HCP-MMP (Glasser) thickness
 
-**Where the sample goes.** 11,868 enrolled → 8,192 with ≥2 usable visits →
-5,678 genotyped (EUR only) → 4,119 analysed. The genotype shortfall is an
-**ancestry restriction and release vintage, not QC attrition**: ABCD's 7.0
-curated genotypes cover 11,670 of 11,868, with the ~198 difference accounted for
-by subjects never genotyped. Details in
-[`hpc/README_HPC.md`](hpc/README_HPC.md) §4.
+ABCD tabulates only Desikan (`dsk`). The HCP-MMP1.0 parcellation exists for 7.0
+as a **derived** table at `abcd-data-release-7.0/processed/hcp/`, so
+`parcellation: hcp` works (`configs/ct_70_hcp_noglobal_mv2.yaml`).
+
+- **Source.** The release FreeSurfer 7.1.1 reconstructions on CSD3
+  (`/rds/project/rds-CeXlNYOYMxw/derivatives/freesurfer/`, 33,825 sessions).
+  R. Romero-Garcia projected the fsaverage HCP-MMP1.0 annotation onto them;
+  `src/abcd/hcp_stats.py` parses the per-session tables into
+  `mr_y_smri__{thk,area,vol}__hcp.tsv` in the DK column convention, plus
+  `hcp_session_qc.tsv`. Regenerate with `sbatch tools/hcp_extract.sbatch` on
+  CSD3 (about 10 min).
+- **Coverage is incomplete and flagged.** 24,921 of 33,825 sessions parsed;
+  3,435 were never reached by the July 2026 array job and 5,439 have empty
+  stubs (a concurrency bug in the parcellation script). The re-run list for
+  rr480 is `processed/hcp/sessions_to_reparcellate.txt`. Missing sessions have
+  no row, so `assemble` reports fewer scans than DK.
+- **Parcel `H`** (hippocampus) lies on the medial wall and has thickness 0 in
+  ~6,350 sessions; exclude it or treat 0 as missing.
+- With the 7.0 covariates the six-year HCP sessions that previously lacked an
+  age row now enter the model; see `ahba_pls/README.md` for the resulting n.
+- Details and the plan: [`docs/PLAN_HCP_thickness.md`](docs/PLAN_HCP_thickness.md).
 
 ## Running it
 
@@ -217,36 +160,53 @@ make all                                          # assemble -> fit -> phenotype
 `make help` prints the active config and the run directory it resolves to. Every
 analysis choice is a `RunConfig` field that hashes into the `run_id`, so runs
 cannot silently overwrite each other and `out/<run_id>/config.yaml` records what
-produced the numbers.
+produced the numbers. **The hash does not encode data vintage**: the manifest's
+`data_vintage` key does, and assembly refuses a 7.0 run from 6.0-sized tables.
 
 The same four steps run directly (needs `PYTHONPATH=src` or `pip install -e .`):
 
 ```bash
 python -m abcd.assemble              # tidy long table
-Rscript R/fit_lmm.R --cores 8        # per-region lme4 fits
+Rscript R/fit_lmm.R --cores 8        # per-region lme4 fits (reads $PY for the interpreter)
 python -m abcd.phenotype             # BLUPs + reliability
 python -m abcd.gcta_export           # GCTA/MAGMA inputs
 ```
 
+To redo every specification the report needs (eleven fits, ~15 min):
+
+```bash
+tools/rerun_local.sh
+```
+
+Environments on this machine: `~/mambaforge/envs/abcd` has the Python
+dependencies **and** an R with lme4/arrow/optparse/ggseg (the fitter and the
+brain maps); `~/.claude-science/conda/envs/abcd-spatial` has pytest and the
+spatial/statsmodels stack (tests, `ahba_pls/` analysis); `ahba-pls-r` holds the
+R plotting stack for `ahba_pls/` figures. `tools/rerun_local.sh` and `make`
+accept `PY`/`RSCRIPT` overrides.
+
 `ABCD_ROOT` is **not** required: 7.0 is vendored at `abcd-data-release-7.0/`
-(gitignored — access-controlled) and 5.1 is found under `~/Git/ABCD`.
+and the 6.0 tables at `abcd-data-release-6.0/` (both gitignored —
+access-controlled); 5.1 is found under `~/Git/ABCD`. A config with
+`release: "6.0"` (`configs/ct_60_noglobal_mv2_genetic.yaml`) reproduces the
+pre-2026-09-14 sample exactly, for comparison only.
 
 ## Layout
 
 ```
-src/abcd/        # Python: assembly, QC, phenotypes, spatial stats, gene work
-R/               # model fitting (lme4)
-configs/         # one YAML per specification; the run_id is a hash of it
-docs/            # REPORT_7.0.md + every table and figure it cites
-tools/           # regenerators for every table and figure in the report
-hpc/             # SLURM genetics pipeline  -- see hpc/README_HPC.md
-  hcp_extract.sbatch   builds abcd-7.0/processed/hcp/ from the FreeSurfer surfaces (CSD3)
-  legacy/          superseded HPC docs; read only if the repo contradicts the current one
-ahba_pls/        # imaging transcriptomics: PLS of AHBA expression on the ABCD
-                 # thinning maps, and its SCZ/MDD enrichment -- self-contained,
-                 # see ahba_pls/README.md
-notebooks/       # explanatory documents, not analysis scripts
-tests/           # 160 tests, incl. provenance and README checks
+src/abcd/          # Python: assembly, QC, phenotypes, spatial stats, gene work
+R/                 # model fitting (lme4)
+configs/           # one YAML per specification; the run_id is a hash of it
+docs/              # REPORT_7.0.md, RERUN_7.0_TABULATED.md + every table and figure they cite
+tools/             # regenerators for every table and figure; rerun_local.sh; compare_vintage.py;
+                   # hcp_extract.sbatch (CSD3); prs_assoc.R (used by genetic_analysis/)
+genetic_analysis/  # the cluster genetics re-run: README_HPC.md, config, GENESIS + PRS scripts
+ahba_pls/          # imaging transcriptomics: PLS of AHBA expression on the ABCD thinning maps,
+                   # and its SCZ/MDD enrichment -- self-contained, see ahba_pls/README.md
+notebooks/         # explanatory documents, not analysis scripts
+tests/             # pytest suite, incl. provenance and README checks
+legacy/            # superseded: hpc/, hpc_v2/, hpc_v3/ (6.0-vintage genetics), handoff tables
+out/               # run directories (gitignored); out/legacy_6.0_tabulated/ holds the old fits
 ```
 
 The Python/R seam is Parquet in `out/<run_id>/`. Computation is kept separate
@@ -255,24 +215,31 @@ from plotting throughout.
 | config | what it is for |
 |:---|:---|
 | `ct_70_noglobal_mv2_genetic.yaml` | **the settled specification** |
-| `ct_70_noglobal_mv{2,3,4}.yaml` | the visit-filter comparison |
-| `ct_70_global_mv3_genetic.yaml` | global-covariate contrast |
+| `ct_70_noglobal_mv{2,3,4}.yaml`, `ct_70_noglobal_mv{3,4}_genetic.yaml` | the visit-filter and family-effect comparisons |
+| `ct_70_global_mv3_genetic.yaml`, `ct_70_baseline.yaml`, `ct_70_genetic.yaml` | global-covariate contrasts |
 | `ct_51_noglobal_mv2_matched.yaml` | 5.1 on the same specification |
-| `t1t2_70_noglobal_mv2_genetic.yaml` | T1w/T2w ratio, matched to the settled spec |
-| `ct_70_hcp_noglobal_mv2.yaml` | the settled spec on HCP-MMP (Glasser); derived table, partial coverage — see above |
+| `ct_60_noglobal_mv2_genetic.yaml` | the settled spec on the 6.0 tables (comparison only) |
+| `t1t2_70_noglobal_mv2_genetic.yaml` | T1w/T2w ratio, matched to the settled spec (maps for `ahba_pls/`) |
+| `ct_70_hcp_noglobal_mv2.yaml` | the settled spec on HCP-MMP (Glasser); derived table, partial coverage |
 
 ## Reproducing the report
 
-Every table and figure in `docs/` is produced by script from committed data —
-never from a run directory:
+Every table and figure in `docs/` is produced by script from runs on disk and
+committed data — never hand-entered:
 
 ```bash
+export PYTHONPATH=src
 python tools/regen_report_tables.py     # spatial/covariance/site tables
 python tools/regen_h2_tables.py         # heritability tables (bootstrap; slow)
 python tools/regen_report_figures.py    # table-based figures
 python tools/regen_brain_maps.py        # DK surface maps
-python -m pytest tests/ -q              # 160 tests
+python tools/compare_vintage.py --old out/legacy_6.0_tabulated/thickness_dsk_70_139406217085 \
+                                --new out/thickness_dsk_70_139406217085
+python -m pytest tests/ -q              # 167 tests
 ```
+
+The README test count check spawns pytest via `PYTEST_PY` (default `python`);
+set it to an interpreter that has pytest if `python` is a bare shim here.
 
 This is enforced, not trusted: `tests/test_docs_provenance.py` checks that every
 cited figure and table exists and that every figure on disk has a generator. It
@@ -280,8 +247,7 @@ exists because 11 figures were once drawn in ad-hoc cells and silently survived
 corrections to the numbers underneath them.
 
 **If you work on this repo through Claude Science**, note that editing a file on
-disk does not update its artifact, and neither does committing — so a corrected
-report can sit on disk while a stale copy is what gets read. Run
+disk does not update its artifact, and neither does committing. Run
 `make audit-artifacts` at the end of any session that edits deliverables.
 
 ## Related prior work

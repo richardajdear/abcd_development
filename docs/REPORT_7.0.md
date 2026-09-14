@@ -1,5 +1,15 @@
 # Adolescent cortical development in ABCD 7.0
 
+> **Vintage notice (2026-09-14).** The prose below was written against runs on
+> the ABCD **6.0** tabulated tables (8,192 children), which sat in a directory
+> labelled 7.0. Every table and figure this report cites has since been
+> regenerated from the true 7.0 tabulation (8,716 children; see
+> [`RERUN_7.0_TABULATED.md`](RERUN_7.0_TABULATED.md) for the old-vs-new
+> comparison and the new headline numbers). The design decisions in §2–§4 were
+> re-checked on the new tables and stand; sample sizes and effect sizes quoted
+> in the prose are the 6.0-vintage ones unless a table says otherwise. §13
+> (cluster steps) is superseded by `../genetic_analysis/README_HPC.md`.
+
 **Status.** Modelling framework settled and validated on release 7.0. Phenotype
 selection for imaging genetics complete. Genetic analyses (GCTA GRM-based
 heritability, GWAS) specified and ready to dispatch to the HPC cluster.
@@ -880,6 +890,10 @@ thickness.
 
 ## 13. What runs next, on the cluster
 
+> Superseded: the cluster plan for the 7.0 tabulation is
+> [`../genetic_analysis/README_HPC.md`](../genetic_analysis/README_HPC.md).
+> The list below is the 2026-07 version and is kept for the record.
+
 1. **GCTA GRM heritability** on the four recommended phenotypes, to replace the
    Falconer estimates with unbiased SNP heritability. `gcta_export.py` writes
    the phenotype and covariate files; it refuses to export from a run with the
@@ -891,7 +905,7 @@ thickness.
 4. **Compare the resulting gene sets** to AHBA C1–C3 and to the snRNA-seq
    leading component.
 5. **Test association with SCZ and MDD directly**, by two methods whose power
-   differs sharply in this sample (`hpc/06_prs.sbatch`, `hpc/05_ldsc_rg.sbatch`).
+   differs sharply in this sample (`legacy/hpc/06_prs.sbatch`, `legacy/hpc/05_ldsc_rg.sbatch`).
 
 The h²-versus-transcription tradeoff in §10 means step 3 should be run on both
 the global mean *and* the components — they may implicate different genes, and
@@ -919,7 +933,7 @@ Because the SCZ/MDD discovery GWAS are predominantly European and scores
 transfer poorly across ancestry, the EUR subset is primary and the full
 multi-ancestry sample is reported as a sensitivity analysis — ancestry-PC
 adjustment controls stratification but does not repair transferability. See
-`hpc/README_HPC.md` for the full rationale and the clumping/threshold choices.
+`legacy/hpc/README_HPC.md` for the full rationale and the clumping/threshold choices.
 
 ---
 

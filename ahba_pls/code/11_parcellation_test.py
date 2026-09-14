@@ -25,7 +25,7 @@ difference):
      are directly comparable.
 
 Reads:  AHBA/data/abagen-data/expression/{hcp,dk}_3d_ds5.csv, data/weights.csv,
-        results/lead_signature_weights.tsv, hpc/work/results/magma/*.genes.raw
+        results/lead_signature_weights.tsv, genetic_analysis/inputs/magma/*.genes.raw
 Writes: results/parcellation_test_weights.tsv, results/parcellation_test.tsv
 """
 from __future__ import annotations
@@ -45,8 +45,8 @@ GS = REF / "gene_sets"
 RUN = RES / "magma_runs"; RUN.mkdir(exist_ok=True)
 EXPR = Path.home() / "Git" / "AHBA" / "data" / "abagen-data" / "expression"
 MAGMA = REPO / "tools" / "bin" / ("magma_mac/magma" if (REPO / "tools/bin/magma_mac/magma").exists() else "magma")
-RAW = {"SCZ": REPO / "hpc/work/results/magma/SCZ.genes.raw",
-       "MDD": REPO / "hpc/work/results/magma/MDD.genes.raw"}
+RAW = {"SCZ": REPO / "genetic_analysis/inputs/magma/SCZ.genes.raw",
+       "MDD": REPO / "genetic_analysis/inputs/magma/MDD.genes.raw"}
 
 # ---------------------------------------------------------------- inputs -----
 # The ds5 (top-8k differential stability) gene sets are parcellation-SPECIFIC --

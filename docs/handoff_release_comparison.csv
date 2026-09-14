@@ -1,5 +1,5 @@
 run,release,min_visits,run_id,subjects,mean_visits,mean_reliability,effective_N,vs_5.1
 5.1 (>=2 visits),5.1,2,thickness_dsk_51_ae7cfea22a78,8419,2.3125,0.09898,833.3,1
-7.0 (>=2 visits),7.0,2,thickness_dsk_70_139406217085,8192,2.8575,0.16613,1361,1.6333
-7.0 (>=3 visits),7.0,3,thickness_dsk_70_fcb2dfafb0ea,5195,3.3523,0.20252,1052.1,1.2626
-7.0 (4 visits),7.0,4,thickness_dsk_70_5899982b9397,1830,4,0.25617,468.8,0.5626
+7.0 (>=2 visits),7.0,2,thickness_dsk_70_139406217085,8716,3.0919,0.20106,1752.4,2.103
+7.0 (>=3 visits),7.0,3,thickness_dsk_70_fcb2dfafb0ea,6512,3.4615,0.23096,1504,1.8049
+7.0 (4 visits),7.0,4,thickness_dsk_70_5899982b9397,3005,4,0.26381,792.8,0.9514

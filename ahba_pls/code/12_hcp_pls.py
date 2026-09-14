@@ -43,8 +43,8 @@ RES, DATA, REF = ROOT / "results", ROOT / "data", ROOT / "data" / "reference"
 GS = REF / "gene_sets"
 RUN_DIR = REPO / "out" / "thickness_hcp_70_fec93121f0dd"
 MAGMA = REPO / "tools" / "bin" / ("magma_mac/magma" if (REPO / "tools/bin/magma_mac/magma").exists() else "magma")
-RAW = {"SCZ": REPO / "hpc/work/results/magma/SCZ.genes.raw",
-       "MDD": REPO / "hpc/work/results/magma/MDD.genes.raw"}
+RAW = {"SCZ": REPO / "genetic_analysis/inputs/magma/SCZ.genes.raw",
+       "MDD": REPO / "genetic_analysis/inputs/magma/MDD.genes.raw"}
 EXPR = Path.home() / "Git" / "AHBA" / "data" / "abagen-data" / "expression"
 N_PERM, N_BOOT, SEED = 5000, 1000, 0
 BAD_PARCELS = ["H"]          # medial-wall parcel, thickness 0 in many sessions

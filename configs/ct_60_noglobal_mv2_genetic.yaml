@@ -1,0 +1,26 @@
+release: '6.0'
+metric: thickness
+parcellation: dsk
+hemisphere: both
+qc_policy: coded
+sample_rule: min_visits
+min_visits: 2
+visits:
+- v0
+- v2
+- v4
+- v6
+age_basis: linear
+spline_df: 3
+age_centre: null
+re_structure: slope_correlated
+global_covariate: none
+covariates:
+- sex
+family_effect: false
+site_effect: true
+note: 'The settled specification (ct_70_noglobal_mv2_genetic) run on the 6.0 tabulated
+  tables at abcd-data-release-6.0/. These are the tables every result dated before
+  2026-09-14 was computed on, under a directory then labelled 7.0. Exists only so the
+  gain from the true 7.0 tabulation (3,520 extra six-year scans) can be isolated from
+  code changes; do not build on it.'

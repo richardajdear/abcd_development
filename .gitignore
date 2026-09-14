@@ -15,7 +15,7 @@ Rplots.pdf
 _view_*.png
 
 # Quarto render output.  The exception below is a hand-authored report, not a
-# rendered notebook -- it is the shareable version of hpc_v2/README_HPC.md 11-13
+# rendered notebook -- it is the shareable version of legacy/hpc_v2/README_HPC.md 11-13
 # and is a work product like the *_summary.tsv tables.
 *_files/
 *.html
@@ -26,9 +26,9 @@ src/*.egg-info/
 build/
 dist/
 
-# Machine-specific HPC path overrides (see hpc/config.local.sh.example).
-hpc/config.local.sh
-hpc_v2/config.local.sh
+# Machine-specific HPC path overrides (see legacy/hpc/config.local.sh.example).
+legacy/hpc/config.local.sh
+legacy/hpc_v2/config.local.sh
 
 # Scratch tree for local pipeline tests: synthetic genotypes, GRMs, GWAS output.
 scratch/
@@ -43,7 +43,7 @@ abcd-[0-9]*.[0-9]*/
 .artifact_audit.json
 
 # ---------------------------------------------------------------------------
-# CSD3 working tree (hpc/work/).  Everything in here is either huge, rebuildable,
+# CSD3 working tree (legacy/hpc/work/).  Everything in here is either huge, rebuildable,
 # machine-specific, or access-controlled:
 #
 #   pheno/ pheno_prs/   SUBJECT-LEVEL ABCD phenotypes and covariates -- never
@@ -57,46 +57,46 @@ abcd-[0-9]*.[0-9]*/
 #
 # The exceptions are the scripts written for this run and the small result
 # summary tables, which are the actual work product.
-hpc/work/*
-!hpc/work/*.py
-!hpc/work/*.sbatch
-!hpc/work/*.sh
+legacy/hpc/work/*
+!legacy/hpc/work/*.py
+!legacy/hpc/work/*.sbatch
+!legacy/hpc/work/*.sh
 
 # Result summaries only (a few KB each); everything else under results/ is
 # regenerable output measured in hundreds of megabytes.
-!hpc/work/results/
-hpc/work/results/*
-!hpc/work/results/*/
-hpc/work/results/*/*
-!hpc/work/results/*/*_summary.tsv
-!hpc/work/results/prs/prs_association.tsv
+!legacy/hpc/work/results/
+legacy/hpc/work/results/*
+!legacy/hpc/work/results/*/
+legacy/hpc/work/results/*/*
+!legacy/hpc/work/results/*/*_summary.tsv
+!legacy/hpc/work/results/prs/prs_association.tsv
 # the IMPUTED PRS arm -- v1's actual headline PRS numbers come from here, not
 # from prs/ (array genotypes).  Same shape and size as the line above; it was
-# simply never added.  hpc_v3/make_results_v3.py reads it for the v1 rows.
-!hpc/work/results/prs_imp/prs_association.tsv
+# simply never added.  legacy/hpc_v3/make_results_v3.py reads it for the v1 rows.
+!legacy/hpc/work/results/prs_imp/prs_association.tsv
 
-# SLURM stderr scratch, and the convenience symlink to hpc/work/out.
-hpc/slurm/
+# SLURM stderr scratch, and the convenience symlink to legacy/hpc/work/out.
+legacy/hpc/slurm/
 /out
 
 # ---------------------------------------------------------------------------
-# hpc_v2 working tree, same contract as hpc/work/ above: setup scripts and the
+# legacy/hpc_v2 working tree, same contract as legacy/hpc/work/ above: setup scripts and the
 # small *_summary.tsv tables are the work product, everything else (GDS files,
 # per-chromosome association output, GRM id views, conda logs) is huge or
 # rebuildable.
-hpc_v2/work/*
-!hpc_v2/work/setup/
-hpc_v2/work/setup/*
-!hpc_v2/work/setup/*.sh
-!hpc_v2/work/setup/*.sbatch
-!hpc_v2/work/setup/*.py
-!hpc_v2/work/setup/*.R
-!hpc_v2/work/results_v2/
-hpc_v2/work/results_v2/*
-!hpc_v2/work/results_v2/*/
-hpc_v2/work/results_v2/*/*
-!hpc_v2/work/results_v2/*/*_summary.tsv
-!hpc_v2/work/results_v2/prs_family/prs_withinfamily.tsv
+legacy/hpc_v2/work/*
+!legacy/hpc_v2/work/setup/
+legacy/hpc_v2/work/setup/*
+!legacy/hpc_v2/work/setup/*.sh
+!legacy/hpc_v2/work/setup/*.sbatch
+!legacy/hpc_v2/work/setup/*.py
+!legacy/hpc_v2/work/setup/*.R
+!legacy/hpc_v2/work/results_v2/
+legacy/hpc_v2/work/results_v2/*
+!legacy/hpc_v2/work/results_v2/*/
+legacy/hpc_v2/work/results_v2/*/*
+!legacy/hpc_v2/work/results_v2/*/*_summary.tsv
+!legacy/hpc_v2/work/results_v2/prs_family/prs_withinfamily.tsv
 
 # Reported result tables.  The *_summary.tsv glob above misses these because
 # they are named by what they are, not by the convention -- and the PRS tables
@@ -106,13 +106,33 @@ hpc_v2/work/results_v2/*/*
 #   prs_final/fam_*.tsv          Fulker between/within-family decomposition
 #   within_ancestry/*.tsv        ancestry-standardised scores (sec 13)
 #   retired/README.md            why PRS-CS/1000G and PRS-CSx were dropped
-!hpc_v2/work/results_v2/prs_final/table_*.tsv
-!hpc_v2/work/results_v2/prs_final/assoc_*.tsv
-!hpc_v2/work/results_v2/prs_final/fam_*.tsv
-!hpc_v2/work/results_v2/within_ancestry/*.tsv
-!hpc_v2/work/results_v2/retired/README.md
+!legacy/hpc_v2/work/results_v2/prs_final/table_*.tsv
+!legacy/hpc_v2/work/results_v2/prs_final/assoc_*.tsv
+!legacy/hpc_v2/work/results_v2/prs_final/fam_*.tsv
+!legacy/hpc_v2/work/results_v2/within_ancestry/*.tsv
+!legacy/hpc_v2/work/results_v2/retired/README.md
 
 # SLURM job logs land in the repo root because that is the submit directory.
 slurm-*.out
-hpc_v2/work/downloads/
+legacy/hpc_v2/work/downloads/
 synapse_download/
+
+# ---------------------------------------------------------------------------
+# genetic_analysis/ (the 2026-09 re-run on the 7.0 tabulation; replaces the
+# legacy/hpc* trees).  Same contract: scripts and small summary tables are the
+# work product; per-subject files, sumstats, GDS/GRM files and logs are not.
+genetic_analysis/work/*
+!genetic_analysis/work/results/
+genetic_analysis/work/results/*
+!genetic_analysis/work/results/*/
+genetic_analysis/work/results/*/*
+!genetic_analysis/work/results/*/*_summary.tsv
+!genetic_analysis/work/results/*/table_*.tsv
+genetic_analysis/config.local.sh
+# MAGMA gene-level results for the SCZ/MDD discovery GWAS (public sumstats,
+# 23 MB): staged from the cluster for ahba_pls/, see genetic_analysis/README_HPC.md.
+genetic_analysis/inputs/
+# SLURM logs from tools/hcp_extract.sbatch and genetic_analysis/ jobs.
+slurm/
+# Local re-run log written by tools/rerun_local.sh (lives in out/, listed for clarity).
+out/rerun_local.log

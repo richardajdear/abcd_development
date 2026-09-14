@@ -62,7 +62,10 @@ resolve_run_dir <- function(opt) {
   if (!is.null(opt$`run-dir`)) return(opt$`run-dir`)
   args <- c("-m", "abcd.run_dir")
   if (!is.null(opt$config)) args <- c(args, opt$config)
-  res <- suppressWarnings(system2("python", args, stdout = TRUE, stderr = TRUE))
+  # The interpreter that has abcd's dependencies; `make` and tools/rerun_local.sh
+  # export PY.  A bare "python" resolved to a shim without pandas and failed here.
+  py <- Sys.getenv("PY", unset = "python")
+  res <- suppressWarnings(system2(py, args, stdout = TRUE, stderr = TRUE))
   if (!is.null(attr(res, "status")) && attr(res, "status") != 0) {
     stop("could not resolve a run directory. Either pass --run-dir, or set\n",
          "  export ABCD_CONFIG=ct_70_genetic\n",

@@ -15,7 +15,7 @@ from abcd.config import RunConfig  # noqa: E402
 def _have_release_tables() -> bool:
     """True only if a release *table* is readable, not merely a release directory.
 
-    ``abcd-7.0/`` may hold only derived ``processed/hcp/`` output (built on
+    ``abcd-data-release-7.0/`` may hold only derived ``processed/hcp/`` output (built on
     CSD3 before the tabulated release was in place); that is not release data.
     """
     try:

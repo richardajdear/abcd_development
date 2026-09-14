@@ -30,7 +30,7 @@ This module parses those tables into
 Outputs land in ``<release_dir>/processed/hcp/``, next to the release's
 tabulated tables, mirroring the ``processed/`` convention the 5.1 HCP files
 already use.  They are derived data, not release tables, and stay gitignored
-with the rest of ``abcd-7.0/``.
+with the rest of ``abcd-data-release-7.0/``.
 
 Run it on the cluster (30k sessions is not a login-node job)::
 

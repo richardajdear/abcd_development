@@ -22,7 +22,14 @@ export ABCD_CONFIG
 export PYTHONPATH := src:$(PYTHONPATH)
 SRCPATH = PYTHONPATH=src:$(PYTHONPATH)
 
-PY ?= python
+# The interpreter with abcd's dependencies.  A bare `python` on this machine is a
+# pyenv shim without pandas, so prefer the project env when it exists; override
+# with PY=... on the command line.
+PY ?= $(shell test -x $(HOME)/mambaforge/envs/abcd/bin/python && echo $(HOME)/mambaforge/envs/abcd/bin/python || echo python)
+# R/fit_lmm.R shells out to $PY to resolve the run directory.  The export must
+# come AFTER the assignment: in GNU make 3.81 a bare `export PY` defines PY as
+# empty and the `?=` above is then skipped.
+export PY
 RSCRIPT ?= Rscript
 CORES ?= 4
 RUN = $(shell $(SRCPATH) $(PY) -m abcd.run_dir --allow-missing 2>/dev/null)

@@ -1,9 +1,9 @@
 quantity,value
-subjects,8192
-sites,18
-distinct manufacturers,4
+subjects,8716
+sites,19
+distinct manufacturers,3
 manufacturer metadata coverage,1
-pct switched manufacturer,0.0422
-n switchers,346
-var ratio switch/same (global slope),1.1668
-Cohen d switch vs same,0.2324
+pct switched manufacturer,0.0101
+n switchers,88
+var ratio switch/same (global slope),1.0692
+Cohen d switch vs same,0.1246

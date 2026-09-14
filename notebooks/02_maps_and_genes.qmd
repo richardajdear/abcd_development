@@ -223,7 +223,7 @@ map-level test is not the test the hypothesis needs. Where cortex thins *on
 average* is a group-level anatomical fact; whether SCZ/MDD risk genes are
 enriched in the genetic architecture of *individual differences* in development
 is a question about association signal, answered by GWAS of the subject-level
-phenotype followed by competitive gene-set testing. That is the `hpc/` pipeline,
+phenotype followed by competitive gene-set testing. That is the `legacy/hpc/` pipeline,
 and it is independent of everything in this notebook.
 
 The right summary is: the group-mean developmental map is reliable, is not

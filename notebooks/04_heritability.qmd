@@ -241,7 +241,7 @@ The estimates here justify the cluster steps; they do not replace them.
 
 1. `python -m abcd.gcta_export <run-dir>` — writes phenotypes, covariates, and
    the 10 ancestry PCs.
-2. `hpc/02_reml.sh` — GCTA-GRM + REML for a genotype-based $h^2$ that does not
+2. `legacy/hpc/02_reml.sh` — GCTA-GRM + REML for a genotype-based $h^2$ that does not
    assume equal environments and is not inflated by the sibling dilution.
-3. `hpc/03_gwas.sh` — fastGWA on the PC1 phenotype first, the global mean as a
+3. `legacy/hpc/03_gwas.sh` — fastGWA on the PC1 phenotype first, the global mean as a
    secondary, and regional GWAS only after the primary run validates.

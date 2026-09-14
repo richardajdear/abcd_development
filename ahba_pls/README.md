@@ -59,8 +59,8 @@ NSPN's 308 — power is bounded and DS-filter sensitivity matters.
 (`../data/weights.csv`, 7,973 genes) and DK scores (`../data/ahba_dme_dsk_scores.csv`).
 
 **GWAS gene sets for H2.** SCZ: Trubetskoy 2022 prioritised / fine-mapped /
-locus pool (`AHBA/data/gwas/`, and the sets used in `hpc/` MAGMA). MDD: Adams 2025.
-MAGMA gene-level Z for SCZ and MDD: `../hpc/work/results/magma/{SCZ,MDD}.genes.raw` — present on this
+locus pool (`AHBA/data/gwas/`, and the sets used in `legacy/hpc/` MAGMA). MDD: Adams 2025.
+MAGMA gene-level Z for SCZ and MDD: `../genetic_analysis/inputs/magma/{SCZ,MDD}.genes.raw` — present on this
 machine but **gitignored**, so on a fresh clone they must be re-fetched from the cluster before
 `08_magma_gene_property.py` will run.
 
@@ -84,7 +84,7 @@ ahba_pls/
 - [x] **Phase 1** — inputs: Y-matrix, aligned X at 3 DS levels, NSPN-PLS2 and C3 references, GWAS gene sets (`code/01_*`–`03_*`; notes in `data/INPUTS.md`, `data/Y_MAPS.md`, `data/reference/*.md`, `data/reference/gene_sets/GENE_SETS.md`)
 - [x] **Phase 2** — PLS fits (5 options × 3 DS), spin/bootstrap inference, concordance with PLS2/C3, lead signature (`code/pls.py`, `04_fit_pls.py`, `05_concordance.py`, `06_lead_signature.py`)
 - [x] **Phase 3** — SCZ/MDD enrichment: permutation + MAGMA gene-property, with C3/PLS2 benchmarks (`07_permutation_enrichment.py`, `08_magma_gene_property.py`, `09_summarise_enrichment.py`; MAGMA macOS binary in `../tools/bin/magma_mac/`)
-- [x] **Phase 4** — [`FOLLOWUP_GENETICS.md`](FOLLOWUP_GENETICS.md) (H3, H4 specification for the cluster agent) and exports in `hpc/` (`code/10_export_for_hpc.py`)
+- [x] **Phase 4** — [`FOLLOWUP_GENETICS.md`](FOLLOWUP_GENETICS.md) (H3, H4 specification for the cluster agent) and exports in `legacy/hpc/` (`code/10_export_for_hpc.py`)
 - [x] **Phase 5** — notebook [`imaging_transcriptomics.qmd`](imaging_transcriptomics.qmd), this results index, and a pointer row in the top-level README (`tests/test_readme.py` passes)
 
 ## Results index
@@ -95,7 +95,7 @@ ahba_pls/
 - dCT and CT reproduce `docs/developmental_maps_noglobal.csv` to <1e-5. The T1w/T2w `rh_temporalpole` fit is singular/non-converged (kept; flagged in `data/Y_MAPS.md`).
 - NSPN gene symbols are 2016-vintage: 1,310 renamed via mygene (rule: unique current symbol present in ds0, no collision) → overlap with ds0/25/50 = 14,865 / 11,175 / 7,454 of 20,710 (`data/reference/NSPN_REFERENCE.md`). 26 Excel-date-corrupted symbols dropped.
 - C1–C3 scores recomputed from `weights.csv` on the current DK matrices agree with the shipped DK scores at ρ = 0.99 / 0.94 / 0.91 (C1/C2/C3); the recomputed versions are used for like-for-like comparison.
-- SCZ (Trubetskoy 2022) and MDD (Adams 2025 Table S21) sets replicate the `hpc/` MAGMA definitions in symbol space; MAGMA gene-level Z for SCZ/MDD mapped to symbols at 99.3 %. Brain-expressed backgrounds: 13,763 / 10,322 / 6,931 genes.
+- SCZ (Trubetskoy 2022) and MDD (Adams 2025 Table S21) sets replicate the `legacy/hpc/` MAGMA definitions in symbol space; MAGMA gene-level Z for SCZ/MDD mapped to symbols at 99.3 %. Brain-expressed backgrounds: 13,763 / 10,322 / 6,931 genes.
 
 ### Phase 2 — the transcriptomic signature (H1: **supported**)
 
@@ -369,3 +369,48 @@ per-option weight tables, spin nulls, MAGMA run directories).
 - All PLS runs on the 33 AHBA-covered bilateral DK regions; the missing region is recorded in `data/`.
 - 2026-09-12: figures are built in R (`ggplot2` + `patchwork` + `ggseg` 2.2.1 from CRAN, env `ahba-pls-r`), not matplotlib. ggseg's R atlas renders frontal and temporal pole correctly, unlike the python polygon set. The R scripts fit nothing and hardcode nothing: every statistic printed on a figure is read from the `results/` table it plots. DK polygons are cached to `data/dk_polygons.csv`.
 - Figure conventions: one-line interpretation per panel subtitle, overall interpretation as the figure subtitle, methods as short bullets in the caption.
+
+## 2026-09-14 — re-run on the true 7.0 tabulated tables
+
+Every input map and every result in this directory was regenerated on
+2026-09-14 from runs on the 7.0 tabulation (`../docs/RERUN_7.0_TABULATED.md`).
+The runs behind the Y maps kept their run ids (the config hash does not encode
+data vintage) but now contain 8,716 children (DK, was 8,192) and 6,537 (HCP-MMP,
+was 5,947), with the six-year wave complete. The "release-vintage caveat" in the
+HCP-MMP section above is resolved: the extra HCP sessions now have age and QC
+rows and enter the model. Scripts `01`–`15` and the six R figures were re-run
+unchanged apart from path updates (MAGMA disorder files now at
+`../genetic_analysis/inputs/magma/`, gene-set sources under `../legacy/hpc/work/`).
+
+**Nothing changes in kind; every number moves by a rounding step.** The group
+maps that feed the PLS correlate ρ = 0.996 with the 6.0-vintage maps, so this
+is the expected outcome and a useful stability check on the whole chain.
+
+| quantity (lead signature = option 2, PLS2, ds0 unless stated) | 6.0-vintage | 7.0 tables |
+|:--|--:|--:|
+| PLS2 spin p (singular value) | 0.0016 | 0.0022 |
+| PLS2 scores vs NSPN-PLS2 (ρ, p_spin) | −0.69, 0.002 | −0.73, 0.001 |
+| gene weights vs NSPN-PLS2 / C3 (ρ over shared genes) | 0.61 / 0.76 | 0.62 / 0.76 |
+| top-decile overlap with C3, fold | 5.3 | 5.2 |
+| MAGMA gene-property β_std, SCZ: ds0 / ds25 / ds50 | 0.037 / 0.028 / 0.034 | 0.037 / 0.027 / 0.034 |
+| MAGMA gene-property β_std, MDD: ds0 / ds25 / ds50 | 0.026 / 0.028 / 0.041 | 0.025 / 0.026 / 0.039 |
+| MDD high-confidence set, permutation z (ds0) | 2.82 | 2.80 |
+| HCP-MMP PLS2 scores vs C3 (ρ, 137 parcels) | 0.69 | 0.70 |
+| HCP-MMP PLS2 MDD β_std / conditional on DK, p | 0.070 / 0.009 | 0.069 / 0.008 |
+| DK PLS2 (matched X) MDD β_std / conditional on HCP, p | 0.055 / 0.78 | 0.053 / 0.91 |
+| SCZ β_std HCP vs DK (matched X) | 0.044 vs 0.046 | 0.045 vs 0.046 |
+| astrocyte z, HCP-MMP PLS2 / DK PLS2 / C3 | +5.1 / −5.3 / −8.9 | +5.1 / −5.2 / −8.9 |
+| oligodendrocyte z, HCP-MMP PLS2 / DK PLS2 / C3 | −12.3 / −5.7 / −13.2 | −12.0 / −5.4 / −13.2 |
+
+Sources: `results/pls_components.tsv`, `concordance_scores.tsv`,
+`lead_overlap_with_references.tsv`, `enrichment_summary.tsv`,
+`hcp_concordance.tsv`, `hcp_vs_dk_conditional.tsv`, `celltype_all_options.tsv`.
+Both conditioning directions, the C3 dominance (everything ABCD-derived is
+absorbed by C3, C3 survives everything), the parcellation control and the
+astrocyte flip by atlas all reproduce. The prose in the sections above quotes
+the 6.0-vintage numbers; where a figure and the prose disagree at the second
+decimal, the figure (regenerated) is current.
+
+Still deferred to the cluster (`FOLLOWUP_GENETICS.md`, now scheduled as step 8
+of `../genetic_analysis/README_HPC.md`): H3 and H4. The exports in `hpc/` were
+regenerated by `code/10_export_for_hpc.py` from the new weights.

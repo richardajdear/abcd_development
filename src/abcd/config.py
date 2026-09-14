@@ -35,7 +35,10 @@ from . import paths
 # producing a new config hash and a new output directory.
 # --------------------------------------------------------------------------
 
-RELEASES = ("5.1", "7.0")
+#: "6.0" is the tabulation this repo analysed between July and September 2026
+#: under a directory labelled 7.0 (see ``io.Release60Adapter``); it is kept so
+#: the like-for-like comparison with the true 7.0 tables stays reproducible.
+RELEASES = ("5.1", "6.0", "7.0")
 
 #: Imaging metrics.  ``t1t2_ratio`` is derived (see ``assemble.DERIVED_METRICS``);
 #: the rest map onto release tables via the adapter's ``METRIC_TABLES``.

@@ -1,5 +1,5 @@
 family_effect,phenotype,h2,ci_lo,ci_hi,r_MZ,r_DZ,n_MZ,n_DZ,dz_class,r_sib_excluded
-False,baseline thickness (control),0.739505,0.575289,0.916457,0.874771,0.505018,266,424,DZ_twin,0.452284
-True,baseline thickness (control),1.46308,1.16746,1.73377,0.57932,-0.15222,266,424,DZ_twin,-0.196344
-False,global mean slope,0.444418,0.181475,0.716541,0.50145,0.279241,266,424,DZ_twin,0.0901879
-True,global mean slope,0.481677,0.200555,0.766628,0.473026,0.232187,266,424,DZ_twin,0.0290379
+False,baseline thickness (control),0.727141,0.574566,0.902303,0.881485,0.517914,273,448,DZ_twin,0.440551
+True,baseline thickness (control),1.45993,1.17999,1.7289,0.60102,-0.128945,273,448,DZ_twin,-0.205225
+False,global mean slope,0.475506,0.235199,0.71481,0.541536,0.303783,273,448,DZ_twin,0.163471
+True,global mean slope,0.489265,0.235566,0.738644,0.51773,0.273097,273,448,DZ_twin,0.118582

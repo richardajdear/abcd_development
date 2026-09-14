@@ -1,7 +1,7 @@
 """Tests for the HCP-MMP extraction (abcd.hcp_stats) and its 7.0 adapter path.
 
 The parser tests run on a synthetic ``mris_anatomical_stats`` table and need
-no data.  The adapter test needs ``abcd-7.0/processed/hcp/`` and skips
+no data.  The adapter test needs ``abcd-data-release-7.0/processed/hcp/`` and skips
 otherwise.
 """
 
@@ -132,7 +132,7 @@ def _hcp_available() -> bool:
         return False
 
 
-@pytest.mark.skipif(not _hcp_available(), reason="abcd-7.0/processed/hcp not present")
+@pytest.mark.skipif(not _hcp_available(), reason="abcd-data-release-7.0/processed/hcp not present")
 def test_release70_hcp_thickness_long_format():
     df = io.Release70Adapter().imaging("thickness", "hcp")
     reg = df[~df.is_global]

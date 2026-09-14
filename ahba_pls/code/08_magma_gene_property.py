@@ -31,7 +31,7 @@ RES, REF = ROOT / "results", ROOT / "data" / "reference"
 GS = REF / "gene_sets"
 RUN = RES / "magma_runs"; RUN.mkdir(exist_ok=True)
 MAGMA = REPO / "tools" / "bin" / ("magma_mac/magma" if (REPO / "tools/bin/magma_mac/magma").exists() else "magma")
-RAW = {"SCZ": REPO / "hpc/work/results/magma/SCZ.genes.raw", "MDD": REPO / "hpc/work/results/magma/MDD.genes.raw"}
+RAW = {"SCZ": REPO / "genetic_analysis/inputs/magma/SCZ.genes.raw", "MDD": REPO / "genetic_analysis/inputs/magma/MDD.genes.raw"}
 for p in RAW.values():
     assert p.exists(), p
 

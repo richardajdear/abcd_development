@@ -48,12 +48,12 @@ PATTERNS = [
     "docs/*.md",
     "docs/*.csv",
     "docs/figures/*.png",
-    "hpc/*.md",          # hpc/README.md -- the file whose absence from the tray
+    "genetic_analysis/*.md",          # hpc/README.md -- the file whose absence from the tray
                          # prompted this script; omitting .md here would have
                          # made the audit blind to exactly that case.
-    "hpc/*.sbatch",
-    "hpc/*.sh",
-    "hpc/*.example",
+    "genetic_analysis/*.sbatch",
+    "genetic_analysis/*.sh",
+    "genetic_analysis/*.example",
     "configs/*.yaml",
     "src/abcd/*.py",
     "tools/*.py",
