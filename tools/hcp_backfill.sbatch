@@ -15,10 +15,10 @@
 #
 #   LIST=abcd-data-release-7.0/processed/hcp/sessions_to_reparcellate.txt   # 8,874 lines
 #   N=$(wc -l < $LIST); CHUNK=50
-#   sbatch --array=0-$(( (N + CHUNK - 1) / CHUNK - 1 ))%100 tools/hcp_backfill.sbatch $LIST work/parcellations_backfill/T1
+#   sbatch --array=0-$(( (N + CHUNK - 1) / CHUNK - 1 ))%100 tools/hcp_backfill.sbatch $LIST legacy/hpc/work/parcellations_backfill/T1
 #
 # Then:  sbatch tools/hcp_extract.sbatch --out-dir abcd-data-release-7.0/processed/hcp \
-#            --extra-parc-root work/parcellations_backfill/T1
+#            --extra-parc-root legacy/hpc/work/parcellations_backfill/T1
 #
 # Idempotent: sessions whose output already has 180 ROI rows per hemisphere
 # are skipped, so a partial array can simply be resubmitted.
@@ -45,10 +45,18 @@ while read -r id; do
         echo "DONE $id (already complete)"; skip=$((skip+1)); continue
     fi
     t0=$(date +%s)
-    if bash hpc/hcp_backfill_session.sh "$id" "$OUT_ROOT"; then
+    # absolute path: the first run lost 756 sessions with rc=127 when the
+    # repo's hpc/ directory was renamed under a running array
+    rc=0
+    for attempt in 1 2 3; do
+        bash "$SLURM_SUBMIT_DIR/tools/hcp_backfill_session.sh" "$id" "$OUT_ROOT" && { rc=0; break; } || rc=$?
+        [[ $rc -eq 127 ]] || break
+        echo "  rc=127 on attempt $attempt, retrying in 30 s"; sleep 30
+    done
+    if [[ $rc -eq 0 ]]; then
         ok=$((ok+1))
     else
-        rc=$?; echo "FAILED rc=$rc $id"; fail=$((fail+1))
+        echo "FAILED rc=$rc $id"; fail=$((fail+1))
     fi
     echo "  $(( $(date +%s) - t0 ))s"
 done < <(sed -n "${start},${end}p" "$LIST")

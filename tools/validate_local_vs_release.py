@@ -11,7 +11,7 @@ Three comparisons, written as a Markdown report plus TSVs to
    per-region max |delta|, the hemisphere means, and sessions present on one
    side only.
 2. **HCP backfill vs July run** on the deliberately re-run overlap sample
-   (``work/parcellations_overlap/T1``): same-session, same-surface,
+   (``legacy/hpc/work/parcellations_overlap/T1``): same-session, same-surface,
    different execution -- must be identical.
 3. **HCP vs DK on the same surfaces**: vertex-weighted whole-cortex means.
 
@@ -138,7 +138,7 @@ def main(argv=None) -> int:
     ap.add_argument("--release-label", default="6.0")
     ap.add_argument("--processed", type=Path, default=None,
                     help="default: <release 7.0 dir>/processed")
-    ap.add_argument("--overlap-root", type=Path, default=ROOT / "work/parcellations_overlap/T1")
+    ap.add_argument("--overlap-root", type=Path, default=ROOT / "legacy/hpc/work/parcellations_overlap/T1")
     ap.add_argument("--out", type=Path, default=ROOT / "docs/hcp_census")
     a = ap.parse_args(argv)
     processed = a.processed or paths.release_dir("7.0") / "processed"

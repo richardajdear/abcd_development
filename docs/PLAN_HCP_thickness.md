@@ -410,7 +410,7 @@ reconstructions cost nothing.
 Design decisions worth reviewing:
 
 - **No writes to `derivatives/`.** Output mirrors rr480's layout under
-  `work/parcellations_backfill/T1/<sub>/<ses>/HCP.fsaverage.aparc/`
+  `legacy/hpc/work/parcellations_backfill/T1/<sub>/<ses>/HCP.fsaverage.aparc/`
   (gitignored). The annotation and stats live there, plus the surf2surf and
   stats stderr logs per hemisphere for post-mortems.
 - **Same annotation, same FreeSurfer major version.** `fsaverageSubP`'s
@@ -435,7 +435,7 @@ stub) with the identical scripts: 40 s, 180 `*_ROI` rows per hemisphere,
 V1 = 1.974 mm and TE1m = 3.426 mm (plausible), stderr shows FreeSurfer
 reading the session only through the private symlink, and the session's
 `label/` directory in `derivatives/` keeps its 28 July mtime — nothing was
-written there. Output at `work/parcellations_backfill_test/`.
+written there. Output at `legacy/hpc/work/parcellations_backfill_test/`.
 
 **Then re-extract.** `abcd.hcp_stats` gains `--extra-parc-root`: sessions are
 discovered in both trees, and for a session present in both the backfill tree
