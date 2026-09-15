@@ -1315,5 +1315,261 @@ reported as null; not hunted.
 **The DK arm is now complete through every step of §3 (1–8).** Its §7 table
 is `results_70tab/summary_70tab.tsv`.
 
-**Next:** read the HCP scans (λ_GC, `n_chr`); `PARC=hcp` step 7 then step 8;
-then the DK-vs-HCP table and the HCP `summary_70tab.tsv`.
+**Committed and pushed: `105c7ac` on `main`** (43 files: the 23 DK summary
+tables, this log, every step script, the setup fixes, the PARC switch and the
+two pipeline changes for HCP; nothing per-subject). `origin/main` went
+f9a8806 → 105c7ac, carrying the three `hcp-backfill` commits with it. Push was
+over SSH; the HTTPS remote has no credentials in a non-interactive shell.
+
+**On the HCP PRS grid's pace (35583575).** Compute is trivial — C+T cells run
+2–3 min (≈320 lmer fits: 2 scripts × 2 strata × 5 phenotypes × 8 thresholds,
+raw + zanc), single-score cells 30–50 s — and the DK grid took 16 min wall.
+The HCP cells were waiting 12 → 76 min each for a node because the array was
+throttled to 10 concurrent tasks and every freed slot re-entered a busy
+icelake queue. Throttle lifted to 40 (`scontrol update ArrayTaskThrottle`);
+the remaining cells now queue together. The min-p permutation is the one
+genuinely heavy piece, by design.
+
+**HCP steps 5 and 6 (association layer) COMPLETE** — GREML 5/5 (35583574),
+PRS 40/40 cells, 160 files, zero failures (35583575), collected into
+`results_70tab_hcp/prs_final/table_{main,all,family}.tsv`. Min-p permutation
+(35583576) running.
+
+GREML, HCP, same 6,011 unrelated: `slope_PC1` 0.0998 ± 0.0438 (z 2.28)
+completes the table above — again a different number from DK's PC1 (0.111),
+again not comparable.
+
+**PRS, `global_slope`, ancestry-matched cells, DK vs HCP** (pooled arm zanc,
+EUR raw; C+T at its best threshold):
+
+| arm | method | β (SE) DK → HCP | p_adj DK → HCP |
+|:--|:--|:--|:--|
+| SCZ_pooled | C+T | −0.0337 (0.0104) → −0.0353 (0.0104) | 0.0093 → 0.0057 |
+| | PRS-CS | −0.0242 → −0.0219 | 0.020 → 0.037 |
+| | SBayesR | −0.0303 → −0.0302 | 0.0039 → 0.0042 |
+| | SBayesRC | −0.0289 → −0.0287 | 0.0054 → 0.0060 |
+| SCZ_eur | C+T | −0.0382 (0.0147) → −0.0396 (0.0148) | 0.073 → 0.059 |
+| | PRS-CS | −0.0261 → **−0.0294** | 0.074 → **0.047** |
+| | SBayesR | −0.0266 → **−0.0338** | 0.071 → **0.023** |
+| | SBayesRC | −0.0270 → **−0.0332** | 0.065 → **0.024** |
+| MDD_pooled | C+T | −0.0216 → −0.0158 | 0.31 → 1.0 |
+| | PRS-CS | −0.0206 → −0.0151 | 0.048 → 0.15 |
+| | SBayesR | −0.0290 → −0.0232 | 0.0060 → 0.029 |
+| | SBayesRC | −0.0223 → −0.0182 | 0.033 → 0.084 |
+| MDD_eur | all four | null → null | — |
+
+Three readings, and the third is the one to keep:
+
+1. **The robust cell is atlas-invariant.** SCZ pooled: four betas agree to
+   within 0.002 and all four methods stay significant on either atlas. The
+   SEs are identical to the fourth decimal — the null-model residual gain in
+   HCP does **not** propagate to the PRS SE, because `prs_assoc.R` standardises
+   the phenotype and the SE is then set by n and by the PRS–phenotype
+   correlation, not by how much family variance the kinship absorbs.
+2. **The two marginal cells move in opposite directions.** SCZ EUR goes from
+   0/4 significant (DK, p_adj 0.065–0.074) to **3/4** (HCP, 0.023–0.047) —
+   betas −0.029 to −0.040, i.e. back where 6.0 had them. MDD pooled goes from
+   3/4 (DK) to **1/4** (HCP, SBayesR only). Nothing changes sign.
+3. **That is what near-threshold effects do under an r = 0.95 re-weighting
+   of the phenotype, and it is the argument against reading either atlas's
+   marginal cells as a verdict.** The honest DK-vs-HCP statement is: SCZ →
+   faster thinning is robust in the pooled arm regardless of parcellation;
+   SCZ in EUR and MDD pooled are real-looking effects of ~0.02–0.03 SD/SD
+   whose p-values sit either side of 0.05 depending on which whole-cortex
+   average you take. Report both atlases side by side
+   (`results_70tab_hcp/compare/table_dk_vs_hcp.tsv`); do not pick the one
+   that flatters a cell.
+
+**HCP min-p permutation COMPLETE (35583576)** — matched design, C+T,
+`global_slope`, p_perm DK → HCP: SCZ pooled **0.0065 → 0.0090** (survives on
+both); SCZ EUR **0.053 → 0.035** (crosses under on HCP, the same move as the
+mixed model); MDD pooled 0.099 → 0.27 (C+T MDD is null on both — its DK
+significance was never C+T); ALZ EUR 0.026 → 0.053; ASD 0.077 → 0.14; EA 0.12
+→ 0.44. The permutation reproduces the mixed-model comparison cell for cell,
+which is what it should do.
+
+**HCP within-family (Fulker), `global_slope`, 726 / 1,449 pairs — same
+verdict as DK.** SCZ EUR C+T: β_W −0.077 (SE 0.049) vs β_B −0.036, p_diff 0.42;
+SCZ pooled C+T: β_W −0.004 (0.045) vs β_B −0.048, p_diff 0.36. Every β_W SE is
+0.045–0.065, three to four times β_B's; no p_diff < 0.11 on either atlas. One
+nuance: the DK pooled β_W for SCZ sat slightly *above* zero (+0.022 C+T,
++0.032 SBayesR) and on HCP it sits at zero or slightly below (−0.004, −0.001)
+— i.e. the mild "within-family effect vanishes" pattern that could have been
+read as a stratification hint on DK is not there on HCP. With SEs this size
+that is noise, and it is a reason not to build a story on the sign of β_W in
+either atlas. §5's ~18 % power caveat stands.
+
+**HCP steps 7 and 8 chained behind the scans.** Pooled assoc 110/110
+COMPLETED (collect 35583562 queued); EUR assoc 77/110 with 35 running
+(collect 35583573 `afterok`). `PARC=hcp step7_ldsc_magma.sbatch` submitted as
+**35593113** with `--dependency=afterok:35583573`, and `PARC=hcp
+step8_ahba_pls_h3.sh` as **35593114** `afterok:35593113` — the same scripts,
+same v1 downstream code, output under `results_70tab_hcp/{ldsc_eur,magma_eur,
+magma_prio_eur,magma_ahba_pls_h3}`. Zero failures across 220 scan tasks so far.
+Partial `summary_70tab.tsv` (595 rows) and `compare/table_dk_vs_hcp.tsv` (227
+rows) already built for the HCP root; both rebuild once the scans, step 7 and
+step 8 land.
+
+**HCP pooled scan COMPLETE AND VALID** (35583561 110/110, collected by
+35583562): `n_chr == 22` on all five, 9,426,204 variants, n_mean 8,395 — the
+identical variant set and sample as DK, so this is a clean atlas contrast:
+
+| phenotype | λ_GC DK → HCP | hits DK → HCP |
+|:--|:--|:--|
+| baseline_thickness | 1.0388 → 1.0399 | 0 → **1** (p 4.0e-8) |
+| global_slope | 1.0265 → 1.0278 | 0 → 0 |
+| slope_PC1 | 1.0196 → 1.0221 | 0 → 0 |
+| slope_PC2 | 1.0470 → 1.0346 | 1 → 0 |
+| slope_PC3 | 1.0149 → 1.0409 | 0 → 0 |
+
+λ_GC within 0.003 of DK for the two whole-cortex phenotypes and in band
+everywhere (rule 8). **`global_slope` has no genome-wide hit on either atlas.**
+The single hits move around: DK's `slope_PC2` hit (4.6e-9) is absent from HCP
+(its PC2 is a different component), and HCP's `baseline_thickness` has one at
+p 4.0e-8 that DK put at 6.5e-8 — the same locus straddling the threshold from
+two averages of the same cortex. Neither is a finding to lead with; n_p1e5 is
+lower on HCP for baseline (223 vs 343), consistent with a slightly different
+weighting rather than a stronger signal. EUR array 110/110 COMPLETED; collect
+35583573 → step 7 → step 8 chained.
+
+**HCP EUR scan COMPLETE AND VALID** (35583572 110/110, collected by
+35583573): `n_chr == 22`, 7,470,569 variants, n_mean 4,205 — identical to DK.
+
+| phenotype | λ_GC DK → HCP | hits DK → HCP |
+|:--|:--|:--|
+| baseline_thickness | 1.0225 → 1.0212 | 0 → 0 |
+| global_slope | 0.9951 → 0.9935 | 0 → 0 |
+| slope_PC1 | 0.9996 → 1.0106 | 0 → 0 |
+| slope_PC2 | 1.0232 → 1.0165 | 0 → 0 |
+| slope_PC3 | 0.9970 → 1.0099 | 0 → **3** |
+
+λ_GC in band everywhere, within 0.002 of DK for the whole-cortex phenotypes,
+and **no hit on `global_slope` in any of the four scans (2 atlases × 2 arms)**.
+**HCP steps 3–4 are done: 440 scan tasks across both atlases, zero failures.**
+
+*The three `slope_PC3` hits are one locus.* rs62452241 / rs11761541 /
+rs1476194 at chr7:35.55–35.63 Mb (hg19), in LD, MAF 5–8 %, β ≈ +0.24 SD per
+allele on HCP-EUR `slope_PC3` (p 1.2e-9 / 2.4e-9 / 4.1e-8). A fourth row below
+5e-8, rs755168870 (chr9, freq 0.00023 ≈ 2 carriers, β 3.8), is a MAC artefact
+and is correctly dropped by the collector's MAF ≥ 0.01 filter. The chr7 locus
+is present in the same direction elsewhere — DK-EUR `slope_PC3` p 3.0e-5,
+HCP-pooled 1.5e-5, DK-pooled 0.011 — so it is not noise, but the pooled arm
+with twice the n is *weaker* than EUR, the winner's-curse signature. It is a
+**candidate for a phenotype that is atlas-specific** (HCP PC3 shares a quarter
+of its variance with DK PC3), from one arm of 4,205 children. Record it; do
+not lead with it; it wants an independent cohort, not another parcellation.
+
+**Side question answered while waiting: do DK's and HCP's slope PC1–3 agree,
+and what do they track?** (`docs/figures/pc_loadings_dk_vs_hcp.html`, numbers
+in `results_70tab_hcp/compare/table_pc_loadings_dk_vs_hcp.tsv`; inputs
+recomputed from both runs' `fits/blups.parquet` with `covariance.slope_pcs`,
+i.e. exactly the pipeline's loadings.) Variance explained: DK PC1 24.5 %, PC2
+5.5 %, PC3 4.7 %; HCP 13.2 / 2.6 / 2.5 % (358 parcels spread the same variance
+thinner). Cross-atlas, with each HCP parcel averaged into its nearest DK region
+by spherical centroid (68 regions): PC1↔PC1 r = **−0.63** (sign flip, PCA sign
+is arbitrary), PC2↔PC2 **+0.83**, PC3↔PC3 **+0.66**, |slope|↔|slope| +0.84;
+off-diagonal DK PC1↔HCP PC2 +0.46 and DK PC3↔HCP PC1 +0.47, so the components
+partially mix — which is why the *subject-level* PC phenotypes correlated only
+0.88 / 0.79 / 0.51 across atlases and why their GREML h² reorders. Within each
+atlas (Spearman): **PC2 ↔ AHBA C1 = −0.79 (DK) / −0.78 (HCP)** and **PC3 ↔ AHBA
+C2 = +0.82 / +0.72** — the two couplings README "Status" records (PC3–C2, PC2–C1)
+reproduce on the independent parcellation; PC1 ↔ C1 is −0.48 / +0.53
+(consistent given the PC1 sign flip); |slope| ↔ C3 is 0.59 (DK, 34 regions) vs
+0.33 (HCP, 137 parcels) — the C3 coupling of the absolute thinning map is
+weaker at parcel resolution. Artifact: https://claude.ai/artifact/HSz6Xg6JjgKyQ72BgAyy8s
+
+**Structural-covariance PCs (asked for next): they are the slope PCs.** Ran
+`covariance.sc_matrix` → `sc_pcs` (eigenvectors of the 68×68 / 358×358
+region-by-region correlation of subject slopes) on both atlases and repeated
+every comparison. Diagonal Pearson r between SC1–3 and PC1–3 loadings is
+**1.000** on both atlases; every within-atlas Spearman against |slope| and
+AHBA C1–C3, and every cross-atlas cell, reproduces the slope-PC table to three
+decimals (`work/pc_compare/*_sc.csv`). This is the identity `covariance.py`
+states and `docs/sc_vs_slope_pc_identity.csv` verified for DK: PCA on the
+column-standardised subject×region matrix diagonalises R = V L Vᵀ, PCA on R
+diagonalises RᵀR = V L² Vᵀ — same eigenvectors, squared eigenvalues. So the
+"structural covariance" analysis is not independent evidence about the
+components; it is the same analysis. The one thing that differs is the
+variance-explained *convention*: the squared-eigenvalue share the SC framing
+reports is **80.4 % (DK) / 79.1 % (HCP)** for PC1, against the true variance
+share of **24.5 % / 13.2 %** — a threefold-plus overstatement, the trap the
+module docstring warns about. Both reported here so nobody quotes 80 %.
+
+**HCP STEP 7 COMPLETE** (35593113, 1 h 33 min). h² z first:
+
+| LDSC, EUR | DK h²_obs (z) | HCP h²_obs (z) | rg(SCZ) DK → HCP |
+|:--|:--|:--|:--|
+| baseline_thickness | 0.421 ± 0.097 (4.34) | 0.413 ± 0.095 (4.32) | 0.024 ± 0.053 → 0.031 ± 0.055 |
+| global_slope | 0.055 ± 0.097 (**0.57**) | 0.166 ± 0.093 (**1.78**) | −0.164 ± 0.200 → −0.104 ± 0.086 |
+
+The HCP whole-cortex slope has three times the LDSC h² z of DK's — the same
+lower-noise phenotype seen in the null models — and its rg SE halves as a
+result. It is **still far below rule 13's z ≳ 4**, so rg(global_slope, SCZ)
+remains uninformative on both atlases; the sign is negative on both, the
+magnitude is noise. `baseline_thickness` is the positive control on both
+(z 4.3) with a tight null rg. GREML (z 3.5) and LDSC (z 1.8) on HCP are, as on
+DK, different estimators on different samples and not in tension.
+
+| MAGMA prioritised set (EUR, marginal) | DK β (p) | HCP β (p) |
+|:--|:--|:--|
+| SCZ_locus_pool → global_slope | 0.143 (3.0e-3) | **0.170 (5.0e-4)** |
+| SCZ_locus_pool → baseline_thickness | 0.172 (4.2e-4) | 0.189 (1.3e-4) |
+| SCZ_prioritised (101) → either | null | null |
+| MDD_pool → either | null | null |
+
+The `SCZ_locus_pool` enrichment of the thinning-rate GWAS — the one step-7
+result that strengthened from 6.0 to 7.0 on DK — **strengthens again on HCP**,
+and is now the most consistent gene-level finding across vintages and atlases.
+AHBA C1–C3 (±) gene-property: null for `global_slope` on HCP as on DK; the
+only sub-0.05 rows are the same reverse-direction disorder → baseline rows
+(SCZ 0.0082, MDD 2.9e-4) plus two nominal snRNA-PC1 rows. Step 8 (35593114)
+chained.
+
+---
+
+### What changed against §5, and what it licenses (§7 item 5)
+
+The 7.0 tabulation added 3,520 six-year scans and moved the subject-level
+thinning rate (r = 0.92 with its 6.0 self) without moving the group map
+(ρ = 0.996). On the genotype side nothing changed. The re-run shows the
+consequence exactly where §1 said the power was spent: on **subject-level
+precision**. Every matched SCZ/MDD polygenic-score SE tightened; `global_slope`
+GREML h² rose 0.137 → 0.166 with an unchanged SE, the signature of a
+de-attenuated phenotype rather than a bigger sample; the GENESIS null models
+absorb less residual. What that precision bought: **SCZ → faster thinning is
+robust in the pooled arm under all four PRS methods** (p_adj 0.004–0.037, min-p
+permutation 0.0065) and **MDD crossed into significance under three methods**
+(the outcome §5 named in advance as "new"); the `SCZ_locus_pool` gene-set
+enrichment of the thinning GWAS strengthened. What it did not buy, and could
+not: any genome-wide hit on `global_slope` (four scans, two atlases, λ_GC all
+in band, zero), an informative rg (LDSC h² z 0.6–1.8 against the ≳ 4 needed),
+or any AHBA C1–C3 gene-level coupling (null, both directions, both atlases,
+including the data-driven PLS signature). The one honest loss: the **SCZ-EUR
+cell attenuated to borderline** (3/4 → 0/4 on DK), and the ladder showed this
+is the phenotype values themselves, not a bug — while on HCP the same cell is
+back to 3/4 and MDD-pooled drops to 1/4. That pair of reversals is the
+clearest lesson of the parcellation comparison: **effects of 0.02–0.03 SD/SD
+sit either side of 0.05 depending on which whole-cortex average is taken,
+so the licensed claims are the atlas-invariant ones** — SCZ pooled, the
+`SCZ_locus_pool` enrichment, the null GWAS and null rg, and a whole-cortex h²
+that does not depend on the atlas (0.166 / 0.156). Everything marginal is
+reported with both atlases side by side and is not to be led with. The slope
+PCs are atlas-specific decompositions (PC2 excepted) and structural-covariance
+PCs are the same objects by algebra; their h² and PRS rows are within-atlas
+readouts only. The chr7:35.5 Mb locus for HCP's PC3 is a candidate that wants
+an independent cohort.
+
+**HCP STEP 8 COMPLETE (35593114) — null.** 35 tests, none below 0.05
+(smallest 0.066, a marginal ds0 row on baseline). The DK conditional
+`global_slope` trend (p 0.06–0.07) is **not present on HCP** (0.17–0.25), which
+settles it as noise.
+
+**THE HCP-MMP ARM IS COMPLETE THROUGH EVERY STEP (1–8).** 840 SLURM job steps
+across the arm, zero failures. Tables: `results_70tab_hcp/summary_70tab.tsv`
+(694 rows, 559 with a DK-6.0 partner — there is no HCP legacy) and
+`results_70tab_hcp/compare/table_dk_vs_hcp.tsv` (229 rows, one per readout ×
+phenotype × arm × method, DK and HCP side by side, PCs flagged
+`comparable=no`). Both atlases now have identical pipelines, layouts and
+definition-of-done tables; `PARC=<dsk|hcp>` is the only switch.
+
+Committed and pushed as the second commit of this re-run.

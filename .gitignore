@@ -19,6 +19,8 @@ _view_*.png
 # and is a work product like the *_summary.tsv tables.
 *_files/
 *.html
+# the DK-vs-HCP slope-component figure (README_HPC.md 8, 2026-09-15)
+!docs/figures/pc_loadings_dk_vs_hcp.html
 !docs/abcd_v2_findings.html
 
 # setuptools build artefacts (created by `pip install -e .`, machine-specific)

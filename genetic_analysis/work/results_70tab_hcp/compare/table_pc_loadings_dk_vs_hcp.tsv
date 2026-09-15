@@ -1,0 +1,47 @@
+panel	x	y	stat	n	value
+cross-atlas (68 DK regions; HCP parcels averaged into nearest DK region)	DK PC1	HCP PC1	pearson_r	68	-0.6338
+cross-atlas (68 DK regions; HCP parcels averaged into nearest DK region)	DK PC1	HCP PC2	pearson_r	68	0.4606
+cross-atlas (68 DK regions; HCP parcels averaged into nearest DK region)	DK PC1	HCP PC3	pearson_r	68	0.0764
+cross-atlas (68 DK regions; HCP parcels averaged into nearest DK region)	DK PC1	HCP abs_slope	pearson_r	68	-0.0497
+cross-atlas (68 DK regions; HCP parcels averaged into nearest DK region)	DK PC2	HCP PC1	pearson_r	68	-0.3775
+cross-atlas (68 DK regions; HCP parcels averaged into nearest DK region)	DK PC2	HCP PC2	pearson_r	68	0.829
+cross-atlas (68 DK regions; HCP parcels averaged into nearest DK region)	DK PC2	HCP PC3	pearson_r	68	0.4233
+cross-atlas (68 DK regions; HCP parcels averaged into nearest DK region)	DK PC2	HCP abs_slope	pearson_r	68	0.0576
+cross-atlas (68 DK regions; HCP parcels averaged into nearest DK region)	DK PC3	HCP PC1	pearson_r	68	0.4652
+cross-atlas (68 DK regions; HCP parcels averaged into nearest DK region)	DK PC3	HCP PC2	pearson_r	68	-0.3424
+cross-atlas (68 DK regions; HCP parcels averaged into nearest DK region)	DK PC3	HCP PC3	pearson_r	68	0.6595
+cross-atlas (68 DK regions; HCP parcels averaged into nearest DK region)	DK PC3	HCP abs_slope	pearson_r	68	0.1587
+cross-atlas (68 DK regions; HCP parcels averaged into nearest DK region)	DK abs_slope	HCP PC1	pearson_r	68	0.4216
+cross-atlas (68 DK regions; HCP parcels averaged into nearest DK region)	DK abs_slope	HCP PC2	pearson_r	68	-0.0718
+cross-atlas (68 DK regions; HCP parcels averaged into nearest DK region)	DK abs_slope	HCP PC3	pearson_r	68	0.3903
+cross-atlas (68 DK regions; HCP parcels averaged into nearest DK region)	DK abs_slope	HCP abs_slope	pearson_r	68	0.8387
+within-atlas (DK)	PC1	|slope| (all regions)	spearman_rho	68	-0.238
+within-atlas (DK)	PC1	AHBA C1 (lh)	spearman_rho	34	-0.484
+within-atlas (DK)	PC1	AHBA C2 (lh)	spearman_rho	34	-0.268
+within-atlas (DK)	PC1	AHBA C3 (lh)	spearman_rho	34	-0.442
+within-atlas (DK)	PC2	|slope| (all regions)	spearman_rho	68	0.226
+within-atlas (DK)	PC2	AHBA C1 (lh)	spearman_rho	34	-0.79
+within-atlas (DK)	PC2	AHBA C2 (lh)	spearman_rho	34	0.268
+within-atlas (DK)	PC2	AHBA C3 (lh)	spearman_rho	34	0.343
+within-atlas (DK)	PC3	|slope| (all regions)	spearman_rho	68	0.49
+within-atlas (DK)	PC3	AHBA C1 (lh)	spearman_rho	34	0.205
+within-atlas (DK)	PC3	AHBA C2 (lh)	spearman_rho	34	0.819
+within-atlas (DK)	PC3	AHBA C3 (lh)	spearman_rho	34	0.477
+within-atlas (DK)	|slope|	AHBA C1 (lh)	spearman_rho	34	0.081
+within-atlas (DK)	|slope|	AHBA C2 (lh)	spearman_rho	34	0.349
+within-atlas (DK)	|slope|	AHBA C3 (lh)	spearman_rho	34	0.587
+within-atlas (HCP)	PC1	|slope| (all regions)	spearman_rho	358	0.188
+within-atlas (HCP)	PC1	AHBA C1 (lh)	spearman_rho	137	0.532
+within-atlas (HCP)	PC1	AHBA C2 (lh)	spearman_rho	137	0.21
+within-atlas (HCP)	PC1	AHBA C3 (lh)	spearman_rho	137	0.337
+within-atlas (HCP)	PC2	|slope| (all regions)	spearman_rho	358	-0.095
+within-atlas (HCP)	PC2	AHBA C1 (lh)	spearman_rho	137	-0.782
+within-atlas (HCP)	PC2	AHBA C2 (lh)	spearman_rho	137	-0.189
+within-atlas (HCP)	PC2	AHBA C3 (lh)	spearman_rho	137	0.042
+within-atlas (HCP)	PC3	|slope| (all regions)	spearman_rho	358	0.232
+within-atlas (HCP)	PC3	AHBA C1 (lh)	spearman_rho	137	-0.162
+within-atlas (HCP)	PC3	AHBA C2 (lh)	spearman_rho	137	0.724
+within-atlas (HCP)	PC3	AHBA C3 (lh)	spearman_rho	137	0.116
+within-atlas (HCP)	|slope|	AHBA C1 (lh)	spearman_rho	137	0.141
+within-atlas (HCP)	|slope|	AHBA C2 (lh)	spearman_rho	137	0.061
+within-atlas (HCP)	|slope|	AHBA C3 (lh)	spearman_rho	137	0.334

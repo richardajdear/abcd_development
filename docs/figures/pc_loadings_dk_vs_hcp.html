@@ -1,0 +1,195 @@
+<title>Slope Components Across Atlases</title>
+<style>
+:root{color-scheme:light;--surface:#fcfcfb;--plane:#f9f9f7;--ink:#0b0b0b;--ink2:#52514e;--muted:#898781;--grid:#e1e0d9;--axis:#c3c2b7;--pos:#2a78d6;--neg:#e34948;--mid:#f0efec;--dot:#2a78d6;--ring:#fcfcfb;--border:rgba(11,11,11,.10)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){color-scheme:dark;--surface:#1a1a19;--plane:#0d0d0d;--ink:#fff;--ink2:#c3c2b7;--muted:#898781;--grid:#2c2c2a;--axis:#383835;--pos:#3987e5;--neg:#e66767;--mid:#383835;--dot:#3987e5;--ring:#1a1a19;--border:rgba(255,255,255,.10)}}
+:root[data-theme="dark"]{color-scheme:dark;--surface:#1a1a19;--plane:#0d0d0d;--ink:#fff;--ink2:#c3c2b7;--muted:#898781;--grid:#2c2c2a;--axis:#383835;--pos:#3987e5;--neg:#e66767;--mid:#383835;--dot:#3987e5;--ring:#1a1a19;--border:rgba(255,255,255,.10)}
+body{background:var(--plane);color:var(--ink);font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;padding-block:28px;padding-inline:clamp(16px,4vw,48px);margin:0}
+main{max-width:1040px;margin:0 auto;display:grid;gap:28px}
+header h1{font-size:clamp(22px,3vw,30px);margin:0 0 6px;text-wrap:balance;font-weight:650;letter-spacing:-.01em}
+header p{margin:0;color:var(--ink2);max-width:68ch}
+.kv{display:flex;flex-wrap:wrap;gap:8px 20px;color:var(--ink2);font-size:13px;margin-top:10px} .kv b{color:var(--ink);font-weight:600}
+section{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:20px}
+section>h2{font-size:15px;margin:0 0 4px;font-weight:650} section>p.lead{margin:0 0 16px;color:var(--ink2);max-width:75ch}
+figure{margin:0} figcaption{display:flex;flex-direction:column;gap:2px;margin-bottom:10px} figcaption strong{font-weight:600} figcaption span{color:var(--muted);font-size:12.5px}
+.pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px}
+.grid{display:grid;gap:2px;background:var(--surface)}
+.hl{font-size:12px;color:var(--ink2);padding:6px 4px;display:flex;align-items:flex-end;justify-content:center;text-align:center;line-height:1.2} .hl.row{justify-content:flex-end;text-align:right;align-items:center;padding-right:8px}
+.cell{position:relative;border:0;border-radius:3px;min-height:44px;display:flex;align-items:center;justify-content:center;font:inherit;font-variant-numeric:tabular-nums;cursor:default;background:color-mix(in oklab, var(--mid) calc(100% - var(--w)*100%), var(--pos) calc(var(--w)*100%));color:var(--ink)}
+.cell.neg{background:color-mix(in oklab, var(--mid) calc(100% - var(--w)*100%), var(--neg) calc(var(--w)*100%))}
+.cell span{font-size:13px;font-weight:600;padding:2px 6px;border-radius:3px;background:color-mix(in oklab,var(--surface) 78%,transparent)}
+.cell:hover,.cell:focus-visible{outline:2px solid var(--ink);outline-offset:1px} .cell.na{background:var(--grid)}
+.legend{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px;margin-top:10px} .legend i{height:10px;flex:0 0 140px;border-radius:2px;background:linear-gradient(90deg,var(--neg),var(--mid),var(--pos))}
+details{margin-top:10px;color:var(--ink2);font-size:13px} summary{cursor:pointer} table{border-collapse:collapse;margin-top:8px;font-variant-numeric:tabular-nums} th,td{padding:4px 10px;border-bottom:1px solid var(--grid);text-align:right} th:first-child,td:first-child{text-align:left} thead th{color:var(--muted);font-weight:500}
+.sm{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px}
+.panel h3{font-size:13px;margin:0 0 2px;font-weight:600} .panel .r{font-size:12px;color:var(--muted);margin:0 0 6px}
+svg{width:100%;height:auto;display:block;overflow:visible} .gl{stroke:var(--grid);stroke-width:1} .ax{stroke:var(--axis);stroke-width:1} .tk{fill:var(--muted);font-size:10px} .al{fill:var(--ink2);font-size:11px}
+.pt{fill:var(--dot);stroke:var(--ring);stroke-width:2} .hit{fill:transparent;cursor:default} .hit:hover+.pt,.hit:focus+.pt{stroke:var(--ink)}
+#tip{position:fixed;pointer-events:none;background:var(--surface);color:var(--ink);border:1px solid var(--border);border-radius:4px;padding:6px 9px;font-size:12.5px;box-shadow:0 2px 8px rgba(0,0,0,.12);display:none;z-index:9} #tip b{font-weight:600}
+.note{color:var(--ink2);font-size:13px;margin:0}
+@media (prefers-reduced-motion:no-preference){.cell,.pt{transition:outline-color .12s}}
+</style>
+<main>
+<header>
+<h1>Slope components across atlases</h1>
+<p>Region loadings of PC1–PC3 from a PCA of subject-by-region thinning slopes, fitted separately on the Desikan–Killiany (DK, 68 regions) and HCP-MMP (358 parcels, hippocampal parcel excluded) parcellations of the same 8,716 ABCD children, 7.0 tabulation. Compared with each atlas's regional absolute thinning rate and with the AHBA transcriptomic components C1–C3.</p>
+<p class="note" style="margin-top:10px;max-width:75ch"><strong>Structural-covariance PCs are these same components.</strong> Eigenvectors of the region-by-region correlation matrix of subject slopes (68×68 DK, 358×358 HCP) correlate 1.000 with the PC1–PC3 loadings shown here on both atlases, because PCA on the standardised subject-by-region matrix diagonalises R while PCA on R diagonalises R² — same eigenvectors, squared eigenvalues. Every panel below is therefore also the structural-covariance result. Only the variance-explained convention differs: the squared-eigenvalue share would quote PC1 at 80% (DK) and 79% (HCP); the true variance share is the one given here.</p>
+<div class="kv"><span>DK variance explained <b>PC1 24.5%</b> · PC2 5.5% · PC3 4.7%</span><span>HCP <b>PC1 13.2%</b> · PC2 2.6% · PC3 2.5%</span><span>PCA sign is arbitrary: read |r|</span></div>
+</header>
+
+<section>
+<h2>Do the same components emerge on both atlases?</h2>
+<p class="lead">Each HCP parcel is assigned to its nearest DK region by spherical centroid, HCP loadings are averaged within each DK region, and the 68 DK values are correlated with them. The diagonal answers the question; the off-diagonal shows mixing.</p>
+<figure class="heat"><figcaption><strong>Cross-atlas Pearson r, 68 DK regions</strong><span>rows: DK loading · columns: HCP loading averaged into the DK region</span></figcaption>
+<div class="grid" style="grid-template-columns: 7.5em repeat(4, 1fr)">
+<div class="corner"></div>
+<div class="hl">HCP PC1</div>
+<div class="hl">HCP PC2</div>
+<div class="hl">HCP PC3</div>
+<div class="hl">HCP |slope|</div>
+<div class="hl row">DK PC1</div>
+<button class="cell neg" style="--w:0.634" data-r="DK PC1" data-c="HCP PC1" data-v="-0.634" data-n="" aria-label="DK PC1 vs HCP PC1: -0.634"><span>-0.63</span></button>
+<button class="cell pos" style="--w:0.461" data-r="DK PC1" data-c="HCP PC2" data-v="+0.461" data-n="" aria-label="DK PC1 vs HCP PC2: +0.461"><span>+0.46</span></button>
+<button class="cell pos" style="--w:0.076" data-r="DK PC1" data-c="HCP PC3" data-v="+0.076" data-n="" aria-label="DK PC1 vs HCP PC3: +0.076"><span>+0.08</span></button>
+<button class="cell neg" style="--w:0.050" data-r="DK PC1" data-c="HCP |slope|" data-v="-0.050" data-n="" aria-label="DK PC1 vs HCP |slope|: -0.050"><span>-0.05</span></button>
+<div class="hl row">DK PC2</div>
+<button class="cell neg" style="--w:0.377" data-r="DK PC2" data-c="HCP PC1" data-v="-0.377" data-n="" aria-label="DK PC2 vs HCP PC1: -0.377"><span>-0.38</span></button>
+<button class="cell pos" style="--w:0.829" data-r="DK PC2" data-c="HCP PC2" data-v="+0.829" data-n="" aria-label="DK PC2 vs HCP PC2: +0.829"><span>+0.83</span></button>
+<button class="cell pos" style="--w:0.423" data-r="DK PC2" data-c="HCP PC3" data-v="+0.423" data-n="" aria-label="DK PC2 vs HCP PC3: +0.423"><span>+0.42</span></button>
+<button class="cell pos" style="--w:0.058" data-r="DK PC2" data-c="HCP |slope|" data-v="+0.058" data-n="" aria-label="DK PC2 vs HCP |slope|: +0.058"><span>+0.06</span></button>
+<div class="hl row">DK PC3</div>
+<button class="cell pos" style="--w:0.465" data-r="DK PC3" data-c="HCP PC1" data-v="+0.465" data-n="" aria-label="DK PC3 vs HCP PC1: +0.465"><span>+0.47</span></button>
+<button class="cell neg" style="--w:0.342" data-r="DK PC3" data-c="HCP PC2" data-v="-0.342" data-n="" aria-label="DK PC3 vs HCP PC2: -0.342"><span>-0.34</span></button>
+<button class="cell pos" style="--w:0.659" data-r="DK PC3" data-c="HCP PC3" data-v="+0.659" data-n="" aria-label="DK PC3 vs HCP PC3: +0.659"><span>+0.66</span></button>
+<button class="cell pos" style="--w:0.159" data-r="DK PC3" data-c="HCP |slope|" data-v="+0.159" data-n="" aria-label="DK PC3 vs HCP |slope|: +0.159"><span>+0.16</span></button>
+<div class="hl row">DK |slope|</div>
+<button class="cell pos" style="--w:0.422" data-r="DK |slope|" data-c="HCP PC1" data-v="+0.422" data-n="" aria-label="DK |slope| vs HCP PC1: +0.422"><span>+0.42</span></button>
+<button class="cell neg" style="--w:0.072" data-r="DK |slope|" data-c="HCP PC2" data-v="-0.072" data-n="" aria-label="DK |slope| vs HCP PC2: -0.072"><span>-0.07</span></button>
+<button class="cell pos" style="--w:0.390" data-r="DK |slope|" data-c="HCP PC3" data-v="+0.390" data-n="" aria-label="DK |slope| vs HCP PC3: +0.390"><span>+0.39</span></button>
+<button class="cell pos" style="--w:0.839" data-r="DK |slope|" data-c="HCP |slope|" data-v="+0.839" data-n="" aria-label="DK |slope| vs HCP |slope|: +0.839"><span>+0.84</span></button>
+</div>
+<details><summary>Table view</summary><table><thead><tr><th></th><th>HCP PC1</th><th>HCP PC2</th><th>HCP PC3</th><th>HCP |slope|</th></tr></thead><tbody>
+<tr><th>DK PC1</th><td>-0.634</td><td>+0.461</td><td>+0.076</td><td>-0.050</td></tr>
+<tr><th>DK PC2</th><td>-0.377</td><td>+0.829</td><td>+0.423</td><td>+0.058</td></tr>
+<tr><th>DK PC3</th><td>+0.465</td><td>-0.342</td><td>+0.659</td><td>+0.159</td></tr>
+<tr><th>DK |slope|</th><td>+0.422</td><td>-0.072</td><td>+0.390</td><td>+0.839</td></tr>
+</tbody></table></details></figure>
+<div class="legend"><span>−1</span><i></i><span>+1</span><span style="margin-left:8px">blue positive · red negative · grey ≈ 0</span></div>
+</section>
+
+<section>
+<h2>Region by region</h2>
+<p class="lead">The same 68 DK regions as points. |slope| is the fitted age effect (mm/yr) in absolute value; PC values are loadings.</p>
+<div class="sm" id="sm"></div>
+<p class="note">Hover or focus a point for the region. PC1 is inverted between atlases (r = -0.63); the other three agree in sign.</p>
+</section>
+
+<section>
+<h2>What each component tracks within its own atlas</h2>
+<p class="lead">Spearman ρ of each atlas's loadings against its own absolute thinning map (all regions) and against AHBA C1–C3 scored on that atlas's left-hemisphere regions (DK 34, HCP 137 parcels with expression coverage).</p>
+<div class="pair">
+<figure class="heat"><figcaption><strong>DK (68 regions)</strong><span>ρ; AHBA columns use 34 left-hemisphere regions</span></figcaption>
+<div class="grid" style="grid-template-columns: 7.5em repeat(4, 1fr)">
+<div class="corner"></div>
+<div class="hl">|slope| (all regions)</div>
+<div class="hl">AHBA C1 (lh)</div>
+<div class="hl">AHBA C2 (lh)</div>
+<div class="hl">AHBA C3 (lh)</div>
+<div class="hl row">PC1</div>
+<button class="cell neg" style="--w:0.238" data-r="PC1" data-c="|slope| (all regions)" data-v="-0.238" data-n="68" aria-label="PC1 vs |slope| (all regions): -0.238"><span>-0.24</span></button>
+<button class="cell neg" style="--w:0.484" data-r="PC1" data-c="AHBA C1 (lh)" data-v="-0.484" data-n="34" aria-label="PC1 vs AHBA C1 (lh): -0.484"><span>-0.48</span></button>
+<button class="cell neg" style="--w:0.268" data-r="PC1" data-c="AHBA C2 (lh)" data-v="-0.268" data-n="34" aria-label="PC1 vs AHBA C2 (lh): -0.268"><span>-0.27</span></button>
+<button class="cell neg" style="--w:0.442" data-r="PC1" data-c="AHBA C3 (lh)" data-v="-0.442" data-n="34" aria-label="PC1 vs AHBA C3 (lh): -0.442"><span>-0.44</span></button>
+<div class="hl row">PC2</div>
+<button class="cell pos" style="--w:0.226" data-r="PC2" data-c="|slope| (all regions)" data-v="+0.226" data-n="68" aria-label="PC2 vs |slope| (all regions): +0.226"><span>+0.23</span></button>
+<button class="cell neg" style="--w:0.790" data-r="PC2" data-c="AHBA C1 (lh)" data-v="-0.790" data-n="34" aria-label="PC2 vs AHBA C1 (lh): -0.790"><span>-0.79</span></button>
+<button class="cell pos" style="--w:0.268" data-r="PC2" data-c="AHBA C2 (lh)" data-v="+0.268" data-n="34" aria-label="PC2 vs AHBA C2 (lh): +0.268"><span>+0.27</span></button>
+<button class="cell pos" style="--w:0.343" data-r="PC2" data-c="AHBA C3 (lh)" data-v="+0.343" data-n="34" aria-label="PC2 vs AHBA C3 (lh): +0.343"><span>+0.34</span></button>
+<div class="hl row">PC3</div>
+<button class="cell pos" style="--w:0.490" data-r="PC3" data-c="|slope| (all regions)" data-v="+0.490" data-n="68" aria-label="PC3 vs |slope| (all regions): +0.490"><span>+0.49</span></button>
+<button class="cell pos" style="--w:0.205" data-r="PC3" data-c="AHBA C1 (lh)" data-v="+0.205" data-n="34" aria-label="PC3 vs AHBA C1 (lh): +0.205"><span>+0.20</span></button>
+<button class="cell pos" style="--w:0.819" data-r="PC3" data-c="AHBA C2 (lh)" data-v="+0.819" data-n="34" aria-label="PC3 vs AHBA C2 (lh): +0.819"><span>+0.82</span></button>
+<button class="cell pos" style="--w:0.477" data-r="PC3" data-c="AHBA C3 (lh)" data-v="+0.477" data-n="34" aria-label="PC3 vs AHBA C3 (lh): +0.477"><span>+0.48</span></button>
+<div class="hl row">|slope|</div>
+<div class="cell na"></div>
+<button class="cell pos" style="--w:0.081" data-r="|slope|" data-c="AHBA C1 (lh)" data-v="+0.081" data-n="34" aria-label="|slope| vs AHBA C1 (lh): +0.081"><span>+0.08</span></button>
+<button class="cell pos" style="--w:0.349" data-r="|slope|" data-c="AHBA C2 (lh)" data-v="+0.349" data-n="34" aria-label="|slope| vs AHBA C2 (lh): +0.349"><span>+0.35</span></button>
+<button class="cell pos" style="--w:0.587" data-r="|slope|" data-c="AHBA C3 (lh)" data-v="+0.587" data-n="34" aria-label="|slope| vs AHBA C3 (lh): +0.587"><span>+0.59</span></button>
+</div>
+<details><summary>Table view</summary><table><thead><tr><th></th><th>|slope| (all regions)</th><th>AHBA C1 (lh)</th><th>AHBA C2 (lh)</th><th>AHBA C3 (lh)</th></tr></thead><tbody>
+<tr><th>PC1</th><td>-0.238</td><td>-0.484</td><td>-0.268</td><td>-0.442</td></tr>
+<tr><th>PC2</th><td>+0.226</td><td>-0.790</td><td>+0.268</td><td>+0.343</td></tr>
+<tr><th>PC3</th><td>+0.490</td><td>+0.205</td><td>+0.819</td><td>+0.477</td></tr>
+<tr><th>|slope|</th><td></td><td>+0.081</td><td>+0.349</td><td>+0.587</td></tr>
+</tbody></table></details></figure>
+<figure class="heat"><figcaption><strong>HCP-MMP (358 parcels)</strong><span>ρ; AHBA columns use 137 left-hemisphere parcels</span></figcaption>
+<div class="grid" style="grid-template-columns: 7.5em repeat(4, 1fr)">
+<div class="corner"></div>
+<div class="hl">|slope| (all regions)</div>
+<div class="hl">AHBA C1 (lh)</div>
+<div class="hl">AHBA C2 (lh)</div>
+<div class="hl">AHBA C3 (lh)</div>
+<div class="hl row">PC1</div>
+<button class="cell pos" style="--w:0.188" data-r="PC1" data-c="|slope| (all regions)" data-v="+0.188" data-n="358" aria-label="PC1 vs |slope| (all regions): +0.188"><span>+0.19</span></button>
+<button class="cell pos" style="--w:0.532" data-r="PC1" data-c="AHBA C1 (lh)" data-v="+0.532" data-n="137" aria-label="PC1 vs AHBA C1 (lh): +0.532"><span>+0.53</span></button>
+<button class="cell pos" style="--w:0.210" data-r="PC1" data-c="AHBA C2 (lh)" data-v="+0.210" data-n="137" aria-label="PC1 vs AHBA C2 (lh): +0.210"><span>+0.21</span></button>
+<button class="cell pos" style="--w:0.337" data-r="PC1" data-c="AHBA C3 (lh)" data-v="+0.337" data-n="137" aria-label="PC1 vs AHBA C3 (lh): +0.337"><span>+0.34</span></button>
+<div class="hl row">PC2</div>
+<button class="cell neg" style="--w:0.095" data-r="PC2" data-c="|slope| (all regions)" data-v="-0.095" data-n="358" aria-label="PC2 vs |slope| (all regions): -0.095"><span>-0.10</span></button>
+<button class="cell neg" style="--w:0.782" data-r="PC2" data-c="AHBA C1 (lh)" data-v="-0.782" data-n="137" aria-label="PC2 vs AHBA C1 (lh): -0.782"><span>-0.78</span></button>
+<button class="cell neg" style="--w:0.189" data-r="PC2" data-c="AHBA C2 (lh)" data-v="-0.189" data-n="137" aria-label="PC2 vs AHBA C2 (lh): -0.189"><span>-0.19</span></button>
+<button class="cell pos" style="--w:0.042" data-r="PC2" data-c="AHBA C3 (lh)" data-v="+0.042" data-n="137" aria-label="PC2 vs AHBA C3 (lh): +0.042"><span>+0.04</span></button>
+<div class="hl row">PC3</div>
+<button class="cell pos" style="--w:0.232" data-r="PC3" data-c="|slope| (all regions)" data-v="+0.232" data-n="358" aria-label="PC3 vs |slope| (all regions): +0.232"><span>+0.23</span></button>
+<button class="cell neg" style="--w:0.162" data-r="PC3" data-c="AHBA C1 (lh)" data-v="-0.162" data-n="137" aria-label="PC3 vs AHBA C1 (lh): -0.162"><span>-0.16</span></button>
+<button class="cell pos" style="--w:0.724" data-r="PC3" data-c="AHBA C2 (lh)" data-v="+0.724" data-n="137" aria-label="PC3 vs AHBA C2 (lh): +0.724"><span>+0.72</span></button>
+<button class="cell pos" style="--w:0.116" data-r="PC3" data-c="AHBA C3 (lh)" data-v="+0.116" data-n="137" aria-label="PC3 vs AHBA C3 (lh): +0.116"><span>+0.12</span></button>
+<div class="hl row">|slope|</div>
+<div class="cell na"></div>
+<button class="cell pos" style="--w:0.141" data-r="|slope|" data-c="AHBA C1 (lh)" data-v="+0.141" data-n="137" aria-label="|slope| vs AHBA C1 (lh): +0.141"><span>+0.14</span></button>
+<button class="cell pos" style="--w:0.061" data-r="|slope|" data-c="AHBA C2 (lh)" data-v="+0.061" data-n="137" aria-label="|slope| vs AHBA C2 (lh): +0.061"><span>+0.06</span></button>
+<button class="cell pos" style="--w:0.334" data-r="|slope|" data-c="AHBA C3 (lh)" data-v="+0.334" data-n="137" aria-label="|slope| vs AHBA C3 (lh): +0.334"><span>+0.33</span></button>
+</div>
+<details><summary>Table view</summary><table><thead><tr><th></th><th>|slope| (all regions)</th><th>AHBA C1 (lh)</th><th>AHBA C2 (lh)</th><th>AHBA C3 (lh)</th></tr></thead><tbody>
+<tr><th>PC1</th><td>+0.188</td><td>+0.532</td><td>+0.210</td><td>+0.337</td></tr>
+<tr><th>PC2</th><td>-0.095</td><td>-0.782</td><td>-0.189</td><td>+0.042</td></tr>
+<tr><th>PC3</th><td>+0.232</td><td>-0.162</td><td>+0.724</td><td>+0.116</td></tr>
+<tr><th>|slope|</th><td></td><td>+0.141</td><td>+0.061</td><td>+0.334</td></tr>
+</tbody></table></details></figure>
+</div>
+<div class="legend"><span>−1</span><i></i><span>+1</span></div>
+</section>
+</main>
+<div id="tip" role="status" aria-live="polite"></div>
+<script>
+const PTS={"PC1": [{"l": "L bankssts", "x": -0.1033, "y": 0.5901}, {"l": "L caudalanteriorcingulate", "x": 1.8262, "y": -0.785}, {"l": "L caudalmiddlefrontal", "x": -0.9789, "y": 0.6711}, {"l": "L cuneus", "x": 0.1268, "y": 0.8785}, {"l": "L entorhinal", "x": 1.462, "y": -1.8814}, {"l": "L frontalpole", "x": 1.4237, "y": -0.2085}, {"l": "L fusiform", "x": -0.8378, "y": 0.1899}, {"l": "L inferiorparietal", "x": -1.271, "y": 1.0645}, {"l": "L inferiortemporal", "x": -0.8755, "y": 0.5976}, {"l": "L insula", "x": 1.391, "y": -1.4388}, {"l": "L isthmuscingulate", "x": 0.5876, "y": -0.3703}, {"l": "L lateraloccipital", "x": -1.1497, "y": 0.4403}, {"l": "L lateralorbitofrontal", "x": 0.0936, "y": -1.0675}, {"l": "L lingual", "x": -0.073, "y": -0.9333}, {"l": "L medialorbitofrontal", "x": 1.1546, "y": -1.5687}, {"l": "L middletemporal", "x": -0.7147, "y": 0.2667}, {"l": "L paracentral", "x": -0.9602, "y": 0.9059}, {"l": "L parahippocampal", "x": 1.0314, "y": -1.3296}, {"l": "L parsopercularis", "x": -0.5659, "y": 0.0874}, {"l": "L parsorbitalis", "x": 0.0276, "y": 0.3623}, {"l": "L parstriangularis", "x": -0.4663, "y": 0.5883}, {"l": "L pericalcarine", "x": 0.8093, "y": 0.3465}, {"l": "L postcentral", "x": -0.3133, "y": 0.6464}, {"l": "L posteriorcingulate", "x": 0.5441, "y": -0.174}, {"l": "L precentral", "x": -0.2992, "y": -0.3118}, {"l": "L precuneus", "x": -1.4714, "y": 0.7314}, {"l": "L rostralanteriorcingulate", "x": 1.6412, "y": -0.4724}, {"l": "L rostralmiddlefrontal", "x": -1.0133, "y": 1.2286}, {"l": "L superiorfrontal", "x": -1.2832, "y": 0.0685}, {"l": "L superiorparietal", "x": -1.2635, "y": 0.3937}, {"l": "L superiortemporal", "x": -1.1232, "y": 0.2681}, {"l": "L supramarginal", "x": -0.857, "y": 0.5393}, {"l": "L temporalpole", "x": 1.8483, "y": -0.8965}, {"l": "L transversetemporal", "x": 0.0694, "y": -0.1582}, {"l": "R bankssts", "x": -0.2315, "y": 0.7412}, {"l": "R caudalanteriorcingulate", "x": 1.7932, "y": 0.0937}, {"l": "R caudalmiddlefrontal", "x": -0.5725, "y": -0.3919}, {"l": "R cuneus", "x": -0.1554, "y": 0.797}, {"l": "R entorhinal", "x": 1.6445, "y": -1.8338}, {"l": "R frontalpole", "x": 1.5556, "y": -0.0826}, {"l": "R fusiform", "x": -0.648, "y": -0.7192}, {"l": "R inferiorparietal", "x": -1.3496, "y": 0.5581}, {"l": "R inferiortemporal", "x": -0.8348, "y": 0.1787}, {"l": "R insula", "x": 1.4851, "y": -1.126}, {"l": "R isthmuscingulate", "x": 0.7826, "y": -1.2986}, {"l": "R lateraloccipital", "x": -1.1709, "y": 0.616}, {"l": "R lateralorbitofrontal", "x": 0.4063, "y": -1.2802}, {"l": "R lingual", "x": -0.1069, "y": -1.0527}, {"l": "R medialorbitofrontal", "x": 0.6986, "y": -1.3101}, {"l": "R middletemporal", "x": -0.7234, "y": 0.2636}, {"l": "R paracentral", "x": -0.7018, "y": 0.5013}, {"l": "R parahippocampal", "x": 1.0247, "y": -2.9107}, {"l": "R parsopercularis", "x": -0.3428, "y": -0.2499}, {"l": "R parsorbitalis", "x": 0.1098, "y": -0.0274}, {"l": "R parstriangularis", "x": -0.2964, "y": -0.4854}, {"l": "R pericalcarine", "x": 1.3338, "y": 0.4128}, {"l": "R postcentral", "x": 0.1873, "y": 0.7362}, {"l": "R posteriorcingulate", "x": 0.6084, "y": -0.4377}, {"l": "R precentral", "x": -0.0894, "y": -1.2432}, {"l": "R precuneus", "x": -1.3422, "y": 0.4973}, {"l": "R rostralanteriorcingulate", "x": 1.837, "y": -0.5086}, {"l": "R rostralmiddlefrontal", "x": -0.691, "y": 0.7401}, {"l": "R superiorfrontal", "x": -1.197, "y": 0.2612}, {"l": "R superiorparietal", "x": -1.2738, "y": 0.3534}, {"l": "R superiortemporal", "x": -1.1004, "y": 0.3658}, {"l": "R supramarginal", "x": -0.4902, "y": 0.6028}, {"l": "R temporalpole", "x": 1.2475, "y": -1.3599}, {"l": "R transversetemporal", "x": 0.1875, "y": 0.4488}], "PC2": [{"l": "L bankssts", "x": 0.2066, "y": -0.1313}, {"l": "L caudalanteriorcingulate", "x": 0.9386, "y": 0.5862}, {"l": "L caudalmiddlefrontal", "x": -0.107, "y": -0.2497}, {"l": "L cuneus", "x": -1.9027, "y": -1.6688}, {"l": "L entorhinal", "x": 0.1, "y": 0.2604}, {"l": "L frontalpole", "x": 0.7428, "y": 0.3548}, {"l": "L fusiform", "x": 0.3434, "y": 0.5757}, {"l": "L inferiorparietal", "x": -0.7021, "y": -1.1532}, {"l": "L inferiortemporal", "x": 0.6234, "y": 0.7768}, {"l": "L insula", "x": 1.1725, "y": 1.6198}, {"l": "L isthmuscingulate", "x": 0.3555, "y": 0.2597}, {"l": "L lateraloccipital", "x": -1.5399, "y": -0.6505}, {"l": "L lateralorbitofrontal", "x": 0.9719, "y": 1.0281}, {"l": "L lingual", "x": -1.4899, "y": 0.0894}, {"l": "L medialorbitofrontal", "x": 1.2117, "y": 0.9382}, {"l": "L middletemporal", "x": 0.5632, "y": 0.3691}, {"l": "L paracentral", "x": -1.1974, "y": -1.3358}, {"l": "L parahippocampal", "x": 0.5235, "y": 0.9161}, {"l": "L parsopercularis", "x": 0.5601, "y": 0.7159}, {"l": "L parsorbitalis", "x": 0.8311, "y": 0.9225}, {"l": "L parstriangularis", "x": 0.6353, "y": 0.4146}, {"l": "L pericalcarine", "x": -2.1451, "y": -1.5286}, {"l": "L postcentral", "x": -1.1196, "y": -1.5639}, {"l": "L posteriorcingulate", "x": 0.6092, "y": 0.149}, {"l": "L precentral", "x": -1.0216, "y": -0.7817}, {"l": "L precuneus", "x": -1.0315, "y": -1.0991}, {"l": "L rostralanteriorcingulate", "x": 1.3153, "y": 0.8823}, {"l": "L rostralmiddlefrontal", "x": 0.4433, "y": 0.0173}, {"l": "L superiorfrontal", "x": 0.4971, "y": -0.1839}, {"l": "L superiorparietal", "x": -1.8091, "y": -1.9004}, {"l": "L superiortemporal", "x": 0.6394, "y": 0.8007}, {"l": "L supramarginal", "x": -0.37, "y": -0.6007}, {"l": "L temporalpole", "x": -0.1681, "y": 0.7739}, {"l": "L transversetemporal", "x": 0.05, "y": 0.7615}, {"l": "R bankssts", "x": 0.5159, "y": 0.4388}, {"l": "R caudalanteriorcingulate", "x": 0.9059, "y": 0.6749}, {"l": "R caudalmiddlefrontal", "x": 0.0303, "y": -0.181}, {"l": "R cuneus", "x": -2.0204, "y": -1.037}, {"l": "R entorhinal", "x": 0.3517, "y": 0.5685}, {"l": "R frontalpole", "x": 0.8535, "y": 0.3641}, {"l": "R fusiform", "x": 0.281, "y": 0.7099}, {"l": "R inferiorparietal", "x": -0.7589, "y": -0.6449}, {"l": "R inferiortemporal", "x": 0.5364, "y": 0.8892}, {"l": "R insula", "x": 1.211, "y": 1.4867}, {"l": "R isthmuscingulate", "x": 0.1873, "y": 0.4507}, {"l": "R lateraloccipital", "x": -1.4258, "y": -0.9815}, {"l": "R lateralorbitofrontal", "x": 1.3967, "y": 1.1701}, {"l": "R lingual", "x": -1.6472, "y": 0.1432}, {"l": "R medialorbitofrontal", "x": 1.3758, "y": 1.0117}, {"l": "R middletemporal", "x": 0.5737, "y": 0.2827}, {"l": "R paracentral", "x": -1.1275, "y": -1.5008}, {"l": "R parahippocampal", "x": 0.4216, "y": 0.2672}, {"l": "R parsopercularis", "x": 0.8479, "y": 1.0069}, {"l": "R parsorbitalis", "x": 1.0654, "y": 1.0648}, {"l": "R parstriangularis", "x": 0.901, "y": 1.0663}, {"l": "R pericalcarine", "x": -2.2886, "y": 0.0755}, {"l": "R postcentral", "x": -0.9094, "y": -1.373}, {"l": "R posteriorcingulate", "x": 0.5128, "y": 0.4318}, {"l": "R precentral", "x": -0.8333, "y": -0.8717}, {"l": "R precuneus", "x": -1.0304, "y": -0.6936}, {"l": "R rostralanteriorcingulate", "x": 1.2967, "y": 0.7148}, {"l": "R rostralmiddlefrontal", "x": 0.6427, "y": 0.1802}, {"l": "R superiorfrontal", "x": 0.5417, "y": -0.2779}, {"l": "R superiorparietal", "x": -1.7299, "y": -1.6914}, {"l": "R superiortemporal", "x": 0.6481, "y": 1.1563}, {"l": "R supramarginal", "x": -0.3861, "y": -0.74}, {"l": "R temporalpole", "x": 0.1842, "y": 1.0957}, {"l": "R transversetemporal", "x": 0.1464, "y": 0.5429}], "PC3": [{"l": "L bankssts", "x": 0.0663, "y": -0.1629}, {"l": "L caudalanteriorcingulate", "x": -0.5081, "y": 0.5752}, {"l": "L caudalmiddlefrontal", "x": 1.5356, "y": 0.8912}, {"l": "L cuneus", "x": -1.0864, "y": -1.1708}, {"l": "L entorhinal", "x": -1.4172, "y": -0.4533}, {"l": "L frontalpole", "x": 0.7953, "y": 1.5696}, {"l": "L fusiform", "x": -1.2292, "y": -1.1947}, {"l": "L inferiorparietal", "x": 0.7708, "y": -0.3243}, {"l": "L inferiortemporal", "x": -0.7865, "y": -0.7698}, {"l": "L insula", "x": -1.6849, "y": -0.7104}, {"l": "L isthmuscingulate", "x": -0.0059, "y": -0.2837}, {"l": "L lateraloccipital", "x": -0.6429, "y": -0.968}, {"l": "L lateralorbitofrontal", "x": -0.3112, "y": -0.3421}, {"l": "L lingual", "x": -1.4208, "y": -0.6571}, {"l": "L medialorbitofrontal", "x": -0.4835, "y": 0.5155}, {"l": "L middletemporal", "x": -0.2213, "y": 0.0067}, {"l": "L paracentral", "x": 0.8083, "y": 0.1241}, {"l": "L parahippocampal", "x": -1.0451, "y": -0.9948}, {"l": "L parsopercularis", "x": 0.6519, "y": 0.0514}, {"l": "L parsorbitalis", "x": 0.7371, "y": 0.4077}, {"l": "L parstriangularis", "x": 1.0945, "y": 0.6538}, {"l": "L pericalcarine", "x": -1.2956, "y": -1.439}, {"l": "L postcentral", "x": 0.4084, "y": -0.4682}, {"l": "L posteriorcingulate", "x": 0.3462, "y": 0.3045}, {"l": "L precentral", "x": 0.7213, "y": 0.418}, {"l": "L precuneus", "x": 0.6744, "y": 0.0019}, {"l": "L rostralanteriorcingulate", "x": -1.0341, "y": 0.9445}, {"l": "L rostralmiddlefrontal", "x": 1.5965, "y": 1.3367}, {"l": "L superiorfrontal", "x": 1.9252, "y": 1.7804}, {"l": "L superiorparietal", "x": 1.2398, "y": -0.1344}, {"l": "L superiortemporal", "x": -0.461, "y": -0.126}, {"l": "L supramarginal", "x": 0.9008, "y": 0.2751}, {"l": "L temporalpole", "x": -0.707, "y": -0.551}, {"l": "L transversetemporal", "x": -0.5931, "y": -0.6591}, {"l": "R bankssts", "x": 0.0706, "y": -0.6366}, {"l": "R caudalanteriorcingulate", "x": -0.4137, "y": 0.944}, {"l": "R caudalmiddlefrontal", "x": 1.5437, "y": 1.557}, {"l": "R cuneus", "x": -1.0559, "y": -1.0085}, {"l": "R entorhinal", "x": -1.3663, "y": -0.2769}, {"l": "R frontalpole", "x": 0.7157, "y": 1.5939}, {"l": "R fusiform", "x": -1.3237, "y": -1.0755}, {"l": "R inferiorparietal", "x": 0.6995, "y": -0.8106}, {"l": "R inferiortemporal", "x": -0.8782, "y": -1.3114}, {"l": "R insula", "x": -1.729, "y": -0.6817}, {"l": "R isthmuscingulate", "x": -0.0004, "y": -0.0771}, {"l": "R lateraloccipital", "x": -0.768, "y": -1.7121}, {"l": "R lateralorbitofrontal", "x": -0.5188, "y": -0.1673}, {"l": "R lingual", "x": -1.5403, "y": -0.6864}, {"l": "R medialorbitofrontal", "x": -0.1377, "y": 0.7067}, {"l": "R middletemporal", "x": -0.1275, "y": -0.3742}, {"l": "R paracentral", "x": 0.7432, "y": 0.4018}, {"l": "R parahippocampal", "x": -0.8631, "y": 0.13}, {"l": "R parsopercularis", "x": 0.8689, "y": 0.0299}, {"l": "R parsorbitalis", "x": 0.863, "y": 0.8382}, {"l": "R parstriangularis", "x": 1.3683, "y": 0.3758}, {"l": "R pericalcarine", "x": -1.3029, "y": -0.4718}, {"l": "R postcentral", "x": 0.4662, "y": -0.045}, {"l": "R posteriorcingulate", "x": 0.1463, "y": 0.0513}, {"l": "R precentral", "x": 0.8848, "y": -0.3706}, {"l": "R precuneus", "x": 0.6972, "y": -0.0134}, {"l": "R rostralanteriorcingulate", "x": -0.8443, "y": 1.3917}, {"l": "R rostralmiddlefrontal", "x": 1.7891, "y": 1.6277}, {"l": "R superiorfrontal", "x": 1.8935, "y": 1.7207}, {"l": "R superiorparietal", "x": 1.2544, "y": -0.1583}, {"l": "R superiortemporal", "x": 0.1417, "y": -0.3731}, {"l": "R supramarginal", "x": 1.1949, "y": 0.5391}, {"l": "R temporalpole", "x": -1.2516, "y": -0.8923}, {"l": "R transversetemporal", "x": -0.5581, "y": -0.2716}], "abs_slope": [{"l": "L bankssts", "x": 0.0226, "y": 0.0228}, {"l": "L caudalanteriorcingulate", "x": 0.0187, "y": 0.0216}, {"l": "L caudalmiddlefrontal", "x": 0.0135, "y": 0.0131}, {"l": "L cuneus", "x": 0.0189, "y": 0.022}, {"l": "L entorhinal", "x": 0.0015, "y": 0.0059}, {"l": "L frontalpole", "x": 0.0314, "y": 0.0293}, {"l": "L fusiform", "x": 0.0173, "y": 0.0191}, {"l": "L inferiorparietal", "x": 0.0264, "y": 0.0256}, {"l": "L inferiortemporal", "x": 0.019, "y": 0.019}, {"l": "L insula", "x": 0.0166, "y": 0.0165}, {"l": "L isthmuscingulate", "x": 0.0209, "y": 0.0239}, {"l": "L lateraloccipital", "x": 0.0156, "y": 0.0199}, {"l": "L lateralorbitofrontal", "x": 0.0224, "y": 0.0198}, {"l": "L lingual", "x": 0.0177, "y": 0.0215}, {"l": "L medialorbitofrontal", "x": 0.0212, "y": 0.0266}, {"l": "L middletemporal", "x": 0.0188, "y": 0.0197}, {"l": "L paracentral", "x": 0.0248, "y": 0.0225}, {"l": "L parahippocampal", "x": 0.0143, "y": 0.015}, {"l": "L parsopercularis", "x": 0.0149, "y": 0.0157}, {"l": "L parsorbitalis", "x": 0.0266, "y": 0.0237}, {"l": "L parstriangularis", "x": 0.0208, "y": 0.0203}, {"l": "L pericalcarine", "x": 0.0121, "y": 0.0134}, {"l": "L postcentral", "x": 0.0184, "y": 0.0186}, {"l": "L posteriorcingulate", "x": 0.0209, "y": 0.0278}, {"l": "L precentral", "x": 0.0062, "y": 0.0044}, {"l": "L precuneus", "x": 0.0254, "y": 0.0268}, {"l": "L rostralanteriorcingulate", "x": 0.0191, "y": 0.0255}, {"l": "L rostralmiddlefrontal", "x": 0.0228, "y": 0.0223}, {"l": "L superiorfrontal", "x": 0.0208, "y": 0.0194}, {"l": "L superiorparietal", "x": 0.0229, "y": 0.0233}, {"l": "L superiortemporal", "x": 0.0157, "y": 0.0157}, {"l": "L supramarginal", "x": 0.021, "y": 0.0206}, {"l": "L temporalpole", "x": 0.0083, "y": 0.0102}, {"l": "L transversetemporal", "x": 0.0184, "y": 0.0179}, {"l": "R bankssts", "x": 0.0216, "y": 0.0207}, {"l": "R caudalanteriorcingulate", "x": 0.0178, "y": 0.0231}, {"l": "R caudalmiddlefrontal", "x": 0.0158, "y": 0.0113}, {"l": "R cuneus", "x": 0.0197, "y": 0.0218}, {"l": "R entorhinal", "x": 0.0028, "y": 0.0094}, {"l": "R frontalpole", "x": 0.0301, "y": 0.0281}, {"l": "R fusiform", "x": 0.0168, "y": 0.0185}, {"l": "R inferiorparietal", "x": 0.0231, "y": 0.0202}, {"l": "R inferiortemporal", "x": 0.0188, "y": 0.0183}, {"l": "R insula", "x": 0.0187, "y": 0.0165}, {"l": "R isthmuscingulate", "x": 0.0199, "y": 0.0254}, {"l": "R lateraloccipital", "x": 0.0154, "y": 0.0177}, {"l": "R lateralorbitofrontal", "x": 0.0213, "y": 0.0211}, {"l": "R lingual", "x": 0.0194, "y": 0.0243}, {"l": "R medialorbitofrontal", "x": 0.0245, "y": 0.0284}, {"l": "R middletemporal", "x": 0.019, "y": 0.0175}, {"l": "R paracentral", "x": 0.0221, "y": 0.0209}, {"l": "R parahippocampal", "x": 0.0146, "y": 0.0124}, {"l": "R parsopercularis", "x": 0.016, "y": 0.0191}, {"l": "R parsorbitalis", "x": 0.027, "y": 0.0226}, {"l": "R parstriangularis", "x": 0.0223, "y": 0.018}, {"l": "R pericalcarine", "x": 0.0127, "y": 0.0254}, {"l": "R postcentral", "x": 0.0182, "y": 0.0196}, {"l": "R posteriorcingulate", "x": 0.0198, "y": 0.0182}, {"l": "R precentral", "x": 0.0066, "y": 0.0092}, {"l": "R precuneus", "x": 0.0243, "y": 0.0261}, {"l": "R rostralanteriorcingulate", "x": 0.0211, "y": 0.0266}, {"l": "R rostralmiddlefrontal", "x": 0.0252, "y": 0.0225}, {"l": "R superiorfrontal", "x": 0.021, "y": 0.0174}, {"l": "R superiorparietal", "x": 0.0222, "y": 0.0228}, {"l": "R superiortemporal", "x": 0.0162, "y": 0.021}, {"l": "R supramarginal", "x": 0.0191, "y": 0.0193}, {"l": "R temporalpole", "x": 0.0044, "y": 0.0076}, {"l": "R transversetemporal", "x": 0.0181, "y": 0.0173}]}; const R={"PC1": -0.6337979838860935, "PC2": 0.8290464749510759, "PC3": 0.6594946784304118, "abs_slope": 0.8387363874567887};
+const tip=document.getElementById('tip');
+function show(e,lines){tip.replaceChildren(); lines.forEach((l,i)=>{const d=document.createElement('div'); if(i===0){const b=document.createElement('b'); b.textContent=l; d.appendChild(b);} else d.textContent=l; tip.appendChild(d);}); tip.style.display='block'; move(e);}
+function move(e){const x=e.clientX??0,y=e.clientY??0; tip.style.left=Math.min(x+14,innerWidth-tip.offsetWidth-8)+'px'; tip.style.top=Math.min(y+14,innerHeight-tip.offsetHeight-8)+'px';}
+function hide(){tip.style.display='none';}
+document.querySelectorAll('.cell[data-v]').forEach(c=>{const f=e=>show(e,[c.dataset.v, c.dataset.r+' vs '+c.dataset.c+(c.dataset.n?' · n = '+c.dataset.n:'')]); c.addEventListener('pointermove',f); c.addEventListener('focus',f); c.addEventListener('pointerleave',hide); c.addEventListener('blur',hide);});
+const titles={PC1:'PC1 loading',PC2:'PC2 loading',PC3:'PC3 loading',abs_slope:'|slope| (mm/yr)'};
+const sm=document.getElementById('sm'); const W=260,H=220,m={l:44,r:10,t:8,b:34};
+function nice(v){return Math.abs(v)<0.01? v.toExponential(1): (Math.abs(v)<1? v.toFixed(3): v.toFixed(2));}
+for(const k of ['PC1','PC2','PC3','abs_slope']){
+  const P=PTS[k]; const xs=P.map(p=>p.x), ys=P.map(p=>p.y);
+  const pad=v=>{const lo=Math.min(...v),hi=Math.max(...v),d=(hi-lo)||1; return [lo-.06*d,hi+.06*d];};
+  const [x0,x1]=pad(xs),[y0,y1]=pad(ys);
+  const sx=v=>m.l+(v-x0)/(x1-x0)*(W-m.l-m.r), sy=v=>H-m.b-(v-y0)/(y1-y0)*(H-m.t-m.b);
+  const ticks=(a,b)=>{const n=4,s=(b-a)/n;return Array.from({length:n+1},(_,i)=>a+i*s);};
+  let g=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${titles[k]}, DK versus HCP, 68 regions">`;
+  for(const t of ticks(y0,y1)) g+=`<line class="gl" x1="${m.l}" x2="${W-m.r}" y1="${sy(t).toFixed(1)}" y2="${sy(t).toFixed(1)}"/><text class="tk" x="${m.l-4}" y="${(sy(t)+3).toFixed(1)}" text-anchor="end">${nice(t)}</text>`;
+  for(const t of ticks(x0,x1)) g+=`<text class="tk" x="${sx(t).toFixed(1)}" y="${H-m.b+13}" text-anchor="middle">${nice(t)}</text>`;
+  g+=`<line class="ax" x1="${m.l}" x2="${W-m.r}" y1="${H-m.b}" y2="${H-m.b}"/><line class="ax" x1="${m.l}" x2="${m.l}" y1="${m.t}" y2="${H-m.b}"/>`;
+  g+=`<text class="al" x="${(m.l+W-m.r)/2}" y="${H-6}" text-anchor="middle">DK</text><text class="al" transform="translate(11 ${(m.t+H-m.b)/2}) rotate(-90)" text-anchor="middle">HCP, averaged into DK region</text>`;
+  P.forEach((p,i)=>{g+=`<circle class="hit" r="12" cx="${sx(p.x).toFixed(1)}" cy="${sy(p.y).toFixed(1)}" tabindex="0" data-i="${i}"/><circle class="pt" r="4" cx="${sx(p.x).toFixed(1)}" cy="${sy(p.y).toFixed(1)}"/>`;});
+  g+='</svg>';
+  const d=document.createElement('div'); d.className='panel';
+  const h=document.createElement('h3'); h.textContent=titles[k]; const r=document.createElement('p'); r.className='r'; r.textContent=`r = ${R[k]>=0?'+':''}${R[k].toFixed(2)} · 68 regions`;
+  d.appendChild(h); d.appendChild(r); const wrap=document.createElement('div'); wrap.innerHTML=g; d.appendChild(wrap);
+  const det=document.createElement('details'); const s=document.createElement('summary'); s.textContent='Table view'; det.appendChild(s);
+  const tb=document.createElement('table'); const th=document.createElement('tr'); ['Region','DK','HCP (avg)'].forEach(t=>{const e=document.createElement('th'); e.textContent=t; th.appendChild(e);}); tb.appendChild(th);
+  P.forEach(p=>{const tr=document.createElement('tr'); [p.l,nice(p.x),nice(p.y)].forEach(t=>{const e=document.createElement('td'); e.textContent=t; tr.appendChild(e);}); tb.appendChild(tr);});
+  det.appendChild(tb); d.appendChild(det); sm.appendChild(d);
+  wrap.querySelectorAll('.hit').forEach(c=>{const p=P[+c.dataset.i]; const f=e=>show(e,[p.l,`DK ${nice(p.x)} · HCP ${nice(p.y)}`]); c.addEventListener('pointermove',f); c.addEventListener('focus',f); c.addEventListener('pointerleave',hide); c.addEventListener('blur',hide);});
+}
+</script>
