@@ -2,11 +2,12 @@
 12_hcp_pls.py -- the option-2 PLS (dCT + CT) in the HCP-MMP parcellation, the
 native space of AHBA C1-C3, and its SCZ/MDD enrichment against the DK version.
 
-Exploratory: the HCP thickness table is derived from the release FreeSurfer
-surfaces and covers 24,921 of 33,825 sessions, so the run behind this
-(thickness_hcp_70_*) has 5,947 subjects against the DK run's 8,192.  The
-question is only whether the finer parcellation adds gene-level signal, so the
-smaller sample is accepted and stated rather than corrected.
+Sample: as of the 2026-09-14 backfill (tools/hcp_backfill.sbatch) the HCP-MMP
+thickness table covers 33,795 of 33,825 FreeSurfer sessions, so the run behind
+this (thickness_hcp_70_aa6e91efba82, config `exclude_regions: [H]`) has the SAME
+8,716 children as the DK run on the 7.0 tabulation -- the earlier 6,537-subject
+version of this analysis is superseded and the comparison with DK is now
+like-for-like rather than confounded with sample size.
 
 Design, matched to the DK analysis except for the parcellation:
   X : AHBA HCP-MMP expression (hcp_3d.csv) on the 7,973 genes the shipped C1-C3
@@ -14,8 +15,9 @@ Design, matched to the DK analysis except for the parcellation:
       coverage; genes z-scored across regions.  The DK comparator uses the same
       7,973 genes from dk_3d.csv so the two are gene-matched.
   Y : bilateral (lh/rh mean) HCP dCT (age slope) and CT (intercept) from the
-      run's fits/fixed.parquet.  Parcel H is dropped -- it sits on the
-      FreeSurfer medial wall and has thickness 0 in ~6,350 sessions.
+      run's fits/fixed.parquet.  Parcel H is excluded by the run config
+      (FreeSurfer medial wall, thickness 0 in many sessions); the drop below is
+      kept as a guard for older run dirs.
   Inference: 5,000 spin rotations of the complete 180-parcel map (HCP spherical
       centroids from data/hcp_centroids.csv) then restriction to the covered
       137; gene weights = Z over 1,000 region bootstraps, Procrustes-aligned.
@@ -41,7 +43,7 @@ ROOT = HERE.parent
 REPO = ROOT.parent
 RES, DATA, REF = ROOT / "results", ROOT / "data", ROOT / "data" / "reference"
 GS = REF / "gene_sets"
-RUN_DIR = REPO / "out" / "thickness_hcp_70_fec93121f0dd"
+RUN_DIR = REPO / "out" / "thickness_hcp_70_aa6e91efba82"   # backfilled; 8,716 children
 MAGMA = REPO / "tools" / "bin" / ("magma_mac/magma" if (REPO / "tools/bin/magma_mac/magma").exists() else "magma")
 RAW = {"SCZ": REPO / "genetic_analysis/inputs/magma/SCZ.genes.raw",
        "MDD": REPO / "genetic_analysis/inputs/magma/MDD.genes.raw"}
@@ -65,6 +67,15 @@ Y180.index = "lh_" + Y180.index
 print(f"HCP Y: {Y180.shape[0]} bilateral parcels (dropped {BAD_PARCELS})", file=sys.stderr)
 # the complete map (all parcels, not just AHBA-covered) for figures
 Y180.to_csv(RES / "hcp_y_maps_180.csv", float_format="%.6g")
+
+# sample provenance, so the figure captions read the numbers instead of hardcoding
+# them (run dirs are gitignored, the figures must work from results/ alone)
+_dg = pd.read_parquet(RUN_DIR / "fits" / "diagnostics.parquet")
+pd.DataFrame([dict(run_id=RUN_DIR.name, n_subjects=int(_dg.n_subjects.iloc[0]),
+                   n_sessions=int(_dg.n_obs.iloc[0]), n_labels_fitted=len(_dg),
+                   n_singular=int(_dg.singular.sum()), n_nonconverged=int((~_dg.converged).sum()),
+                   n_parcels_pls=int(Y180.shape[0]))]
+             ).to_csv(RES / "hcp_run_provenance.tsv", sep="\t", index=False)
 
 # ------------------------------------------------------------------ X --------
 c123w = pd.read_csv(REPO / "data" / "weights.csv", index_col=0)

@@ -38,6 +38,7 @@ nspn34 <- read.csv(file.path(REF, "nspn_dk_maps_bilateral_34.csv"), row.names = 
 c3dk   <- read.csv(file.path(REF, sprintf("ahba_c123_scores_recomputed_%s.csv", LEAD_DS)), row.names = 1)
 dkpoly <- read.csv(file.path(DATA, "dk_polygons.csv"))
 hcppoly <- read.csv(file.path(DATA, "hcp_polygons.csv"))
+PROV <- read.delim(file.path(RES, "hcp_run_provenance.tsv"))   # sample size, written by 12_hcp_pls.py
 
 # concordance rho for the DK fit is stored in pls.py's raw orientation (dCT
 # salience positive); the figure is in the thinning orientation, so flip it.
@@ -198,7 +199,8 @@ methods <- paste(
           dkl$p_spin_singular[1], hl$p_spin_singular[1]),
   sprintf("\u2022 Gene weights are bootstrap Z over 1,000 region resamples (reproducibility %.2f DK, %.2f HCP). Panels e\u2013j are Spearman; gene-level n differs because the two expression matrices differ.",
           dkl$boot_reproducibility[1], hl$boot_reproducibility[1]),
-  "\u2022 Imaging: 8,192 subjects (DK) and 5,947 (HCP-MMP, derived from the FreeSurfer surfaces, coverage still incomplete), \u22652 visits, release 7.0 tables.",
+  sprintf("\u2022 Imaging: %s children with \u22652 QC-passing visits, true 7.0 tabulated tables; both parcellations run on the same sample.",
+          format(PROV$n_subjects[1], big.mark = ",")),
   "\u2022 Panel k: Seidlitz et al. 2020 marker compilation; each vector against its own universe. Marker genes are co-expressed, so the independent-gene null is anti-conservative \u2014 read the pattern, not the absolute z.",
   "\u2022 Everything is in the thinning orientation: positive = expressed more where adolescent thinning is faster. Grey parcels have no AHBA donor coverage.",
   sep = "\n")

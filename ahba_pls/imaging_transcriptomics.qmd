@@ -43,7 +43,8 @@ Adams GWAS). That is a stronger claim about the transcriptome but a weaker one a
 development: C3 is defined without reference to any developmental measure.
 
 The ABCD gives a thinning map from ~8,200 subjects rather than 297. So: **if we go back to
-the imaging-transcriptomics route with a 20× larger discovery sample, do we recover the
+the imaging-transcriptomics route with a discovery sample ~30× larger (8,716 children
+against NSPN's ~300), do we recover the
 same signature, and is it a sharper gene list than C3?**
 
 Two things constrain the design. The ABCD has no magnetization transfer, so the PNAS
@@ -63,7 +64,8 @@ The ds75 (4,003-gene) level is not used: too few genes for gene-set enrichment.
 
 ### Y — imaging
 
-Bilateral (LH/RH-averaged) DK maps from the settled ABCD 7.0 mixed-model runs.
+Bilateral (LH/RH-averaged) DK maps from the settled ABCD mixed-model runs on the **true 7.0
+tabulation** (8,716 children, 26,949 QC-passing sessions, ≥2 visits each).
 
 ```{python}
 #| echo: false
@@ -71,8 +73,8 @@ show(pd.read_csv(RES / "y_map_lr_agreement.csv") if (RES / "y_map_lr_agreement.c
      else pd.read_csv(DATA / "y_maps_bilateral_34.csv", index_col=0).describe().T.reset_index())
 ```
 
-`dCT` and `CT` reproduce `docs/developmental_maps_noglobal.csv` to <1e-5. One T1w/T2w fit
-(`rh_temporalpole`) is singular and is kept with a flag (`data/Y_MAPS.md`).
+`dCT` and `CT` reproduce `docs/developmental_maps_noglobal.csv` to 4.9e-08 and 4.8e-06. One
+T1w/T2w fit (`rh_temporalpole`) is singular and is kept with a flag (`data/Y_MAPS.md`).
 
 ### The five Y-matrix options
 
@@ -107,13 +109,13 @@ show(lead[["ds", "n_genes", "cov_explained", "p_spin_singular", "sal_dCT", "sal_
 ```
 
 Option 1 (dCT alone) gives a component that is only marginal under the spin null
-(p = 0.06–0.10) and whose gene vector loads as heavily on C1, the dominant static
-expression gradient, as on C3 (ρ = 0.59 with each). That is the interpretive trap: the
+(p = 0.06–0.11) and whose gene vector loads as heavily on C1, the dominant static
+expression gradient (0.56), as on C3 (0.59). That is the interpretive trap: the
 thinning map is itself correlated with the static thickness/myelination gradient, so
 correlating genes against it returns a mixture.
 
 Adding CT as a second Y column separates them. PLS1 becomes the static axis (gene weights
-ρ = −0.92 with C1) and PLS2 is left carrying dCT (salience 0.94) — spin-significant, and
+ρ = 0.92 with C1) and PLS2 is left carrying dCT (salience 0.94) — spin-significant, and
 concordant with both references at region and gene level. **This is why the thinning
 signature was PLS2 in the PNAS paper too**: the same decomposition, arrived at from a
 different direction.
@@ -124,9 +126,9 @@ k = sc[(sc.ds == "ds25") & sc.reference.isin(["NSPN_PLS2", "C3_recomputed_ds25"]
 show(k[["option", "component", "sal_dCT", "reference", "rho", "p_spin"]].round(3))
 ```
 
-Options 3 and 4 find the same component (pairwise gene-weight ρ 0.83–0.94 with option 2),
-and the signature is essentially invariant to the DS filter (weight ρ = 0.995–0.999 between adjacent
-filters, 0.981–0.994 between the ds0/ds50 extremes) —
+Options 3 and 4 find the same component (pairwise gene-weight ρ 0.91–0.94 with option 2),
+and the signature is essentially invariant to the DS filter (weight ρ = 0.980–0.999 across
+ds0/ds25/ds50) —
 unlike C3 itself, whose derivation by PCA needs careful gene filtering. The lead signature
 is taken as **option 2, PLS2, ds25**.
 
@@ -154,11 +156,11 @@ show(S[["label", "disorder", "n_genes", "magma_beta_std", "magma_p"]].round(4))
 ```
 
 The continuous test is positive for both disorders at every DS level and for every option
-that isolates the signature (SCZ β_std 0.028–0.041, MDD 0.024–0.041), at roughly **half
+that isolates the signature (SCZ β_std 0.027–0.040, MDD 0.025–0.039), at roughly **half
 C3's effect size**. The set-based test is more demanding: no SCZ set is enriched in the
 signature, and only the MDD high-confidence list (Adams 2025) reaches nominal significance
-(z = 2.4 at ds25). Importantly, the SCZ locus-pool signal that *is* present sits on the
-static PLS1 and on C1 (z ≈ 2.1–2.3) — so it is a property of the dominant expression
+(z = 2.8 at ds0, 2.4 at ds25). Importantly, the SCZ locus-pool signal that *is* present sits on the
+static PLS1 and on C1 (z = 2.3 and 2.1) — so it is a property of the dominant expression
 gradient, not of thinning.
 
 The conditional models settle the question the project actually cares about:
@@ -190,12 +192,12 @@ The ABCD signature survives conditioning on C1 and on the static component — i
 the expression gradient. But conditioned on C3 its coefficient goes to zero, while C3
 conditioned on the ABCD signature keeps its association. Against NSPN-PLS2 the picture is
 symmetric rather than nested: the two are collinear, so for SCZ neither coefficient
-survives the joint model (ABCD p = 0.36, NSPN p = 0.085, from 0.014 and 0.004 alone),
-while for MDD only the ABCD signature retains its association (p = 0.015 vs 0.87).
+survives the joint model (ABCD p = 0.38, NSPN p = 0.086, from 0.014 and 0.004 alone),
+while for MDD only the ABCD signature retains its association (p = 0.024 vs 0.93).
 
 ## What this says
 
-**The replication is the result.** A discovery sample 20× larger, a different scanner
+**The replication is the result.** A discovery sample ~30× larger (8,716 children), a different scanner
 protocol, a different parcellation and no magnetization transfer still yields the same
 transcriptomic axis of adolescent thinning, with the same neuronal-versus-glial
 composition and the same direction of association with SCZ and MDD genetics. That is
@@ -209,11 +211,19 @@ gene ranking for disorder enrichment, C3 remains it. If the goal is a *developme
 warrant for that ranking — evidence that this axis really tracks adolescent thinning in
 a population-scale cohort — this analysis supplies it.
 
-**Open questions** are specified for the cluster in `FOLLOWUP_GENETICS.md`: whether the
-signature weights relate to the genes driving ABCD's own global thinning (H3; the prior
-from `hpc_v3` is null), and whether projecting subject-level slopes onto the component
-gives a more heritable GWAS phenotype than `global_slope` (H4; benchmarks h² = 0.115 ± 0.056
-and `slope_projC3` 0.121 ± 0.057, so a large gain would be surprising).
+**H3 is answered and null.** The cluster run (`genetic_analysis/step8_ahba_pls_h3.sh`) regressed
+each phenotype's gene-level Z on the signature weights: 35 tests across five phenotypes, none
+below p = 0.05, the nearest being `global_slope` conditioned on C3 (β +0.029–+0.033, p 0.061–0.072).
+`global_slope` is heritable in GREML (h² = 0.166 ± 0.045) but has no GWAS hit and an LDSC h² z
+below 1, so there is no common-variant signal for the weights to align with. **H4** — projecting
+subject-level slopes onto the component to get a more heritable phenotype — remains the open arm.
+
+**A finer parcellation helps, for MDD only.** Refitting the same PLS in HCP-MMP (137 parcels, the
+native space of C1–C3, same 8,716 children) raises the MDD gene-property β from 0.053 to
+0.069 and survives conditioning on the DK version while DK does not survive conditioning on it;
+SCZ shows no gain. The cell-class profile also shifts: astrocytes flip to positive in HCP-MMP
+(+5.0 vs -5.2 in DK) and oligodendrocytes deepen towards C3's value. See the `ahba_pls`
+README for both arms.
 
 ## Reproducing
 
@@ -231,8 +241,17 @@ python code/07_permutation_enrichment.py  # H2 test A                           
 python code/08_magma_gene_property.py     # H2 test B (needs ../tools/bin MAGMA)
 python code/09_summarise_enrichment.py    # enrichment summary table
 python code/10_export_for_hpc.py          # exports for the cluster follow-up
-Rscript code/fig1_lead_signature.R        # Figure 1  (ggplot2 + patchwork + ggseg)
-Rscript code/fig2_enrichment.R            # Figure 2
+python code/11_parcellation_test.py       # is the gap a DK-resolution artefact?  (no)
+python code/12_hcp_pls.py                 # the same PLS in HCP-MMP            (~4 min)
+python code/13_celltype_compare.py        # cell classes, three rankings
+python code/14_magma_all_options.py       # one MAGMA universe, all rankings
+python code/15_celltype_all_options.py    # cell classes, all eight rankings   (~3 min)
+Rscript code/fig1_lead_signature.R        # DK lead signature
+Rscript code/fig1_signature_both.R        # both parcellations + cell classes
+Rscript code/fig2_enrichment.R            # permutation + MAGMA, DK
+Rscript code/fig2_enrichment_combined.R   # MAGMA only, all rankings
+Rscript code/fig3_hcp_vs_dk.R             # HCP vs DK arm
+Rscript code/fig4_celltypes.R             # cell classes, all eight rankings
 ```
 
 Environments. Analysis and tables: python (pandas/scipy) — env `ahba-pls`. Figures: R with

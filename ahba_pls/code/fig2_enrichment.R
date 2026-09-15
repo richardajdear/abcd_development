@@ -117,10 +117,12 @@ pc <- ggplot(rows, aes(BETA_STD, nm, colour = disorder)) +
 
 methods <- paste(
   "Methods.",
-  "\u2022 Universe: AHBA genes with a MAGMA gene-level result in both disorders (13,763 / 10,322 / 6,931 genes at ds0 / ds25 / ds50).",
-  "\u2022 GWAS: SCZ = PGC3 wave 3 (Trubetskoy 2022); MDD = PGC MDD 2025 (Adams 2025). Gene analysis from this project's hpc/ run (MAGMA v1.10, NCBI37.3).",
+  sprintf("\u2022 Universe: AHBA genes with a MAGMA gene-level result, per DS filter (%s genes at ds0 / ds25 / ds50; the two GWAS differ by a few dozen genes).",
+          paste(sapply(c("ds0", "ds25", "ds50"), function(d)
+            format(min(S$n_genes[grepl(d, S$vector) & grepl("lead", S$vector)]), big.mark = ",")), collapse = " / ")),
+  "\u2022 GWAS: SCZ = PGC3 wave 3 (Trubetskoy 2022); MDD = PGC MDD 2025 (Adams 2025). Gene analysis from this project's genetic_analysis/ run (MAGMA v1.10, NCBI37.3).",
   "\u2022 Panel a: MAGMA --gene-covar regression; models gene\u2013gene LD and conditions internally on gene size, density and sample size; two-sided.",
-  "\u2022 Panel b: mean weight of the set vs 10,000 random sets matched on size and gene-length decile; sets replicate the hpc MAGMA definitions.",
+  "\u2022 Panel b: mean weight of the set vs 10,000 random sets matched on size and gene-length decile; sets replicate the project's MAGMA definitions.",
   "\u2022 Panel c: the same regression with a second weight vector added. \"X | Y\" = coefficient of X with Y in the model.",
   "\u2022 Rows in a and b: ABCD signature at three DS filters; other Y-matrix options and the within-analysis static control; published benchmarks.",
   sep = "\n")

@@ -12,6 +12,7 @@ M <- read.delim(file.path(RES, "hcp_vs_dk_enrichment.tsv"))
 C <- read.delim(file.path(RES, "hcp_vs_dk_conditional.tsv"))
 cmp <- read.delim(file.path(RES, "hcp_pls_components.tsv"))
 conc <- read.delim(file.path(RES, "hcp_concordance.tsv"))
+PROV <- read.delim(file.path(RES, "hcp_run_provenance.tsv"))   # sample size, written by 12_hcp_pls.py
 
 base <- theme_bw(base_size = 7.6) +
   theme(panel.grid.minor = element_blank(),
@@ -80,14 +81,15 @@ c3s <- conc |> filter(reference == "C3", level == "scores")
 c3w <- conc |> filter(reference == "C3", level == "weights")
 methods <- paste(
   "Methods.",
-  "\u2022 Imaging: thickness in HCP-MMP1.0, derived from the release FreeSurfer surfaces (ABCD tabulates only Desikan). Parcellation coverage is\n  incomplete (24,921 of 33,825 sessions), so this run has 5,947 subjects with \u22652 visits against 8,192 in DK.",
+  sprintf("\u2022 Imaging: thickness in HCP-MMP1.0, derived from the release FreeSurfer surfaces (ABCD tabulates only Desikan). After the 2026-09-14\n  parcellation backfill this run has %s children with \u22652 visits (%s sessions) \u2014 the same sample as the DK run.",
+          format(PROV$n_subjects[1], big.mark = ","), format(PROV$n_sessions[1], big.mark = ",")),
   "\u2022 Same option-2 design as Figure 1 (Y = bilateral dCT + CT), 137 of 180 left parcels with AHBA donor coverage; medial-wall parcel H excluded.",
   sprintf("\u2022 PLS2 carries dCT (salience %.2f), explains %.0f%% of the cross-covariance, spin p = %.3f over 5,000 rotations of the complete 180-parcel map; bootstrap reproducibility %.2f.",
           lead$sal_dCT, 100 * lead$cov_explained, lead$p_spin_singular, lead$boot_reproducibility),
   sprintf("\u2022 It is the same axis: scores vs AHBA C3 rho = %.2f (p_spin < 0.001, 137 parcels), gene weights rho = %.2f \u2014 measured in C3's own parcellation rather than a DK projection.",
           c3s$rho, c3w$rho),
   "\u2022 The DK comparator is refitted on dk_3d.csv \u2014 same abagen build and the same 7,973 genes as the HCP matrix \u2014 so parcellation is not confounded with pipeline.",
-  "\u2022 Exploratory run: release metadata is 6.0-vintage, so the 2,639 six-year sessions HCP uniquely has (of 2,646) lack an age row and drop out.",
+  sprintf("\u2022 All %d hemisphere-region models converged with none singular; medial-wall parcel H is excluded by the run config.", PROV$n_labels_fitted[1]),
   sep = "\n")
 
 fig <- (pa / pb) +

@@ -84,15 +84,16 @@ ahba_pls/
 - [x] **Phase 1** — inputs: Y-matrix, aligned X at 3 DS levels, NSPN-PLS2 and C3 references, GWAS gene sets (`code/01_*`–`03_*`; notes in `data/INPUTS.md`, `data/Y_MAPS.md`, `data/reference/*.md`, `data/reference/gene_sets/GENE_SETS.md`)
 - [x] **Phase 2** — PLS fits (5 options × 3 DS), spin/bootstrap inference, concordance with PLS2/C3, lead signature (`code/pls.py`, `04_fit_pls.py`, `05_concordance.py`, `06_lead_signature.py`)
 - [x] **Phase 3** — SCZ/MDD enrichment: permutation + MAGMA gene-property, with C3/PLS2 benchmarks (`07_permutation_enrichment.py`, `08_magma_gene_property.py`, `09_summarise_enrichment.py`; MAGMA macOS binary in `../tools/bin/magma_mac/`)
-- [x] **Phase 4** — [`FOLLOWUP_GENETICS.md`](FOLLOWUP_GENETICS.md) (H3, H4 specification for the cluster agent) and exports in `legacy/hpc/` (`code/10_export_for_hpc.py`)
+- [x] **Phase 4** — [`FOLLOWUP_GENETICS.md`](FOLLOWUP_GENETICS.md) and exports (`code/10_export_for_hpc.py`); **H3 run on the cluster and null**, H4 still open
 - [x] **Phase 5** — notebook [`imaging_transcriptomics.qmd`](imaging_transcriptomics.qmd), this results index, and a pointer row in the top-level README (`tests/test_readme.py` passes)
 
 ## Results index
 
 ### Phase 1 — inputs (facts worth knowing)
 
-- Uncovered AHBA region: `lh_frontalpole` → 33 regions enter PLS. LH/RH agreement of the seven Y maps r = 0.96–0.995 (`results/y_map_lr_agreement.csv`).
-- dCT and CT reproduce `docs/developmental_maps_noglobal.csv` to <1e-5. The T1w/T2w `rh_temporalpole` fit is singular/non-converged (kept; flagged in `data/Y_MAPS.md`).
+- Uncovered AHBA region: `lh_frontalpole` → 33 regions enter PLS. LH/RH agreement of the seven Y maps r = 0.962–0.995 (`results/y_map_lr_agreement.csv`).
+- The Y maps come from the 7.0-tabulated runs: **8,716 children / 26,949 sessions** (DK thickness, all 68 hemisphere-region models converged, none singular) and the T1w/T2w run on the same sample, where `rh_temporalpole` is singular/non-converged (kept; flagged in `data/Y_MAPS.md`).
+- dCT and CT reproduce `docs/developmental_maps_noglobal.csv` to 4.9e-08 and 4.8e-06 (ρ = 1.000 for both).
 - NSPN gene symbols are 2016-vintage: 1,310 renamed via mygene (rule: unique current symbol present in ds0, no collision) → overlap with ds0/25/50 = 14,865 / 11,175 / 7,454 of 20,710 (`data/reference/NSPN_REFERENCE.md`). 26 Excel-date-corrupted symbols dropped.
 - C1–C3 scores recomputed from `weights.csv` on the current DK matrices agree with the shipped DK scores at ρ = 0.99 / 0.94 / 0.91 (C1/C2/C3); the recomputed versions are used for like-for-like comparison.
 - SCZ (Trubetskoy 2022) and MDD (Adams 2025 Table S21) sets replicate the `legacy/hpc/` MAGMA definitions in symbol space; MAGMA gene-level Z for SCZ/MDD mapped to symbols at 99.3 %. Brain-expressed backgrounds: 13,763 / 10,322 / 6,931 genes.
@@ -103,21 +104,35 @@ ahba_pls/
 
 | option (Y) | dCT-carrying component | cov. explained | spin p (ds0/25/50) | scores ρ vs NSPN-PLS2 | scores ρ vs C3 (recomputed) | weights ρ vs PLS2_z | weights ρ vs C3 |
 |:--|:--|--:|:--|--:|--:|--:|--:|
-| 1. dCT | PLS1 | 1.00 | 0.06 / 0.08 / 0.10 | 0.45 (p 0.08) | 0.24 (n.s.) | 0.60 | 0.58 (but also **0.59 with C1**) |
-| 2. dCT + CT | **PLS2** (dCT salience 0.94) | 0.13 | **0.002 / 0.004 / 0.006** | **0.76 (p 0.001)** | **0.85 (p 0.001)** | **0.61** | **0.77** (C1: 0.21) |
-| 3. dCT + dT1T2 | PLS2 (0.90) | 0.16 | 0.017 / 0.024 / 0.028 | 0.57 (p 0.01) | 0.87 (p 0.001) | 0.47 | 0.78 |
-| 4. CT + dCT + T1T2 + dT1T2 | PLS2 (0.87) | 0.09 | 0.08 / 0.11 / 0.13 | 0.73 (p 0.001) | 0.78 (p 0.001) | 0.56 | 0.64 |
-| 5. slopePC1–3 | PLS2 (= slopePC3) | 0.27 | 0.001 | 0.74 (p 0.001) | 0.49 (p 0.01) | 0.68 | 0.46 |
+| 1. dCT | PLS1 | 1.00 | 0.065 / 0.082 / 0.108 | 0.49 (p 0.048) | 0.28 (p 0.185) | 0.61 | 0.59 (C1: 0.56) |
+| 2. dCT + CT | **PLS2** (dCT salience 0.94) | 0.13 | **0.002 / 0.002 / 0.004** | **0.75 (p 0.001)** | **0.83 (p 0.001)** | **0.62** | **0.76** (C1: -0.20) |
+| 3. dCT + dT1T2 | PLS2 (dCT salience 0.90) | 0.17 | 0.015 / 0.021 / 0.026 | 0.57 (p 0.010) | 0.87 (p 0.001) | 0.48 | 0.78 (C1: -0.34) |
+| 4. CT + dCT + T1T2 + dT1T2 | PLS2 (dCT salience 0.86) | 0.09 | 0.078 / 0.098 / 0.119 | 0.76 (p 0.001) | 0.78 (p 0.001) | 0.57 | 0.62 (C1: -0.07) |
+| 5. slopePC1–3 | PLS2 | 0.27 | 0.001 / 0.000 / 0.000 | 0.74 (p 0.001) | 0.52 (p 0.007) | 0.68 | 0.48 (C1: -0.09) |
 
-Signs above are reported in the *thinning* orientation (positive = higher expression where thinning is faster), which is the orientation in which NSPN-PLS2 and C3 are defined; `pls.py` itself fixes the dCT salience positive, so raw outputs have the opposite sign.
+All ρ and saliences at ds25 unless the column says otherwise. Signs are reported in the *thinning*
+orientation (positive = higher expression where thinning is faster), which is the orientation in which
+NSPN-PLS2 and C3 are defined; `pls.py` itself fixes the dCT salience positive, so raw outputs carry the
+opposite sign.
 
 Reading:
-- **dCT alone does not isolate the signature.** Its gene vector loads equally on C1 (the dominant static axis) and C3, and it is only marginal under the spin null. The thinning map carries the static transcriptional gradient because thinning rate covaries with baseline thickness / myelination.
-- **Adding CT as a second Y column absorbs the static axis into PLS1** (opt2 PLS1 weights ρ = −0.92 with C1) and leaves a spin-significant PLS2 that is the C3-like thinning signature at both levels — the same structure as NSPN, where the thinning signal also appeared as the second component.
-- The dCT-carrying components of options 2, 3 and 4 are one signature (pairwise weight ρ 0.83–0.94) and are stable across DS filters (weight ρ = 0.995–0.999 between adjacent filters, 0.981–0.994 between the ds0/ds50 extremes), so gene filtering is not the limiting factor here as it was for deriving C3 by PCA.
-- The ABCD thinning map itself matches the NSPN thinning map (ρ = 0.64, p_spin = 0.002), so the replication is not an artefact of a shared atlas.
+- **dCT alone does not isolate the signature.** Its gene vector loads about equally on C3 (0.59) and on
+  C1, the dominant static axis (0.56), and it is only marginal under the spin null
+  (p = 0.065 / 0.082 / 0.108). The thinning map carries the static transcriptional gradient because
+  thinning rate covaries with baseline thickness and myelination.
+- **Adding CT as a second Y column absorbs the static axis into PLS1** (opt2 PLS1 weights ρ = 0.92 with C1)
+  and leaves a spin-significant PLS2 that is the C3-like thinning signature at every DS level — the same
+  structure as NSPN, where the thinning signal also appeared as the second component.
+- The dCT-carrying components of options 2, 3 and 4 are one signature (pairwise weight ρ = 0.83–0.94
+  at matched DS) and each is near-invariant to the DS filter (ρ = 0.980–0.999 across ds0/ds25/ds50), so gene
+  filtering is not the limiting factor here as it was for deriving C3 by PCA.
+- The ABCD thinning map itself matches the NSPN thinning map (ρ = 0.66, p_spin = 0.002), so the
+  replication is not an artefact of a shared atlas.
 
-**Lead signature = option 2, PLS2, ds25** (`results/lead_signature_weights.tsv`, `lead_signature_scores.csv`). Top-decile overlap with C3 top decile 5.3×, with NSPN-PLS2 4.1× (hypergeometric p ≈ 0). Top genes: *AGBL4, CHRM3, CPNE8, PRSS12, LRRTM4, RAPGEF2, CCK*; bottom: *CAPN2, GIT2, PDE9A, HDAC1, MCM3, HLA-E*. Cell-class markers (Seidlitz 2020 compilation): neuronal (Ex, In) strongly positive, all glial/vascular classes negative (`lead_celltype_enrichment.tsv`; z values are descriptive — genes are not independent).
+**Lead signature = option 2, PLS2, ds25** (`results/lead_signature_weights.tsv`, `lead_signature_scores.csv`).
+Top-decile overlap with the C3 top decile 5.2×, with NSPN-PLS2 4.2× (hypergeometric p ≈ 0). Top genes:
+*AGBL4*, *PRSS12*, *LKAAEAR1*, *CHRM3*, *SEC24D*, *WIPF2*, *CPNE8*; bottom: *CAPN2*, *PHACTR2*, *ITGAV*, *HLA-B*, *BRD2*, *HLA-C*. Cell-class markers: neuronal classes strongly positive, glial and
+vascular classes negative (`lead_celltype_enrichment.tsv`, and the eight-ranking comparison below).
 
 ### Phase 3 — SCZ / MDD enrichment of the gene weights (H2: **supported by the continuous test, nominal in strength; the signal is a subset of C3's**)
 
@@ -127,46 +142,78 @@ Two tests, shared brain-expressed universe (AHBA genes with a MAGMA Z in both di
 
 **A. PNAS-style set permutation** (mean weight of set genes vs 10,000 size- and gene-length-matched random sets):
 
-| weight vector | SCZ prioritised (120) | SCZ locus pool (685) | MDD high-confidence (308) | MDD pool (4,600) |
+| weight vector | SCZ prioritised (92) | SCZ locus pool (394) | MDD high-confidence (202) | MDD pool (1626) |
 |:--|--:|--:|--:|--:|
-| ABCD PLS2 ds0 / ds25 / ds50 | z 1.0 / 0.0 / −0.1 | 1.8 / 1.0 / 1.0 | **2.8 / 2.4 / 1.5** (p 0.005 / 0.015 / 0.12) | 1.4 / 1.8 / 1.6 |
-| static PLS1 (control) | 1.5 | 2.3 | −2.4 | 0.9 |
+| ABCD PLS2 ds0 / ds25 / ds50 | z 1.0 / -0.0 / -0.1 | 1.8 / 1.0 / 1.0 | **2.8 / 2.4 / 1.5** (p 0.005 / 0.016 / 0.132) | 1.4 / 1.7 / 1.5 |
+| static PLS1 (control) | 1.5 | 2.3 | -2.4 | 0.9 |
 | AHBA C3 | 1.1 | 2.4 | **3.4** | 1.9 |
 | NSPN PLS2 | 0.2 | 1.4 | 0.1 | 0.3 |
 
-No SCZ set is enriched in the thinning signature by this test; the MDD high-confidence set (Adams 2025) is nominally enriched, in the same direction as for C3. The static/C1-like axis carries the SCZ locus-pool signal (z ≈ 2.1–2.3) as strongly as anything, and is *depleted* for MDD high-confidence genes, so the SCZ pool result is not specific to thinning.
+No SCZ set is enriched in the thinning signature by this test; the MDD high-confidence set (Adams 2025)
+is nominally enriched at ds0 and ds25, in the same direction as for C3. The static/C1-like axis carries
+the SCZ locus-pool signal (z = 2.3) as strongly as anything, and is *depleted* for MDD
+high-confidence genes (-2.4), so the SCZ pool result is not specific to thinning.
 
 **B. MAGMA gene-property** (disorder gene Z regressed on the continuous weight, gene-gene LD correlations from the `.genes.raw`, MAGMA's internal gene-size/density covariates):
 
 | weight vector | SCZ β_std (p) | MDD β_std (p) |
 |:--|--:|--:|
-| ABCD PLS2 ds0 | 0.037 (4e-4) | 0.026 (0.011) |
-| ABCD PLS2 ds25 | 0.028 (0.022) | 0.028 (0.021) |
-| ABCD PLS2 ds50 | 0.034 (0.034) | 0.041 (0.006) |
-| dCT alone (opt 1) | 0.041 (0.001) | 0.031 (0.010) |
-| dCT+dT1T2 PLS2 (opt 3) | 0.033 (0.008) | 0.039 (0.001) |
-| static PLS1 (control) | 0.026 (0.037) | 0.015 (0.20) |
-| AHBA C1 | 0.026 (0.09) | 0.008 (0.58) |
+| ABCD PLS2 ds0 | 0.037 (5e-4) | 0.025 (0.014) |
+| ABCD PLS2 ds25 | 0.027 (0.026) | 0.026 (0.027) |
+| ABCD PLS2 ds50 | 0.034 (0.036) | 0.039 (0.01) |
+| dCT alone (opt 1) | 0.040 (0.001) | 0.030 (0.012) |
+| dCT+dT1T2 PLS2 (opt 3) | 0.032 (0.011) | 0.038 (0.002) |
+| static PLS1 (control) | 0.026 (0.036) | 0.015 (0.208) |
+| AHBA C1 | 0.026 (0.093) | 0.008 (0.585) |
 | **AHBA C3** | **0.064 (7e-5)** | **0.075 (1e-6)** |
-| NSPN PLS2 | 0.033 (4e-4) | 0.015 (0.11) |
+| NSPN PLS2 | 0.033 (4e-4) | 0.015 (0.105) |
 
-The thinning signature is positively associated with both SCZ and MDD gene-level association at every DS level and for every Y-option that isolates it — effect sizes ≈ half of C3's. Top-decile indicators are weaker (opt2 ds0 SCZ p = 0.03; others n.s.), i.e. the effect is spread along the continuum rather than concentrated in the extreme genes.
+The thinning signature is positively associated with both SCZ and MDD gene-level association at every DS
+level and for every Y-option that isolates it — effect sizes ≈ half of C3's. Top-decile indicators are
+weaker (opt2 ds0 SCZ p = 0.027; others n.s.), i.e. the effect is spread along the continuum rather
+than concentrated in the extreme genes.
 
-**C. Conditional models** (shared universe n = 6,672): ABCD PLS2 keeps its association when conditioned on C1 (SCZ p = 0.004, MDD 0.002) or on the static PLS1 (0.008, 0.002), so it is not the static gradient. But conditioned on **C3 it drops to zero** (SCZ β = −0.01 p = 0.62; MDD −0.03 p = 0.17), whereas C3 conditioned on ABCD PLS2 retains its signal (SCZ p = 0.006, MDD 1e-5). ABCD PLS2 and NSPN PLS2 are mutually attenuating rather than nested: in the joint model neither SCZ coefficient survives (ABCD PLS2 p = 0.36, NSPN PLS2 p = 0.085, from p = 0.014 and 0.004 alone), while for MDD only ABCD PLS2 retains its association (p = 0.015 vs 0.87).
+**C. Conditional models** (shared universe n = 6,672 SCZ / 6,662 MDD): ABCD PLS2 keeps its association
+when conditioned on C1 (SCZ p = 0.004, MDD 0.003) or on the static PLS1 (0.009, 0.003), so it is
+not the static gradient. But conditioned on **C3 it drops to zero** (SCZ β = -0.012 p = 0.64;
+MDD -0.035 p = 0.13), whereas C3 conditioned on ABCD PLS2 retains its signal
+(SCZ β = 0.069 p = 0.0056; MDD 0.106 p = 7e-6). ABCD PLS2 and NSPN PLS2 are mutually
+attenuating rather than nested: in the joint model neither SCZ coefficient survives (ABCD PLS2
+p = 0.376, NSPN PLS2 p = 0.086, from p = 0.014 and 0.0042 alone), while for MDD only
+ABCD PLS2 retains its association (p = 0.024 vs 0.93).
 
-Reading: the data-driven ABCD signature recovers the disorder-relevant part of C3, but does not add to it — C3 (derived from AHBA alone, with careful gene filtering) remains the sharper gene ranking for SCZ/MDD. This is the expected order: the ABCD component is a 33-region projection and can only capture the part of C3 that is expressed in the DK-resolution thinning map. The gain from ABCD is therefore in *validation* (an independent, 20× larger imaging sample reproduces the signature and its disorder enrichment) rather than in a sharper gene list.
+Reading: the data-driven ABCD signature recovers the disorder-relevant part of C3, but does not add to it
+— C3 (derived from AHBA alone, with careful gene filtering) remains the sharper gene ranking for SCZ/MDD.
+This is the expected order: the ABCD component is a 33-region projection and can only capture the part of
+C3 that is expressed in the DK-resolution thinning map. The gain from ABCD is therefore in *validation*
+(an independent imaging sample roughly 30× the size of NSPN's — 8,716 children against ~300 —
+reproduces the signature and its disorder enrichment) rather
+than in a sharper gene list.
 
-### Phase 4 — exports for the cluster (H3, H4 deferred)
+### Phase 4 — exports for the cluster, and H3's answer (**null**)
 
-`FOLLOWUP_GENETICS.md` specifies both arms with the conventions of `hpc_v2`/`hpc_v3`
-and states the priors to beat (`global_slope` h² = 0.115 ± 0.056, `slope_projC3` 0.121 ± 0.057;
-every MAGMA test in `hpc_v3` §10 was null). Exports, all in the thinning orientation:
+`FOLLOWUP_GENETICS.md` specifies both arms with the conventions of `legacy/hpc_v2`/`hpc_v3`. Exports,
+all in the thinning orientation:
 
 | file | what |
 |:--|:--|
 | `hpc/lead_pls2_dk_scores_68.csv` | lead-component regional scores, 68 DK labels (both frontal poles NA) — input to the H4 projection phenotype |
 | `hpc/lead_pls2_gene_covar_entrez.txt` | MAGMA `--gene-covar` file, Entrez-keyed: `thinning_Z_ds0/25/50` + `AHBA_C3` for conditioning |
 | `hpc/lead_pls2_gene_weights_symbol.tsv` | the same weights by gene symbol, with rank and decile |
+
+**H3 — do the signature's genes drive the ABCD's own thinning GWAS? No.** The cluster agent ran it as
+step 8 of the 7.0-tabulated genetics (`genetic_analysis/step8_ahba_pls_h3.sh`,
+`work/results_70tab/magma_ahba_pls_h3/table_h3.tsv`): each phenotype's EUR gene-level Z regressed on
+`thinning_Z_ds0/25/50` and on C3, marginally and conditioned on C3, across five phenotypes — 35 tests,
+**none below p = 0.05**. For `global_slope` the marginal βs are -0.002 / +0.008 / +0.013
+(p 0.84 / 0.35 / 0.23); conditioned on C3 they rise to +0.029–+0.033 (p 0.061–0.072) — the same
+near-threshold signal three times over, since the DS columns are near-duplicates. That is the expected
+result rather than evidence against the signature: `global_slope` is heritable in GREML
+(h² = 0.166 ± 0.045, n = 6,011) but has no GWAS hit and an LDSC h² z of only 0.57–0.60, so there is
+no detectable common-variant signal for the gene weights to line up with. **H4** (a projection phenotype with
+higher heritability) remains open and is the informative follow-up.
+
+The cluster agent then repeated the whole pipeline on the HCP-MMP export (commit `3e80410`, `work/results_70tab_hcp/`). H3 is null there too — 50 rows, smallest p = 0.066; for `global_slope` the marginal βs are +0.009–+0.016 (p 0.081–0.215), and conditioning on C3 does not help. Worth noting for H4: on HCP the thinning GWAS's LDSC h² z rises to 1.78 from 0.57 on DK, so a parcellation-aware phenotype is the more promising route than a better gene weighting.
 
 ### Parcellation control — is the weaker enrichment a DK-resolution artefact? (**no**)
 
@@ -196,16 +243,10 @@ the ABCD weights correlate ρ = 0.77 with C3, and simple regression dilution pre
 β ≈ ρ²·β_C3 = 0.036 (SCZ) / 0.044 (MDD) against 0.040 / 0.041 observed. The attenuation
 is fully accounted for by that fidelity, with nothing left over for resolution.
 
-Implication: **a finer imaging parcellation should not be expected to close the gap.** It
-would be worth doing if finer parcels made the *thinning map itself* a better proxy for
-C3 (DK parcels straddle the gradient), and that is cheap to check first — HCP-MMP
-thickness for ABCD 5.1 already exists at `ABCD/abcd-data-release-5.1/processed/` (360
-ROIs; 10,778 / 7,092 / 2,800 subjects at v0 / v2 / v4) and `src/abcd/io.py` already loads
-it (`parcellation: hcp`). If the dCT–C3 score correlation rises appreciably above the
-DK value (ρ = −0.55 for the rate map, 0.85 for the PLS scores), a 7.0 re-parcellation on
-the cluster is justified; if it does not, the limit is the phenotype, not the atlas. Note
-7.0 has no `processed/` directory, so 7.0 HCP thickness needs the surface parcellation
-re-run.
+Implication: **a finer imaging parcellation should not be expected to close the gap** by giving the
+weights more observations. It would only help if finer parcels made the *thinning map itself* a better
+proxy for the axis (DK parcels straddle the gradient) — which is exactly what the next section tests,
+and for MDD that is what happens.
 
 ### HCP-MMP arm — fitting the PLS in C3's own parcellation (**adds MDD signal, not SCZ**)
 
@@ -214,102 +255,88 @@ re-run.
 
 The parcellation control above said a coarse atlas costs nothing *when the phenotype is
 already the axis*, and left open the one case that would matter: whether finer parcels make
-the thinning map a better proxy. HCP-MMP thickness for 7.0 now exists (commit 3961821,
-`configs/ct_70_hcp_noglobal_mv2.yaml`), so this tests it directly.
+the thinning map a better proxy. This tests it directly.
 
-**The run.** `thickness_hcp_70_fec93121f0dd` — the settled specification on HCP-MMP.
-Assemble keeps **5,947 subjects** with ≥2 QC-passing visits (DK: 8,192); 360 regions fit in
-2 min, 4/360 singular, 4 non-converged, 0 errors. The PLS uses the 137 left parcels with
-AHBA donor coverage, bilateral (lh/rh mean), with the medial-wall parcel `H` dropped.
+**The run.** `thickness_hcp_70_aa6e91efba82` — the settled specification on HCP-MMP, refitted
+after the 2026-09-14 parcellation backfill. It keeps **8,716 children** with ≥2 QC-passing
+visits and 26,946 sessions, i.e. **exactly the DK sample** (8,716); all 358 hemisphere-region
+models converged with none singular (the earlier 6,537-child run had 4 singular and 4
+non-converged of 360). Parcel `H` (FreeSurfer medial wall) is excluded by the run config.
+The PLS uses the 137 left parcels with AHBA donor coverage, bilateral (lh/rh mean).
 
 **The component is the same axis, now measured in its native space.** PLS2 carries dCT
-(salience 0.99), explains 14% of the cross-covariance, spin p = 0.012 (5,000 rotations of
+(salience 0.99), explains 14% of the cross-covariance, spin p = 0.011 (5,000 rotations of
 the complete 180-parcel map), bootstrap reproducibility 0.90. Scores vs C3
-ρ = 0.69 (p_spin < 0.001, 137 parcels), gene weights ρ = 0.67; weights vs the DK signature
-ρ = 0.73. The DK score correlation of 0.85 was over 33 regions — 0.69 over 137 is the more
-honest number, not a loss of signal.
+ρ = 0.70 (p_spin = 0.0004, 137 parcels), gene weights ρ = 0.68; weights vs the DK
+signature ρ = 0.73. The DK score correlation of 0.83 was over 33 regions — 0.70 over
+137 is the more honest number, not a loss of signal.
 
-**Enrichment** (one shared MAGMA universe of 6,063 genes; the DK comparator is
+**Enrichment** (one shared MAGMA universe of 6,063 SCZ / 6,051 MDD genes; the DK comparator is
 refitted on `dk_3d.csv`, the same abagen build and the same 7,973 genes as the HCP matrix, so
 parcellation is not confounded with pipeline):
 
 | gene weights | parcels | SCZ β_std (p) | MDD β_std (p) |
 |:--|--:|--:|--:|
-| **HCP-MMP PLS2** | **137** | 0.044 (0.012) | **0.070** (2e-05) |
-| DK PLS2, matched genes | 33 | 0.046 (0.007) | 0.055 (0.0007) |
-| HCP-MMP, dCT alone | 137 | 0.053 (0.0022) | 0.079 (2e-06) |
-| AHBA C3 | 137 | 0.068 (9e-05) | 0.082 (9e-07) |
+| **HCP-MMP PLS2** | **137** | 0.045 (0.01) | **0.069** (3e-5) |
+| DK PLS2, matched genes | 33 | 0.046 (0.008) | 0.053 (0.001) |
+| HCP-MMP, dCT alone | 137 | 0.054 (0.002) | 0.078 (3e-6) |
+| AHBA C3 | 137 | 0.068 (9e-5) | 0.082 (9e-7) |
 
 Because the two weight vectors are correlated (ρ = 0.73), the comparison is made inside
 MAGMA rather than by differencing βs:
 
 | model | SCZ β (p) | MDD β (p) |
 |:--|--:|--:|
-| HCP PLS2 \| DK PLS2 | 0.020 (0.45) | **0.065 (0.0092)** |
-| DK PLS2 \| HCP PLS2 | 0.031 (0.23) | 0.007 (0.78) |
-| HCP PLS2 \| AHBA C3 | -0.003 (0.89) | 0.029 (0.19) |
-| AHBA C3 \| HCP PLS2 | 0.071 (0.0026) | 0.062 (0.0055) |
+| HCP PLS2 \| DK PLS2 | 0.023 (0.39) | **0.067 (0.008)** |
+| DK PLS2 \| HCP PLS2 | 0.029 (0.27) | 0.003 (0.91) |
+| HCP PLS2 \| AHBA C3 | -0.002 (0.94) | 0.027 (0.23) |
+| AHBA C3 \| HCP PLS2 | 0.070 (0.0032) | 0.063 (0.0047) |
 
-**Reading.** For **MDD** the finer parcellation adds real signal: β rises 0.055 → 0.070, HCP
-survives conditioning on DK (p = 0.009) and DK does not survive conditioning on HCP
-(p = 0.78) — the DK version is a degraded copy of the HCP one. For **SCZ** there is no gain;
-the two attenuate each other and neither dominates. Both remain absorbed by C3, which keeps
-its association conditioned on either. So the HCP arm improves the *ABCD-derived* ranking for
-MDD without changing the headline conclusion that C3 is the sharper ranking.
+**Reading.** For **MDD** the finer parcellation adds real signal: β rises 0.053 → 0.069, HCP
+survives conditioning on DK (p = 0.008) and DK does not survive conditioning on HCP
+(p = 0.91) — the DK version is a degraded copy of the HCP one. For **SCZ** there is no gain;
+the two attenuate each other and neither dominates (0.39 and 0.27 jointly). Both remain absorbed
+by C3, which keeps its association conditioned on either. So the HCP arm improves the
+*ABCD-derived* ranking for MDD without changing the headline conclusion that C3 is the sharper
+ranking.
 
 Also notable: in HCP space **dCT alone** (option 1) is the strongest ABCD vector
-(MDD 0.079, SCZ 0.053). In DK its enrichment was already competitive (SCZ 0.041, MDD 0.031,
-vs 0.037/0.026 for the lead at ds0); what disqualified it there was not the enrichment but
-that it fails to *isolate* the axis — its weights load equally on C1 (ρ = −0.59) and C3
-(−0.58) — and that its component is marginal under the spin null. The same caution applies
-here: spin p = 0.27, so the map-level covariance with expression is not spatially specific.
-Treat the single-Y option as a gene-level result without a spatial claim.
+(MDD 0.078, SCZ 0.054). What disqualifies it is not the enrichment but that it fails to
+*isolate* the axis — in DK its weights load about equally on C1 and C3 — and that its component
+is marginal under the spin null here too (p = 0.27), so the map-level covariance with expression
+is not spatially specific. Treat the single-Y option as a gene-level result without a spatial claim.
 
-**Caveats.** (i) 5,947 subjects, not 8,192 — 8,001 sessions are missing from the parcellated
-table (3,435 never reached by the array job, 5,439 `mri_surf2surf` stubs), so this is not a
-like-for-like sample comparison with the DK run. (ii) Release vintage, checked against the
-tables this repo reads: the DK thickness table has **4,086** six-year sessions against 7,612
-six-year FreeSurfer sessions, i.e. it is 6.0-sized; the covariate table `ab_g_dyn` has 5,056
-six-year rows. Of the **2,646** sessions the HCP table has that DK lacks (2,639 of them
-six-year), only **12** have an age row and 10 a QC row — so the extra scans HCP uniquely
-offers are unusable until the 7.0 tabulated release lands. A re-run with the missing
-parcellations plus 7.0 covariates is the version to trust.
+**Sample caveat retired.** The earlier version of this section ran on 6,537 children because the
+parcellated table covered only 24,921 of 33,825 FreeSurfer sessions and the covariate tables were
+6.0-vintage. Both are fixed: coverage is 33,795/33,825 after `tools/hcp_backfill.sbatch`, the 7.0
+tabulation supplies age and QC for the extra sessions, and the HCP and DK arms now run on the same
+8,716 children. **Every conclusion above survived the change unchanged** — MDD β 0.069 against
+0.070 on the smaller sample, the joint-model verdicts identical — which is the strongest available
+evidence that the MDD gain is about the atlas and not about who is in the sample.
 
-### Two summary figures (2026-09-12)
+### Two summary figures
 
 Built from single-universe re-runs so every number on them is comparable:
 `code/14_magma_all_options.py` (one MAGMA covar file with all eight rankings →
 `results/magma_all_marginal.tsv`, `magma_all_joint.tsv`) and
-`code/13_celltype_compare.py` (→ `results/celltype_compare.tsv`).
+`code/15_celltype_all_options.py` (→ `results/celltype_all_options.tsv`).
 
 | figure | script | content |
 |:--|:--|:--|
 | `figures/fig_signature_both.png` | `code/fig1_signature_both.R` | the signature derived in **both** parcellations: brain maps (DK row, HCP-MMP row), six small concordance panels, and the cell-class profile of three rankings |
 | `figures/fig_enrichment_combined.png` | `code/fig2_enrichment_combined.R` | MAGMA only: every ranking's SCZ/MDD β alone, then the seven head-to-head joint models |
+| `figures/fig_celltypes.png` | `code/fig4_celltypes.R` | cell-class marker enrichment of all eight rankings, plus the astrocyte/oligodendrocyte plane |
 
 HCP-MMP brain rendering needs `ggsegGlasser`, which is not on CRAN for this R
 version; it is installed from GitHub into `ahba_pls/.Rlib` (gitignored) —
 `remotes::install_github("ggseg/ggsegGlasser", lib = "ahba_pls/.Rlib")`. The
-polygons are cached to `data/hcp_polygons.csv`, so the figure renders without it.
+polygons are cached to `data/hcp_polygons.csv`, so the figures render without it.
 
-**New result — the astrocyte loading flips between parcellations.** Across the
-nine Seidlitz 2020 cell classes the three rankings agree closely (rank ρ 0.80–0.87):
-the three neuronal classes load positively in all three, and
-Endo, Micro, Oligo load negatively in all three.
-Astrocytes are the exception — **positive** in the HCP-MMP signature
-(z = +5.6) against -7.3 in DK and -8.7 in C3 —
-and oligodendrocytes are far more negative in HCP (-13.8) than in DK
-(-5.7), close to C3's -15.5. OPC and pericytes are weak throughout
-and not significant in the HCP fit (OPC p = 0.85, Per p = 0.91).
-The permutation null treats genes as independent, so read the signs and the pattern,
-not the magnitudes. Worth following up: this is the one place where the finer
-parcellation changes the biological reading rather than just the effect size.
-
-**Single-universe enrichment** (n = 6,672 SCZ / 6,662 MDD genes) reproduces the
-separate runs: all five ABCD-derived rankings are enriched for both disorders,
-NSPN-PLS2 reaches SCZ only (MDD p = 0.10) and C1 neither. In the joint
-models the HCP ranking beats DK for MDD (0.069, p = 0.003 vs -0.004, p = 0.86)
-and beats NSPN-PLS2 for MDD, survives C1 for both disorders, and loses to C3.
+**Single-universe enrichment** (n = 6,672 SCZ / 6,662 MDD genes) reproduces the separate runs:
+all five ABCD-derived rankings are enriched for both disorders, NSPN-PLS2 reaches SCZ only
+(MDD p = 0.10) and C1 neither. In the joint models the HCP ranking beats DK for MDD
+(0.071, p = 0.002 vs -0.008, p = 0.73) and beats NSPN-PLS2 for MDD, survives C1 for
+both disorders, and loses to C3.
 
 ### Cell-class profiles of all eight rankings — the astrocyte flip is a parcellation effect
 
@@ -318,15 +345,15 @@ figure `figures/fig_celltypes.png` (`code/fig4_celltypes.R`). Supersedes
 `13_celltype_compare.py` (three rankings) for figure purposes. Every ranking is
 tested on **one shared universe** of 7,338 genes, so a difference between two
 columns cannot come from a difference in universe; running each on its own
-universe instead gives z agreeing at Spearman 0.995 over all 72 cells (both are
+universe instead gives z agreeing at Spearman 0.994 over all 72 cells (both are
 in the table).
 
 | class | PLS2 HCP | dCT HCP | PLS2 DK | dCT DK | dCT+dT1T2 DK | C3 | NSPN PLS2 | C1 |
 |:--|--:|--:|--:|--:|--:|--:|--:|--:|
-| Neuro-Ex | +12.1 | +11.8 | +13.6 | +13.7 | +12.9 | +19.3 | +9.7 | +2.5 |
-| **Astro** | **+5.1** | +1.2 | -5.3 | -12.4 | -2.9 | -8.9 | -11.3 | -11.9 |
-| **Oligo** | **-12.3** | -9.1 | -5.7 | -1.5 | -7.0 | -13.2 | +1.8 | +5.5 |
-| Micro | -10.9 | -11.6 | -9.9 | -11.8 | -8.6 | -8.8 | -1.6 | -4.1 |
+| Neuro-Ex | +12.6 | +12.2 | +13.6 | +13.8 | +12.8 | +19.3 | +9.7 | +2.5 |
+| **Astro** | **+5.0** | +1.4 | -5.2 | -12.1 | -2.6 | -8.9 | -11.3 | -11.9 |
+| **Oligo** | **-12.1** | -9.2 | -5.4 | -1.6 | -7.0 | -13.2 | +1.8 | +5.5 |
+| Micro | -11.3 | -11.9 | -10.0 | -11.7 | -8.3 | -8.8 | -1.6 | -4.1 |
 
 (full 9 × 8 matrix with p_perm in the table and figure; Endo, OPC and Per omitted here)
 
@@ -334,11 +361,11 @@ in the table).
   the Y-matrix option matters far less than the atlas (profiles correlate ρ 0.65–0.98
   among the five ABCD vectors; ρ 0.98 between the two HCP-MMP fits).
 - **Astrocytes split by atlas, not by option.** Both HCP-MMP rankings are the only
-  ones in the astrocyte-positive half (+5.1, p < 0.001; +1.2, p = 0.23);
+  ones in the astrocyte-positive half (+5.0, p < 0.001; +1.4, p = 0.16);
   all three DK rankings and all three published components are negative
-  (-5.3 to -12.4).
-- **Oligodendrocytes move the same way with the atlas**: -12.3 in HCP-MMP against
-  -5.7 in DK, i.e. the HCP version sits next to C3 (-13.2) while the DK
+  (-2.6 to -12.1).
+- **Oligodendrocytes move the same way with the atlas**: -12.1 in HCP-MMP against
+  -5.4 in DK, i.e. the HCP version sits next to C3 (-13.2) while the DK
   version does not. On this axis the finer parcellation moves the ABCD signature
   *towards* C3 even though its SCZ/MDD β does not overtake it.
 - **C1 is the control that behaves differently**, as it should: weakly neuronal
@@ -350,18 +377,35 @@ in the table).
 **Open question.** Whether the astrocyte flip reflects real biology resolved by
 137 parcels or a parcel-size artefact is not settled here. The cheap test is
 whether it survives restricting the HCP fit to parcels inside DK regions that
-are astrocyte-marker-rich, or a leave-one-region-out refit.
+are astrocyte-marker-rich, or a leave-one-region-out refit. It is not a
+sample-size effect: it is unchanged (+5.1 → +5.0) between the 6,537-child and
+8,716-child HCP runs.
 
 ## Reproducing
 
-Analysis (python, env `ahba-pls`): `code/01_*` → `code/12_*` in order (`11_` is the
-parcellation control, `12_` the HCP-MMP arm; `12_` needs the
-`thickness_hcp_70_*` run — `ABCD_CONFIG=ct_70_hcp_noglobal_mv2 python -m abcd.assemble`
-then `Rscript R/fit_lmm.R --run-dir out/thickness_hcp_70_* --cores 8`). Figures (R, env
-`ahba-pls-r`): `Rscript code/fig1_lead_signature.R`, `fig2_enrichment.R`, `fig3_hcp_vs_dk.R`.
-The full command list with timings is at the end of `imaging_transcriptomics.qmd`.
-`.gitignore` here excludes the regenerable intermediates (aligned X matrices, full
-per-option weight tables, spin nulls, MAGMA run directories).
+Analysis (python, env `ahba-pls`): `code/01_*` → `code/15_*` in order. `11_` is the parcellation
+control, `12_` the HCP-MMP arm, `14_`/`15_` the single-universe enrichment and cell-class tables that
+the summary figures read. `12_` needs the backfilled HCP run
+(`ABCD_CONFIG=ct_70_hcp_noglobal_mv2 python -m abcd.assemble` then
+`Rscript R/fit_lmm.R --cores 8`, which lands in `out/thickness_hcp_70_aa6e91efba82`); everything else
+reads the DK and T1w/T2w runs listed in `tools/rerun_local.sh`.
+
+Figures (R, env `ahba-pls-r`, with `ahba_pls/.Rlib` on `.libPaths()` for `ggsegGlasser`):
+
+```
+Rscript code/fig1_lead_signature.R      # DK-only lead signature
+Rscript code/fig1_signature_both.R      # both parcellations + cell classes
+Rscript code/fig2_enrichment.R          # permutation + MAGMA, DK
+Rscript code/fig2_enrichment_combined.R # MAGMA only, all rankings
+Rscript code/fig3_hcp_vs_dk.R           # the HCP vs DK arm
+Rscript code/fig4_celltypes.R           # cell classes, all eight rankings
+```
+
+MAGMA v1.10 binaries and their provenance are in `../tools/bin/README.md`; the disorder
+`.genes.raw` files come from `../genetic_analysis/inputs/magma/` and are gitignored, so a fresh
+clone must copy them from the cluster before `08_`, `11_`, `12_` or `14_` will run.
+`.gitignore` here excludes the regenerable intermediates (aligned X matrices, full per-option
+weight tables, spin nulls, MAGMA run directories).
 
 ## Decisions and caveats
 
@@ -369,22 +413,23 @@ per-option weight tables, spin nulls, MAGMA run directories).
 - All PLS runs on the 33 AHBA-covered bilateral DK regions; the missing region is recorded in `data/`.
 - 2026-09-12: figures are built in R (`ggplot2` + `patchwork` + `ggseg` 2.2.1 from CRAN, env `ahba-pls-r`), not matplotlib. ggseg's R atlas renders frontal and temporal pole correctly, unlike the python polygon set. The R scripts fit nothing and hardcode nothing: every statistic printed on a figure is read from the `results/` table it plots. DK polygons are cached to `data/dk_polygons.csv`.
 - Figure conventions: one-line interpretation per panel subtitle, overall interpretation as the figure subtitle, methods as short bullets in the caption.
+- 2026-09-15: the HCP-MMP arm moved to the backfilled run `thickness_hcp_70_aa6e91efba82` (8,716 children, the DK sample); the 6,537-child run `thickness_hcp_70_fec93121f0dd` is superseded and kept only for the stability comparison quoted above.
 
-## 2026-09-14 — re-run on the true 7.0 tabulated tables
+## Data vintage — what this directory now runs on
 
-Every input map and every result in this directory was regenerated on
-2026-09-14 from runs on the 7.0 tabulation (`../docs/RERUN_7.0_TABULATED.md`).
-The runs behind the Y maps kept their run ids (the config hash does not encode
-data vintage) but now contain 8,716 children (DK, was 8,192) and 6,537 (HCP-MMP,
-was 5,947), with the six-year wave complete. The "release-vintage caveat" in the
-HCP-MMP section above is resolved: the extra HCP sessions now have age and QC
-rows and enter the model. Scripts `01`–`15` and the six R figures were re-run
-unchanged apart from path updates (MAGMA disorder files now at
-`../genetic_analysis/inputs/magma/`, gene-set sources under `../legacy/hpc/work/`).
+Two corrections landed after the first version of this analysis, and **neither changed a conclusion**.
 
-**Nothing changes in kind; every number moves by a rounding step.** The group
-maps that feed the PLS correlate ρ = 0.996 with the 6.0-vintage maps, so this
-is the expected outcome and a useful stability check on the whole chain.
+### 1. 2026-09-14 — the tables were 6.0, not 7.0
+
+Every input map and every result here was regenerated from runs on the true 7.0 tabulation
+(`../docs/RERUN_7.0_TABULATED.md`). The DK runs kept their run ids (the config hash does not encode
+data vintage) but now contain **8,716 children / 26,949 sessions**, with the six-year wave complete.
+Scripts `01`–`15` and the R figures were re-run unchanged apart from path updates (MAGMA disorder files
+now at `../genetic_analysis/inputs/magma/`, gene-set sources under `../legacy/hpc/work/`).
+
+**Nothing changed in kind; every number moved by a rounding step.** The group maps that feed the PLS
+correlate ρ = 0.996 with the 6.0-vintage maps, which is both the expected outcome and a useful
+stability check on the whole chain:
 
 | quantity (lead signature = option 2, PLS2, ds0 unless stated) | 6.0-vintage | 7.0 tables |
 |:--|--:|--:|
@@ -403,14 +448,32 @@ is the expected outcome and a useful stability check on the whole chain.
 | oligodendrocyte z, HCP-MMP PLS2 / DK PLS2 / C3 | −12.3 / −5.7 / −13.2 | −12.0 / −5.4 / −13.2 |
 
 Sources: `results/pls_components.tsv`, `concordance_scores.tsv`,
-`lead_overlap_with_references.tsv`, `enrichment_summary.tsv`,
-`hcp_concordance.tsv`, `hcp_vs_dk_conditional.tsv`, `celltype_all_options.tsv`.
-Both conditioning directions, the C3 dominance (everything ABCD-derived is
-absorbed by C3, C3 survives everything), the parcellation control and the
-astrocyte flip by atlas all reproduce. The prose in the sections above quotes
-the 6.0-vintage numbers; where a figure and the prose disagree at the second
-decimal, the figure (regenerated) is current.
+`lead_overlap_with_references.tsv`, `enrichment_summary.tsv`, `hcp_concordance.tsv`,
+`hcp_vs_dk_conditional.tsv`, `celltype_all_options.tsv`.
 
-Still deferred to the cluster (`FOLLOWUP_GENETICS.md`, now scheduled as step 8
-of `../genetic_analysis/README_HPC.md`): H3 and H4. The exports in `hpc/` were
-regenerated by `code/10_export_for_hpc.py` from the new weights.
+### 2. 2026-09-15 — the HCP-MMP arm refitted on the backfilled parcellation
+
+The HCP-MMP arm had been running on a partial parcellation (24,921 of 33,825 FreeSurfer sessions →
+6,537 children) with 6.0-vintage covariates for the extra scans. After `tools/hcp_backfill.sbatch`
+(33,795/33,825 sessions) and the 7.0 covariates, the arm was refitted on
+`out/thickness_hcp_70_aa6e91efba82` — **8,716 children, the same sample as DK**, 179 regions with
+parcel `H` excluded at fit time, all 358 hemisphere-region models converged and none singular.
+
+| quantity (HCP-MMP arm) | 6,537 children | 8,716 children |
+|:--|--:|--:|
+| PLS2 spin p / bootstrap reproducibility | 0.010 / 0.898 | 0.011 / 0.899 |
+| scores vs C3 (ρ, 137 parcels) | 0.702 | 0.701 |
+| gene weights vs C3 / vs DK PLS2 | 0.677 / 0.733 | 0.678 / 0.733 |
+| MDD β_std, HCP PLS2 / DK matched | 0.069 / 0.053 | 0.069 / 0.053 |
+| MDD joint: HCP \| DK / DK \| HCP (p) | 0.008 / 0.91 | 0.008 / 0.91 |
+| SCZ β_std, HCP PLS2 / DK matched | 0.045 / 0.046 | 0.045 / 0.046 |
+| astrocyte z, HCP PLS2 | +5.1 | +5.0 |
+| oligodendrocyte z, HCP PLS2 | -12.0 | -12.1 |
+
+This is the more useful of the two checks, because the sample grew by a third and the HCP arm's whole
+point — the MDD gain over DK — could have been a sample artefact. It was not: adding 2,179 children
+moves the MDD β by 0.0001 and leaves every joint-model verdict intact. The prose and tables above
+are the 8,716-child versions throughout; the figures were re-rendered from them.
+
+Still deferred: **H4** (`FOLLOWUP_GENETICS.md`), a projection phenotype for the ABCD GWAS. **H3** was
+run on the cluster and is null (Phase 4 above).
