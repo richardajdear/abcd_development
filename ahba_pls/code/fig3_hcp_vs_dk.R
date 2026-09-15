@@ -33,8 +33,11 @@ lab_a <- c(HCP_PLS2_thinning = "HCP-MMP PLS2 (137 parcels)",
            HCP_PLS1_dCTonly = "HCP-MMP, dCT alone (137)",
            C3_shipped = "AHBA C3 (Dear 2024)",
            C1_shipped = "AHBA C1 (static axis)")
+# rows ordered by the SCZ effect (largest at the top), computed from the table
+ord_a <- M |> filter(VARIABLE %in% names(lab_a), disorder == "SCZ") |>
+  arrange(BETA_STD) |> pull(VARIABLE)
 A <- M |> filter(VARIABLE %in% names(lab_a)) |>
-  mutate(nm = factor(lab_a[VARIABLE], levels = rev(lab_a)),
+  mutate(nm = factor(lab_a[VARIABLE], levels = lab_a[ord_a]),
          disorder = factor(disorder, c("SCZ", "MDD")))
 pa <- ggplot(A, aes(BETA_STD, nm, colour = disorder)) +
   geom_vline(xintercept = 0, colour = "grey60", linewidth = 0.3) +
@@ -42,7 +45,7 @@ pa <- ggplot(A, aes(BETA_STD, nm, colour = disorder)) +
                   position = position_dodge(width = 0.55), size = 0.22, linewidth = 0.4) +
   scale_colour_manual(values = pal) +
   labs(x = "MAGMA gene-property \u03b2 (semi-standardised), 95% CI", y = NULL,
-       title = sprintf("a   Each gene ranking on its own (shared universe, n = %s genes)",
+       title = sprintf("a   Each gene ranking on its own, ordered by SCZ effect (shared universe, n = %s genes)",
                        format(M$NGENES[1], big.mark = ",")),
        subtitle = sprintf("HCP-MMP raises the MDD effect from %.3f to %.3f; SCZ is unchanged (%.3f vs %.3f)",
                           A$BETA_STD[A$VARIABLE == "DK_PLS2_matchedX" & A$disorder == "MDD"],

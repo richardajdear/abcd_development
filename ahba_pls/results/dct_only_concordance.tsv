@@ -1,0 +1,12 @@
+parcellation	reference	level	rho	p_spin	n
+DK	C3	scores	0.2781	0.1848	33
+DK	NSPN_PLS2	scores	0.4862	0.04799	33
+HCP	C3	scores	0.5465	0.0003999	137
+DK	C3	weights	0.5921		7873
+DK	C1	weights	0.5605		7873
+DK	NSPN_PLS2_z	weights	0.6108		11175
+HCP	C3	weights	0.6056		7973
+HCP	C1	weights	0.2782		7973
+HCP	DK_dCT_PLS1	weights	0.7518		7873
+DK	DK_opt2_PLS2	weights	0.6954		12007
+HCP	HCP_opt2_PLS2	weights	0.9043		7973

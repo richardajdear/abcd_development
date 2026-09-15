@@ -326,6 +326,7 @@ Built from single-universe re-runs so every number on them is comparable:
 | `figures/fig_signature_both.png` | `code/fig1_signature_both.R` | the signature derived in **both** parcellations: brain maps (DK row, HCP-MMP row), six small concordance panels, and the cell-class profile of three rankings |
 | `figures/fig_enrichment_combined.png` | `code/fig2_enrichment_combined.R` | MAGMA only: every ranking's SCZ/MDD β alone, then the seven head-to-head joint models |
 | `figures/fig_celltypes.png` | `code/fig4_celltypes.R` | cell-class marker enrichment of all eight rankings, plus the astrocyte/oligodendrocyte plane |
+| `figures/fig_signature_dct_only.png` | `code/fig1_signature_dct_only.R` | the same layout with **Y = dCT alone**: the single-Y control (see below) |
 
 HCP-MMP brain rendering needs `ggsegGlasser`, which is not on CRAN for this R
 version; it is installed from GitHub into `ahba_pls/.Rlib` (gitignored) —
@@ -337,6 +338,40 @@ all five ABCD-derived rankings are enriched for both disorders, NSPN-PLS2 reache
 (MDD p = 0.10) and C1 neither. In the joint models the HCP ranking beats DK for MDD
 (0.071, p = 0.002 vs -0.008, p = 0.73) and beats NSPN-PLS2 for MDD, survives C1 for
 both disorders, and loses to C3.
+
+### The dCT-only variant — why the single-Y design is kept as a control, not a result
+
+`code/16_dct_only.py` → `results/dct_only_*`; figure `figures/fig_signature_dct_only.png`
+(`code/fig1_signature_dct_only.R`). Same panel structure as `fig_signature_both.png` so the two
+read side by side; Y is the thinning rate alone, so the PLS has a single component and PLS1 *is*
+the vector of gene–map correlations.
+
+| | DK, 33 regions | HCP-MMP, 137 parcels |
+|:--|--:|--:|
+| component spin p (5,000 rotations) | 0.082 | 0.266 |
+| bootstrap reproducibility | 0.83 | 0.88 |
+| scores vs C3 (ρ, p_spin) | 0.28, 0.185 | 0.55, 0.0004 |
+| weights vs C3 | 0.59 | 0.61 |
+| weights vs **C1** (the static axis) | **0.56** | **0.28** |
+| weights vs the two-Y signature | 0.70 | 0.90 |
+
+Two things are clearer here than in the DK-only analysis:
+
+- **The C1 confound is a coarse-atlas problem.** At 33 regions the dCT-only vector loads on the
+  static gradient as heavily as on C3 (0.56 vs 0.59) — the reason the two-Y design was adopted.
+  At 137 parcels the C1 loading collapses to 0.28 while the C3 loading holds at 0.61, and the
+  vector is ρ = 0.90 with the HCP two-Y signature. With enough parcels, thinning rate alone
+  nearly recovers the axis; the thinning map and the static map are less collinear when parcels
+  are small enough not to straddle the gradient.
+- **Neither single-Y component is spin-significant** (0.082 DK, 0.266 HCP), even though the HCP
+  *scores* track C3 at p_spin = 0.0004. The component's total covariance with expression is within
+  what spatial autocorrelation produces; what is spatially specific is the part aligned with C3.
+  So the dCT-only vector is usable as a gene ranking (it is the strongest ABCD vector for both
+  disorders in HCP space — see the arm above) but carries no independent spatial claim.
+
+Cell classes agree with the main figure's reading: neuronal up, glial down in both parcellations,
+with astrocytes again splitting by atlas (+1.4 in HCP-MMP, p = 0.16, against
+-12.1 in DK) — i.e. the flip does not depend on the Y-matrix design.
 
 ### Cell-class profiles of all eight rankings — the astrocyte flip is a parcellation effect
 
@@ -383,9 +418,9 @@ sample-size effect: it is unchanged (+5.1 → +5.0) between the 6,537-child and
 
 ## Reproducing
 
-Analysis (python, env `ahba-pls`): `code/01_*` → `code/15_*` in order. `11_` is the parcellation
+Analysis (python, env `ahba-pls`): `code/01_*` → `code/16_*` in order. `11_` is the parcellation
 control, `12_` the HCP-MMP arm, `14_`/`15_` the single-universe enrichment and cell-class tables that
-the summary figures read. `12_` needs the backfilled HCP run
+the summary figures read, `16_` the dCT-only variant (seconds — it reuses the saved option-1 fits). `12_` needs the backfilled HCP run
 (`ABCD_CONFIG=ct_70_hcp_noglobal_mv2 python -m abcd.assemble` then
 `Rscript R/fit_lmm.R --cores 8`, which lands in `out/thickness_hcp_70_aa6e91efba82`); everything else
 reads the DK and T1w/T2w runs listed in `tools/rerun_local.sh`.
@@ -399,6 +434,7 @@ Rscript code/fig2_enrichment.R          # permutation + MAGMA, DK
 Rscript code/fig2_enrichment_combined.R # MAGMA only, all rankings
 Rscript code/fig3_hcp_vs_dk.R           # the HCP vs DK arm
 Rscript code/fig4_celltypes.R           # cell classes, all eight rankings
+Rscript code/fig1_signature_dct_only.R  # the dCT-only variant of figure 1
 ```
 
 MAGMA v1.10 binaries and their provenance are in `../tools/bin/README.md`; the disorder
