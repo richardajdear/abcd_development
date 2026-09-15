@@ -16,17 +16,19 @@ not resemble that of a static measure. Almost all published brain-imaging GWAS
 use cross-sectional phenotypes, which average over exactly the variation of
 interest.
 
-## Status — 2026-09-14: re-run on the true 7.0 tabulation
+## Status — 2026-09-15: the 7.0 re-run is complete, on two parcellations
 
 **What happened.** Every result in this repo dated before 2026-09-14 was
 computed from the ABCD **6.0** tabulated tables, which sat in a directory
-labelled 7.0. The two tabulations are column-identical; only the six-year row
-count tells them apart (4,086 vs 7,607 thickness rows). The FreeSurfer
-surfaces and the genotypes on the cluster were 7.0 throughout. The 7.0
-tabulated tables were downloaded on 2026-09-14 and every **local** analysis
-was re-run on them; the **cluster genetics has not yet been re-run** and is
-specified, step by step, in
-[`genetic_analysis/README_HPC.md`](genetic_analysis/README_HPC.md).
+labelled 7.0 (column-identical; only the six-year row count tells them apart,
+4,086 vs 7,607 thickness rows). The FreeSurfer surfaces and the genotypes were
+7.0 throughout. On 2026-09-14 the 7.0 tables were installed and every local
+analysis re-run; on 2026-09-14/15 the **cluster genetics were re-run end to
+end** — every step of [`genetic_analysis/README_HPC.md`](genetic_analysis/README_HPC.md)
+§3, on both the Desikan–Killiany (DK, 68 regions) and the HCP-MMP (Glasser, 358
+parcels) parcellations of the same children. The dated run log in that file's
+§8 (job ids, failures, diagnoses) is the authoritative record; its closing
+statement (§7 item 5) is the one-paragraph verdict.
 
 **What the 7.0 tables buy** (settled specification, `ct_70_noglobal_mv2_genetic`;
 full table in [`docs/RERUN_7.0_TABULATED.md`](docs/RERUN_7.0_TABULATED.md)):
@@ -36,13 +38,55 @@ full table in [`docs/RERUN_7.0_TABULATED.md`](docs/RERUN_7.0_TABULATED.md)):
 | six-year scans in the model | 3,539 | 6,510 |
 | children with ≥2 QC-passing scans | 8,192 | **8,716** |
 | … with all four scans | 1,830 | **3,005** |
-| … phenotyped and genotyped | 8,082 | **8,596** |
+| … phenotyped and genotyped | 8,082 | **8,596** (EUR arm 4,308) |
 | median slope reliability | 0.157 | **0.211** |
 | effective N for the slope | 1,361 | **1,752** |
 | group thinning map, old vs new (Spearman) | | 0.996 |
 
 The map did not change; the per-child slopes did (r = 0.92 on shared children),
-which is where heritability and polygenic-score analyses spend their power.
+and that is exactly where the re-run found its gains: subject-level precision.
+
+**Genetics on the 7.0 phenotype — what changed against the 6.0 benchmark.**
+Tables: `genetic_analysis/work/results_70tab/summary_70tab.tsv` (DK, 694 rows,
+each with its 6.0 partner) and `…/results_70tab_hcp/summary_70tab.tsv` (HCP);
+side by side in `…/results_70tab_hcp/compare/table_dk_vs_hcp.tsv`.
+
+- **Every matched SCZ/MDD polygenic-score SE tightened**, no sign flipped.
+  **SCZ PRS → faster thinning is robust in the pooled arm under all four
+  methods** (β −0.022 to −0.035 SD/SD, p_adj 0.004–0.037; min-p permutation
+  0.0065), on **both** parcellations.
+- **MDD PRS → faster thinning crossed into significance under three of four
+  methods** in the pooled arm on DK (PRS-CS, SBayesR, SBayesRC), where 6.0 had
+  one. On HCP it is one of four.
+- **SCZ in the EUR arm attenuated to borderline on DK** (0/4 methods, p_adj
+  0.065–0.074) and is 3/4 on HCP. A one-input-at-a-time decomposition showed
+  the DK attenuation is the phenotype values themselves, not a pipeline
+  difference. Effects of 0.02–0.03 SD/SD sit either side of 0.05 depending on
+  the whole-cortex average taken; **only the atlas-invariant claims are
+  licensed**, and the marginal cells are reported side by side.
+- **SNP heritability of `global_slope` (GCTA GREML, dense imputed GRM, 6,011
+  PC-AiR-unrelated children): 0.137 → 0.166 ± 0.045** with the SE unchanged —
+  the signature of a de-attenuated phenotype. It is atlas-invariant (HCP
+  0.156). Baseline thickness 0.223 (positive control holds).
+- **No genome-wide hit on `global_slope`** in any of four scans (two atlases
+  × two arms; λ_GC 0.99–1.05 everywhere). LDSC h² z is 0.57 (DK) / 1.78
+  (HCP), far below the ≈4 needed, so **rg with SCZ/MDD is uninformative, not
+  null**. The `SCZ_locus_pool` gene-set enrichment of the thinning GWAS
+  strengthened (p 0.0074 → 0.0030 → 0.0005 on HCP) and is the most consistent
+  gene-level result. AHBA C1–C3 gene-property and the ahba_pls H3 signature
+  test are null in both directions on both atlases.
+- The controls behave as documented: ASD null, ALZ associated at ~80 % of
+  SCZ's magnitude, EA in the opposite direction.
+
+**HCP-MMP.** The backfill is complete (33,795 of 33,825 sessions), and the
+genetics pipeline is parcellation-agnostic: `PARC=hcp` in
+`genetic_analysis/config.local.sh` runs every step unchanged on the HCP
+export (`configs/ct_70_hcp_noglobal_mv2.yaml`, hippocampal parcel excluded
+because it is thickness 0 in ~7,800 sessions). Whole-cortex readouts agree
+across atlases; the slope PCs are atlas-specific decompositions except PC2
+(`docs/figures/pc_loadings_dk_vs_hcp.html`), and structural-covariance PCs
+are the same components by algebra. One candidate locus, chr7:35.5 Mb for
+HCP's PC3 in the EUR arm, is recorded and not led with.
 
 **What stands from the earlier work**, re-checked on the new tables:
 
@@ -50,25 +94,16 @@ which is where heritability and polygenic-score analyses spend their power.
   visits, the coded QC stack — hold (§Key findings; `docs/reliability_grid.csv`,
   `docs/h2_family_effect_contrast.csv`).
 - **Absolute thinning rate vs AHBA C3: ρ = −0.546, p_spin = 0.002**, identical
-  to before; the slope-component couplings (PC3–C2 +0.854, PC2–C1 −0.812) too
-  (`docs/ahba_vs_maps_noglobal.csv`).
+  to before; the slope-component couplings (PC3–C2 +0.854, PC2–C1 −0.812)
+  too, and both replicate on HCP-MMP (+0.72, −0.78).
 - The imaging-transcriptomics arm (`ahba_pls/`) re-derives the NSPN-PLS2 /
   AHBA-C3 signature from the new maps — see the dated section at the end of
   [`ahba_pls/README.md`](ahba_pls/README.md).
 
-**What is superseded.** All cluster genetics numbers (h², GWAS, LDSC, MAGMA,
-PRS) were computed on the 6.0-vintage phenotypes and now live under
-[`legacy/`](legacy/README.md). The last canonical result there — SCZ polygenic
-score → faster thinning, β −0.035 to −0.047 SD/SD, significant in 3 of 4 PRS
-methods in both ancestry arms; MDD same direction, significant only pooled;
-ASD and education null or opposite — is the benchmark the re-run must be read
-against (`genetic_analysis/README_HPC.md` §5). Do not quote legacy genetics
-numbers as current.
-
-**Next step (needs the user's go-ahead):** rsync the tables to CSD3 and start
-`genetic_analysis/README_HPC.md` step 0. HCP-MMP runs on the new tables as
-well (`configs/ct_70_hcp_noglobal_mv2.yaml`); the DK arm remains primary until
-the HCP re-parcellation on CSD3 is complete.
+**What is superseded.** All cluster genetics numbers computed before
+2026-09-14 (h², GWAS, LDSC, MAGMA, PRS) were on 6.0-vintage phenotypes and
+live under [`legacy/`](legacy/README.md). Do not quote them as current; the
+7.0 tables above carry the 6.0 value alongside every row for the comparison.
 
 ## Where to look
 
