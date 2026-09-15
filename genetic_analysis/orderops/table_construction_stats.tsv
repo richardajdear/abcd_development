@@ -1,0 +1,17 @@
+metric	atlas	value	source
+r_slope_constructions	dk	0.931	README_HPC.md 2026-09-15 order-of-operations table
+r_slope_constructions	hcp	0.824	README_HPC.md 2026-09-15 order-of-operations table
+r_slope_visits2	dk	0.878	README_HPC.md 2026-09-15 order-of-operations table
+r_slope_visits2	hcp	0.723	README_HPC.md 2026-09-15 order-of-operations table
+r_slope_visits3	dk	0.935	README_HPC.md 2026-09-15 order-of-operations table
+r_slope_visits3	hcp	0.827	README_HPC.md 2026-09-15 order-of-operations table
+r_slope_visits4	dk	0.950	README_HPC.md 2026-09-15 order-of-operations table
+r_slope_visits4	hcp	0.866	README_HPC.md 2026-09-15 order-of-operations table
+r_intercept_constructions	dk	0.9995	README_HPC.md 2026-09-15 order-of-operations table
+r_intercept_constructions	hcp	0.9986	README_HPC.md 2026-09-15 order-of-operations table
+sd_slope_1lmm_mm_per_yr	dk	0.00200	README_HPC.md 2026-09-15 order-of-operations table
+sd_slope_1lmm_mm_per_yr	hcp	0.00230	README_HPC.md 2026-09-15 order-of-operations table
+sd_slope_perregion_mm_per_yr	dk	0.00132	README_HPC.md 2026-09-15 order-of-operations table
+sd_slope_perregion_mm_per_yr	hcp	0.00131	README_HPC.md 2026-09-15 order-of-operations table
+cross_atlas_r_slope	perregion	0.949	README_HPC.md 2026-09-15 order-of-operations table
+cross_atlas_r_slope	1lmm	0.960	README_HPC.md 2026-09-15 order-of-operations table
