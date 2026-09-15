@@ -27,31 +27,43 @@ theme_set(base)
 pal <- c(SCZ = "#762a83", MDD = "#1b7837")
 
 # ---- panel a: marginal betas -----------------------------------------------
-lab_a <- c(HCP_PLS2_thinning = "HCP-MMP PLS2 (137 parcels)",
-           DK_PLS2_matchedX = "DK PLS2, matched genes (33)",
-           DK_PLS2_ds50 = "DK PLS2, ds50 matrix (33)",
+# Panel a shows ONLY vectors on the matched gene basis (abagen-data, the same
+# 7,973 genes = HCP-space DS-50), so the HCP-vs-DK contrast is parcellation and
+# nothing else. The AHBA_updated native-DK ds0/ds25/ds50 vectors are in the
+# table with basis = "AHBA_updated native-DK" and are excluded here: they differ
+# from the HCP fit in build and gene identity as well as parcellation. They are
+# compared as gene RANKINGS (where provenance does not matter) in
+# fig_enrichment_combined.png.
+lab_a <- c(HCP_PLS2_thinning = "HCP-MMP PLS2, dCT+CT (137 parcels)",
+           DK_PLS2_matchedX = "DK PLS2, dCT+CT (33 regions)",
            HCP_PLS1_dCTonly = "HCP-MMP, dCT alone (137)",
+           DK_PLS1_dCTonly_matchedX = "DK, dCT alone (33)",
            C3_shipped = "AHBA C3 (Dear 2024)",
            C1_shipped = "AHBA C1 (static axis)")
+MATCHED <- "abagen-data, 7,973 genes (HCP-space DS-50)"
+stopifnot(all(M$basis[M$VARIABLE %in% names(lab_a)] == MATCHED))
 # rows ordered by the SCZ effect (largest at the top), computed from the table
 ord_a <- M |> filter(VARIABLE %in% names(lab_a), disorder == "SCZ") |>
   arrange(BETA_STD) |> pull(VARIABLE)
 A <- M |> filter(VARIABLE %in% names(lab_a)) |>
   mutate(nm = factor(lab_a[VARIABLE], levels = lab_a[ord_a]),
          disorder = factor(disorder, c("SCZ", "MDD")))
+# which ABCD-derived vector leads on SCZ, read from the table
+scz_top <- A |> filter(disorder == "SCZ", grepl("^(HCP|DK)", VARIABLE)) |> arrange(desc(BETA_STD))
 pa <- ggplot(A, aes(BETA_STD, nm, colour = disorder)) +
   geom_vline(xintercept = 0, colour = "grey60", linewidth = 0.3) +
   geom_pointrange(aes(xmin = BETA_STD - 1.96 * se_std, xmax = BETA_STD + 1.96 * se_std),
                   position = position_dodge(width = 0.55), size = 0.22, linewidth = 0.4) +
   scale_colour_manual(values = pal) +
   labs(x = "MAGMA gene-property \u03b2 (semi-standardised), 95% CI", y = NULL,
-       title = sprintf("a   Each gene ranking on its own, ordered by SCZ effect (shared universe, n = %s genes)",
+       title = sprintf("a   Each vector on its own, ordered by SCZ effect (one gene basis, shared MAGMA universe of %s genes)",
                        format(M$NGENES[1], big.mark = ",")),
-       subtitle = sprintf("HCP-MMP raises the MDD effect from %.3f to %.3f; SCZ is unchanged (%.3f vs %.3f)",
+       subtitle = sprintf("HCP-MMP raises the MDD effect from %.3f to %.3f; SCZ is unchanged (%.3f vs %.3f).\nOn SCZ the single-Y (dCT-alone) fits lead both PLS2 fits in either atlas \u2014 %s tops the ABCD rows at \u03b2 = %.3f",
                           A$BETA_STD[A$VARIABLE == "DK_PLS2_matchedX" & A$disorder == "MDD"],
                           A$BETA_STD[A$VARIABLE == "HCP_PLS2_thinning" & A$disorder == "MDD"],
                           A$BETA_STD[A$VARIABLE == "DK_PLS2_matchedX" & A$disorder == "SCZ"],
-                          A$BETA_STD[A$VARIABLE == "HCP_PLS2_thinning" & A$disorder == "SCZ"])) +
+                          A$BETA_STD[A$VARIABLE == "HCP_PLS2_thinning" & A$disorder == "SCZ"],
+                          sub(" \\(.*", "", lab_a[scz_top$VARIABLE[1]]), scz_top$BETA_STD[1])) +
   theme(legend.position = "bottom", legend.direction = "horizontal",
         legend.margin = margin(t = -4, b = -2), legend.key.height = unit(7, "pt"))
 
@@ -91,7 +103,10 @@ methods <- paste(
           lead$sal_dCT, 100 * lead$cov_explained, lead$p_spin_singular, lead$boot_reproducibility),
   sprintf("\u2022 It is the same axis: scores vs AHBA C3 rho = %.2f (p_spin < 0.001, 137 parcels), gene weights rho = %.2f \u2014 measured in C3's own parcellation rather than a DK projection.",
           c3s$rho, c3w$rho),
-  "\u2022 The DK comparator is refitted on dk_3d.csv \u2014 same abagen build and the same 7,973 genes as the HCP matrix \u2014 so parcellation is not confounded with pipeline.",
+  "\u2022 Gene basis, identical for every row: the 7,973 genes the shipped C1\u2013C3 weights were fitted on, which are exactly the columns of hcp_3d_ds5.csv \u2014 the top half of",
+  "  15,946 genes by differential stability computed in HCP space. The HCP arm is therefore DS-50-filtered, not unfiltered. DS filters are parcellation-specific (dk_3d_ds5 shares",
+  "  88% of that list, the AHBA_updated native-DK ds50 matrix 87%), so the DK rows here are those same 7,973 genes taken from dk_3d.csv \u2014 same abagen build, same genes, 33",
+  "  regions \u2014 and parcellation is the only difference on the figure. The AHBA_updated DK vectors of the main analysis are in the results table, marked as a different basis.",
   sprintf("\u2022 All %d hemisphere-region models converged with none singular; medial-wall parcel H is excluded by the run config.", PROV$n_labels_fitted[1]),
   sep = "\n")
 

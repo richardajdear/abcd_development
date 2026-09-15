@@ -43,8 +43,14 @@ c123 = pd.read_csv(REF / "ahba_c123_gene_weights.csv", index_col=0)
 nspn = pd.read_csv(REF / "nspn_pls_gene_weights.csv").set_index("gene")
 
 # same names and order as panel a of the enrichment figure
+# "DK, HCP gene basis" is the DK fit on dk_3d.csv with the SAME 7,973 genes as
+# the HCP matrix (12_hcp_pls.py). Without it the HCP-vs-DK contrast in this
+# table confounds parcellation with the abagen build and DS gene set, which
+# matters because the astrocyte sign difference is read off exactly that pair.
+dkm = pd.read_csv(RES / "dk_matched_weights.tsv", sep="\t", index_col=0)
 vectors = {
     "ABCD PLS2, HCP-MMP": -hcp["hcp_opt2_dCT_CT_PLS2_Z"],
+    "ABCD PLS2, DK (HCP gene basis)": dkm["DK_PLS2_matchedX"],
     "ABCD PLS2, DK": -dk2["PLS2_Z"],
     "ABCD dCT alone, HCP-MMP": -hcp["hcp_opt1_dCT_PLS1_Z"],
     "ABCD dCT alone, DK": -dk1["PLS1_Z"],

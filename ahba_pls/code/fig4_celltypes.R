@@ -19,17 +19,41 @@ stopifnot(length(unique(S$n_universe)) == 1)
 NU <- format(S$n_universe[1], big.mark = ",")
 
 # column order and grouping follow panel a of the enrichment figure
+# "DK, HCP gene basis" is the DK fit on the same 7,973 genes as the HCP matrix;
+# it is what makes the astrocyte comparison a parcellation contrast rather than
+# a parcellation + abagen-build + DS-gene-set contrast.
 ord <- c("ABCD PLS2, HCP-MMP", "ABCD dCT alone, HCP-MMP",
+         "ABCD PLS2, DK (HCP gene basis)",
          "ABCD PLS2, DK", "ABCD dCT alone, DK", "ABCD dCT+dT1T2 PLS2, DK",
          "AHBA C3", "NSPN PLS2", "AHBA C1")
-grp <- setNames(c(rep("HCP-MMP\n(137 parcels)", 2), rep("Desikan\u2013Killiany\n(33 regions)", 3),
+grp <- setNames(c(rep("HCP-MMP\n(137 parcels)", 2), rep("Desikan\u2013Killiany\n(33 regions)", 4),
                   rep("published\ncomponents", 3)), ord)
 stopifnot(setequal(ord, unique(S$vector)))
+
+# claims about counts are computed, never written in: how many thinning-derived
+# rankings show the neuronal-up / microglia-down pattern, and how many rankings
+# sit on each side of zero for astrocytes.
+thin_v <- setdiff(ord, c("AHBA C1"))                       # C1 is the static control
+n_thin <- S |> filter(vector %in% thin_v, cell_class %in% c("Neuro", "Neuro-Ex", "Neuro-In")) |>
+  group_by(vector) |> summarise(ok = all(z > 0), .groups = "drop") |>
+  inner_join(S |> filter(vector %in% thin_v, cell_class %in% c("Micro", "Endo")) |>
+               group_by(vector) |> summarise(ok2 = all(z < 0), .groups = "drop"), by = "vector") |>
+  summarise(n = sum(ok & ok2)) |> pull(n)
+astro_all <- S |> filter(cell_class == "Astro")
+n_astro_neg <- sum(astro_all$z < 0)
+n_cells <- nrow(S)
+rho_uni <- suppressWarnings(cor(
+  (T |> filter(universe == "own") |> arrange(vector, cell_class))$z,
+  (T |> filter(universe == "shared") |> arrange(vector, cell_class))$z,
+  method = "spearman"))
+own_n <- T |> filter(universe == "own") |> distinct(vector, n_universe) |>
+  arrange(desc(n_universe))
 
 # rows ordered by the mean z across rankings: neuronal at the top, glial below
 row_ord <- S |> group_by(cell_class) |> summarise(m = mean(z), .groups = "drop") |>
   arrange(m) |> pull(cell_class)
 short <- c("ABCD PLS2, HCP-MMP" = "PLS2 (dCT+CT)", "ABCD dCT alone, HCP-MMP" = "dCT alone",
+           "ABCD PLS2, DK (HCP gene basis)" = "PLS2, HCP gene basis",
            "ABCD PLS2, DK" = "PLS2 (dCT+CT)", "ABCD dCT alone, DK" = "dCT alone",
            "ABCD dCT+dT1T2 PLS2, DK" = "PLS2 (dCT+dT1T2)",
            "AHBA C3" = "AHBA C3", "NSPN PLS2" = "NSPN PLS2", "AHBA C1" = "AHBA C1")
@@ -76,9 +100,10 @@ pb <- ggplot(W, aes(z_Astro, z_Oligo, colour = grp)) +
   scale_colour_manual(values = c("#33a02c", "#1f78b4", "grey25"), name = NULL) +
   labs(x = "astrocyte marker z", y = "oligodendrocyte marker z",
        title = "b   The two classes that separate the rankings \u2014 by parcellation, not by Y-matrix option",
-       subtitle = sprintf("Both HCP-MMP rankings sit alone in the astrocyte-positive half (%+.1f and %+.1f); all five DK and published rankings are astrocyte-negative",
+       subtitle = sprintf("Both HCP-MMP rankings sit alone in the astrocyte-positive half (%+.1f and %+.1f); the other %d rankings \u2014 including the DK fit on the HCP gene basis \u2014 are astrocyte-negative",
                           W$z_Astro[W$vector == "ABCD PLS2, HCP-MMP"],
-                          W$z_Astro[W$vector == "ABCD dCT alone, HCP-MMP"])) +
+                          W$z_Astro[W$vector == "ABCD dCT alone, HCP-MMP"],
+                          n_astro_neg)) +
   theme_bw(base_size = 7.4) +
   theme(panel.grid.minor = element_blank(),
         panel.grid.major = element_line(linewidth = 0.15, colour = "grey94"),
@@ -95,8 +120,10 @@ oli <- S |> filter(cell_class == "Oligo", vector %in% c("ABCD PLS2, HCP-MMP", "A
 methods <- paste(
   "Methods.",
   "\u2022 Markers: the Seidlitz et al. 2020 compilation, nine classes (Neuro / Neuro-Ex / Neuro-In, Astro, Oligo, OPC, Micro, Endo, Per), 38\u2013862 genes per class after intersecting the universe.",
-  sprintf("\u2022 Test: mean gene weight of a class against 20,000 random gene sets of the same size, drawn from one universe shared by all eight rankings (%s genes), identical random draws per column.", NU),
-  "\u2022 Running each ranking on its own universe instead (12,007 DK / 7,973 HCP and AHBA / 20,710 NSPN) gives the same picture:\n  z agrees at Spearman 0.995 over all 72 cells. Both versions are in the results table.",
+  sprintf("\u2022 Test: mean gene weight of a class against 20,000 random gene sets of the same size, drawn from one universe shared by all %d rankings (%s genes), identical random draws per column.",
+          length(ord), NU),
+  sprintf("\u2022 Running each ranking on its own universe instead (%s genes across the nine vectors) gives the same picture:\n  z agrees at Spearman %.3f over all %d cells. Both versions are in the results table.",
+          paste(format(range(own_n$n_universe), big.mark = ","), collapse = "\u2013"), rho_uni, n_cells),
   "\u2022 Marker genes are co-expressed, so the independent-gene null is anti-conservative: read the sign and the pattern across columns, not the absolute z.",
   "\u2022 Sign convention: positive = the class's markers are expressed more where adolescent thinning is faster.\n  C1, C3 and NSPN PLS2 keep their published sign, so positive there means \"higher where the component score is high\".",
   sep = "\n")
@@ -104,8 +131,8 @@ methods <- paste(
 fig <- (pa / pb) + plot_layout(heights = c(1, 0.92)) +
   plot_annotation(
     title = "Cell-class profiles agree across Y-matrix options but split on astrocytes by parcellation",
-    subtitle = sprintf("Neuronal classes are positive and microglia/endothelia negative in all seven thinning-derived rankings.\nAstrocytes flip with the atlas (HCP-MMP %+.1f vs DK %+.1f), and oligodendrocytes deepen with it (%+.1f vs %+.1f, against %+.1f for C3).",
-                       astro_hcp$z, astro_dk$z,
+    subtitle = sprintf("Neuronal classes are positive and microglia/endothelia negative in all %d thinning-derived rankings.\nAstrocytes flip with the atlas (HCP-MMP %+.1f vs DK %+.1f), and oligodendrocytes deepen with it (%+.1f vs %+.1f, against %+.1f for C3).",
+                       n_thin, astro_hcp$z, astro_dk$z,
                        oli$z[oli$vector == "ABCD PLS2, HCP-MMP"],
                        oli$z[oli$vector == "ABCD PLS2, DK"],
                        oli$z[oli$vector == "AHBA C3"]),

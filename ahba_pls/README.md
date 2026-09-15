@@ -277,10 +277,17 @@ parcellation is not confounded with pipeline):
 
 | gene weights | parcels | SCZ β_std (p) | MDD β_std (p) |
 |:--|--:|--:|--:|
-| **HCP-MMP PLS2** | **137** | 0.045 (0.01) | **0.069** (3e-5) |
-| DK PLS2, matched genes | 33 | 0.046 (0.008) | 0.053 (0.001) |
+| **HCP-MMP PLS2 (dCT+CT)** | **137** | 0.045 (0.01) | **0.069** (3e-5) |
+| DK PLS2 (dCT+CT) | 33 | 0.046 (0.008) | 0.053 (0.001) |
 | HCP-MMP, dCT alone | 137 | 0.054 (0.002) | 0.078 (3e-6) |
+| DK, dCT alone | 33 | 0.065 (2e-4) | 0.059 (4e-4) |
 | AHBA C3 | 137 | 0.068 (9e-5) | 0.082 (9e-7) |
+| AHBA C1 (static) | 137 | 0.037 (0.029) | 0.010 (0.551) |
+
+All six rows are on the **matched** gene basis (see *Gene bases* above): the same 7,973 genes taken
+from `hcp_3d.csv` or `dk_3d.csv`, so an HCP row differs from its DK counterpart by parcellation
+alone. The cross-build AHBA_updated DK vectors are in the table under `basis = "AHBA_updated
+native-DK"` and are not plotted.
 
 Because the two weight vectors are correlated (ρ = 0.73), the comparison is made inside
 MAGMA rather than by differencing βs:
@@ -317,7 +324,7 @@ evidence that the MDD gain is about the atlas and not about who is in the sample
 ### Two summary figures
 
 Built from single-universe re-runs so every number on them is comparable:
-`code/14_magma_all_options.py` (one MAGMA covar file with all eight rankings →
+`code/14_magma_all_options.py` (one MAGMA covar file with all nine rankings →
 `results/magma_all_marginal.tsv`, `magma_all_joint.tsv`) and
 `code/15_celltype_all_options.py` (→ `results/celltype_all_options.tsv`).
 
@@ -325,7 +332,7 @@ Built from single-universe re-runs so every number on them is comparable:
 |:--|:--|:--|
 | `figures/fig_signature_both.png` | `code/fig1_signature_both.R` | the signature derived in **both** parcellations: brain maps (DK row, HCP-MMP row), six small concordance panels, and the cell-class profile of three rankings |
 | `figures/fig_enrichment_combined.png` | `code/fig2_enrichment_combined.R` | MAGMA only: every ranking's SCZ/MDD β alone, then the seven head-to-head joint models |
-| `figures/fig_celltypes.png` | `code/fig4_celltypes.R` | cell-class marker enrichment of all eight rankings, plus the astrocyte/oligodendrocyte plane |
+| `figures/fig_celltypes.png` | `code/fig4_celltypes.R` | cell-class marker enrichment of all nine rankings, plus the astrocyte/oligodendrocyte plane |
 | `figures/fig_signature_dct_only.png` | `code/fig1_signature_dct_only.R` | the same layout with **Y = dCT alone**: the single-Y control (see below) |
 
 HCP-MMP brain rendering needs `ggsegGlasser`, which is not on CRAN for this R
@@ -334,10 +341,54 @@ version; it is installed from GitHub into `ahba_pls/.Rlib` (gitignored) —
 polygons are cached to `data/hcp_polygons.csv`, so the figures render without it.
 
 **Single-universe enrichment** (n = 6,672 SCZ / 6,662 MDD genes) reproduces the separate runs:
-all five ABCD-derived rankings are enriched for both disorders, NSPN-PLS2 reaches SCZ only
-(MDD p = 0.10) and C1 neither. In the joint models the HCP ranking beats DK for MDD
-(0.071, p = 0.002 vs -0.008, p = 0.73) and beats NSPN-PLS2 for MDD, survives C1 for
-both disorders, and loses to C3.
+all ABCD-derived rankings are enriched for both disorders, NSPN-PLS2 reaches SCZ only
+(MDD p = 0.10) and C1 neither. The atlas pairing uses the gene-matched DK vector (see
+*Gene bases*): jointly, the HCP ranking keeps its MDD association (0.060, p = 0.012) while the
+matched DK ranking does not (0.007, p = 0.76); for SCZ neither survives (0.33 and 0.22). The
+HCP ranking also beats NSPN-PLS2 for MDD, survives C1 for both disorders, and loses to C3.
+
+### Gene bases — which comparisons are clean, and why
+
+Three different gene sets are in play, and mixing them silently confounds parcellation with
+pipeline. Stated once here because every cross-parcellation claim depends on it:
+
+| basis | matrix | genes | used for |
+|:--|:--|--:|:--|
+| **matched** | `AHBA/data/abagen-data/expression/{hcp,dk}_3d.csv` restricted to `data/weights.csv` | 7,973 | the HCP-vs-DK arm — both atlases, same genes, same abagen build |
+| AHBA_updated native-DK | `AHBA_updated/outputs/.../ahba_dk_lh_native_ds{0,25,50}.csv` | 16,009 / 12,005 / 8,005 | the main DK analysis (phases 1–3) |
+| shipped C1–C3 | `data/weights.csv` | 7,973 | the published components |
+
+The 7,973 genes of `weights.csv` are **not** an unfiltered set: they are exactly the columns of
+`hcp_3d_ds5.csv`, i.e. the top half of 15,946 genes by differential stability computed **in HCP
+space** (verified by set comparison). So the HCP arm carries a DS-50 filter of its own. DS filters
+are parcellation-specific, which is why that list overlaps `dk_3d_ds5` by only 88 % and the
+AHBA_updated `ds50` matrix by 87 %. An AHBA_updated `ds50` row therefore differs from the HCP fit in
+**three** ways at once — parcellation, abagen build, gene identity — and is not a parcellation
+comparator. (An earlier version of `fig_hcp_vs_dk.png` carried such a row, chosen because its gene
+*count* was closest; it has been removed.)
+
+Standardisation applied:
+
+- `hcp_vs_dk_enrichment.tsv` now carries a **`basis`** column, and `fig_hcp_vs_dk.png` plots only
+  the matched-basis rows — so on that figure parcellation is the only difference between an HCP row
+  and its DK counterpart. Every HCP design now has a matched DK counterpart:
+  `12_hcp_pls.py` fits the single-Y design on `dk_3d.csv` too (`DK_PLS1_dCTonly_matchedX`) and
+  exports both matched vectors to `results/dk_matched_weights.tsv` for reuse.
+- `14_magma_all_options.py` adds `ABCD_PLS2_DKmatched` and the **atlas joint model now uses it**:
+  HCP vs DK on matched genes gives MDD β = 0.060 (p = 0.012) for HCP against
+  0.007 (p = 0.76) for DK, and for SCZ neither survives (0.33 and 0.22) — the same
+  verdict as the cross-build version, now without the confound.
+- `15_celltype_all_options.py` adds the matched DK vector as a ninth ranking, which **settles the
+  astrocyte question**: on the HCP gene basis the DK fit still gives Astro z = -5.8 and
+  Oligo -5.8, essentially identical to the AHBA_updated DK fit (-5.2, -5.4) and opposite
+  to HCP (+5.0, -12.1). The flip is parcellation, not the gene set or the abagen build.
+
+One thing the matched single-Y row makes visible: **for SCZ the dCT-alone fits lead every PLS2 fit
+in either atlas** — DK dCT-alone β = 0.065 (p = 0.0002) and HCP dCT-alone 0.054, against
+0.046 and 0.045 for the two-Y fits, with only C3 (0.068) above them. For MDD the ordering is the
+opposite way round for DK (0.059 vs 0.053) and HCP two-Y is close to its single-Y (0.069 vs 0.078).
+Read with the dCT-only section below — those components are not spin-significant, so this is a
+statement about gene rankings, not about spatial maps.
 
 ### The dCT-only variant — why the single-Y design is kept as a control, not a result
 
@@ -373,32 +424,33 @@ Cell classes agree with the main figure's reading: neuronal up, glial down in bo
 with astrocytes again splitting by atlas (+1.4 in HCP-MMP, p = 0.16, against
 -12.1 in DK) — i.e. the flip does not depend on the Y-matrix design.
 
-### Cell-class profiles of all eight rankings — the astrocyte flip is a parcellation effect
+### Cell-class profiles of all nine rankings — the astrocyte flip is a parcellation effect
 
 `code/15_celltype_all_options.py` → `results/celltype_all_options.tsv`;
 figure `figures/fig_celltypes.png` (`code/fig4_celltypes.R`). Supersedes
 `13_celltype_compare.py` (three rankings) for figure purposes. Every ranking is
 tested on **one shared universe** of 7,338 genes, so a difference between two
 columns cannot come from a difference in universe; running each on its own
-universe instead gives z agreeing at Spearman 0.994 over all 72 cells (both are
+universe instead gives z agreeing at Spearman 0.994 over all 81 cells (both are
 in the table).
 
-| class | PLS2 HCP | dCT HCP | PLS2 DK | dCT DK | dCT+dT1T2 DK | C3 | NSPN PLS2 | C1 |
-|:--|--:|--:|--:|--:|--:|--:|--:|--:|
-| Neuro-Ex | +12.6 | +12.2 | +13.6 | +13.8 | +12.8 | +19.3 | +9.7 | +2.5 |
-| **Astro** | **+5.0** | +1.4 | -5.2 | -12.1 | -2.6 | -8.9 | -11.3 | -11.9 |
-| **Oligo** | **-12.1** | -9.2 | -5.4 | -1.6 | -7.0 | -13.2 | +1.8 | +5.5 |
-| Micro | -11.3 | -11.9 | -10.0 | -11.7 | -8.3 | -8.8 | -1.6 | -4.1 |
+| class | PLS2 HCP | dCT HCP | **PLS2 DK, HCP basis** | PLS2 DK | dCT DK | dCT+dT1T2 DK | C3 | NSPN PLS2 | C1 |
+|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| Neuro-Ex | +12.6 | +12.2 | +15.4 | +13.6 | +13.8 | +12.8 | +19.3 | +9.7 | +2.5 |
+| **Astro** | **+5.0** | **+1.4** | **-5.8** | -5.2 | -12.1 | -2.6 | -8.9 | -11.3 | -11.9 |
+| **Oligo** | **-12.1** | **-9.2** | **-5.8** | -5.4 | -1.6 | -7.0 | -13.2 | +1.8 | +5.5 |
+| Micro | -11.3 | -11.9 | -11.3 | -10.0 | -11.7 | -8.3 | -8.8 | -1.6 | -4.1 |
 
-(full 9 × 8 matrix with p_perm in the table and figure; Endo, OPC and Per omitted here)
+(full 9 classes × 9 rankings with p_perm in the table and figure; Endo, OPC and Per omitted here)
 
-- **Neuronal up, microglia/endothelia down in all seven thinning-derived rankings** —
+- **Neuronal up, microglia/endothelia down in every thinning-derived ranking** —
   the Y-matrix option matters far less than the atlas (profiles correlate ρ 0.65–0.98
-  among the five ABCD vectors; ρ 0.98 between the two HCP-MMP fits).
-- **Astrocytes split by atlas, not by option.** Both HCP-MMP rankings are the only
-  ones in the astrocyte-positive half (+5.0, p < 0.001; +1.4, p = 0.16);
-  all three DK rankings and all three published components are negative
-  (-2.6 to -12.1).
+  among the 6 ABCD vectors; ρ 0.98 between the two HCP-MMP fits).
+- **Astrocytes split by atlas, not by option — and not by gene set.** Both HCP-MMP rankings are
+  the only ones in the astrocyte-positive half (+5.0, p < 0.001; +1.4, p = 0.16); every DK
+  ranking and every published component is negative (-2.6 to -12.1). The decisive control is
+  the DK fit on the **HCP gene basis** (-5.8): identical to the other DK fits, so neither the
+  abagen build nor the DS gene set produces the flip.
 - **Oligodendrocytes move the same way with the atlas**: -12.1 in HCP-MMP against
   -5.4 in DK, i.e. the HCP version sits next to C3 (-13.2) while the DK
   version does not. On this axis the finer parcellation moves the ABCD signature
@@ -433,7 +485,7 @@ Rscript code/fig1_signature_both.R      # both parcellations + cell classes
 Rscript code/fig2_enrichment.R          # permutation + MAGMA, DK
 Rscript code/fig2_enrichment_combined.R # MAGMA only, all rankings
 Rscript code/fig3_hcp_vs_dk.R           # the HCP vs DK arm
-Rscript code/fig4_celltypes.R           # cell classes, all eight rankings
+Rscript code/fig4_celltypes.R           # cell classes, all nine rankings
 Rscript code/fig1_signature_dct_only.R  # the dCT-only variant of figure 1
 ```
 

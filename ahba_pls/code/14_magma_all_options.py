@@ -46,8 +46,16 @@ hcp_w = pd.read_csv(RES / "hcp_pls_weights.tsv", sep="\t", index_col=0)
 c123 = pd.read_csv(REF / "ahba_c123_gene_weights.csv", index_col=0)
 nspn = pd.read_csv(REF / "nspn_pls_gene_weights.csv").set_index("gene")
 
+# The HCP and AHBA_updated-DK vectors are fitted on DIFFERENT abagen builds and
+# different DS gene sets, so a joint model of the two confounds parcellation
+# with pipeline. ABCD_PLS2_DKmatched is the gene- and build-matched DK fit
+# (dk_3d.csv, the same 7,973 genes as the HCP matrix; written by 12_hcp_pls.py)
+# and is the vector the atlas pair below uses. ABCD_PLS2_DK stays in the
+# marginal comparison because it is the main analysis's own signature.
+dk_m = pd.read_csv(RES / "dk_matched_weights.tsv", sep="\t", index_col=0)
 vectors = {
     "ABCD_PLS2_HCP": -hcp_w["hcp_opt2_dCT_CT_PLS2_Z"],
+    "ABCD_PLS2_DKmatched": dk_m["DK_PLS2_matchedX"],
     "ABCD_PLS2_DK": -dk_w["PLS2_Z"],
     "ABCD_dCT_HCP": -hcp_w["hcp_opt1_dCT_PLS1_Z"],
     "ABCD_dCT_DK": -dk_o1["PLS1_Z"],
@@ -56,7 +64,8 @@ vectors = {
     "AHBA_C1": c123["C1"],
     "NSPN_PLS2": nspn["PLS2_z"],
 }
-PAIRS = [("ABCD_PLS2_HCP", "ABCD_PLS2_DK"),     # does the finer parcellation add?
+PAIRS = [("ABCD_PLS2_HCP", "ABCD_PLS2_DKmatched"),   # does the finer parcellation add?
+         #  ^ gene- and build-matched, so this pair isolates parcellation
          ("ABCD_PLS2_HCP", "AHBA_C3"),          # does either ABCD vector add to C3?
          ("ABCD_PLS2_DK", "AHBA_C3"),
          ("ABCD_PLS2_HCP", "AHBA_C1"),          # is it just the static gradient?

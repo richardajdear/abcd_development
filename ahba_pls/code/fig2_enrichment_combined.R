@@ -31,7 +31,13 @@ base <- theme_bw(base_size = 7.6) +
         plot.margin = margin(2, 5, 2, 5))
 theme_set(base)
 
+# ABCD_PLS2_DKmatched is the DK fit on the HCP gene basis (dk_3d.csv, the same
+# 7,973 genes): the only DK vector whose difference from the HCP one is purely
+# parcellation, and the one the HCP-vs-DK joint model in panel b uses. The other
+# DK rows come from the main analysis's AHBA_updated matrices and are compared
+# here as gene RANKINGS, where the build difference is part of the ranking.
 lab <- c(ABCD_PLS2_HCP = "ABCD PLS2, HCP-MMP (137 parcels)",
+         ABCD_PLS2_DKmatched = "ABCD PLS2, DK \u2014 HCP gene basis (33)",
          ABCD_PLS2_DK = "ABCD PLS2, DK (33 regions)",
          ABCD_dCT_HCP = "ABCD dCT alone, HCP-MMP",
          ABCD_dCT_DK = "ABCD dCT alone, DK",
@@ -39,7 +45,7 @@ lab <- c(ABCD_PLS2_HCP = "ABCD PLS2, HCP-MMP (137 parcels)",
          AHBA_C3 = "AHBA C3 (Dear 2024)",
          NSPN_PLS2 = "NSPN PLS2 (Whitaker 2016)",
          AHBA_C1 = "AHBA C1 (static gradient)")
-grp <- c(rep("ABCD-derived", 5), rep("published", 3))
+grp <- c(rep("ABCD-derived", 6), rep("published", 3))
 
 A <- M |> filter(VARIABLE %in% names(lab)) |>
   mutate(nm = factor(lab[VARIABLE], levels = rev(lab)),
@@ -76,8 +82,9 @@ pa <- ggplot(A, aes(BETA_STD, nm, colour = disorder)) +
 
 # ---- panel b: joint models, both coefficients side by side -----------------
 short <- c(ABCD_PLS2_HCP = "ABCD PLS2 HCP", ABCD_PLS2_DK = "ABCD PLS2 DK",
+           ABCD_PLS2_DKmatched = "ABCD PLS2 DK (matched)",
            AHBA_C3 = "AHBA C3", AHBA_C1 = "AHBA C1", NSPN_PLS2 = "NSPN PLS2")
-pair_lab <- c("ABCD_PLS2_HCP + ABCD_PLS2_DK" = "HCP vs DK\n(does the finer atlas add?)",
+pair_lab <- c("ABCD_PLS2_HCP + ABCD_PLS2_DKmatched" = "HCP vs DK, matched genes\n(does the finer atlas add?)",
               "ABCD_PLS2_HCP + AHBA_C1" = "HCP vs C1\n(is it the static gradient?)",
               "ABCD_PLS2_HCP + NSPN_PLS2" = "HCP vs NSPN PLS2",
               "ABCD_PLS2_DK + NSPN_PLS2" = "DK vs NSPN PLS2",
@@ -96,7 +103,7 @@ pb <- ggplot(B, aes(BETA_STD, pr, colour = disorder)) +
                   position = position_dodge(width = 0.72), size = 0.2, linewidth = 0.4) +
   scale_colour_manual(values = pal, guide = "none") +
   scale_alpha_manual(values = c("p < 0.05" = 1, "n.s." = 0.35), guide = "none") +
-  scale_shape_manual(values = c(16, 21, 17, 2, 15), name = NULL) +
+  scale_shape_manual(values = c(16, 21, 1, 17, 2, 15), name = NULL) +   # 6 vectors since DKmatched joined
   facet_wrap(~ disorder, nrow = 1) +
   labs(x = "MAGMA gene-property \u03b2 in the JOINT model, 95% CI", y = NULL,
        title = "b   Which of a pair keeps its signal when both are in the model? (filled = p < 0.05)",
@@ -107,7 +114,7 @@ pb <- ggplot(B, aes(BETA_STD, pr, colour = disorder)) +
         legend.margin = margin(t = -4, b = -2), legend.key.height = unit(7, "pt"),
         panel.spacing = unit(6, "pt"))
 
-hcp_dk <- B |> filter(pair == "ABCD_PLS2_HCP + ABCD_PLS2_DK", disorder == "MDD")
+hcp_dk <- B |> filter(pair == "ABCD_PLS2_HCP + ABCD_PLS2_DKmatched", disorder == "MDD")
 methods <- paste(
   "Methods.",
   sprintf("\u2022 One MAGMA gene-property run per panel row. Within a disorder every ranking shares one universe \u2014 genes with a gene-level result and a weight in\n  every vector \u2014 so the betas are directly comparable; the two GWAS cover slightly different gene sets (n = %s).", NG),
@@ -122,9 +129,9 @@ fig <- (pa / pb) + plot_layout(heights = c(1, 1.25)) +
     title = "SCZ and MDD enrichment of every candidate gene ranking, and which survives a head-to-head",
     subtitle = sprintf("The HCP-MMP thinning signature is the strongest ABCD-derived ranking for MDD (joint \u03b2 = %.3f vs %.3f for DK, p = %.3f vs %.2f); AHBA C3 still leads overall.",
                        hcp_dk$BETA_STD[hcp_dk$VARIABLE == "ABCD_PLS2_HCP"],
-                       hcp_dk$BETA_STD[hcp_dk$VARIABLE == "ABCD_PLS2_DK"],
+                       hcp_dk$BETA_STD[hcp_dk$VARIABLE == "ABCD_PLS2_DKmatched"],
                        hcp_dk$P[hcp_dk$VARIABLE == "ABCD_PLS2_HCP"],
-                       hcp_dk$P[hcp_dk$VARIABLE == "ABCD_PLS2_DK"]),
+                       hcp_dk$P[hcp_dk$VARIABLE == "ABCD_PLS2_DKmatched"]),
     caption = methods,
     theme = theme(plot.title = element_text(size = 9.4, face = "bold"),
                   plot.subtitle = element_text(size = 7.3, colour = "grey25", margin = margin(b = 4)),

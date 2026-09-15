@@ -14,6 +14,20 @@ Design, matched to the DK analysis except for the parcellation:
       weights were fitted on, restricted to the 137 left parcels with donor
       coverage; genes z-scored across regions.  The DK comparator uses the same
       7,973 genes from dk_3d.csv so the two are gene-matched.
+
+      Those 7,973 genes ARE a differential-stability filter: they are exactly the
+      columns of hcp_3d_ds5.csv, i.e. the top half of the 15,946 genes by DS
+      computed IN HCP SPACE (verified: weights.csv == hcp_3d_ds5.csv columns).
+      So the HCP arm is not unfiltered -- it is DS-50 in its own parcellation.
+      DS filters are parcellation-specific, so dk_3d_ds5 shares only 88% of that
+      list and the AHBA_updated native-DK ds50 matrix only 87%; neither is
+      gene-matched to the HCP fit.  The ONLY clean comparator is therefore the
+      same 7,973 genes taken from dk_3d.csv (same abagen build, same genes,
+      33 regions) -- the `*_matchedX` vectors below.  The AHBA_updated ds0/ds25/
+      ds50 vectors are kept in the output table as a cross-build reference and
+      are marked basis="AHBA_updated native-DK"; they differ from the HCP fit in
+      parcellation AND build AND gene identity at once, so they do not belong in
+      a parcellation comparison.
   Y : bilateral (lh/rh mean) HCP dCT (age slope) and CT (intercept) from the
       run's fits/fixed.parquet.  Parcel H is excluded by the run config
       (FreeSurfer medial wall, thickness 0 in many sessions); the drop below is
@@ -117,6 +131,13 @@ Ydk = pd.read_csv(DATA / "y_maps_bilateral_34.csv", index_col=0)[["dCT", "CT"]]
 fit_dk = pls.pls_svd(Xd, Ydk.loc[Xd.index])
 bt_dk = pls.bootstrap_weights(Xd, Ydk.loc[Xd.index], n_boot=N_BOOT, seed=SEED)
 Z_dk_matched = -bt_dk["Z"]["PLS2"]
+# the single-Y design too, so every HCP row has a gene-matched DK counterpart
+bt_dk_o1 = pls.bootstrap_weights(Xd, Ydk.loc[Xd.index, ["dCT"]], n_boot=N_BOOT, seed=SEED)
+Z_dk_o1_matched = -bt_dk_o1["Z"]["PLS1"]
+pd.DataFrame({"DK_PLS2_matchedX": Z_dk_matched,
+              "DK_PLS1_dCTonly_matchedX": Z_dk_o1_matched}
+             ).rename_axis("gene").to_csv(RES / "dk_matched_weights.tsv", sep="\t",
+                                          float_format="%.6g")
 print(f"matched DK comparator: |rho(PC1,C1)| = {_r:.3f}, "
       f"PLS2 dCT salience {fit_dk.saliences().loc['dCT', 'PLS2']:.2f}", file=sys.stderr)
 
@@ -180,11 +201,17 @@ sym2ent = (pd.read_csv(GS / "magma_SCZ_genes.tsv", sep="\t").dropna(subset=["sym
 dk_thin = {f"DK_PLS2_{ds}": pd.read_csv(RES / "lead_signature_weights.tsv", sep="\t",
                                         index_col=0)[f"thinning_Z_{ds}"]
            for ds in ("ds0", "ds25", "ds50")}
+# BASIS is the gene set each vector was fitted on; only the "matched" basis
+# isolates parcellation, and only those rows go on the figure.
+MATCHED = "abagen-data, 7,973 genes (HCP-space DS-50)"
+CROSSBUILD = "AHBA_updated native-DK"
 vectors = {"HCP_PLS2_thinning": Z_lead,
            "HCP_PLS1_dCTonly": -Wall["hcp_opt1_dCT_PLS1_Z"],
            "DK_PLS2_matchedX": Z_dk_matched,
+           "DK_PLS1_dCTonly_matchedX": Z_dk_o1_matched,
            **dk_thin,
            "C3_shipped": c123w["C3"], "C1_shipped": c123w["C1"]}
+BASIS = {k: (CROSSBUILD if k.startswith("DK_PLS2_ds") else MATCHED) for k in vectors}
 cov = pd.DataFrame(vectors).dropna(how="any")
 cov = cov.loc[cov.index.intersection(sym2ent.index)]
 cov.index = sym2ent.loc[cov.index].values
@@ -208,6 +235,8 @@ for dis, raw in RAW.items():
     res.append(t)
 M = pd.concat(res, ignore_index=True)
 M["se_std"] = M.SE * M.BETA_STD / M.BETA
+M.insert(2, "basis", M.VARIABLE.map(BASIS))
+assert M.basis.notna().all(), M.loc[M.basis.isna(), "VARIABLE"].unique()
 M.to_csv(RES / "hcp_vs_dk_enrichment.tsv", sep="\t", index=False, float_format="%.5g")
 
 pd.set_option("display.width", 200)
@@ -217,8 +246,8 @@ print(comp_tab[["option", "component", "cov_explained", "p_spin_singular", "sal_
 print("\nConcordance of the HCP thinning component with the AHBA components:")
 print(C.round(3).to_string(index=False))
 print(f"\nMAGMA gene-property, shared universe of {int(M.NGENES.iloc[0])} genes:")
-order = ["HCP_PLS2_thinning", "DK_PLS2_matchedX", "DK_PLS2_ds0", "DK_PLS2_ds25", "DK_PLS2_ds50",
-         "HCP_PLS1_dCTonly", "C3_shipped", "C1_shipped"]
+order = ["HCP_PLS2_thinning", "DK_PLS2_matchedX", "HCP_PLS1_dCTonly", "DK_PLS1_dCTonly_matchedX",
+         "C3_shipped", "C1_shipped", "DK_PLS2_ds0", "DK_PLS2_ds25", "DK_PLS2_ds50"]
 print(M[M.VARIABLE.isin(order)].pivot(index="VARIABLE", columns="disorder",
                                       values=["BETA_STD", "se_std", "P"]).loc[order].round(4).to_string())
 

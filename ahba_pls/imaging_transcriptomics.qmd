@@ -245,13 +245,13 @@ python code/11_parcellation_test.py       # is the gap a DK-resolution artefact?
 python code/12_hcp_pls.py                 # the same PLS in HCP-MMP            (~4 min)
 python code/13_celltype_compare.py        # cell classes, three rankings
 python code/14_magma_all_options.py       # one MAGMA universe, all rankings
-python code/15_celltype_all_options.py    # cell classes, all eight rankings   (~3 min)
+python code/15_celltype_all_options.py    # cell classes, all nine rankings   (~3 min)
 Rscript code/fig1_lead_signature.R        # DK lead signature
 Rscript code/fig1_signature_both.R        # both parcellations + cell classes
 Rscript code/fig2_enrichment.R            # permutation + MAGMA, DK
 Rscript code/fig2_enrichment_combined.R   # MAGMA only, all rankings
 Rscript code/fig3_hcp_vs_dk.R             # HCP vs DK arm
-Rscript code/fig4_celltypes.R             # cell classes, all eight rankings
+Rscript code/fig4_celltypes.R             # cell classes, all nine rankings
 ```
 
 Environments. Analysis and tables: python (pandas/scipy) — env `ahba-pls`. Figures: R with
