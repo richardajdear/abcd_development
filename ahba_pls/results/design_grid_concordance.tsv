@@ -1,0 +1,24 @@
+design	parcellation	level	reference	rho	p_spin	n
+dCT + CT	DK	scores	C3	0.8329	0.0009998	33
+dCT + CT	DK	scores	NSPN_PLS2	0.7514	0.0012	33
+dCT + CT	DK	weights	C3	0.7559		7873
+dCT + CT	DK	weights	C1	-0.1972		7873
+dCT + CT	DK	weights	NSPN_PLS2_z	0.6152		11175
+dCT alone	DK	scores	C3	0.2781	0.1848	33
+dCT alone	DK	scores	NSPN_PLS2	0.4862	0.04799	33
+dCT alone	DK	weights	C3	0.5921		7873
+dCT alone	DK	weights	C1	0.5605		7873
+dCT alone	DK	weights	NSPN_PLS2_z	0.6108		11175
+CT + dCT + T1T2 + dT1T2	DK	scores	C3	0.7821	0.0009998	33
+CT + dCT + T1T2 + dT1T2	DK	scores	NSPN_PLS2	0.7643	0.0012	33
+CT + dCT + T1T2 + dT1T2	DK	weights	C3	0.6246		7873
+CT + dCT + T1T2 + dT1T2	DK	weights	C1	-0.06898		7873
+CT + dCT + T1T2 + dT1T2	DK	weights	NSPN_PLS2_z	0.5713		11175
+dCT + CT	HCP	scores	C3	0.7012	0.0003999	137
+dCT + CT	HCP	weights	C3	0.6779		7973
+dCT + CT	HCP	weights	C1	-0.1078		7973
+dCT + CT	HCP	weights	NSPN_PLS2_z	0.3494		7433
+dCT alone	HCP	scores	C3	0.5465	0.0003999	137
+dCT alone	HCP	weights	C3	0.6056		7973
+dCT alone	HCP	weights	C1	0.2782		7973
+dCT alone	HCP	weights	NSPN_PLS2_z	0.3717		7433

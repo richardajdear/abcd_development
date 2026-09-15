@@ -333,7 +333,8 @@ Built from single-universe re-runs so every number on them is comparable:
 | `figures/fig_signature_both.png` | `code/fig1_signature_both.R` | the signature derived in **both** parcellations: brain maps (DK row, HCP-MMP row), six small concordance panels, and the cell-class profile of three rankings |
 | `figures/fig_enrichment_combined.png` | `code/fig2_enrichment_combined.R` | MAGMA only: every ranking's SCZ/MDD β alone, then the seven head-to-head joint models |
 | `figures/fig_celltypes.png` | `code/fig4_celltypes.R` | cell-class marker enrichment of all nine rankings, plus the astrocyte/oligodendrocyte plane |
-| `figures/fig_signature_dct_only.png` | `code/fig1_signature_dct_only.R` | the same layout with **Y = dCT alone**: the single-Y control (see below) |
+| **`figures/fig_signature_designs.png`** | `code/fig1_signature_designs.R` | **the version to read**: all three Y designs (dCT+CT, dCT alone, four features) × both parcellations, scatters only |
+| `figures/fig_signature_dct_only.png` | `code/fig1_signature_dct_only.R` | the dCT-alone design on its own, with its cell-class panel |
 
 HCP-MMP brain rendering needs `ggsegGlasser`, which is not on CRAN for this R
 version; it is installed from GitHub into `ahba_pls/.Rlib` (gitignored) —
@@ -343,9 +344,44 @@ polygons are cached to `data/hcp_polygons.csv`, so the figures render without it
 **Single-universe enrichment** (n = 6,672 SCZ / 6,662 MDD genes) reproduces the separate runs:
 all ABCD-derived rankings are enriched for both disorders, NSPN-PLS2 reaches SCZ only
 (MDD p = 0.10) and C1 neither. The atlas pairing uses the gene-matched DK vector (see
-*Gene bases*): jointly, the HCP ranking keeps its MDD association (0.060, p = 0.012) while the
-matched DK ranking does not (0.007, p = 0.76); for SCZ neither survives (0.33 and 0.22). The
+*Gene bases*): jointly, in this run the HCP ranking keeps its MDD association (0.060, p = 0.012) while
+the matched DK ranking does not (0.007, p = 0.76); for SCZ neither survives (0.33 and 0.22). The
 HCP ranking also beats NSPN-PLS2 for MDD, survives C1 for both disorders, and loses to C3.
+
+### All three Y designs in one figure — and the four-feature design
+
+`code/17_design_grid.py` → `results/design_grid_{scores,weights,components,concordance}`;
+figure `figures/fig_signature_designs.png` (`code/fig1_signature_designs.R`). This is the version of
+Figure 1 to read: the cell-class panel has moved to its own figure, and in its place are the
+concordance scatters of **all three** designs, in both parcellations where both exist.
+
+The four-feature design (CT + dCT + T1w/T2w + dT1w/T2w) is the closest available analogue of the
+NSPN PNAS design. Its C3-aligned component is **selected in the script**, not assumed:
+|rho| with C3 weights: PLS2 0.62 > PLS4 0.54. It is DK-only — ABCD tabulates T1w/T2w in Desikan space and the
+locally-derived HCP-MMP parcellation covers thickness only, so a 137-parcel T1w/T2w map needs a new
+surface run.
+
+| design | component | spin p | cov. expl. | scores ρ vs C3 (p_spin) | scores ρ vs NSPN PLS2 | weights ρ vs C3 | weights ρ vs **C1** | weights ρ vs NSPN_z |
+|:--|:--|--:|--:|--:|--:|--:|--:|--:|
+| dCT + CT, DK | PLS2 | 0.002 | 0.13 | 0.83 (0.001) | 0.75 | 0.76 | -0.20 | 0.62 |
+| dCT alone, DK | PLS1 | 0.082 | 1.00 | 0.28 (0.185) | 0.49 | 0.59 | **+0.56** | 0.61 |
+| **four features, DK** | PLS2 | 0.098 | 0.09 | **0.78** (0.001) | **0.76** | 0.62 | **-0.07** | 0.57 |
+| dCT + CT, HCP | PLS2 | 0.011 | 0.14 | 0.70 (0.0004) | — | 0.68 | -0.11 | 0.35 |
+| dCT alone, HCP | PLS1 | 0.266 | 1.00 | 0.55 (0.0004) | — | 0.61 | +0.28 | 0.37 |
+
+Reading, in the order the figure supports it:
+
+- **What the design buys is separation from C1, not agreement with C3.** All three DK designs reach
+  weights ρ 0.59–0.76 with C3, but their C1 loadings run -0.07 (four features) and
+  -0.20 (dCT + CT) against +0.56 for dCT alone. Any static map in Y does the job; the
+  four-feature design, with two static and two rate maps, separates best.
+- **The four-feature design agrees with NSPN PLS2 best of all** (0.76 on scores, 0.57 on weights),
+  which is what you would expect since it is the closest analogue of the PNAS Y matrix — two
+  thickness-like and two myelin-proxy columns, with T1w/T2w standing in for MT.
+- **But its own component is not spin-significant** (p = 0.098), like the single-Y fit (0.082) and
+  unlike the two-Y fits (0.002 DK, 0.011 HCP). It explains only 9 % of the cross-covariance, so the
+  spin null on the singular value is unforgiving. The lead signature stays the two-Y fit; the
+  four-feature component is the better *NSPN analogue* and a usable gene ranking, not a replacement.
 
 ### Gene bases — which comparisons are clean, and why
 
@@ -375,9 +411,13 @@ Standardisation applied:
   `12_hcp_pls.py` fits the single-Y design on `dk_3d.csv` too (`DK_PLS1_dCTonly_matchedX`) and
   exports both matched vectors to `results/dk_matched_weights.tsv` for reuse.
 - `14_magma_all_options.py` adds `ABCD_PLS2_DKmatched` and the **atlas joint model now uses it**:
-  HCP vs DK on matched genes gives MDD β = 0.060 (p = 0.012) for HCP against
-  0.007 (p = 0.76) for DK, and for SCZ neither survives (0.33 and 0.22) — the same
-  verdict as the cross-build version, now without the confound.
+  in `magma_all_joint.tsv` (nine covariates, n = 6,662 MDD / 6,672 SCZ) HCP vs DK on matched genes gives
+  MDD β = 0.060 (p = 0.012) for HCP against 0.007 (p = 0.76) for DK, and for SCZ neither survives
+  (0.33 and 0.22) — the same verdict as the cross-build version, now without the confound.
+  The arm's own three-covariate run (`hcp_vs_dk_conditional.tsv`, n = 6,051) is a separate MAGMA
+  model on a smaller universe and gives the same reading with slightly different coefficients
+  (MDD HCP 0.067, p = 0.008; DK 0.003, p = 0.91; SCZ 0.39 and 0.27) — quote one or
+  the other, never a mix.
 - `15_celltype_all_options.py` adds the matched DK vector as a ninth ranking, which **settles the
   astrocyte question**: on the HCP gene basis the DK fit still gives Astro z = -5.8 and
   Oligo -5.8, essentially identical to the AHBA_updated DK fit (-5.2, -5.4) and opposite
@@ -385,8 +425,8 @@ Standardisation applied:
 
 One thing the matched single-Y row makes visible: **for SCZ the dCT-alone fits lead every PLS2 fit
 in either atlas** — DK dCT-alone β = 0.065 (p = 0.0002) and HCP dCT-alone 0.054, against
-0.046 and 0.045 for the two-Y fits, with only C3 (0.068) above them. For MDD the ordering is the
-opposite way round for DK (0.059 vs 0.053) and HCP two-Y is close to its single-Y (0.069 vs 0.078).
+0.046 and 0.045 for the two-Y fits, with only C3 (0.068) above them. For MDD the single-Y fits still lead,
+but by much less — DK 0.059 vs 0.053 (a gap of 0.006 against 0.019 for SCZ) and HCP 0.078 vs 0.069.
 Read with the dCT-only section below — those components are not spin-significant, so this is a
 statement about gene rankings, not about spatial maps.
 
@@ -470,9 +510,9 @@ sample-size effect: it is unchanged (+5.1 → +5.0) between the 6,537-child and
 
 ## Reproducing
 
-Analysis (python, env `ahba-pls`): `code/01_*` → `code/16_*` in order. `11_` is the parcellation
+Analysis (python, env `ahba-pls`): `code/01_*` → `code/17_*` in order. `11_` is the parcellation
 control, `12_` the HCP-MMP arm, `14_`/`15_` the single-universe enrichment and cell-class tables that
-the summary figures read, `16_` the dCT-only variant (seconds — it reuses the saved option-1 fits). `12_` needs the backfilled HCP run
+the summary figures read, `16_` the dCT-only variant and `17_` the three-design grid (seconds each — both reuse saved fits). `12_` needs the backfilled HCP run
 (`ABCD_CONFIG=ct_70_hcp_noglobal_mv2 python -m abcd.assemble` then
 `Rscript R/fit_lmm.R --cores 8`, which lands in `out/thickness_hcp_70_aa6e91efba82`); everything else
 reads the DK and T1w/T2w runs listed in `tools/rerun_local.sh`.
@@ -486,7 +526,8 @@ Rscript code/fig2_enrichment.R          # permutation + MAGMA, DK
 Rscript code/fig2_enrichment_combined.R # MAGMA only, all rankings
 Rscript code/fig3_hcp_vs_dk.R           # the HCP vs DK arm
 Rscript code/fig4_celltypes.R           # cell classes, all nine rankings
-Rscript code/fig1_signature_dct_only.R  # the dCT-only variant of figure 1
+Rscript code/fig1_signature_designs.R   # all three Y designs, both parcellations
+Rscript code/fig1_signature_dct_only.R  # the dCT-only design on its own
 ```
 
 MAGMA v1.10 binaries and their provenance are in `../tools/bin/README.md`; the disorder

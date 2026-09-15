@@ -1,0 +1,374 @@
+design,parcellation,label,score
+dCT + CT,DK,lh_bankssts,37.8933
+dCT + CT,DK,lh_caudalanteriorcingulate,-43.7833
+dCT + CT,DK,lh_caudalmiddlefrontal,21.2799
+dCT + CT,DK,lh_cuneus,-45.1259
+dCT + CT,DK,lh_entorhinal,-88.8021
+dCT + CT,DK,lh_fusiform,12.5811
+dCT + CT,DK,lh_inferiorparietal,7.15398
+dCT + CT,DK,lh_inferiortemporal,15.4565
+dCT + CT,DK,lh_isthmuscingulate,-29.9747
+dCT + CT,DK,lh_lateraloccipital,-17.5182
+dCT + CT,DK,lh_lateralorbitofrontal,37.8334
+dCT + CT,DK,lh_lingual,-45.0479
+dCT + CT,DK,lh_medialorbitofrontal,48.622
+dCT + CT,DK,lh_middletemporal,19.0919
+dCT + CT,DK,lh_parahippocampal,-27.9352
+dCT + CT,DK,lh_paracentral,-0.540328
+dCT + CT,DK,lh_parsopercularis,24.2791
+dCT + CT,DK,lh_parsorbitalis,50.2687
+dCT + CT,DK,lh_parstriangularis,49.1515
+dCT + CT,DK,lh_pericalcarine,-88.8332
+dCT + CT,DK,lh_postcentral,-23.3413
+dCT + CT,DK,lh_posteriorcingulate,7.67384
+dCT + CT,DK,lh_precentral,-5.90924
+dCT + CT,DK,lh_precuneus,24.0006
+dCT + CT,DK,lh_rostralanteriorcingulate,9.33101
+dCT + CT,DK,lh_rostralmiddlefrontal,47.8199
+dCT + CT,DK,lh_superiorfrontal,27.6359
+dCT + CT,DK,lh_superiorparietal,3.80852
+dCT + CT,DK,lh_superiortemporal,20.0187
+dCT + CT,DK,lh_supramarginal,24.9967
+dCT + CT,DK,lh_temporalpole,-54.1384
+dCT + CT,DK,lh_transversetemporal,-32.2989
+dCT + CT,DK,lh_insula,14.3519
+dCT alone,DK,lh_bankssts,48.1259
+dCT alone,DK,lh_caudalanteriorcingulate,-93.6543
+dCT alone,DK,lh_caudalmiddlefrontal,11.0529
+dCT alone,DK,lh_cuneus,66.0911
+dCT alone,DK,lh_entorhinal,-160.216
+dCT alone,DK,lh_fusiform,-9.65924
+dCT alone,DK,lh_inferiorparietal,32.5275
+dCT alone,DK,lh_inferiortemporal,-12.6144
+dCT alone,DK,lh_isthmuscingulate,-5.81284
+dCT alone,DK,lh_lateraloccipital,60.1072
+dCT alone,DK,lh_lateralorbitofrontal,13.8263
+dCT alone,DK,lh_lingual,48.6152
+dCT alone,DK,lh_medialorbitofrontal,-4.91062
+dCT alone,DK,lh_middletemporal,-11.5138
+dCT alone,DK,lh_parahippocampal,-72.8757
+dCT alone,DK,lh_paracentral,19.9609
+dCT alone,DK,lh_parsopercularis,-3.55351
+dCT alone,DK,lh_parsorbitalis,33.3407
+dCT alone,DK,lh_parstriangularis,33.0454
+dCT alone,DK,lh_pericalcarine,41.4777
+dCT alone,DK,lh_postcentral,17.7863
+dCT alone,DK,lh_posteriorcingulate,-5.45179
+dCT alone,DK,lh_precentral,2.79827
+dCT alone,DK,lh_precuneus,43.6166
+dCT alone,DK,lh_rostralanteriorcingulate,-49.4277
+dCT alone,DK,lh_rostralmiddlefrontal,32.7914
+dCT alone,DK,lh_superiorfrontal,4.33255
+dCT alone,DK,lh_superiorparietal,36.419
+dCT alone,DK,lh_superiortemporal,-1.68173
+dCT alone,DK,lh_supramarginal,23.0457
+dCT alone,DK,lh_temporalpole,-141.101
+dCT alone,DK,lh_transversetemporal,33.7052
+dCT alone,DK,lh_insula,-30.1934
+CT + dCT + T1T2 + dT1T2,DK,lh_bankssts,33.7941
+CT + dCT + T1T2 + dT1T2,DK,lh_caudalanteriorcingulate,-31.1304
+CT + dCT + T1T2 + dT1T2,DK,lh_caudalmiddlefrontal,17.0949
+CT + dCT + T1T2 + dT1T2,DK,lh_cuneus,-29.2012
+CT + dCT + T1T2 + dT1T2,DK,lh_entorhinal,-97.0625
+CT + dCT + T1T2 + dT1T2,DK,lh_fusiform,4.35889
+CT + dCT + T1T2 + dT1T2,DK,lh_inferiorparietal,9.69093
+CT + dCT + T1T2 + dT1T2,DK,lh_inferiortemporal,7.65632
+CT + dCT + T1T2 + dT1T2,DK,lh_isthmuscingulate,-14.3112
+CT + dCT + T1T2 + dT1T2,DK,lh_lateraloccipital,-9.46428
+CT + dCT + T1T2 + dT1T2,DK,lh_lateralorbitofrontal,34.7308
+CT + dCT + T1T2 + dT1T2,DK,lh_lingual,-29.0609
+CT + dCT + T1T2 + dT1T2,DK,lh_medialorbitofrontal,39.3828
+CT + dCT + T1T2 + dT1T2,DK,lh_middletemporal,10.8587
+CT + dCT + T1T2 + dT1T2,DK,lh_parahippocampal,-31.6146
+CT + dCT + T1T2 + dT1T2,DK,lh_paracentral,2.96059
+CT + dCT + T1T2 + dT1T2,DK,lh_parsopercularis,17.5921
+CT + dCT + T1T2 + dT1T2,DK,lh_parsorbitalis,43.7387
+CT + dCT + T1T2 + dT1T2,DK,lh_parstriangularis,42.6043
+CT + dCT + T1T2 + dT1T2,DK,lh_pericalcarine,-62.2843
+CT + dCT + T1T2 + dT1T2,DK,lh_postcentral,-22.4424
+CT + dCT + T1T2 + dT1T2,DK,lh_posteriorcingulate,16.7874
+CT + dCT + T1T2 + dT1T2,DK,lh_precentral,-6.30124
+CT + dCT + T1T2 + dT1T2,DK,lh_precuneus,24.6499
+CT + dCT + T1T2 + dT1T2,DK,lh_rostralanteriorcingulate,15.9045
+CT + dCT + T1T2 + dT1T2,DK,lh_rostralmiddlefrontal,42.5899
+CT + dCT + T1T2 + dT1T2,DK,lh_superiorfrontal,26.2744
+CT + dCT + T1T2 + dT1T2,DK,lh_superiorparietal,6.83416
+CT + dCT + T1T2 + dT1T2,DK,lh_superiortemporal,10.2582
+CT + dCT + T1T2 + dT1T2,DK,lh_supramarginal,19.3735
+CT + dCT + T1T2 + dT1T2,DK,lh_temporalpole,-79.3546
+CT + dCT + T1T2 + dT1T2,DK,lh_transversetemporal,-24.6588
+CT + dCT + T1T2 + dT1T2,DK,lh_insula,9.75123
+dCT + CT,HCP,lh_V1,-18.6506
+dCT + CT,HCP,lh_V2,-19.8526
+dCT + CT,HCP,lh_V3,-5.46675
+dCT + CT,HCP,lh_V4,-7.51875
+dCT + CT,HCP,lh_4,-54.9011
+dCT + CT,HCP,lh_3b,-49.7926
+dCT + CT,HCP,lh_FEF,-27.3791
+dCT + CT,HCP,lh_55b,-37.9274
+dCT + CT,HCP,lh_V3A,1.19248
+dCT + CT,HCP,lh_RSC,-7.75505
+dCT + CT,HCP,lh_POS2,22.389
+dCT + CT,HCP,lh_IPS1,-18.461
+dCT + CT,HCP,lh_FFC,-0.397739
+dCT + CT,HCP,lh_A1,-33.1906
+dCT + CT,HCP,lh_PSL,13.8359
+dCT + CT,HCP,lh_SFL,-33.2039
+dCT + CT,HCP,lh_PCV,12.023
+dCT + CT,HCP,lh_STV,8.26105
+dCT + CT,HCP,lh_7Pm,19.7288
+dCT + CT,HCP,lh_7m,2.85376
+dCT + CT,HCP,lh_POS1,17.8032
+dCT + CT,HCP,lh_23d,10.5096
+dCT + CT,HCP,lh_d23ab,12.3936
+dCT + CT,HCP,lh_31pv,24.967
+dCT + CT,HCP,lh_5mv,17.3468
+dCT + CT,HCP,lh_23c,5.79453
+dCT + CT,HCP,lh_5L,-4.18152
+dCT + CT,HCP,lh_24dd,-29.385
+dCT + CT,HCP,lh_24dv,-3.02139
+dCT + CT,HCP,lh_7AL,2.11584
+dCT + CT,HCP,lh_SCEF,-26.7806
+dCT + CT,HCP,lh_6ma,-20.0886
+dCT + CT,HCP,lh_7Am,4.83461
+dCT + CT,HCP,lh_7PC,-18.282
+dCT + CT,HCP,lh_LIPv,-13.871
+dCT + CT,HCP,lh_VIP,-1.50934
+dCT + CT,HCP,lh_MIP,-1.72732
+dCT + CT,HCP,lh_1,-34.016
+dCT + CT,HCP,lh_2,2.59906
+dCT + CT,HCP,lh_3a,-54.313
+dCT + CT,HCP,lh_6d,-64.2619
+dCT + CT,HCP,lh_6mp,-54.8446
+dCT + CT,HCP,lh_p24pr,-4.09481
+dCT + CT,HCP,lh_33pr,-37.6272
+dCT + CT,HCP,lh_a24pr,-14.1814
+dCT + CT,HCP,lh_p32pr,5.46483
+dCT + CT,HCP,lh_a24,23.9002
+dCT + CT,HCP,lh_d32,15.133
+dCT + CT,HCP,lh_8BM,3.4479
+dCT + CT,HCP,lh_p32,30.219
+dCT + CT,HCP,lh_10r,41.8502
+dCT + CT,HCP,lh_8Av,-18.0908
+dCT + CT,HCP,lh_8Ad,-2.2221
+dCT + CT,HCP,lh_9m,16.3169
+dCT + CT,HCP,lh_8BL,-15.4929
+dCT + CT,HCP,lh_9p,5.14891
+dCT + CT,HCP,lh_8C,3.62652
+dCT + CT,HCP,lh_44,1.2201
+dCT + CT,HCP,lh_45,7.98766
+dCT + CT,HCP,lh_47l,9.01723
+dCT + CT,HCP,lh_a47r,16.464
+dCT + CT,HCP,lh_IFSp,11.6799
+dCT + CT,HCP,lh_IFSa,26.3109
+dCT + CT,HCP,lh_p9-46v,12.2445
+dCT + CT,HCP,lh_46,25.3861
+dCT + CT,HCP,lh_a9-46v,42.5936
+dCT + CT,HCP,lh_9-46d,15.3044
+dCT + CT,HCP,lh_9a,38.0658
+dCT + CT,HCP,lh_10v,21.9487
+dCT + CT,HCP,lh_11l,28.5369
+dCT + CT,HCP,lh_13l,23.3306
+dCT + CT,HCP,lh_OFC,27.3671
+dCT + CT,HCP,lh_47s,12.6452
+dCT + CT,HCP,lh_6a,-21.484
+dCT + CT,HCP,lh_i6-8,-26.6352
+dCT + CT,HCP,lh_43,-7.66454
+dCT + CT,HCP,lh_OP4,-15.5058
+dCT + CT,HCP,lh_52,8.28847
+dCT + CT,HCP,lh_PoI2,-4.32491
+dCT + CT,HCP,lh_TA2,11.1735
+dCT + CT,HCP,lh_FOP4,-5.64597
+dCT + CT,HCP,lh_MI,16.3438
+dCT + CT,HCP,lh_AVI,4.30919
+dCT + CT,HCP,lh_FOP3,2.05885
+dCT + CT,HCP,lh_PFt,-14.7675
+dCT + CT,HCP,lh_AIP,5.02673
+dCT + CT,HCP,lh_EC,-69.53
+dCT + CT,HCP,lh_PreS,-28.9292
+dCT + CT,HCP,lh_PeEc,-31.9998
+dCT + CT,HCP,lh_STGa,2.22558
+dCT + CT,HCP,lh_PBelt,-24.4727
+dCT + CT,HCP,lh_A5,3.28045
+dCT + CT,HCP,lh_PHA1,-30.833
+dCT + CT,HCP,lh_PHA3,10.9564
+dCT + CT,HCP,lh_STSdp,5.28703
+dCT + CT,HCP,lh_STSvp,-1.47827
+dCT + CT,HCP,lh_TGd,-12.1039
+dCT + CT,HCP,lh_TE1a,-1.37723
+dCT + CT,HCP,lh_TE1p,4.33853
+dCT + CT,HCP,lh_TE2a,2.17852
+dCT + CT,HCP,lh_TF,4.3357
+dCT + CT,HCP,lh_TE2p,14.0753
+dCT + CT,HCP,lh_PHT,1.53311
+dCT + CT,HCP,lh_PH,11.1327
+dCT + CT,HCP,lh_TPOJ1,9.84791
+dCT + CT,HCP,lh_TPOJ2,-5.48612
+dCT + CT,HCP,lh_DVT,3.59794
+dCT + CT,HCP,lh_PGp,8.28784
+dCT + CT,HCP,lh_IP2,2.91381
+dCT + CT,HCP,lh_IP1,0.946292
+dCT + CT,HCP,lh_IP0,21.4611
+dCT + CT,HCP,lh_PFop,9.22687
+dCT + CT,HCP,lh_PF,8.45476
+dCT + CT,HCP,lh_PFm,9.83287
+dCT + CT,HCP,lh_PGi,8.09341
+dCT + CT,HCP,lh_PGs,17.6606
+dCT + CT,HCP,lh_VMV1,-0.164266
+dCT + CT,HCP,lh_VMV3,-0.146002
+dCT + CT,HCP,lh_PHA2,24.5531
+dCT + CT,HCP,lh_FST,17.6487
+dCT + CT,HCP,lh_LO3,10.6609
+dCT + CT,HCP,lh_31pd,-5.46647
+dCT + CT,HCP,lh_31a,27.4744
+dCT + CT,HCP,lh_VVC,4.00261
+dCT + CT,HCP,lh_25,14.4906
+dCT + CT,HCP,lh_s32,34.9692
+dCT + CT,HCP,lh_pOFC,22.843
+dCT + CT,HCP,lh_PoI1,1.23874
+dCT + CT,HCP,lh_Ig,26.7896
+dCT + CT,HCP,lh_p47r,16.8337
+dCT + CT,HCP,lh_TGv,-3.64284
+dCT + CT,HCP,lh_MBelt,-11.6092
+dCT + CT,HCP,lh_A4,4.3801
+dCT + CT,HCP,lh_STSva,-2.03185
+dCT + CT,HCP,lh_TE1m,5.00063
+dCT + CT,HCP,lh_PI,3.65016
+dCT + CT,HCP,lh_a32pr,-7.47326
+dCT alone,HCP,lh_V1,34.554
+dCT alone,HCP,lh_V2,24.1272
+dCT alone,HCP,lh_V3,38.6447
+dCT alone,HCP,lh_V4,23.7101
+dCT alone,HCP,lh_4,-33.7935
+dCT alone,HCP,lh_3b,-14.064
+dCT alone,HCP,lh_FEF,-24.0583
+dCT alone,HCP,lh_55b,-34.6147
+dCT alone,HCP,lh_V3A,41.6372
+dCT alone,HCP,lh_RSC,5.98883
+dCT alone,HCP,lh_POS2,39.3066
+dCT alone,HCP,lh_IPS1,9.72243
+dCT alone,HCP,lh_FFC,4.6346
+dCT alone,HCP,lh_A1,5.5426
+dCT alone,HCP,lh_PSL,16.0215
+dCT alone,HCP,lh_SFL,-37.0531
+dCT alone,HCP,lh_PCV,22.8701
+dCT alone,HCP,lh_STV,5.93075
+dCT alone,HCP,lh_7Pm,35.4308
+dCT alone,HCP,lh_7m,24.1693
+dCT alone,HCP,lh_POS1,25.7628
+dCT alone,HCP,lh_23d,3.69168
+dCT alone,HCP,lh_d23ab,19.2462
+dCT alone,HCP,lh_31pv,35.4308
+dCT alone,HCP,lh_5mv,29.039
+dCT alone,HCP,lh_23c,0.806894
+dCT alone,HCP,lh_5L,6.39273
+dCT alone,HCP,lh_24dd,-20.1244
+dCT alone,HCP,lh_24dv,-13.8511
+dCT alone,HCP,lh_7AL,12.9266
+dCT alone,HCP,lh_SCEF,-28.1577
+dCT alone,HCP,lh_6ma,-26.855
+dCT alone,HCP,lh_7Am,15.7244
+dCT alone,HCP,lh_7PC,-5.6834
+dCT alone,HCP,lh_LIPv,3.23566
+dCT alone,HCP,lh_VIP,14.8408
+dCT alone,HCP,lh_MIP,17.3127
+dCT alone,HCP,lh_1,-10.0779
+dCT alone,HCP,lh_2,13.9305
+dCT alone,HCP,lh_3a,-19.6247
+dCT alone,HCP,lh_6d,-50.4199
+dCT alone,HCP,lh_6mp,-50.9444
+dCT alone,HCP,lh_p24pr,-20.0753
+dCT alone,HCP,lh_33pr,-58.8726
+dCT alone,HCP,lh_a24pr,-35.3209
+dCT alone,HCP,lh_p32pr,-6.78816
+dCT alone,HCP,lh_a24,-5.52532
+dCT alone,HCP,lh_d32,-3.71717
+dCT alone,HCP,lh_8BM,-4.8904
+dCT alone,HCP,lh_p32,5.28211
+dCT alone,HCP,lh_10r,31.7384
+dCT alone,HCP,lh_8Av,-20.1481
+dCT alone,HCP,lh_8Ad,-5.253
+dCT alone,HCP,lh_9m,1.41118
+dCT alone,HCP,lh_8BL,-24.2276
+dCT alone,HCP,lh_9p,-3.23431
+dCT alone,HCP,lh_8C,3.30116
+dCT alone,HCP,lh_44,-12.2322
+dCT alone,HCP,lh_45,3.71328
+dCT alone,HCP,lh_47l,2.13381
+dCT alone,HCP,lh_a47r,12.1897
+dCT alone,HCP,lh_IFSp,17.2826
+dCT alone,HCP,lh_IFSa,22.127
+dCT alone,HCP,lh_p9-46v,17.1379
+dCT alone,HCP,lh_46,18.3135
+dCT alone,HCP,lh_a9-46v,39.7242
+dCT alone,HCP,lh_9-46d,13.1371
+dCT alone,HCP,lh_9a,33.232
+dCT alone,HCP,lh_10v,5.11634
+dCT alone,HCP,lh_11l,23.187
+dCT alone,HCP,lh_13l,9.29837
+dCT alone,HCP,lh_OFC,5.15603
+dCT alone,HCP,lh_47s,-14.4405
+dCT alone,HCP,lh_6a,-24.9002
+dCT alone,HCP,lh_i6-8,-24.4427
+dCT alone,HCP,lh_43,-9.30695
+dCT alone,HCP,lh_OP4,-9.29954
+dCT alone,HCP,lh_52,2.37217
+dCT alone,HCP,lh_PoI2,-37.4485
+dCT alone,HCP,lh_TA2,-5.58463
+dCT alone,HCP,lh_FOP4,-21.9049
+dCT alone,HCP,lh_MI,-18.5112
+dCT alone,HCP,lh_AVI,-7.68797
+dCT alone,HCP,lh_FOP3,-12.132
+dCT alone,HCP,lh_PFt,-8.42037
+dCT alone,HCP,lh_AIP,15.5969
+dCT alone,HCP,lh_EC,-88.6577
+dCT alone,HCP,lh_PreS,-36.4279
+dCT alone,HCP,lh_PeEc,-64.9253
+dCT alone,HCP,lh_STGa,-27.7594
+dCT alone,HCP,lh_PBelt,-1.20794
+dCT alone,HCP,lh_A5,-0.244138
+dCT alone,HCP,lh_PHA1,-43.5056
+dCT alone,HCP,lh_PHA3,-3.59786
+dCT alone,HCP,lh_STSdp,9.06505
+dCT alone,HCP,lh_STSvp,-5.07471
+dCT alone,HCP,lh_TGd,-45.1262
+dCT alone,HCP,lh_TE1a,-16.8005
+dCT alone,HCP,lh_TE1p,-2.59366
+dCT alone,HCP,lh_TE2a,-14.6592
+dCT alone,HCP,lh_TF,-14.427
+dCT alone,HCP,lh_TE2p,5.0053
+dCT alone,HCP,lh_PHT,2.8157
+dCT alone,HCP,lh_PH,22.2513
+dCT alone,HCP,lh_TPOJ1,13.6922
+dCT alone,HCP,lh_TPOJ2,1.62198
+dCT alone,HCP,lh_DVT,25.4903
+dCT alone,HCP,lh_PGp,22.9368
+dCT alone,HCP,lh_IP2,12.5036
+dCT alone,HCP,lh_IP1,18.0167
+dCT alone,HCP,lh_IP0,41.8015
+dCT alone,HCP,lh_PFop,5.21529
+dCT alone,HCP,lh_PF,11.6312
+dCT alone,HCP,lh_PFm,13.9459
+dCT alone,HCP,lh_PGi,13.528
+dCT alone,HCP,lh_PGs,31.0077
+dCT alone,HCP,lh_VMV1,23.3759
+dCT alone,HCP,lh_VMV3,15.0228
+dCT alone,HCP,lh_PHA2,1.58462
+dCT alone,HCP,lh_FST,34.529
+dCT alone,HCP,lh_LO3,28.576
+dCT alone,HCP,lh_31pd,11.5519
+dCT alone,HCP,lh_31a,33.796
+dCT alone,HCP,lh_VVC,0.510088
+dCT alone,HCP,lh_25,-18.3026
+dCT alone,HCP,lh_s32,11.0564
+dCT alone,HCP,lh_pOFC,-9.56558
+dCT alone,HCP,lh_PoI1,-27.0614
+dCT alone,HCP,lh_Ig,24.5787
+dCT alone,HCP,lh_p47r,14.6518
+dCT alone,HCP,lh_TGv,-27.6457
+dCT alone,HCP,lh_MBelt,11.0386
+dCT alone,HCP,lh_A4,6.95111
+dCT alone,HCP,lh_STSva,-14.4796
+dCT alone,HCP,lh_TE1m,-10.564
+dCT alone,HCP,lh_PI,-14.7641
+dCT alone,HCP,lh_a32pr,-28.7567

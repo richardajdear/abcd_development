@@ -1,0 +1,6 @@
+design	parcellation	component	n_regions	n_genes	cov_explained	p_spin	boot_reproducibility	sal_dCT	selection
+dCT + CT	DK	PLS2	33	12007	0.1348	0.0022	0.8774	0.9441	
+dCT alone	DK	PLS1	33	12007	1	0.08198	0.8289	1	
+CT + dCT + T1T2 + dT1T2	DK	PLS2	33	12007	0.08841	0.09778	0.8915	0.865	|rho| with C3 weights: PLS2 0.62 > PLS4 0.54
+dCT + CT	HCP	PLS2	137	7973	0.143	0.0106	0.8989	0.9888	
+dCT alone	HCP	PLS1	137	7973	1	0.2661	0.8775	1	
