@@ -111,6 +111,7 @@ live under [`legacy/`](legacy/README.md). Do not quote them as current; the
 |:---|:---|
 | **what changed with the 7.0 tables, old vs new** | [`docs/RERUN_7.0_TABULATED.md`](docs/RERUN_7.0_TABULATED.md), `docs/vintage_comparison.csv` |
 | **the cluster genetics: state, what was learnt, the steps to run** | [`genetic_analysis/README_HPC.md`](genetic_analysis/README_HPC.md) |
+| the PRS results on one slide (4 methods × 2 parcellations, controls, all caveats) | [`docs/figures/slide_prs_methods.png`](docs/figures/slide_prs_methods.png), generator [`genetic_analysis/slide_prs_methods.py`](genetic_analysis/slide_prs_methods.py) |
 | the findings, their caveats and the corrections (prose numbers are 6.0-vintage; tables and figures are current) | [`docs/REPORT_7.0.md`](docs/REPORT_7.0.md) |
 | how the mixed model works and why | [`notebooks/01_longitudinal_model.qmd`](notebooks/01_longitudinal_model.qmd) |
 | spatial nulls and the map-to-gene tests | [`notebooks/02_maps_and_genes.qmd`](notebooks/02_maps_and_genes.qmd) |
@@ -198,86 +199,6 @@ as a **derived** table at `abcd-data-release-7.0/processed/hcp/`, so
   release table stays the canonical DK source. Report:
   `docs/hcp_census/local_vs_release_7.0.md` (`tools/validate_local_vs_release.py`).
 - Investigation, run plan and results: [`docs/PLAN_HCP_thickness.md`](docs/PLAN_HCP_thickness.md).
-
-## Where to look
-
-| you want | go to |
-|:---|:---|
-| **what changed with the 7.0 tables, old vs new** | [`docs/RERUN_7.0_TABULATED.md`](docs/RERUN_7.0_TABULATED.md), `docs/vintage_comparison.csv` |
-| **the cluster genetics: state, what was learnt, the steps to run** | [`genetic_analysis/README_HPC.md`](genetic_analysis/README_HPC.md) |
-| the findings, their caveats and the corrections (prose numbers are 6.0-vintage; tables and figures are current) | [`docs/REPORT_7.0.md`](docs/REPORT_7.0.md) |
-| how the mixed model works and why | [`notebooks/01_longitudinal_model.qmd`](notebooks/01_longitudinal_model.qmd) |
-| spatial nulls and the map-to-gene tests | [`notebooks/02_maps_and_genes.qmd`](notebooks/02_maps_and_genes.qmd) |
-| heritability and phenotype choice | [`notebooks/04_heritability.qmd`](notebooks/04_heritability.qmd) |
-| the imaging-transcriptomics PLS study (NSPN-PLS2 / AHBA-C3 re-derivation, SCZ & MDD enrichment) | [`ahba_pls/README.md`](ahba_pls/README.md), notebook [`ahba_pls/imaging_transcriptomics.qmd`](ahba_pls/imaging_transcriptomics.qmd) |
-| HCP-MMP thickness: where it comes from, coverage, how to regenerate | [`docs/PLAN_HCP_thickness.md`](docs/PLAN_HCP_thickness.md) and §HCP-MMP below |
-| superseded pipelines and the 5.1 draft | [`legacy/README.md`](legacy/README.md), [`docs/REPORT_5.1_legacy.md`](docs/REPORT_5.1_legacy.md) |
-
-## Key findings so far
-
-**Phenotype and modelling** (7.0 tables, 2026-09-14)
-
-- **Slope reliability, not sample size, binds.** Median regional slope
-  reliability is 0.211 at ≥2 visits, 0.242 at ≥3, 0.262 at 4. Effective N is
-  1,752 at ≥2 visits — 2.1× release 5.1 at the same filter
-  (`docs/handoff_release_comparison.csv`).
-- **Use `min_visits: 2`, not 3.** The ≥3 filter discards 25 % of subjects and
-  effective N falls (1,752 → 1,504); the group map is unchanged.
-- **The family random effect must be omitted for genetic phenotypes.** It
-  centres each family at zero, so the subject-level BLUPs lose the
-  between-family variance that relatedness explains; the h² of the
-  baseline-thickness control becomes impossible while the group map is
-  untouched (`docs/h2_family_effect_contrast.csv`).
-- **The developmental map is transcriptionally patterned.** Absolute thinning
-  rate vs AHBA C3: ρ = −0.546, p_spin = 0.002, now reproduced across two
-  releases, two tabulations and a pipeline rewrite. The strongest couplings are
-  on the slope components (PC3–C2 ρ = +0.854, PC2–C1 ρ = −0.812).
-- **Site explains 2.9 % of global-slope variance, scanner manufacturer 0.1 %**
-  (`docs/site_scanner_icc.csv`); the model carries a site random effect.
-
-**Imaging transcriptomics** (`ahba_pls/`; DK arm re-run on the 7.0 maps
-2026-09-14, HCP-MMP arm likewise — numbers in its README)
-
-- The NSPN-PLS2 / AHBA-C3 "signature of adolescent thinning" re-derives from
-  the ABCD maps: PLS of AHBA expression on thinning rate plus baseline
-  thickness recovers a component matching both prior signatures in regional
-  scores and gene weights, with the same neuronal-up / glial-down cell-class
-  profile.
-- It carries SCZ and MDD GWAS signal at about half C3's effect size and adds
-  nothing once C3 is in the model: a developmental warrant for C3, not a
-  better gene list.
-- Parcellation matters for MDD, not SCZ: the HCP-MMP version of the signature
-  carries more MDD signal than the DK version. Whether the finer atlas' astrocyte
-  sign flip is biology or parcel size is open.
-
-**Genetics** — see the Status section: the legacy result is a benchmark, the
-re-run is pending. The reasoning that governs it (PRS as the primary
-disorder test, why rg is uninformative at this h², why controls are mandatory,
-why region selection is not a lever) is in `genetic_analysis/README_HPC.md` §4.
-
-## HCP-MMP (Glasser) thickness
-
-ABCD tabulates only Desikan (`dsk`). The HCP-MMP1.0 parcellation exists for 7.0
-as a **derived** table at `abcd-data-release-7.0/processed/hcp/`, so
-`parcellation: hcp` works (`configs/ct_70_hcp_noglobal_mv2.yaml`).
-
-- **Source.** The release FreeSurfer 7.1.1 reconstructions on CSD3
-  (`/rds/project/rds-CeXlNYOYMxw/derivatives/freesurfer/`, 33,825 sessions).
-  R. Romero-Garcia projected the fsaverage HCP-MMP1.0 annotation onto them;
-  `src/abcd/hcp_stats.py` parses the per-session tables into
-  `mr_y_smri__{thk,area,vol}__hcp.tsv` in the DK column convention, plus
-  `hcp_session_qc.tsv`. Regenerate with `sbatch tools/hcp_extract.sbatch` on
-  CSD3 (about 10 min).
-- **Coverage is incomplete and flagged.** 24,921 of 33,825 sessions parsed;
-  3,435 were never reached by the July 2026 array job and 5,439 have empty
-  stubs (a concurrency bug in the parcellation script). The re-run list for
-  rr480 is `processed/hcp/sessions_to_reparcellate.txt`. Missing sessions have
-  no row, so `assemble` reports fewer scans than DK.
-- **Parcel `H`** (hippocampus) lies on the medial wall and has thickness 0 in
-  ~6,350 sessions; exclude it or treat 0 as missing.
-- With the 7.0 covariates the six-year HCP sessions that previously lacked an
-  age row now enter the model; see `ahba_pls/README.md` for the resulting n.
-- Details and the plan: [`docs/PLAN_HCP_thickness.md`](docs/PLAN_HCP_thickness.md).
 
 ## Running it
 
