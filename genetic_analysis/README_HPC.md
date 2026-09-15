@@ -1573,3 +1573,96 @@ phenotype × arm × method, DK and HCP side by side, PCs flagged
 definition-of-done tables; `PARC=<dsk|hcp>` is the only switch.
 
 Committed and pushed as the second commit of this re-run.
+
+### 2026-09-15 — order-of-operations check (in progress)
+
+Question: does averaging 68/358 per-region slope BLUPs (the pipeline's
+`global_slope`) differ from fitting **one** LMM to the per-scan whole-cortex
+mean? Per-scan unweighted means over the atlas's regions were written as a
+one-label model table into `out/<run>_globalmean/` for both atlases and fitted
+with `R/fit_lmm.R` unchanged (same formula); the slope BLUP is then aligned to
+the same 8,596 children and run through `prs_assoc.R` on the 16 matched
+SCZ/MDD cells per atlas (`results_70tab*/prs_final_1lmm/`).
+
+**Rule 10, third sighting.** The first fit job (35616285) finished the DK fit
+in 0.2 min, then died with *"cannot create temp file for here-document: No
+space left on device"* — the compute node's local `/tmp` was full, and bash
+needs it for `<<EOF`. Both scripts now export `TMPDIR` under
+`genetic_analysis/work/tmp` (rds) and carry no here-documents (the embedded
+Python lives in `work/pc_compare/*.py`). Resubmitted as 35616364 → 35616365.
+
+**Fits done (35616364, 0.2 min each, no singularity). The order of
+operations matters for the slope and not for the intercept:**
+
+| same 8,596 children | DK | HCP |
+|:--|:--|:--|
+| r(mean of per-region slope BLUPs, single-LMM slope) | **0.931** | **0.824** |
+| … by visits 2 / 3 / 4 | 0.878 / 0.935 / 0.950 | 0.723 / 0.827 / 0.866 |
+| r(mean of intercept BLUPs, single-LMM intercept) | 0.9995 | 0.9986 |
+| slope SD, single-LMM (mm/yr) | 0.00200 | 0.00230 |
+| slope SD, mean of BLUPs (mm/yr) | 0.00132 | 0.00131 |
+| cross-atlas r of the slope, mean-of-BLUPs → single-LMM | 0.949 → **0.960** |
+
+Why: a BLUP is shrunk toward the population mean in proportion to its
+unreliability, and each region's slope is shrunk by *its own* variance ratio.
+Averaging 68 (358) differently-shrunk slopes therefore over-shrinks — the
+mean-of-BLUPs slope has 60 % of the SD of the single-LMM slope — and does so
+subject by subject in a way that depends on which regions are noisy for that
+child. Hence the agreement rises with visits (less shrinkage to disagree
+about) and is worse on HCP (358 noisier parcels, each shrunk harder). The
+intercept is measured almost without error, so shrinkage is negligible and
+the two constructions coincide. The mean-first slope is the *less* shrunk
+quantity and agrees slightly better across atlases (0.960 vs 0.949). Whether
+it is the better GWAS/PRS phenotype is what 35616365 tests: shrinkage does
+not bias a regression *on* the phenotype, but the standardised β is per SD of
+the phenotype, and the two SDs differ by 1.6×.
+
+**PRS associations on the single-LMM slope (35616365, 64 cells, zero
+failures; `results_70tab*/prs_final_1lmm/table_order_of_operations.tsv`).**
+SEs are identical to the third decimal (ratio 0.996) — the phenotype is
+standardised, so the SE is set by n and the PRS–phenotype correlation. What
+moves is β, mean −0.004 (mean-first more negative), max |Δ| 0.020, and the
+movement is patterned:
+
+| `global_slope`, matched cells, p_adj | mean of BLUPs → single LMM |
+|:--|:--|
+| SCZ pooled, DK (4 methods) | 4/4 → 4/4 (0.004–0.020 → 0.004–0.025) |
+| SCZ pooled, HCP | 4/4 → 4/4 (0.004–0.037 → 0.003–0.015) |
+| SCZ EUR, DK | 0/4 → 0/4 (0.065–0.074 → 0.087–0.144) |
+| SCZ EUR, HCP | **3/4 → 0/4** (0.023–0.059 → 0.061–0.073) |
+| MDD pooled, DK | 3/4 → 3/4, every p smaller (C+T 0.31 → 0.087) |
+| MDD pooled, HCP | **1/4 → 3/4** (SBayesR 0.029 → 0.0035) |
+| MDD EUR, DK | **0/4 → 2/4** (SBayesR 0.056 → 0.015; SBayesRC 0.16 → 0.041) |
+| MDD EUR, HCP | **0/4 → 3/4** (SBayesR 0.11 → **0.0038**; β −0.024 → −0.043) |
+
+Three readings:
+
+1. **SCZ pooled is invariant to the construction as it was to the atlas** —
+   four methods, two atlases, two constructions, sixteen cells, all
+   significant, betas within 0.003 of each other. That is the licensed result.
+2. **SCZ EUR weakens slightly under the single LMM** on both atlases; the HCP
+   3/4 that the atlas comparison produced is gone again. It is a marginal
+   cell on every axis tried — vintage, atlas, construction — and should be
+   described exactly that way.
+3. **MDD strengthens systematically under the single LMM** — every one of the
+   16 MDD cells moves toward significance, on both atlases and both arms, and
+   MDD-EUR (null on both atlases under the pipeline construction) becomes
+   nominally significant under 2–3 methods. This is not the sign of a
+   fragile cell flipping; it is a coherent shift in one direction across
+   sixteen tests. The plausible reason: the single-LMM slope is the *less
+   over-shrunk* phenotype (approximate reliability 0.28–0.30 against a median
+   0.21 for the mean of BLUPs, SD 1.6× larger), so a weak, spread-out
+   polygenic signal like MDD's is less attenuated in it, while SCZ pooled was
+   already strong enough not to care.
+
+**Does the order of operations make a difference? Yes, for the slope.** The
+two constructions are different phenotypes (r 0.93 DK / 0.82 HCP), the
+mean-first one is less shrunk, more reliable and more atlas-invariant, and
+the PRS layer responds: invariant where the signal is strong, systematically
+stronger for MDD, slightly weaker for SCZ-EUR. The pipeline's mean-of-BLUPs
+`global_slope` remains the registered primary (it is what §5 benchmarks and
+every table in this log report); the single-LMM slope is now a documented
+sensitivity phenotype, and the honest summary of MDD is that it is
+significant in the pooled arm under three methods on DK and becomes so more
+broadly under the less-shrunk construction. Scripts:
+`genetic_analysis/orderops/`.
