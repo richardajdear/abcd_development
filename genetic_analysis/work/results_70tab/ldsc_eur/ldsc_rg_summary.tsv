@@ -1,0 +1,11 @@
+disorder	phenotype	rg	se	z	p	h2_obs	h2_obs_se	h2_z	gcov_int	underpowered
+SCZ	baseline_thickness	0.02401	0.05319	0.4514	0.6517	0.4206	0.0970	4.34	-0.0020	no
+SCZ	global_slope	-0.1636	0.1996	-0.82	0.4122	0.0552	0.0973	0.57	0.0013	yes
+SCZ	slope_PC3	NA	NA	NA	NA	-0.2412	0.0911	-2.65	-0.0055	yes
+SCZ	slope_PC2	-0.1091	0.06888	-1.584	0.1131	0.2710	0.1042	2.60	0.0096	yes
+SCZ	slope_PC1	0.09696	0.1506	0.6439	0.5196	0.0638	0.0937	0.68	0.0009	yes
+MDD	baseline_thickness	-0.01091	0.05468	-0.1996	0.8418	0.4371	0.1008	4.34	-0.0058	no
+MDD	global_slope	-0.07004	0.1474	-0.4751	0.6347	0.0602	0.1008	0.60	-0.0012	yes
+MDD	slope_PC3	NA	NA	NA	NA	-0.2398	0.0920	-2.61	0.0045	yes
+MDD	slope_PC2	-0.06073	0.06629	-0.9162	0.3595	0.2911	0.0985	2.96	0.0067	yes
+MDD	slope_PC1	0.1038	0.2609	0.3979	0.6907	0.0378	0.1001	0.38	-0.0022	yes

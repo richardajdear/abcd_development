@@ -128,6 +128,21 @@ genetic_analysis/work/results/*
 genetic_analysis/work/results/*/*
 !genetic_analysis/work/results/*/*_summary.tsv
 !genetic_analysis/work/results/*/table_*.tsv
+# The 7.0 run's output root is work/results_70tab (README_HPC.md 2.1, and
+# config.sh's own OUT_V2 default); mirror the results/ contract above so its
+# summary tables are the work product and nothing per-subject can be added.
+# summary_70tab.tsv sits at the root of the results dir, so it needs naming
+# explicitly -- the *_summary.tsv rule above only reaches one level down.
+# results_70tab* covers the per-parcellation roots (results_70tab = DK,
+# results_70tab_hcp = HCP-MMP; see config.local.sh PARC).
+!genetic_analysis/work/results_70tab*/
+genetic_analysis/work/results_70tab*/*
+!genetic_analysis/work/results_70tab*/*/
+genetic_analysis/work/results_70tab*/*/*
+!genetic_analysis/work/results_70tab*/*/*_summary.tsv
+!genetic_analysis/work/results_70tab*/*/table_*.tsv
+!genetic_analysis/work/results_70tab*/summary_70tab.tsv
+!genetic_analysis/work/results/summary_70tab.tsv
 genetic_analysis/config.local.sh
 # MAGMA gene-level results for the SCZ/MDD discovery GWAS (public sumstats,
 # 23 MB): staged from the cluster for ahba_pls/, see genetic_analysis/README_HPC.md.

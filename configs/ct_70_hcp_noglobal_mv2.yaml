@@ -1,6 +1,8 @@
 release: '7.0'
 metric: thickness
 parcellation: hcp
+exclude_regions:
+- H          # hippocampal parcel: thickness 0 in 7,792 lh / 1,945 rh sessions (see RunConfig)
 hemisphere: both
 qc_policy: coded
 sample_rule: min_visits

@@ -13,7 +13,7 @@
 # Subjects with no family_id (genotyped but not phenotyped) keep FID = IID;
 # they are absent from $PHENO and GCTA drops them either way.
 set -euo pipefail
-source "$(cd "$(dirname "$0")/../.." && pwd)/config.sh"
+source "$(cd "$(dirname "$0")/.." && pwd)/config.sh"   # genetic_analysis/, not the repo root: this script moved up one level from hpc_v2/work/setup/
 
 SRC="${SRC:-$V1_ROOT/results/grm_imp_pooled/abcd_imp}"
 FAMMAP="${FAMMAP:-$V1_ROOT/pheno_allanc/family_map.tsv}"

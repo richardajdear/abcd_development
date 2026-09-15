@@ -151,6 +151,13 @@ def assemble(cfg: RunConfig, adapter=None, verbose: bool = True
     # 1. imaging -----------------------------------------------------------
     img = load_metric(adapter, cfg.metric, cfg.parcellation)
     img = img[img.visit.isin(cfg.visits)]
+    if cfg.exclude_regions:
+        drop = img.region.isin(cfg.exclude_regions) & ~img.is_global
+        n_lab = img.loc[drop, "label"].nunique()
+        img = img[~drop]
+        if verbose:
+            print(f"  excluded regions {list(cfg.exclude_regions)}: {n_lab} labels dropped, "
+                  f"{img.label.nunique()} remain")
     stage("imaging loaded", img)
 
     n_regions = int(img.loc[~img.is_global, ["hemi", "region"]].drop_duplicates().shape[0])

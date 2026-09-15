@@ -111,6 +111,13 @@ class RunConfig:
     #: Visits to include, in temporal order.  Release-specific event names are
     #: resolved by the adapter, so these stay abstract ("v0", "v2", "v4", "v6").
     visits: tuple[str, ...] = ("v0", "v2", "v4")
+    #: Region names (the adapter's ``region`` column, hemisphere-agnostic) to
+    #: drop after loading, before QC.  Added 2026-09-15 for HCP-MMP, whose
+    #: hippocampal parcel ``H`` has thickness exactly 0 in 7,792 (lh) / 1,945
+    #: (rh) of 33,795 sessions -- a zero is not a missing value, so
+    #: ``complete_regions`` would pass it and it would pollute the 360-parcel
+    #: whole-cortex mean.  Participates in the hash: it changes the phenotype.
+    exclude_regions: tuple[str, ...] = ()
 
     # --- model ------------------------------------------------------------
     age_basis: str = "linear"
@@ -164,6 +171,7 @@ class RunConfig:
         # tuples, not lists, so the dataclass stays hashable after a YAML round-trip
         object.__setattr__(self, "visits", tuple(self.visits))
         object.__setattr__(self, "covariates", tuple(self.covariates))
+        object.__setattr__(self, "exclude_regions", tuple(self.exclude_regions))
 
     # ------------------------------------------------------------------
     def to_dict(self) -> dict[str, Any]:
@@ -190,6 +198,12 @@ class RunConfig:
         d = self.to_dict()
         for k in self.HASH_EXCLUDE:
             d.pop(k, None)
+        # An EMPTY exclude_regions is hash-neutral: the field was added on
+        # 2026-09-15 and every run id minted before then (e.g. the settled DK
+        # run thickness_dsk_70_139406217085) must keep resolving.  A non-empty
+        # list changes the phenotype and so changes the hash.
+        if not d.get("exclude_regions"):
+            d.pop("exclude_regions", None)
         payload = json.dumps(d, sort_keys=True, separators=(",", ":"))
         return hashlib.sha256(payload.encode()).hexdigest()[:12]
 

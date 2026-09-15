@@ -9,7 +9,7 @@
 # arms and that is flagged wherever they appear.
 V2ROOT=/home/rajd2/rds/hpc-work/abcd_development/genetic_analysis
 IN="$V2ROOT/work/inputs"
-RES="$V2ROOT/work/results_v2"
+RES="${OUT_V2:-$V2ROOT/work/results_70tab}"   # fresh dirs for the 7.0 re-run (README_HPC.md §4 rule 9)
 FINAL="$RES/prs_final"
 
 GWAS_DIR="$IN/gwas"

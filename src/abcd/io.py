@@ -693,6 +693,10 @@ class Release70Adapter(Release51Adapter):
         long["subject"] = self._to_bids(long.participant_id)
         long["visit"] = self._map_visits(long.session_id)
         long["metric"] = metric
+        # mris_anatomical_stats writes 0 for a parcel with no vertices; a
+        # zero thickness/area/volume is not a measurement.  Make it missing so
+        # complete_regions QC sees it (7.0: 5 stray cells outside region H).
+        long.loc[long.value == 0, "value"] = np.nan
         long = long.dropna(subset=["visit", "value"])
         return long[
             ["subject", "visit", "metric", "hemi", "region", "label",
