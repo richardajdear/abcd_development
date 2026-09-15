@@ -110,7 +110,7 @@ pb <- ggplot(B, aes(BETA_STD, pr, colour = disorder)) +
 hcp_dk <- B |> filter(pair == "ABCD_PLS2_HCP + ABCD_PLS2_DK", disorder == "MDD")
 methods <- paste(
   "Methods.",
-  sprintf("\u2022 One MAGMA gene-property run per panel row, all on the SAME universe (n = %s genes with a gene-level result for both disorders and a weight in every vector).", NG),
+  sprintf("\u2022 One MAGMA gene-property run per panel row. Within a disorder every ranking shares one universe \u2014 genes with a gene-level result and a weight in\n  every vector \u2014 so the betas are directly comparable; the two GWAS cover slightly different gene sets (n = %s).", NG),
   "\u2022 GWAS: SCZ = PGC3 wave 3 (Trubetskoy 2022); MDD = PGC MDD 2025 (Adams 2025). Gene analysis from this project's genetic_analysis/ run (MAGMA v1.10, NCBI37.3).",
   "\u2022 \u03b2 is the change in disorder gene Z per SD of gene weight; MAGMA models gene-gene LD and conditions internally on gene size, density and sample size; two-sided.",
   "\u2022 Panel b fits both covariates in one model, so each pair shows two coefficients: the vector that keeps a non-zero \u03b2 carries the signal the other only shares.",
