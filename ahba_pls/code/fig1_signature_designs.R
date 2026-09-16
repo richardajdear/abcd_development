@@ -36,8 +36,15 @@ hcpS1 <- read.csv(file.path(RES, "dct_only_scores_hcp.csv"), row.names = 1)   # 
 dkpoly <- read.csv(file.path(DATA, "dk_polygons.csv"))
 hcppoly <- read.csv(file.path(DATA, "hcp_polygons.csv"))
 
-DESIGNS <- c("dCT + CT", "dCT alone", "CT + dCT + T1T2 + dT1T2")
-stopifnot(setequal(unique(GS$design), DESIGNS))
+# SHOW_FOUR toggles the four-feature (CT + dCT + T1w/T2w + dT1w/T2w) row. It is
+# off by default: that design's component is not spin-significant (p = 0.098) and
+# it exists in DK only, so the figure reads more cleanly without it. The row is
+# still computed by 17_design_grid.py and its numbers are in the README table and
+# in design_grid_*.tsv -- set this to TRUE to put it back on the figure.
+SHOW_FOUR <- as.logical(Sys.getenv("SHOW_FOUR", "FALSE"))
+ALL_DESIGNS <- c("dCT + CT", "dCT alone", "CT + dCT + T1T2 + dT1T2")
+stopifnot(setequal(unique(GS$design), ALL_DESIGNS))
+DESIGNS <- if (SHOW_FOUR) ALL_DESIGNS else ALL_DESIGNS[1:2]
 have <- GC |> transmute(key = paste(design, parcellation)) |> pull(key)
 
 # statistic lookups -- nothing on this figure is typed in
@@ -80,29 +87,27 @@ row_lab <- function(txt, sub) ggplot() +
   xlim(-1, 1) + ylim(-1, 1) + coord_cartesian(clip = "off") +
   theme_void() + theme(plot.margin = margin(0, 1, 0, 1))
 
-hdr <- c("thinning rate (dCT)", "dCT + CT", "dCT alone", "four features", "NSPN PLS2", "AHBA C3")
-dk_brains <- list(
-  brain(dk_lh, setNames(y34$dCT, rownames(y34)), hdr[1], diverging = FALSE),
-  brain(dk_lh, scores_of(DESIGNS[1], "DK"), hdr[2]),
-  brain(dk_lh, scores_of(DESIGNS[2], "DK"), hdr[3]),
-  brain(dk_lh, scores_of(DESIGNS[3], "DK"), hdr[4]),
-  brain(dk_lh, setNames(nspn34$PLS2, rownames(nspn34)), hdr[5]),
-  brain(dk_lh, setNames(c3dk$C3, rownames(c3dk)), hdr[6]))
-hcp_brains <- list(
-  brain(hcp_lh, setNames(hcpY$dCT, rownames(hcpY)), diverging = FALSE),
-  brain(hcp_lh, scores_of(DESIGNS[1], "HCP")),
-  brain(hcp_lh, scores_of(DESIGNS[2], "HCP")),
-  note("no T1w/T2w in\nHCP-MMP\n(see caption)"),
-  note("NSPN PLS2 exists\nonly in DK /\n308-region space"),
-  brain(hcp_lh, setNames(hcpS1$C3, rownames(hcpS1))))
+# columns: thinning rate, one per design shown, then the two published maps
+des_hdr <- c("dCT + CT" = "dCT + CT", "dCT alone" = "dCT alone",
+             "CT + dCT + T1T2 + dT1T2" = "four features")[DESIGNS]
+dk_brains <- c(
+  list(brain(dk_lh, setNames(y34$dCT, rownames(y34)), "thinning rate (dCT)", diverging = FALSE)),
+  lapply(DESIGNS, function(d) brain(dk_lh, scores_of(d, "DK"), des_hdr[[d]])),
+  list(brain(dk_lh, setNames(nspn34$PLS2, rownames(nspn34)), "NSPN PLS2"),
+       brain(dk_lh, setNames(c3dk$C3, rownames(c3dk)), "AHBA C3")))
+hcp_brains <- c(
+  list(brain(hcp_lh, setNames(hcpY$dCT, rownames(hcpY)), diverging = FALSE)),
+  lapply(DESIGNS, function(d)
+    if (paste(d, "HCP") %in% have) brain(hcp_lh, scores_of(d, "HCP"))
+    else note("no T1w/T2w in\nHCP-MMP\n(see caption)")),
+  list(note("NSPN PLS2 exists\nonly in DK /\n308-region space"),
+       brain(hcp_lh, setNames(hcpS1$C3, rownames(hcpS1)))))
 
-WID <- c(0.55, rep(1, 6))
-r1 <- (row_lab("Desikan\u2013\nKilliany", "33 of 34\nparcels") | dk_brains[[1]] | dk_brains[[2]] |
-         dk_brains[[3]] | dk_brains[[4]] | dk_brains[[5]] | dk_brains[[6]]) +
-  plot_layout(widths = WID)
-r2 <- (row_lab("HCP-MMP\n(Glasser)", "137 of 180\nparcels") | hcp_brains[[1]] | hcp_brains[[2]] |
-         hcp_brains[[3]] | hcp_brains[[4]] | hcp_brains[[5]] | hcp_brains[[6]]) +
-  plot_layout(widths = WID)
+WID <- c(0.55, rep(1, length(dk_brains)))
+brow <- function(lab, sub, panels)
+  Reduce(`|`, panels, init = row_lab(lab, sub)) + plot_layout(widths = WID)
+r1 <- brow("Desikan\u2013\nKilliany", "33 of 34\nparcels", dk_brains)
+r2 <- brow("HCP-MMP\n(Glasser)", "137 of 180\nparcels", hcp_brains)
 
 # ---------------------------------------------------------------- scatters ----
 sm <- theme_bw(base_size = 6.5) +
@@ -178,21 +183,33 @@ for (des in DESIGNS) {
 
 des_lab <- function(des) {
   d <- cmp(des, "DK")
-  row_lab(sub(" \\+ ", "\n+ ", sub("CT \\+ dCT \\+ T1T2 \\+ dT1T2", "four\nfeatures", des)),
-          sprintf("%s\nspin p = %.3f", d$component, d$p_spin))
+  # one line for the design name (the column is wide enough), two for the stats,
+  # with enough separation that the blocks cannot collide at any row height
+  txt <- sub("CT \\+ dCT \\+ T1T2 \\+ dT1T2", "four features", des)
+  ggplot() +
+    annotate("text", 0, 0.48, label = txt, size = 2.2, fontface = "bold", hjust = 0.5) +
+    annotate("text", 0, -0.42, label = sprintf("%s\nspin p = %.3f", d$component, d$p_spin),
+             size = 1.75, colour = "grey40", hjust = 0.5) +
+    xlim(-1, 1) + ylim(-1, 1) + coord_cartesian(clip = "off") +
+    theme_void() + theme(plot.margin = margin(0, 1, 0, 1))
 }
 srow <- function(i) (des_lab(DESIGNS[i]) | panels[[4*i-3]] | panels[[4*i-2]] |
                        panels[[4*i-1]] | panels[[4*i]]) + plot_layout(widths = c(0.5, 1, 1, 1, 1))
 
 # ------------------------------------------------------------------ caption ---
-d1 <- cmp(DESIGNS[1], "DK"); d3 <- cmp(DESIGNS[3], "DK"); h1 <- cmp(DESIGNS[1], "HCP")
+d1 <- cmp(DESIGNS[1], "DK"); h1 <- cmp(DESIGNS[1], "HCP"); d2 <- cmp(DESIGNS[2], "DK")
+d3 <- cmp(ALL_DESIGNS[3], "DK")   # computed even when not plotted
+four_bullets <- if (SHOW_FOUR) c(
+  sprintf("\u2022 Third design: CT + dCT + T1w/T2w + dT1w/T2w (four columns, four components; the component shown is chosen by %s).", d3$selection),
+  "\u2022 The four-feature design is DK-only: ABCD tabulates T1w/T2w in Desikan space, and the locally-derived HCP-MMP parcellation covers thickness only, so a 137-parcel\n  T1w/T2w map would need a new surface run (tools/hcp_backfill.sbatch does thickness).") else
+  sprintf("\u2022 A third design (CT + dCT + T1w/T2w + dT1w/T2w, the closest analogue of the NSPN PNAS Y matrix) is computed by 17_design_grid.py but not shown: its C3-aligned\n  component explains %.0f%% of the cross-covariance and is not spin-significant (p = %.3f), and it is DK-only because there is no HCP-MMP T1w/T2w parcellation. Its\n  numbers are in design_grid_*.tsv and the README table; SHOW_FOUR=TRUE puts the row back on the figure.",
+          100 * d3$cov_explained, d3$p_spin)
 methods <- paste(
   "Methods.",
-  sprintf("\u2022 Y designs: dCT + CT (PLS2, the lead signature), dCT alone (single Y column, so PLS1 is the vector of gene\u2013map correlations), and CT + dCT + T1w/T2w + dT1w/T2w\n  (four columns, %s components; the component shown is chosen by %s).",
-          4, d3$selection),
-  sprintf("\u2022 The four-feature design is DK-only: ABCD tabulates T1w/T2w in Desikan space, and the locally-derived HCP-MMP parcellation covers thickness only, so a 137-parcel\n  T1w/T2w map would need a new surface run (tools/hcp_backfill.sbatch does thickness)."),
-  sprintf("\u2022 Spin p is each component's own singular value against 5,000 rotations of the complete map: %.3f (dCT+CT, DK), %.3f (dCT+CT, HCP), %.3f (dCT alone, DK), %.3f (four features).\n  Only the dCT+CT fits clear 0.05 \u2014 the other two are usable gene rankings but carry no independent spatial claim.",
-          d1$p_spin, h1$p_spin, cmp(DESIGNS[2], "DK")$p_spin, d3$p_spin),
+  "\u2022 Y designs: dCT + CT (PLS2, the lead signature) and dCT alone (a single Y column, so PLS1 is simply the vector of gene\u2013map correlations and nothing absorbs the\n  baseline-thickness gradient).",
+  paste(four_bullets, collapse = "\n"),
+  sprintf("\u2022 Spin p is each component's own singular value against 5,000 rotations of the complete map: %.3f (dCT+CT, DK), %.3f (dCT+CT, HCP), %.3f (dCT alone, DK), %.3f (dCT alone, HCP).\n  Only the dCT+CT fits clear 0.05 \u2014 the single-Y fits are usable gene rankings but carry no independent spatial claim.",
+          d1$p_spin, h1$p_spin, d2$p_spin, cmp(DESIGNS[2], "HCP")$p_spin),
   sprintf("\u2022 Gene weights are bootstrap Z over %s resamples; n = %s genes (DK, AHBA_updated ds25 matrix) and %s (HCP-MMP, abagen-data at the shipped C1\u2013C3 gene list).",
           "1,000", format(d1$n_genes, big.mark = ","), format(h1$n_genes, big.mark = ",")),
   sprintf("\u2022 Imaging: %s children with \u22652 QC-passing visits, true 7.0 tabulated tables; both parcellations run on the same sample.",
@@ -201,21 +218,39 @@ methods <- paste(
   "  Grey parcels have no AHBA donor coverage. Cell-class profiles of these rankings are in fig_celltypes.png.",
   sep = "\n")
 
-fig <- (r1 / r2 / srow(1) / srow(2) / srow(3)) +
-  plot_layout(heights = c(0.72, 0.72, 1, 1, 1)) +
-  plot_annotation(
-    title = "One axis, three ways of asking for it \u2014 and the static map is what makes the difference",
-    subtitle = sprintf("Adding baseline CT (row 1) or all four structural maps (row 3) recovers AHBA C3 at DK resolution: scores rho %.2f and %.2f, both p_spin \u2264 0.001.\nThinning rate alone (row 2) does not (%.2f, %s) because its gene weights load on the static gradient C1 as well (%.2f, against %.2f and %.2f\nfor the other two designs). At 137 parcels that confound largely disappears (row 2, panels f and h).",
-                       g(DESIGNS[1], "DK", "scores", "C3")$rho, g(DESIGNS[3], "DK", "scores", "C3")$rho,
-                       g(DESIGNS[2], "DK", "scores", "C3")$rho, pf(g(DESIGNS[2], "DK", "scores", "C3")$p),
-                       g(DESIGNS[2], "DK", "weights", "C1")$rho,
-                       g(DESIGNS[1], "DK", "weights", "C1")$rho,
-                       g(DESIGNS[3], "DK", "weights", "C1")$rho),
-    caption = methods,
-    theme = theme(plot.title = element_text(size = 9.6, face = "bold"),
-                  plot.subtitle = element_text(size = 7.3, colour = "grey25", margin = margin(b = 4)),
-                  plot.caption = element_text(size = 6.0, colour = "grey25", hjust = 0,
-                                              lineheight = 1.42, margin = margin(t = 6))))
+# one scatter row per design shown; `/` flattens, so heights must count every row
+srows <- Reduce(`/`, lapply(seq_along(DESIGNS), srow))
+methods_panel <- ggplot() +
+  annotate("text", x = 0, y = 1, label = methods, hjust = 0, vjust = 1,
+           size = 2.05, lineheight = 1.42, colour = "grey25") +
+  xlim(0, 1) + ylim(0, 1) + coord_cartesian(clip = "off") +
+  theme_void() + theme(plot.margin = margin(4, 2, 0, 2))
 
-ggsave(file.path(FIG, "fig_signature_designs.png"), fig, width = 8.6, height = 8.8, dpi = 300, bg = "white")
+fig <- (r1 / r2 / srows / methods_panel) +
+  # The brain panels use coord_fixed, so their aspect caps how tall their row can
+  # draw; if their relative weight is small the cap shrinks the WHOLE grid
+  # proportionally and the surplus shows up as dead space above the caption.
+  # Weighting the brain rows near 1 makes the scatter rows the binding constraint.
+  # Brains (coord_fixed, two views wide) need ~0.4x the height of a scatter row;
+  # giving them more only pads their row.
+  plot_layout(heights = c(0.42, 0.42, rep(1, length(DESIGNS)), 0.70)) +
+  plot_annotation(
+    title = if (SHOW_FOUR)
+      "One axis, three ways of asking for it \u2014 and the static map is what makes the difference"
+      else "One axis, two ways of asking for it \u2014 and the static map is what makes the difference",
+    subtitle = sprintf("Adding baseline CT to the Y matrix (row 1) recovers AHBA C3 at DK resolution (scores rho %.2f, p_spin \u2264 0.001); thinning rate alone (row 2) does not\n(%.2f, %s), because its gene weights load on the static gradient C1 as heavily as on C3 (%.2f vs %.2f, against %.2f vs %.2f for dCT + CT).\nAt 137 parcels that confound largely disappears (panels f and h): rho %.2f vs C3 and only %.2f vs C1, without any static map in Y.",
+                       g(DESIGNS[1], "DK", "scores", "C3")$rho,
+                       g(DESIGNS[2], "DK", "scores", "C3")$rho, pf(g(DESIGNS[2], "DK", "scores", "C3")$p),
+                       g(DESIGNS[2], "DK", "weights", "C1")$rho, g(DESIGNS[2], "DK", "weights", "C3")$rho,
+                       g(DESIGNS[1], "DK", "weights", "C1")$rho, g(DESIGNS[1], "DK", "weights", "C3")$rho,
+                       g(DESIGNS[2], "HCP", "weights", "C3")$rho, g(DESIGNS[2], "HCP", "weights", "C1")$rho),
+    theme = theme(plot.title = element_text(size = 9.6, face = "bold"),
+                  plot.subtitle = element_text(size = 7.3, colour = "grey25",
+                                               margin = margin(b = 4))))
+
+# title+caption take a fixed ~2.3 in; the panel stack scales with its own height weights
+# measured fixed rows (title, subtitle, caption, margins) take ~3.0 in on this
+# device; the rest is shared by the flexible panel rows at ~1.45 in per unit.
+H <- 0.9 + 1.45 * (2 * 0.42 + length(DESIGNS) + 0.70)
+ggsave(file.path(FIG, "fig_signature_designs.png"), fig, width = 8.6, height = H, dpi = 300, bg = "white")
 cat("wrote", file.path(FIG, "fig_signature_designs.png"), "\n")

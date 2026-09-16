@@ -333,7 +333,7 @@ Built from single-universe re-runs so every number on them is comparable:
 | `figures/fig_signature_both.png` | `code/fig1_signature_both.R` | the signature derived in **both** parcellations: brain maps (DK row, HCP-MMP row), six small concordance panels, and the cell-class profile of three rankings |
 | `figures/fig_enrichment_combined.png` | `code/fig2_enrichment_combined.R` | MAGMA only: every ranking's SCZ/MDD β alone, then the seven head-to-head joint models |
 | `figures/fig_celltypes.png` | `code/fig4_celltypes.R` | cell-class marker enrichment of all nine rankings, plus the astrocyte/oligodendrocyte plane |
-| **`figures/fig_signature_designs.png`** | `code/fig1_signature_designs.R` | **the version to read**: all three Y designs (dCT+CT, dCT alone, four features) × both parcellations, scatters only |
+| **`figures/fig_signature_designs.png`** | `code/fig1_signature_designs.R` | **the version to read**: dCT+CT and dCT-alone designs × both parcellations, scatters only (`SHOW_FOUR=TRUE` adds the four-feature row) |
 | `figures/fig_signature_dct_only.png` | `code/fig1_signature_dct_only.R` | the dCT-alone design on its own, with its cell-class panel |
 
 HCP-MMP brain rendering needs `ggsegGlasser`, which is not on CRAN for this R
@@ -353,7 +353,11 @@ HCP ranking also beats NSPN-PLS2 for MDD, survives C1 for both disorders, and lo
 `code/17_design_grid.py` → `results/design_grid_{scores,weights,components,concordance}`;
 figure `figures/fig_signature_designs.png` (`code/fig1_signature_designs.R`). This is the version of
 Figure 1 to read: the cell-class panel has moved to its own figure, and in its place are the
-concordance scatters of **all three** designs, in both parcellations where both exist.
+concordance scatters of the two thickness-only designs (dCT + CT and dCT alone) in both
+parcellations. The four-feature row is **computed but not plotted by default** — its component is
+not spin-significant and it exists in DK only, so it clutters the comparison; `SHOW_FOUR=TRUE
+Rscript code/fig1_signature_designs.R` puts it back, and its numbers are in the table below and in
+`design_grid_*.tsv` either way.
 
 The four-feature design (CT + dCT + T1w/T2w + dT1w/T2w) is the closest available analogue of the
 NSPN PNAS design. Its C3-aligned component is **selected in the script**, not assumed:
@@ -526,7 +530,7 @@ Rscript code/fig2_enrichment.R          # permutation + MAGMA, DK
 Rscript code/fig2_enrichment_combined.R # MAGMA only, all rankings
 Rscript code/fig3_hcp_vs_dk.R           # the HCP vs DK arm
 Rscript code/fig4_celltypes.R           # cell classes, all nine rankings
-Rscript code/fig1_signature_designs.R   # all three Y designs, both parcellations
+Rscript code/fig1_signature_designs.R   # two Y designs, both parcellations (SHOW_FOUR=TRUE for three)
 Rscript code/fig1_signature_dct_only.R  # the dCT-only design on its own
 ```
 
