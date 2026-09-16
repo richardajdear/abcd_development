@@ -52,6 +52,11 @@ METHOD_COLOR = {"CT": "0.30", "PRSCS": "#56B4E9", "SBayesR": "#D55E00",
 #: offsets within a row band (band height 1.0)
 MDODGE = {"CT": 0.33, "PRSCS": 0.11, "SBayesR": -0.11, "SBayesRC": -0.33}
 CDODGE = {"perregion": 0.055, "1lmm": -0.055}
+#: marker encodes the ARM, matching slide_prs_methods.py -- the construction
+#: is carried by alpha and the arrow, not by the shape.
+ARM_MARKER = {"EUR": "o", "pooled": "D"}
+ARM_OF = {"SCZ_eur": "EUR", "SCZ_pooled": "pooled",
+          "MDD_eur": "EUR", "MDD_pooled": "pooled"}
 
 BASE, MID, SMALL = 10.5, 9.0, 7.5
 XLIM = (-0.072, 0.012)
@@ -86,9 +91,10 @@ def panel(fig, rect, d, title, show_ylab):
         ax.errorbar(r.beta, y, xerr=1.96 * r.se, fmt="none", ecolor=c,
                     elinewidth=1.0 if one else 0.8, capsize=1.2,
                     alpha=1.0 if one else 0.40, zorder=2)
-        ax.plot(r.beta, y, "D" if one else "o", ms=4.2 if one else 3.4,
+        ax.plot(r.beta, y, ARM_MARKER[ARM_OF[r.trait_arm]],
+                ms=4.4 if one else 3.4,
                 mfc=c if sig else "white", mec=c, mew=1.0,
-                alpha=1.0 if one else 0.55, zorder=3)
+                alpha=1.0 if one else 0.50, zorder=3)
         if sig:
             ax.text(r.beta - 1.96 * r.se - 0.0025, y, _fmt_p(r.p_adj),
                     fontsize=SMALL - 2.5, ha="right", va="center",
@@ -144,8 +150,9 @@ def draw() -> Path:
              "BLUPs vs one LMM on the per-scan mean — SCZ pooled is "
              "invariant, MDD strengthens throughout", fontsize=BASE + 1)
     fig.text(0.006, 0.921, "same 8,596 children, same scores, same model · "
-             "○ mean of per-region BLUPs (pipeline primary) → ◆ single LMM "
-             "(mean first) · filled = p̃ < .05 · arrow shows the shift",
+             "○ EUR arm · ◇ pooled arm (as in slide_prs_methods) · faded = "
+             "mean of per-region BLUPs (pipeline primary), solid = single LMM "
+             "(mean first), arrow shows the shift · filled = p̃ < .05",
              fontsize=SMALL - 0.5, color="0.35")
 
     x0, w, gap, y0, h = 0.098, 0.245, 0.035, 0.115, 0.735
@@ -153,7 +160,7 @@ def draw() -> Path:
         panel(fig, [x0 + k * (w + gap), y0, w, h], data[key], label,
               show_ylab=(k == 0))
 
-    handles = [mpl.lines.Line2D([], [], color=METHOD_COLOR[m], marker="D",
+    handles = [mpl.lines.Line2D([], [], color=METHOD_COLOR[m], marker="s",
                                 ls="", mfc=METHOD_COLOR[m],
                                 label=METHOD_LABEL[m]) for m in METHOD_ORDER]
     fig.legend(handles=handles, loc="upper right",
