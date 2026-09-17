@@ -53,7 +53,10 @@ S_VARS <- c("dCT rate", "dCT + CT", "dCT alone", "NSPN PLS2", "AHBA C3")
 # design_grid_pairs_weights.tsv but are not columns here: C1 is the
 # static-gradient control rather than an axis under comparison, and the U01
 # version is a replication of the plotted Herring one (they agree at rho 0.54).
-W_VARS <- c("dCT + CT", "dCT alone", "NSPN PLS2", "AHBA C3", "snRNAseq PC1")
+# snRNAseq PC1 goes FIRST so that positions 2-5 of this matrix carry the same
+# four variables as positions 2-5 of panel a and the labels line up across the
+# two matrices.
+W_VARS <- c("snRNAseq PC1", "dCT + CT", "dCT alone", "NSPN PLS2", "AHBA C3")
 ODD <- c(a = "dCT rate", b = "snRNAseq PC1")   # shaded rows/columns, see below
 PAL <- c(DK = "#d6604d", HCP = "#2166ac")   # light red / blue, one per parcellation
 stopifnot(setequal(unique(c(PS$var_x, PS$var_y)), S_VARS),
@@ -217,32 +220,30 @@ pc1_pair <- PW |> filter(parcellation == "DK", grepl("snRNAseq", var_x), grepl("
 stopifnot(nrow(pc1_pair) == 1)
 pc1_agree <- pc1_pair$rho[1]
 pc1_n <- max(PW$n[grepl("snRNAseq", PW$var_x) | grepl("snRNAseq", PW$var_y)])
+spin_of <- function(d, p) {
+  r <- CMP |> filter(design == d, parcellation == p)
+  stopifnot(nrow(r) == 1)
+  r$p_spin[1]
+}
+
 methods <- paste(
   "Methods.",
-  "\u2022 Y designs: dCT + CT (PLS2, the lead signature) and dCT alone (a single Y column, so PLS1 is simply the vector of gene\u2013map correlations and nothing absorbs the",
-  "  baseline-thickness gradient). A four-feature design (CT + dCT + T1w/T2w + dT1w/T2w) is computed by 17_design_grid.py but not shown: DK-only, and its C3-aligned",
-  sprintf("  component is not spin-significant (p = %.3f). Its numbers are in design_grid_concordance.tsv.", d4$p_spin),
-  sprintf("\u2022 Spin p is each component's own singular value against 5,000 rotations: %.3f (dCT+CT, DK), %.3f (dCT+CT, HCP), %.3f (dCT alone, DK), %.3f (dCT alone, HCP). Only the",
-          d1$p_spin, h1$p_spin, d2$p_spin, h2$p_spin),
-  "  dCT+CT fits clear 0.05, so the single-Y fits are usable gene rankings but carry no independent spatial claim.",
-  sprintf("\u2022 NSPN PLS2 in HCP-MMP space (%d of 180 parcels) is resampled from the published 308-region map through fsaverage vertices, the route in AHBA/notebooks/", nspn_hcp_n),
-  "  MT_whitakervertes.ipynb (code/18_nspn_to_hcp.py; validation against the published DK table r = 0.985, see data/reference/NSPN_HCP.md). The resampling is not",
-  "  lossy in the way the weak HCP-NSPN cells might suggest: the target grid is FINER than the source (180 vs 152 parcels per hemisphere), each HCP parcel averages a",
-  "  median of 4 source parcels, and an HCP-native map survives a round trip through the 308 grid at r = 0.91 (code/19_resample_check.py). What differs is the ABCD",
-  "  component itself: its DK and HCP score maps correlate only rho = 0.74 across parcellations, and NSPN PLS2 tracks the DK one.",
-  sprintf("\u2022 snRNAseq PC1 = the snRNA-seq maturation axis from the transcriptional_maturation project (data/velmeshev_PC1_gene_loadings.csv, %s genes). Two independent",
-          format(pc1_n, big.mark = ",")),
-  sprintf("  datasets exist and agree at rho = %.2f; the Herring one is plotted and the U01 one is in design_grid_pairs_weights.tsv. It is the only axis here not derived from the AHBA.",
-          pc1_agree),
-  sprintf("\u2022 Gene weights are bootstrap Z over 1,000 resamples; n = %s genes (DK) and %s (HCP-MMP), and each panel's n is the overlap of its two vectors.",
-          format(d1$n_genes, big.mark = ","), format(h1$n_genes, big.mark = ",")),
-  sprintf("\u2022 Imaging: %s children with \u22652 QC-passing visits, true 7.0 tabulated tables; both parcellations run on the same sample.",
-          format(PROV$n_subjects[1], big.mark = ",")),
-  sprintf("\u2022 The shaded row and column of each matrix is the odd one out: %s in a (an imaging map, not a gene-derived axis) and %s in b (the only axis not derived from the AHBA).",
+  "\u2022 Y designs: dCT + CT (PLS2, the lead signature) and dCT alone (one Y column, so PLS1 is just the vector of gene\u2013map correlations). A four-feature design",
+  "  (CT + dCT + T1w/T2w + dT1w/T2w) is computed but not shown: DK-only and not spin-significant; see design_grid_concordance.tsv.",
+  sprintf("\u2022 Spin p is the component's own singular value against 5,000 rotations: %s (dCT+CT, DK), %s (dCT+CT, HCP), %s and %s for dCT alone. Only the dCT+CT fits clear 0.05.",
+          pf(spin_of("dCT + CT", "DK")), pf(spin_of("dCT + CT", "HCP")),
+          pf(spin_of("dCT alone", "DK")), pf(spin_of("dCT alone", "HCP"))),
+  sprintf("\u2022 NSPN PLS2 in HCP-MMP (%d of 180 parcels) is resampled from the published 308-region map through fsaverage vertices (code/18_nspn_to_hcp.py, validation", nspn_hcp_n),
+  "  r = 0.985); the DK cells use the published DK table. The weak HCP cells are not a resampling artefact \u2014 a round trip returns an HCP map at r = 0.91, and the",
+  "  parcellation of the ABCD fit accounts for the rest (code/19_resample_check.py, code/20_basis_vs_parcellation.py).",
+  sprintf("\u2022 snRNAseq PC1 is the maturation axis from the transcriptional_maturation project (%s genes; two datasets agreeing at rho = %.2f, the Herring one plotted).",
+          format(pc1_n, big.mark = ","), pc1_agree),
+  sprintf("\u2022 Shaded row and column = the odd one out of each matrix: %s in a, %s in b. Components are in the thinning orientation (positive = expressed where",
           ODD[["a"]], ODD[["b"]]),
-  "\u2022 Components are in the thinning orientation (multiplied by \u2212sign of their dCT salience): positive = expressed more where thinning is faster. dCT rate itself is",
-  "  mm/yr, so it runs the other way \u2014 hence the negative correlations in its row. Grey parcels have no AHBA donor coverage.",
+  "  thinning is faster); dCT rate is mm/yr, so its row runs the other way. Grey parcels have no AHBA donor coverage.",
+  "\u2022 8,716 children, \u22652 QC-passing visits, release 7.0 tables, both parcellations on the same sample. Gene weights are bootstrap Z over 1,000 resamples.",
   sep = "\n")
+
 methods_panel <- ggplot() +
   annotate("text", x = 0, y = 1, label = methods, hjust = 0, vjust = 1,
            size = 2.05, lineheight = 1.42, colour = "grey25") +
@@ -255,10 +256,10 @@ fig <- (r1 / r2 / (pa | pb) / methods_panel) +
   # matrices ~4.35 at this width, methods ~1.3.
   # a brain cell is ~1.65 in wide and the two views together span 1295 x 425
   # polygon units, so each brain row needs ~0.55 in of height.
-  plot_layout(heights = c(0.58, 0.58, 4.35, 2.9)) +
+  plot_layout(heights = c(0.58, 0.58, 4.35, 1.95)) +
   plot_annotation(
     title = "One transcriptomic axis of adolescent thinning, and every pairwise comparison behind it",
-    subtitle = sprintf("Adding baseline CT to Y recovers AHBA C3 in both parcellations (DK rho %.2f, HCP %.2f); thinning rate alone recovers it only at 137 parcels (%.2f vs %.2f),\nbecause at 33 regions its gene weights load on the static gradient C1 as heavily as on C3 (%.2f vs %.2f). NSPN PLS2 matches the DK fit (%.2f) but not the\nHCP one (%.2f) \u2014 not a resampling artefact (round trip r = 0.91) but the two ABCD fits' score maps differing (rho 0.74 across parcellations).",
+    subtitle = sprintf("Adding baseline CT to Y recovers AHBA C3 in both parcellations (DK rho %.2f, HCP %.2f); thinning rate alone recovers it only at 137 parcels (%.2f vs %.2f),\nbecause at 33 regions its gene weights load on the static gradient C1 as heavily as on C3 (%.2f vs %.2f). NSPN PLS2 matches the DK fit (%.2f) but not the\nHCP one (%.2f) \u2014 not a resampling artefact (round trip r = 0.91) but the ABCD fit's own score map moving with the parcellation (rho 0.76) and not with its gene basis (0.99).",
                        stat_of(PS, "dCT + CT", "AHBA C3", "DK")$rho, stat_of(PS, "dCT + CT", "AHBA C3", "HCP")$rho,
                        stat_of(PS, "dCT alone", "AHBA C3", "HCP")$rho, stat_of(PS, "dCT alone", "AHBA C3", "DK")$rho,
                        stat_of(PW, "dCT alone", "AHBA C1", "DK")$rho, stat_of(PW, "dCT alone", "AHBA C3", "DK")$rho,
@@ -267,5 +268,5 @@ fig <- (r1 / r2 / (pa | pb) / methods_panel) +
                   plot.subtitle = element_text(size = 7.3, colour = "grey25",
                                                margin = margin(b = 4))))
 
-ggsave(file.path(FIG, "fig_signature_designs.png"), fig, width = 8.6, height = 9.5, dpi = 300, bg = "white")
+ggsave(file.path(FIG, "fig_signature_designs.png"), fig, width = 8.6, height = 8.8, dpi = 300, bg = "white")
 cat("wrote", file.path(FIG, "fig_signature_designs.png"), "\n")

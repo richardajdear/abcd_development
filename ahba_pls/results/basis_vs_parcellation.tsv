@@ -1,0 +1,16 @@
+comparison	a	b	rho	p_spin	n
+basis effect (parcellation fixed)	native DK (AHBA_updated ds25)	matched DK (abagen-data, HCP gene basis)	0.986	0.0009998	33
+parcellation effect (basis fixed)	matched DK (abagen-data, HCP gene basis)	HCP-MMP pushed to DK	0.7627	0.0009998	33
+total (the 0.74 being decomposed)	native DK (AHBA_updated ds25)	HCP-MMP pushed to DK	0.7373	0.0009998	33
+vs NSPN PLS2	native DK (AHBA_updated ds25)	NSPN PLS2 (published DK table)	0.7514	0.0012	33
+vs NSPN PLS2	native DK (AHBA_updated ds25)	NSPN PLS2 (308 resampled to DK)	0.6057	0.006399	33
+vs AHBA C3	native DK (AHBA_updated ds25)	AHBA C3 (DK, ds25)	0.8329	0.0009998	33
+vs NSPN PLS2	matched DK (abagen-data, HCP gene basis)	NSPN PLS2 (published DK table)	0.7586	0.0012	33
+vs NSPN PLS2	matched DK (abagen-data, HCP gene basis)	NSPN PLS2 (308 resampled to DK)	0.6007	0.006599	33
+vs AHBA C3	matched DK (abagen-data, HCP gene basis)	AHBA C3 (DK, ds25)	0.8479	0.0009998	33
+vs NSPN PLS2	HCP-MMP pushed to DK	NSPN PLS2 (published DK table)	0.4662	0.02779	33
+vs NSPN PLS2	HCP-MMP pushed to DK	NSPN PLS2 (308 resampled to DK)	0.3334	0.1154	33
+vs AHBA C3	HCP-MMP pushed to DK	AHBA C3 (DK, ds25)	0.7487	0.0009998	33
+gene weights	native DK (AHBA_updated ds25)	matched DK (abagen-data, HCP gene basis)	0.9749		7873
+gene weights	matched DK (abagen-data, HCP gene basis)	HCP-MMP pushed to DK	0.7491		7973
+gene weights	native DK (AHBA_updated ds25)	HCP-MMP pushed to DK	0.7329		7873

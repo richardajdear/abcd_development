@@ -453,6 +453,39 @@ down to DK agrees with the NSPN DK map at only ρ = +0.29, against +0.75 for the
 So the weak HCP–NSPN cells say that the HCP fit is a somewhat different spatial axis — a fact about
 the two ABCD fits rather than about the NSPN reference or the conversion.
 
+### Basis or parcellation? The 0.74 decomposed — `code/20_basis_vs_parcellation.py`
+
+The section above leaves one question: the dCT+CT component's score map correlates only ρ = 0.74
+between its DK and HCP-MMP fits while its gene weights agree at 0.90. Those two fits differ in *two*
+ways — the expression basis (AHBA_updated ds25, 12,007 genes vs abagen-data `hcp_3d.csv` on the
+shipped 7,973) and the parcellation (33 vs 137). A third fit separates them: the same option-2 PLS on
+the same 33 DK regions but with the HCP fit's expression basis (`dk_3d.csv` restricted to those
+7,973 genes — the matched X of `12_hcp_pls.py`, refitted here so its *scores* exist too).
+
+| contrast | what varies | scores ρ | gene weights ρ |
+|:--|:--|--:|--:|
+| native DK vs matched DK | expression basis only | **0.986** | 0.975 |
+| matched DK vs HCP→DK | parcellation only | **0.763** | 0.749 |
+| native DK vs HCP→DK | both | 0.737 | 0.733 |
+
+**My hypothesis was wrong: the expression basis accounts for essentially none of it.** Swapping
+abagen build and gene list while holding the parcellation fixed leaves the score map intact
+(ρ = 0.986) and the gene ranking nearly so; swapping the parcellation while holding the basis
+fixed reproduces the whole gap (0.763). The same holds for the NSPN comparison — the matched-basis
+component agrees with NSPN PLS2 at ρ = 0.76, indistinguishable from the native DK fit's 0.75,
+while the HCP fit pushed down to DK gives 0.47.
+
+So fitting the PLS at 137 parcels genuinely finds a somewhat different spatial axis, not a
+differently-processed version of the same one. Two caveats on the reading:
+
+- **Which NSPN map is used matters at n = 33.** The published DK table and the 308-map resampled to
+  DK agree at r = 0.985, but against the same component they give ρ = 0.75 and
+  0.61 respectively — a 0.15 spread from the reference version alone. The figure uses the
+  published table for DK cells and the resampled map for HCP cells, so part of its 0.75 → 0.21
+  asymmetry is that version difference; both columns are in `basis_vs_parcellation.tsv`.
+- Pushing the HCP map down to DK recovers some but not all of the agreement (0.47 at 33 regions
+  against 0.21 at 137), so the disagreement is partly, but not only, at fine spatial scale.
+
 ### snRNAseq PC1 in the gene matrix
 
 The snRNA-seq maturation axis from
@@ -615,11 +648,11 @@ sample-size effect: it is unchanged (+5.1 → +5.0) between the 6,537-child and
 
 ## Reproducing
 
-Analysis (python, env `ahba-pls`): `code/01_*` → `code/19_*` in order. `11_` is the parcellation
+Analysis (python, env `ahba-pls`): `code/01_*` → `code/20_*` in order. `11_` is the parcellation
 control, `12_` the HCP-MMP arm, `14_`/`15_` the single-universe enrichment and cell-class tables that
 the summary figures read, `16_` the dCT-only variant, `17_` the design grid and all pairwise statistics, `18_` the NSPN→HCP-MMP
 conversion (needs `nibabel`, and the fsaverage annot files in `~/Git/AHBA/data/parcellations/`; run it
-before `17_`), `19_` the resampling audit behind that conversion. `12_` needs the backfilled HCP run
+before `17_`), `19_` the resampling audit behind that conversion and `20_` the basis-vs-parcellation decomposition (both seconds; `code/surface.py` holds the shared annot helpers). `12_` needs the backfilled HCP run
 (`ABCD_CONFIG=ct_70_hcp_noglobal_mv2 python -m abcd.assemble` then
 `Rscript R/fit_lmm.R --cores 8`, which lands in `out/thickness_hcp_70_aa6e91efba82`); everything else
 reads the DK and T1w/T2w runs listed in `tools/rerun_local.sh`.
