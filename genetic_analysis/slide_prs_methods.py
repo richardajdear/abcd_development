@@ -2,9 +2,11 @@
 
 Usage (repo root):  python genetic_analysis/slide_prs_methods.py
 
-Reads ONLY the two canonical grid tables built by setup/collect_final.py:
-    work/results_70tab/prs_final/table_main.tsv       (DK, 68 regions)
-    work/results_70tab_hcp/prs_final/table_main.tsv   (HCP-MMP, 358 parcels)
+Reads ONLY committed grid tables, per parcellation root
+(work/results_70tab = DK 68 regions; work/results_70tab_hcp = HCP-MMP 358):
+    prs_final/table_main.tsv            PGC3 SCZ, MDD2025, controls (step 6)
+    prs_scz2025/table_scz2025_main.tsv  the 2025 multi-ancestry SCZ GWAS
+                                        re-scored (step 9), primary cells
 Traits are facet ROWS; the four COLUMNS are phenotype x parcellation, so the
 atlas comparison sits side by side within each phenotype.
 
@@ -32,16 +34,14 @@ HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
 OUT = REPO / "docs/figures/slide_prs_methods.png"
 
-#: (phenotype, parcellation label, grid table)
+#: (phenotype, parcellation label, results root).  Each root holds the PGC3
+#: grid (prs_final/table_main.tsv) and the step-9 2025 SCZ GWAS re-scoring
+#: (prs_scz2025/table_scz2025_main.tsv); load() reads both.
 COLUMNS = [
-    ("global_slope", "DK (68)",
-     HERE / "work/results_70tab/prs_final/table_main.tsv"),
-    ("global_slope", "HCP-MMP (358)",
-     HERE / "work/results_70tab_hcp/prs_final/table_main.tsv"),
-    ("baseline_thickness", "DK (68)",
-     HERE / "work/results_70tab/prs_final/table_main.tsv"),
-    ("baseline_thickness", "HCP-MMP (358)",
-     HERE / "work/results_70tab_hcp/prs_final/table_main.tsv"),
+    ("global_slope", "DK (68)", HERE / "work/results_70tab"),
+    ("global_slope", "HCP-MMP (358)", HERE / "work/results_70tab_hcp"),
+    ("baseline_thickness", "DK (68)", HERE / "work/results_70tab"),
+    ("baseline_thickness", "HCP-MMP (358)", HERE / "work/results_70tab_hcp"),
 ]
 GROUPS = [("global slope (thinning rate)", 0, 2),
           ("baseline thickness (control phenotype)", 2, 4)]
@@ -51,7 +51,8 @@ BASE, MID, SMALL = 10.5, 9.0, 7.5
 #: facet rows, top to bottom; height gives the two-arm disorder bands more
 #: room (8 markers vs 4) -- the ggplot space='free_y' behaviour.
 BANDS = [
-    ("SCZ", "schizophrenia", ("SCZ_eur", "SCZ_pooled"), 1.8),
+    ("SCZ25", "schizophrenia (2025 GWAS)", ("SCZ25_EUR", "SCZ25_META"), 1.8),
+    ("SCZ", "  ↳ PGC3 2022 GWAS", ("SCZ_eur", "SCZ_pooled"), 1.8),
     ("MDD", "depression", ("MDD_eur", "MDD_pooled"), 1.8),
     ("ASD", "autism (control)", ("ASD",), 1.0),
     ("ALZ", "Alzheimer's — Wightman", ("ALZ",), 1.0),
@@ -81,9 +82,17 @@ def _fmt_p(p: float) -> str:
     return f"{p:.0e}".replace("e-0", "e-") if p < 1e-3 else f"{p:.3f}"[1:]
 
 
-def load(path: Path, phenotype: str) -> pd.DataFrame:
-    t = pd.read_csv(path, sep="\t")
-    t = t[(t.phenotype == phenotype) & (t.matched == "yes")]
+def load(root: Path, phenotype: str) -> pd.DataFrame:
+    g = pd.read_csv(root / "prs_final/table_main.tsv", sep="\t")
+    g = g[g.matched == "yes"]
+    # step 9: the primary cells only (EUR GWAS -> EUR anchor; AFR+EUR+EAS
+    # meta -> pooled).  The four-method set is kept so the rows align with
+    # PGC3; PRS-CSx and the ancestry-matched composite live in the notes.
+    s = pd.read_csv(root / "prs_scz2025/table_scz2025_main.tsv", sep="\t")
+    s = s[(s.design == "primary") & s.method.isin(METHOD_ORDER)
+          & s.trait_arm.isin(["SCZ25_EUR", "SCZ25_META"])]
+    t = pd.concat([g, s], ignore_index=True)
+    t = t[t.phenotype == phenotype]
     keep = ((t.target_stratum == "EUR") & (t.score == "raw")) | \
            ((t.target_stratum == "full") & (t.score == "zanc"))
     t = t[keep].copy()
@@ -134,60 +143,52 @@ def panel(fig, rect, d, title, show_ylab):
 
 NOTES = [
     ("Model & samples", [
-        "phenotype ~ score + age + sex + PC1–10 + (1 | family), score",
-        "standardised.  EUR arm n = 4,308; pooled n = 8,596 (all",
-        "ancestries).  Release 7.0 tabulated tables throughout.",
-    ]),
-    ("The two atlases are NOT independent tests", [
-        "Both phenotypes are whole-cortex means over the SAME 8,596",
-        "children — formed over 68 DK regions or 358 HCP-MMP parcels",
-        "(hippocampal parcel dropped).  The columns are one measure",
-        "computed two ways, so agreement is a parcellation robustness",
-        "check, not replication.  GREML h² agrees: global slope",
-        "0.166 ± 0.045 (DK) vs 0.156 ± 0.045 (HCP-MMP).",
-    ]),
-    ("Where the atlases differ, they differ at p ≈ .05", [
-        "SCZ EUR: 0/4 methods on DK (p̃ .065–.074) but 3/4 on HCP-MMP",
-        "(.023–.047) — with near-identical βs (−.026…−.038 vs",
-        "−.029…−.040).  MDD pooled: 3/4 on DK, 1/4 on HCP-MMP.  These",
-        "are threshold crossings on correlated measures, not atlas",
-        "biology; read both columns together, never one alone.",
+        "phenotype ~ score + age + sex + PC1–10 + (1 | family); score",
+        "standardised.  EUR arm n = 4,308; pooled n = 8,596 (all ancestries),",
+        "score z-scored within ancestry cluster.  Release 7.0 tables.",
     ]),
     ("Discovery GWAS matched to arm", [
-        "Pooled arm ← multi-ancestry releases (SCZ PGC3 primary; MDD",
-        "MDD2025 trans-ancestry).  EUR arm ← European-only releases.",
-        "ASD, both ALZ releases and EA exist ONLY as European GWAS, so",
-        "they appear in the EUR arm alone: against the pooled target",
-        "they are confounded (score and phenotype both track ancestry),",
-        "which had made ASD look significant (+0.036).",
+        "EUR arm ← European-only GWAS; pooled ← multi-ancestry GWAS.  ASD,",
+        "ALZ and EA exist only as European GWAS so appear EUR-only: read",
+        "against the pooled target they are confounded (score and phenotype",
+        "both track ancestry; that made ASD look significant, +0.036).",
+        "SCZ 2025 = Nature multi-ancestry release (EUR Neff 117k → 174k,",
+        "no Latino cohort); PGC3 kept as the row below for comparison.",
     ]),
-    ("Scores, LD and multiplicity", [
-        "Pooled points use the within-ancestry-standardised score; raw",
-        "pooled Bayesian βs inflate 2–3× with their SEs (EUR-panel re-",
-        "weighting makes score variance ancestry-dependent).  PRS-CS /",
-        "SBayesR / SBayesRC all use UK Biobank EUROPEAN LD — no multi-",
-        "ancestry panel is distributed — so pooled Bayesian cells stay",
-        "LD-mismatched on the discovery side; C+T clumps on the target",
-        "genotypes and is the exception.  C+T: best of 8 thresholds,",
-        "p̃ adjusted; Bayesian methods: one score, raw p.  No correction",
-        "across the grid (family-level FDR reported separately).",
+    ("What the second row (2025 GWAS) settles", [
+        "The EUR arm moves from borderline (PGC3: 0/4 DK, 3/4 HCP-MMP) to",
+        "4/4 on both atlases, β −0.035 to −0.051, and the C+T permutation",
+        "p 0.053 → 0.0085.  Nothing was selected — the discovery GWAS grew",
+        "1.5×.  Pooled stays 4/4, slightly weaker (the meta dropped the",
+        "Latino cohort; the Hispanic-like cluster carries the largest",
+        "within-stratum effect).  PRS × ancestry-cluster LRT p ≥ .10 in",
+        "every cell, so one pooled β is licensed; but AFR- and EAS-derived",
+        "weights predict nothing in their own clusters (Neff 35k / 29k) and",
+        "the 2025 meta carries ~0 into the African-American-like cluster.",
+    ]),
+    ("Atlases and scores", [
+        "DK and HCP-MMP are one whole-cortex measure formed two ways on the",
+        "same children (GREML h² 0.166 vs 0.156) — a robustness check, not",
+        "replication; where they differ (MDD pooled 3/4 vs 1/4) they differ",
+        "at p ≈ .05 with near-identical βs.  Raw pooled Bayesian βs inflate",
+        "2–3× with their SEs, so pooled cells are within-cluster z-scored.",
+        "All three Bayesian methods use UKB EUROPEAN LD; C+T clumps on the",
+        "target.  C+T: best of 8 thresholds, p̃ adjusted; others: one score,",
+        "raw p; no correction across the grid (FDR reported separately).",
     ]),
     ("Controls", [
-        "APOE removed on BOTH builds (GRCh37 44.4–46.5 ∪ GRCh38",
-        "43.5–46.5 Mb), 0 residual genome-wide-significant SNPs.",
-        "Kunkle = clinically diagnosed cases only (no UKB by-proxy) but",
-        "Neff 57.7k vs Wightman's 763k, so its nulls are suggestive.",
-        "EA is POSITIVE (higher polygenic education, slower thinning) —",
-        "opposite in sign to the disorders, so it cannot manufacture",
-        "their βs; but it reaches p̃ < .05 in 3/4 methods on DK, so it",
-        "is not a clean null and the conditional test still matters.",
+        "APOE removed on both builds, 0 residual GWS SNPs.  Kunkle: no UKB",
+        "by-proxy but Neff 57.7k vs Wightman 763k — nulls suggestive.  EA is",
+        "POSITIVE (opposite sign; cannot manufacture the disorders' βs) yet",
+        "p̃ < .05 in 3/4 methods on DK, 0/4 HCP-MMP — not a clean null; the",
+        "conditional-on-EA test matters.  Baseline thickness is null in every",
+        "SCZ cell, both GWAS: the association is slope-specific.",
     ]),
-    ("Verdict (cross-method, cross-atlas agreement)", [
-        "SCZ pooled: 4/4 methods on BOTH atlases — the robust result.",
-        "SCZ EUR: atlas-dependent at threshold (0/4 DK, 3/4 HCP-MMP),",
-        "same direction and magnitude throughout.  MDD: pooled arm",
-        "only (3/4 DK, 1/4 HCP-MMP), EUR arm null on both.  ALZ without",
-        "APOE: ≤1/4 on either atlas and 0/4 in Kunkle.  ASD: 0/4.",
+    ("Verdict", [
+        "SCZ: significant under every method, both arms, both atlases with",
+        "the 2025 GWAS; the EUR estimate is now the stronger one.",
+        "MDD: pooled only — 3/4 (DK) / 1/4 (HCP-MMP); EUR arm null.",
+        "ALZ without APOE ≤ 1/4 either atlas, 0/4 Kunkle.  ASD 0/4.",
     ]),
 ]
 
@@ -199,15 +200,15 @@ def draw() -> Path:
     })
     fig = plt.figure(figsize=(13.333, 7.5))
     fig.text(0.006, 0.958, "PRS → cortical development: four methods × two "
-             "parcellations — SCZ is the only association robust across "
-             "methods and atlases", fontsize=BASE + 1)
+             "parcellations × two SCZ GWAS — SCZ is the only association "
+             "robust across all of them", fontsize=BASE + 0.5)
     fig.text(0.006, 0.925, "ancestry-matched cells from "
-             "genetic_analysis/work/results_70tab{,_hcp}/prs_final/"
-             "table_main.tsv · filled = p̃ < .05 · ○ EUR arm · ◇ pooled, "
-             "within-ancestry standardised", fontsize=SMALL - 0.5,
-             color="0.35")
+             "results_70tab{,_hcp}/prs_final/table_main.tsv and "
+             "prs_scz2025/table_scz2025_main.tsv · filled = p̃ < .05 · "
+             "○ EUR arm · ◇ pooled, within-ancestry standardised",
+             fontsize=SMALL - 0.5, color="0.35")
 
-    x0, w, gap, y0, h = 0.118, 0.129, 0.0145, 0.075, 0.755
+    x0, w, gap, y0, h = 0.128, 0.127, 0.0140, 0.075, 0.755
     for k, (pheno, parc, table) in enumerate(COLUMNS):
         rect = [x0 + k * (w + gap), y0, w, h]
         panel(fig, rect, load(table, pheno), parc, show_ylab=(k == 0))
@@ -225,7 +226,7 @@ def draw() -> Path:
                                 ls="", mfc=METHOD_COLOR[m],
                                 label=METHOD_LABEL[m]) for m in METHOD_ORDER]
     fig.legend(handles=handles, loc="upper right",
-               bbox_to_anchor=(0.995, 0.998), ncol=4, frameon=False,
+               bbox_to_anchor=(0.995, 0.955), ncol=4, frameon=False,
                fontsize=SMALL, handletextpad=0.3, columnspacing=0.9)
 
     xn, y = 0.695, 0.905

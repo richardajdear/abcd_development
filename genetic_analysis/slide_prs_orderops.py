@@ -147,12 +147,11 @@ def draw() -> Path:
 
     fig = plt.figure(figsize=(13.333, 7.5))
     fig.text(0.006, 0.955, "Order of operations: mean of per-region slope "
-             "BLUPs vs one LMM on the per-scan mean — SCZ pooled is "
-             "invariant, MDD strengthens throughout", fontsize=BASE + 1)
-    fig.text(0.006, 0.921, "same 8,596 children, same scores, same model · "
-             "○ EUR arm · ◇ pooled arm (as in slide_prs_methods) · faded = "
-             "mean of per-region BLUPs (pipeline primary), solid = single LMM "
-             "(mean first), arrow shows the shift · filled = p̃ < .05",
+             "BLUPs vs one LMM on the per-scan mean — SCZ pooled invariant, "
+             "MDD strengthens throughout", fontsize=BASE + 0.5)
+    fig.text(0.006, 0.921, "same 8,596 children, scores and model · ○ EUR "
+             "· ◇ pooled · faded = mean of per-region BLUPs (primary), solid = "
+             "single LMM, arrow = shift · filled = p̃ < .05",
              fontsize=SMALL - 0.5, color="0.35")
 
     x0, w, gap, y0, h = 0.098, 0.245, 0.035, 0.115, 0.735
@@ -164,45 +163,39 @@ def draw() -> Path:
                                 ls="", mfc=METHOD_COLOR[m],
                                 label=METHOD_LABEL[m]) for m in METHOD_ORDER]
     fig.legend(handles=handles, loc="upper right",
-               bbox_to_anchor=(0.995, 0.998), ncol=4, frameon=False,
+               bbox_to_anchor=(0.995, 0.940), ncol=4, frameon=False,
                fontsize=SMALL, handletextpad=0.3, columnspacing=0.9)
 
     def cnt(atlas, ta):
         return f"{C[atlas][(ta, 'perregion')]}/4 → {C[atlas][(ta, '1lmm')]}/4"
 
     notes = [
-        ("The two constructions are different phenotypes", [
+        ("Two constructions, one measure", [
             f"r(mean of BLUPs, single-LMM slope) = "
-            f"{S[('r_slope_constructions','dk')]:.3f} on DK and "
-            f"{S[('r_slope_constructions','hcp')]:.3f} on HCP-MMP; the",
-            f"intercepts by contrast agree at "
-            f"{S[('r_intercept_constructions','dk')]:.4f} / "
-            f"{S[('r_intercept_constructions','hcp')]:.4f}.  A BLUP is shrunk",
-            "toward the population mean in proportion to its own",
-            "unreliability, so averaging 68 (358) differently-shrunk",
-            "regional slopes OVER-shrinks, child by child, depending on",
-            "which regions are noisy for that child.  The mean-of-BLUPs",
-            f"slope carries only "
+            f"{S[('r_slope_constructions','dk')]:.3f} DK / "
+            f"{S[('r_slope_constructions','hcp')]:.3f} HCP-MMP; intercepts",
+            f"agree at {S[('r_intercept_constructions','dk')]:.4f}.  Each "
+            "regional BLUP is shrunk by its OWN",
+            "variance ratio, so averaging 68 (358) of them over-shrinks child",
+            f"by child: the mean-of-BLUPs slope keeps "
             f"{S[('sd_slope_perregion_mm_per_yr','dk')] / S[('sd_slope_1lmm_mm_per_yr','dk')]:.0%}"
-            f" of the single-LMM slope's SD on DK",
-            f"({S[('sd_slope_perregion_mm_per_yr','hcp')] / S[('sd_slope_1lmm_mm_per_yr','hcp')]:.0%}"
-            " on HCP-MMP).  Agreement rises with scans per child",
-            f"({S[('r_slope_visits2','dk')]:.2f} / {S[('r_slope_visits3','dk')]:.2f}"
-            f" / {S[('r_slope_visits4','dk')]:.2f} on DK for 2 / 3 / 4 visits) —",
-            "less shrinkage left to disagree about — and the mean-first",
-            f"slope is the more atlas-invariant of the two "
-            f"({S[('cross_atlas_r_slope','perregion')]:.3f} →",
-            f"{S[('cross_atlas_r_slope','1lmm')]:.3f} across atlases).",
+            f" / "
+            f"{S[('sd_slope_perregion_mm_per_yr','hcp')] / S[('sd_slope_1lmm_mm_per_yr','hcp')]:.0%}"
+            " of the",
+            f"single-LMM SD, agreement rises with scans "
+            f"({S[('r_slope_visits2','dk')]:.2f}/{S[('r_slope_visits3','dk')]:.2f}/"
+            f"{S[('r_slope_visits4','dk')]:.2f} for 2/3/4),",
+            f"and mean-first is more atlas-invariant "
+            f"({S[('cross_atlas_r_slope','perregion')]:.3f} → "
+            f"{S[('cross_atlas_r_slope','1lmm')]:.3f}).",
         ]),
         ("β moves, precision does not", [
-            "SEs are identical to the third decimal (ratio 0.996): the",
-            "phenotype is standardised, so the SE is set by n and the",
-            "score–phenotype correlation, not by the construction.  What",
-            "moves is β — mean −0.004, mean-first more negative, max",
-            "|Δ| 0.020 — so this is a change in recovered signal, not a",
-            "precision gain.",
+            "SEs identical to the third decimal (ratio 0.996) — set by n and",
+            "the score–phenotype correlation, not the construction.  What",
+            "moves is β (mean −0.004, mean-first more negative, max |Δ| .020):",
+            "recovered signal, not a precision gain.",
         ]),
-        ("What each cell does", [
+        ("Cells significant (p̃ < .05), mean-of-BLUPs → single LMM", [
             f"SCZ pooled   {cnt('dk','SCZ_pooled')} (DK)   "
             f"{cnt('hcp','SCZ_pooled')} (HCP-MMP)",
             f"SCZ EUR      {cnt('dk','SCZ_eur')} (DK)   "
@@ -213,27 +206,22 @@ def draw() -> Path:
             f"{cnt('hcp','MDD_eur')} (HCP-MMP)",
         ]),
         ("Reading", [
-            "SCZ pooled is invariant to the construction as it was to the",
-            "atlas — 4 methods × 2 atlases × 2 constructions, 16/16 cells",
-            "significant, βs within 0.003.  That is the licensed result.",
-            "MDD strengthens systematically: all 16 MDD cells move toward",
-            "significance, and MDD-EUR — null on both atlases under the",
-            "pipeline construction — becomes nominally significant under",
-            "2–3 methods.  A coherent one-directional shift across 16",
-            "tests, consistent with a weak, spread-out polygenic signal",
-            "being less attenuated in the less-shrunk phenotype.",
-            "SCZ EUR weakens on both atlases; the 3/4 the HCP-MMP atlas",
-            "comparison produced is gone again.  It is marginal on every",
-            "axis tried — data vintage, atlas, construction — and should",
-            "be described that way, not as a result.",
+            "SCZ pooled is invariant (16/16 cells across method × atlas ×",
+            "construction, βs within .003).  MDD strengthens in all 16 cells",
+            "and MDD-EUR turns nominally significant under 2–3 methods — a",
+            "one-directional shift ≈ 1.5–2 SE of the difference, consistent",
+            "with a weak, spatially spread signal being less attenuated in the",
+            "less-shrunk phenotype (MDD loads on slope PC3 as much as on the",
+            "global mean; SCZ is carried almost entirely by PC1).  The SCZ-EUR",
+            "'weakening' is ≈ 0.5 SE and absent from SCZ pooled: noise.",
         ]),
-        ("Scope — this is a sensitivity phenotype, not a re-analysis", [
-            "The single-LMM run covered the 16 matched SCZ/MDD cells per",
-            "atlas ONLY.  There are no single-LMM results for the controls",
-            "(ASD, ALZ ×4, EA) or for baseline thickness, so specificity",
-            "still rests entirely on the mean-of-BLUPs construction.  That",
-            "construction remains the registered primary; this one is a",
-            "documented sensitivity analysis.",
+        ("Scope and the SCZ-EUR question since resolved", [
+            "This run covered the 16 matched SCZ/MDD cells per atlas with the",
+            "PGC3 SCZ GWAS only — no controls, no baseline thickness, and not",
+            "yet the 2025 SCZ GWAS, under which SCZ-EUR is 4/4 on both atlases",
+            "(slide_prs_methods).  Mean-of-BLUPs remains the registered",
+            "primary; the single LMM is a documented sensitivity phenotype",
+            "until the full grid is re-run on it.",
         ]),
     ]
 
