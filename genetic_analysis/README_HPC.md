@@ -1666,3 +1666,206 @@ sensitivity phenotype, and the honest summary of MDD is that it is
 significant in the pooled arm under three methods on DK and becomes so more
 broadly under the less-shrunk construction. Scripts:
 `genetic_analysis/orderops/`.
+
+### 2026-09-17 — Step 9 opened: the Nature 2025 multi-ancestry SCZ GWAS
+
+**What arrived.** The user downloaded the summary statistics of the 2025
+Nature schizophrenia GWAS (https://www.nature.com/articles/s41586-025-10000-6;
+phenotype "scz_sad" = schizophrenia + schizoaffective) from Synapse: 13
+GWAS-VCF BCFs — single-ancestry EUR (MVP + PGC3 european + All of Us R7 +
+FinnGen R12), AFR (MVP + AoU + GPC + MGS African-American), EAS (PGC3 asian
+only), every pairwise meta, the AFR+EUR+EAS meta, and chrX for each. They
+landed inside the repo at `data/new_scz_gwas/Users/richard/…`; moved to
+**`~/rds/hpc-work/magma/gwas/SCZ_2025_multiancestry/`** (where every other
+raw discovery file lives — the PGC3, MDD2025, ASD, ALZ files are in
+`magma/gwas/`, symlinked into `genetic_analysis/work/inputs/gwas/`), with a
+`README.txt` recording provenance, format and cohorts. Format: hg38, rsID in
+`ID`, FORMAT `NS:NC:ES:SE:LP:AF:NE` (+ `I2:CQ:ED` in the metas, `SI` in EAS);
+`ES` is relative to ALT; `NE` is the per-variant effective N bcftools +metal
+writes (the Neff convention 2×NEFFDIV2 already used for PGC3). FILTER `IFFY`
+/ `REF_MISMATCH` mark ~10 % of records; dropped. **There is no Latino/AMR
+cohort in this release** (PGC3 primary had one), which matters below.
+
+**Design — how the two arms are tested when the discovery GWAS itself comes
+in ancestries** (rule 4 extended; `step9_scz2025_score.sbatch` header has the
+same table). The target is unchanged: 8,596 children = EURlike 5,665 (of whom
+4,308 are the EUR anchor set the EUR arm uses), cluster1 1,623
+(African-American-like), cluster2 928 (Hispanic-like), cluster3 380 (mixed /
+45 % Asian) by `strata_k4.tsv`.
+
+| cell | discovery → target | methods | role |
+|:--|:--|:--|:--|
+| `SCZ25_EUR → EUR` | EUR GWAS → 4,308 EUR anchor | C+T, PRS-CS, SBayesR, SBayesRC | **primary EUR arm**; direct replacement of PGC3 european |
+| `SCZ25_META → full` (zanc) | AFR+EUR+EAS meta → 8,596, score z within cluster | C+T, PRS-CS, SBayesR, SBayesRC | **primary pooled arm**; direct replacement of PGC3 primary. Bayesian trio still use EUR LD on a multi-ancestry file (same caveat as before); C+T clumps on our own sample |
+| PRS-CSx (EUR, AFR, EAS jointly, each with its own 1000G LD panel) | meta weight → full (zanc); EUR posterior → EUR | PRS-CSx | the principled multi-ancestry method the release makes possible (`~/rds/hpc-work/prscs/PRScsx` + `ldblk_1kg_{eur,afr,eas}` were already installed) |
+| `SCZ25_MATCHED → full` | per-child weights from the closest discovery ancestry: EURlike←EUR, cluster1←AFR, cluster3←EAS, cluster2←META (no AMR GWAS exists); z within cluster | C+T (8 thr), PRS-CSx per-population posteriors | ancestry-matched composite; `setup/build_matched_scores.py` |
+| `SCZ25_META → EUR` | multi → EUR | all | secondary: under-powered, not confounded |
+| `SCZ25_EUR → full` | EUR → pooled | all | **confounded** (rule 4); emitted with `design=confounded`, never read |
+| `SCZ25_AFR`, `SCZ25_EAS` | single-ancestry weights | C+T only (only a EUR LD reference exists for SBayesR/RC) | for the per-stratum table only |
+
+Two new readouts sit beside every cell (`R/09_prs_ancestry_strata.R`): (i)
+the association **within each cluster** and within the EUR anchor set, so the
+transfer of each weight set into each ancestry is visible rather than
+averaged away; (ii) a **pooled model with stratum fixed effects and a PRS ×
+stratum LRT** (`heterogeneity_PRSxStratum`), which is the test of whether the
+pooled arm is entitled to report one β. Smoke test on the PGC3 SBayesRC
+pooled score reproduced the step-6 EUR-anchor row to the last digit
+(−0.02984, p 0.0391) and gave p_het 0.32 — the clusters do not visibly
+disagree, with the caveat that cluster3 has 380 children.
+
+**Scoring is phenotype-independent and runs once**; both atlases read the
+same profiles from `work/scores_scz2025/<METH>/<ARM>/`. Same settings as
+`setup/prs_final.sbatch` so a β change is a GWAS change. PRS-CS and PRS-CSx
+are split per chromosome (66 array tasks) instead of PGC3's 7-hour serial
+run. Association per atlas via `PARC=`, into
+`results_70tab{,_hcp}/prs_scz2025/`; min-p permutation (rule 6) on the C+T
+cells; `step9_scz2025_collect.py` writes `table_scz2025_{main,all,family,strata}.tsv`
+per root and `results_70tab_hcp/compare/table_scz2025_vs_pgc3_dk_vs_hcp.tsv`
+— PGC3 vs 2025 × DK vs HCP for `global_slope`.
+
+**Effective-N trap, caught on the first submission (35735743, cancelled).**
+The first normalise pass reported max NE 114,827 for the EUR file — *less*
+than PGC3 european alone (117,498 in our `.ma`). Single-study rows decode it:
+bcftools +metal summed each study's own N column, and for the two PGC3 files
+that column is PGC's `NEFF` = Neff/2 (PGC3-european-only rows carry 58,749.1;
+PGC3-asian-only rows 14,424.8), while the MVP / AoU / FinnGen / GPC columns
+are proper Neff (AoU EUR 161,682 with 6,579 cases → 25,245 = 4·NC·(NS−NC)/NS).
+So NE under-counts the PGC3 half of the discovery sample, and N is what
+PRS-CS's `n_gwas` and SBayesR/RC's per-SNP N read. The normaliser now adds the
+missing half back per variant using the direction string `ED` (position =
+study order in the metal command, checked on single-study rows: EUR `ED[2]`
+= PGC3 european; META `ED[9]` = PGC3 european, `ED[12]` = PGC3 asian; EAS is
+PGC3 asian alone so N = 2·NE; AFR has no PGC cohort). Lookups are per rsID
+from `legacy/…/SCZ_eur.ma` (N/2) and the new `SCZ25_EAS.ma`; constants
+58,749 / 14,425 when an rsID is absent. Full-coverage EUR variants go 114,827
+→ 173,576. `gwas_summary.tsv` keeps raw and corrected medians.
+
+Resubmitted 2026-09-17 by `run_scz2025.sh` (job ids in
+`work/tmp/scz2025_submit.txt`). Logs `slurm/scz25_*`.
+
+**Rule 10, again (18:27).** Three scoring tasks (35735844_3, 35735845_1/_2)
+died in one second with `cannot create temp file for here-document: No space
+left on device`: bash backs a `<<<` here-string with a file in `$TMPDIR`, and
+those tasks landed on nodes whose local scratch was full. Pending tasks would
+have used the same copy of the script, so 35735845_[27-66] and the downstream
+chain were cancelled, the script now parses its cell with parameter expansion
+and exports `TMPDIR=$SCZ25_ROOT/tmp` (on rds), and the 43 cells were
+resubmitted as 35736782 (CT EAS) and 35736784 (42 chr cells; the script gained
+an optional cell-index list as its second argument). Because `afterok` on an
+array id is dead once any task has failed, the new gather (35736786) depends
+on the surviving original tasks *individually*. Chain: gather 35736786 →
+assoc dsk 35736789 / hcp 35736790 → min-p 35736791 → collect 35736792.
+
+Normalise (35735843, 12.7 min):
+
+| arm | records | kept | in target bim | median N raw → corrected | max N (n_gwas) | p<5e-8 |
+|:--|--:|--:|--:|--:|--:|--:|
+| EUR | 12,991,921 | 10,616,643 | 7,022,360 | 114,827 → 173,576 | 173,576 | 25,053 |
+| AFR | 22,720,347 | 18,037,899 | 6,618,031 | 35,258 (no PGC cohort) | 35,258 | 27 |
+| EAS | 6,848,433 | 6,839,472 | 5,342,045 | 14,425 → 28,850 | 28,850 | 711 |
+| META | 26,584,371 | 21,223,769 | 7,021,426 | 35,258 (AFR-only variants are the median) | 237,683 | 26,101 |
+
+For scale, PGC3 european / primary were Neff 117,498 / 170,114 with 7.66 M /
+7.59 M SNPs. The EUR discovery grew ~1.5×; the AFR arm at Neff 35 k and 27
+genome-wide hits is a small GWAS, and its per-stratum rows must be read with
+that in mind.
+
+**Step 9 COMPLETE (22:01).** Scoring 74/74 cells (C+T 11–15 min, SBayesR
+27–33 min, SBayesRC 62–64 min, PRS-CS 22 chr × ~1 h in parallel, PRS-CSx 22
+chr × ~1.5 h), gather 5 min, association 30 min (DK) / 23 min (HCP), 76
+tables per root, zero warnings; min-p 2.5 min per atlas. Tables:
+`results_70tab{,_hcp}/prs_scz2025/table_scz2025_{main,all,family,strata}.tsv`,
+`table_minp_permutation.tsv`, and
+`results_70tab_hcp/compare/table_scz2025_vs_pgc3_dk_vs_hcp.tsv`.
+
+**Headline, `global_slope`, β (SD/SD) and threshold-adjusted p, PGC3 → 2025,
+same 8,596 children, same scores settings.** EUR arm = EUR GWAS → 4,308 EUR
+anchor, raw score; pooled arm = multi-ancestry GWAS → 8,596, score z within
+ancestry cluster.
+
+| cell | method | DK: PGC3 → 2025 | HCP: PGC3 → 2025 |
+|:--|:--|:--|:--|
+| **EUR → EUR** | C+T | −0.038 (0.073) → **−0.046 (0.012)** | −0.040 (0.059) → **−0.051 (0.0045)** |
+| | PRS-CS | −0.026 (0.074) → **−0.036 (0.013)** | −0.029 (0.047) → **−0.041 (0.0057)** |
+| | SBayesR | −0.027 (0.071) → **−0.036 (0.014)** | −0.034 (0.023) → **−0.042 (0.0040)** |
+| | SBayesRC | −0.027 (0.065) → **−0.035 (0.017)** | −0.033 (0.024) → **−0.042 (0.0043)** |
+| | PRS-CSx (EUR posterior) | — → **−0.033 (0.021)** | — → **−0.035 (0.016)** |
+| **multi → pooled (zanc)** | C+T | −0.034 (0.009) → −0.029 (0.047) | −0.035 (0.006) → −0.033 (0.016) |
+| | PRS-CS | −0.024 (0.020) → −0.024 (0.019) | −0.022 (0.037) → −0.023 (0.027) |
+| | SBayesR | −0.030 (0.004) → −0.022 (0.033) | −0.030 (0.004) → −0.023 (0.024) |
+| | SBayesRC | −0.029 (0.005) → −0.028 (0.007) | −0.029 (0.006) → −0.028 (0.008) |
+| | PRS-CSx (meta) | — → −0.020 (0.050) | — → −0.019 (0.070) |
+| ancestry-matched composite → pooled | C+T | — → −0.031 (0.023) | — → −0.033 (0.013) |
+| | PRS-CSx (per-pop posteriors) | — → −0.022 (0.037) | — → −0.019 (0.070) |
+| EUR weights → pooled, z within cluster (secondary) | C+T / PRS-CS / SBayesR / SBayesRC | −0.037 (0.003) / −0.030 (0.004) / −0.034 (0.001) / −0.032 (0.002) | −0.041 (0.0006) / −0.028 (0.007) / −0.033 (0.002) / −0.032 (0.002) |
+| min-p permutation (C+T, rule 6) | EUR → EUR | p_perm 0.053 → **0.0085** | 0.035 → **0.0040** |
+| | multi → pooled | 0.0065 → 0.014 | 0.0090 → 0.0080 |
+| | matched composite → pooled | — → 0.018 | — → 0.011 |
+
+Five readings.
+
+1. **The EUR arm is no longer borderline.** With PGC3 european it was 0/4 on
+   DK (p_adj 0.065–0.074) and 3/4 on HCP; with the 2025 EUR GWAS (Neff
+   117,498 → 173,576) it is **4/4 on DK and 4/4 on HCP, plus PRS-CSx**, β
+   −0.035 to −0.051, and the C+T min-p permutation goes 0.053 → 0.0085. The
+   §5 6.0-vintage EUR numbers (−0.035 to −0.047) are back, this time on the
+   larger 7.0 sample and without the winner's-curse caveat: nothing was
+   selected, the discovery GWAS grew. Same sign everywhere. `baseline_thickness`
+   (positive-control phenotype) stays null in every 2025 cell (|β| ≤ 0.02),
+   so this is a slope-specific association, as before.
+2. **The pooled arm is unchanged in kind and slightly weaker in degree.**
+   Still 4/4 methods significant on both atlases (SBayesRC −0.028, p 0.007 /
+   0.008, indistinguishable from PGC3's −0.029), but C+T and SBayesR drop to
+   −0.029/−0.022, and the C+T min-p goes 0.0065 → 0.014. The likely reason is
+   in the strata table: the 2025 meta has **no Latino cohort** (PGC3 primary
+   did), and cluster2 (Hispanic-like, 928 children) is where the within-
+   stratum effect is largest under every weight set (−0.06 to −0.09 with META
+   or EUR weights, p 0.005–0.05). A meta that no longer estimates in that
+   ancestry loses a little there. This is a statement about the discovery
+   panel, not about the children.
+3. **Ancestry-matched weighting does not help yet, and the strata table says
+   why.** The AFR GWAS (Neff 35 k, 27 hits) and the EAS GWAS (Neff 29 k)
+   produce scores that predict nothing in *any* cluster, including their own
+   (AFR weights in cluster1: +0.011 C+T, +0.033 PRS-CSx, p > 0.3; EAS weights
+   in cluster3: |β| < 0.05, p > 0.5). The EUR weights, by contrast, carry a
+   same-sign signal into cluster1 under three of four methods (C+T −0.050,
+   SBayesR −0.075, SBayesRC −0.046; SE 0.03–0.04, p 0.05–0.2) and into
+   cluster2 (−0.03 to −0.08). So swapping EUR-derived weights for AFR-derived
+   ones in cluster1 replaces a weak signal with noise, and the composite comes
+   out *between* the meta and the EUR-weights-for-all score. PRS-CSx, which
+   couples the three GWAS through shared priors, does not rescue this: its
+   meta weight is the weakest pooled score (−0.020, p 0.05 / 0.07). At these
+   discovery sizes the best pooled scores remain (a) the multi-ancestry meta
+   under SBayesRC and (b) EUR weights standardised within cluster (−0.030 to
+   −0.041, p 0.0006–0.007, both atlases) — the latter is a *secondary* design
+   because it inherits EUR effect sizes, but it is not the rule-4 confound:
+   the raw EUR → pooled cells show the signature (SE 0.016–0.023 vs 0.010
+   after within-cluster z-scoring) and the zanc cells do not.
+4. **The pooled arm is entitled to pool.** PRS × stratum LRT p ≥ 0.10 in
+   every cell on both atlases (0.10–0.92); the stratum-fixed-effects pooled β
+   equals the zanc β to the third decimal (e.g. SBayesRC META −0.0279 vs
+   −0.0276). No cluster contradicts the others' sign under the informative
+   weight sets; cluster3 (380) has SE 0.05–0.10 and says nothing on its own.
+   With ~1,600 / 900 / 380 children per non-EUR cluster this is absence of
+   evidence of heterogeneity, not evidence of homogeneity — stated as such.
+5. **Within-family (Fulker), as before: uninformative, not contradictory.**
+   EUR arm, 726 pairs: β_W −0.02 to −0.12 (C+T −0.121, p 0.014 on both
+   atlases; the three single-score methods −0.02 to −0.06, p 0.2–0.7), every
+   p_diff ≥ 0.08. Pooled arm, 1,449 pairs: β_W −0.02 to +0.03, p_diff
+   0.08–0.64. SEs 0.03–0.05, three times the between-family SEs; the §5
+   "~18 % power" caveat stands.
+
+**What changes in the write-up.** The honest statement moves from "SCZ robust
+pooled (4/4), borderline EUR (p_adj 0.065–0.074 DK / 3 of 4 HCP)" to **"SCZ
+polygenic risk → faster cortical thinning, significant under every method in
+both the European and the pooled arm on both parcellations (β −0.02 to
+−0.05 SD/SD), and the European estimate is the stronger one once the
+discovery GWAS is the 2025 release."** Report the PGC3 and 2025 columns side
+by side (the compare table), keep the AFR/EAS-weight nulls and the
+no-Latino-cohort caveat in the ancestry paragraph, and keep quoting the
+within-family SEs.
+
+Files added: `step9_scz2025_{normalise,score,gather,assoc,minp,collect}.{sbatch,py}`,
+`setup/build_matched_scores.py`, `R/09_prs_ancestry_strata.R`,
+`run_scz2025.sh`. Nothing per-subject is tracked (rule 16); scores live under
+the gitignored `work/scores_scz2025/`.
