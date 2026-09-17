@@ -22,7 +22,7 @@
 # not spin-significant.  Its numbers are in design_grid_concordance.tsv.
 
 suppressMessages({library(ggplot2); library(dplyr); library(tidyr); library(patchwork)
-                  library(scales)})
+                  library(scales); library(grid)})
 
 ROOT <- "/Users/richard/Git/abcd_development/ahba_pls"
 RES <- file.path(ROOT, "results"); DATA <- file.path(ROOT, "data")
@@ -49,10 +49,13 @@ nspnH   <- read.csv(file.path(REF, "nspn_hcp_maps.csv"), row.names = 1)
 c3dk <- read.csv(file.path(REF, "ahba_c123_scores_recomputed_ds25.csv"), row.names = 1)
 
 S_VARS <- c("dCT rate", "dCT + CT", "dCT alone", "NSPN PLS2", "AHBA C3")
-W_VARS <- c("dCT + CT", "dCT alone", "NSPN PLS2", "AHBA C3", "AHBA C1")
+# AHBA C1 is computed in design_grid_pairs_weights.tsv and quoted in the figure
+# subtitle, but is not a column of the matrix: it is the static-gradient control,
+# not one of the axes being compared.
+W_VARS <- c("dCT + CT", "dCT alone", "NSPN PLS2", "AHBA C3")
 PAL <- c(DK = "grey25", HCP = "#2166ac")
 stopifnot(setequal(unique(c(PS$var_x, PS$var_y)), S_VARS),
-          setequal(unique(c(PW$var_x, PW$var_y)), W_VARS))
+          all(W_VARS %in% c(PW$var_x, PW$var_y)))
 
 pf <- function(p) if (is.na(p)) "" else if (p < 0.001) "p<0.001" else sprintf("p=%.3f", p)
 
@@ -65,15 +68,21 @@ brain <- function(poly, vals, title = NULL, diverging = TRUE) {
     coord_fixed(expand = FALSE) +
     (if (diverging) scale_fill_distiller(palette = "RdBu", limits = lim, na.value = "grey78")
      else scale_fill_viridis_c(na.value = "grey78")) +
-    facet_wrap(~view, nrow = 1) + theme_void() +
+    # No facet by view: in the ggseg polygon space the lateral and medial views
+    # already occupy adjacent, non-overlapping x ranges (DK 747-1379 and
+    # 1411-2043), so one coord_fixed panel draws them side by side at full size.
+    # Faceting instead gives each view the UNION x range, which draws every
+    # surface at 49% of its panel width -- and coord_fixed then halves the height
+    # too (free scales are not an option: coord_fixed rejects them).
+    theme_void() +
     theme(legend.position = "none", strip.text = element_blank(),
           plot.title = element_text(size = 7.0, hjust = 0.5, margin = margin(b = 1)),
           plot.margin = margin(0, 1, 0, 1)) +
     labs(title = title)
 }
 row_lab <- function(txt, sub) ggplot() +
-  annotate("text", 0, 0.30, label = txt, size = 2.25, fontface = "bold", hjust = 0.5) +
-  annotate("text", 0, -0.36, label = sub, size = 1.8, colour = "grey40", hjust = 0.5) +
+  annotate("text", 0, 0.45, label = txt, size = 2.1, fontface = "bold", hjust = 0.5) +
+  annotate("text", 0, -0.48, label = sub, size = 1.7, colour = "grey40", hjust = 0.5) +
   xlim(-1, 1) + ylim(-1, 1) + coord_cartesian(clip = "off") +
   theme_void() + theme(plot.margin = margin(0, 1, 0, 1))
 
@@ -91,7 +100,7 @@ hcp_maps <- list(
   brain(hcpp, sc("HCP", "dCT + CT")), brain(hcpp, sc("HCP", "dCT alone")),
   brain(hcpp, setNames(nspnH$PLS2, rownames(nspnH))), brain(hcpp, sc("HCP", "AHBA C3")))
 
-WID <- c(0.55, rep(1, length(dk_maps)))
+WID <- c(0.62, rep(1, length(dk_maps)))
 brow <- function(lab, sub, panels)
   Reduce(`|`, panels, init = row_lab(lab, sub)) + plot_layout(widths = WID)
 r1 <- brow("Desikan\u2013\nKilliany", "33 of 34\nparcels", dk_maps)
@@ -165,8 +174,8 @@ wlab <- WC |> rowwise() |>
   mutate(st = list(stat_of(PW, as.character(row), as.character(col), parcellation))) |>
   mutate(txt = sprintf("%.2f", st$rho), sub = sprintf("n=%.1fk", st$n / 1000)) |> ungroup()
 # the three reference-vs-reference cells are the same data in both triangles
-ref_ref <- WC |> filter(row %in% c("NSPN PLS2", "AHBA C3", "AHBA C1"),
-                        col %in% c("NSPN PLS2", "AHBA C3", "AHBA C1"), parcellation == "HCP") |>
+ref_ref <- WC |> filter(row %in% c("NSPN PLS2", "AHBA C3"),
+                        col %in% c("NSPN PLS2", "AHBA C3"), parcellation == "HCP") |>
   mutate(mark = "=")
 
 pb <- ggplot(wpts, aes(x, y)) +
@@ -181,7 +190,7 @@ pb <- ggplot(wpts, aes(x, y)) +
   scale_alpha_continuous(range = c(0.25, 1), guide = "none") +
   facet_grid(row ~ col, scales = "free") + mat_theme +
   labs(title = "b   Gene weights \u2014 every pair",
-       subtitle = "same triangles  \u00b7  bold rho over the shared genes  \u00b7  \u201c=\u201d: cell is parcellation-independent")
+       subtitle = "same triangles  \u00b7  bold rho over the shared genes, n below  \u00b7  \u201c=\u201d: cell is parcellation-independent")
 
 # ------------------------------------------------------------------ caption ---
 d1 <- CMP |> filter(design == "dCT + CT", parcellation == "DK")
@@ -218,7 +227,9 @@ fig <- (r1 / r2 / (pa | pb) / methods_panel) +
   # aspect.ratio = 1 pins the matrices' panel shape, so these weights are set to
   # the physical height each row actually needs (inches): brains ~0.7, the 5x5
   # matrices ~4.35 at this width, methods ~1.3.
-  plot_layout(heights = c(0.7, 0.7, 4.35, 2.0)) +
+  # a brain cell is ~1.65 in wide and the two views together span 1295 x 425
+  # polygon units, so each brain row needs ~0.55 in of height.
+  plot_layout(heights = c(0.58, 0.58, 4.35, 2.0)) +
   plot_annotation(
     title = "One transcriptomic axis of adolescent thinning, and every pairwise comparison behind it",
     subtitle = sprintf("Adding baseline CT to Y recovers AHBA C3 in both parcellations (DK rho %.2f, HCP %.2f); thinning rate alone recovers it only at 137 parcels (%.2f vs %.2f),\nbecause at 33 regions its gene weights load on the static gradient C1 as heavily as on C3 (%.2f vs %.2f). NSPN PLS2 resampled into HCP-MMP agrees with\nthe HCP fit far less well than in its native resolution (%.2f vs %.2f), which is what its 308-region effective resolution predicts.",
@@ -230,5 +241,5 @@ fig <- (r1 / r2 / (pa | pb) / methods_panel) +
                   plot.subtitle = element_text(size = 7.3, colour = "grey25",
                                                margin = margin(b = 4))))
 
-ggsave(file.path(FIG, "fig_signature_designs.png"), fig, width = 8.6, height = 8.6, dpi = 300, bg = "white")
+ggsave(file.path(FIG, "fig_signature_designs.png"), fig, width = 8.6, height = 8.5, dpi = 300, bg = "white")
 cat("wrote", file.path(FIG, "fig_signature_designs.png"), "\n")

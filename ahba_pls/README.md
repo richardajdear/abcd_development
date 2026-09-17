@@ -428,10 +428,14 @@ Every NSPN pair weakens in HCP space while the pairs that do not involve NSPN st
 should look like, so read the weak HCP–NSPN cells as a resolution limit of the reference map rather
 than as disagreement between the cohorts — the like-for-like NSPN comparison is the DK one.
 
-**The figure is now two square pair matrices**, regional maps (panel a) and gene vectors (panel b),
-each with DK below the diagonal and HCP-MMP above it, ρ in bold inside every cell and the spin p
-under it. This is possible only because NSPN PLS2 exists in both parcellations; the three
-reference-vs-reference cells of panel b are parcellation-independent and marked "=".
+**The figure is now two square pair matrices**, regional maps (panel a, five variables) and gene
+vectors (panel b, four), each with DK below the diagonal and HCP-MMP above it, ρ in bold inside
+every cell and the spin p under it. This is possible only because NSPN PLS2 exists in both
+parcellations. AHBA C1 is not a column of the gene matrix — it is the static-gradient control
+rather than one of the axes being compared — but its loadings are still computed in
+`design_grid_pairs_weights.tsv` and quoted where they matter (the dCT-alone C1 loading is the
+reason that design fails at 33 regions). The NSPN-vs-C3 cell of panel b is
+parcellation-independent and marked "=".
 
 ### Gene bases — which comparisons are clean, and why
 
