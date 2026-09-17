@@ -62,6 +62,9 @@ Y34 = pd.read_csv(DATA / "y_maps_bilateral_34.csv", index_col=0)
 Y180 = pd.read_csv(RES / "hcp_y_maps_180.csv", index_col=0)
 nspn34 = pd.read_csv(REF / "nspn_dk_maps_bilateral_34.csv", index_col=0)
 nspn_hcp = pd.read_csv(REF / "nspn_hcp_maps.csv", index_col=0)   # 18_nspn_to_hcp.py
+pc1 = (pd.read_csv(ROOT.parent / "data" / "velmeshev_PC1_gene_loadings.csv")
+       .dropna(subset=["feature_name"]).drop_duplicates("feature_name")
+       .set_index("feature_name")[["PC1_herringV3", "PC1_U01V2"]])
 nspn_w = pd.read_csv(REF / "nspn_pls_gene_weights.csv").set_index("gene")
 c3dk = pd.read_csv(REF / f"ahba_c123_scores_recomputed_{DS}.csv", index_col=0)
 c123w = pd.read_csv(REF / "ahba_c123_gene_weights.csv", index_col=0)
@@ -189,7 +192,12 @@ print(C[C.level == "scores"][["design", "parcellation", "reference", "rho", "p_s
 # parcellation -- the figure plots these as two square matrices with DK below
 # the diagonal and HCP-MMP above it.
 S_VARS = ["dCT rate", "dCT + CT", "dCT alone", "NSPN PLS2", "AHBA C3"]
-W_VARS = ["dCT + CT", "dCT alone", "NSPN PLS2", "AHBA C3", "AHBA C1"]
+# snRNAseq PC1 = the snRNA-seq maturation axis from the transcriptional_maturation
+# project (data/velmeshev_PC1_gene_loadings.csv in the repo root). Two independent
+# datasets are supplied and they agree at rho ~ 0.5, so both are carried in the
+# pairs table and the figure plots the Herring one.
+W_VARS = ["dCT + CT", "dCT alone", "NSPN PLS2", "AHBA C3", "AHBA C1",
+          "snRNAseq PC1", "snRNAseq PC1 (U01)"]
 
 score_vecs = {
     "DK": {"dCT rate": Y34["dCT"], "dCT + CT": FITS[(D_TWOY, "DK")]["scores"],
@@ -199,11 +207,14 @@ score_vecs = {
             "dCT alone": FITS[(D_ONEY, "HCP")]["scores"],
             "NSPN PLS2": nspn_hcp["PLS2"], "AHBA C3": hcp_c123["C3"].reindex(Y180.index)},
 }
+REFS_W = {"NSPN PLS2": nspn_w["PLS2_z"], "AHBA C3": c123w["C3"], "AHBA C1": c123w["C1"],
+          "snRNAseq PC1": pc1["PC1_herringV3"].dropna(),
+          "snRNAseq PC1 (U01)": pc1["PC1_U01V2"].dropna()}
 weight_vecs = {
-    "DK": {"dCT + CT": FITS[(D_TWOY, "DK")]["weights"], "dCT alone": FITS[(D_ONEY, "DK")]["weights"],
-           "NSPN PLS2": nspn_w["PLS2_z"], "AHBA C3": c123w["C3"], "AHBA C1": c123w["C1"]},
-    "HCP": {"dCT + CT": FITS[(D_TWOY, "HCP")]["weights"], "dCT alone": FITS[(D_ONEY, "HCP")]["weights"],
-            "NSPN PLS2": nspn_w["PLS2_z"], "AHBA C3": c123w["C3"], "AHBA C1": c123w["C1"]},
+    "DK": {"dCT + CT": FITS[(D_TWOY, "DK")]["weights"],
+           "dCT alone": FITS[(D_ONEY, "DK")]["weights"], **REFS_W},
+    "HCP": {"dCT + CT": FITS[(D_TWOY, "HCP")]["weights"],
+            "dCT alone": FITS[(D_ONEY, "HCP")]["weights"], **REFS_W},
 }
 
 # points behind the panels, so the figure fits nothing

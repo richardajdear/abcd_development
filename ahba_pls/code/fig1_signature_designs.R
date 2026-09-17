@@ -49,11 +49,13 @@ nspnH   <- read.csv(file.path(REF, "nspn_hcp_maps.csv"), row.names = 1)
 c3dk <- read.csv(file.path(REF, "ahba_c123_scores_recomputed_ds25.csv"), row.names = 1)
 
 S_VARS <- c("dCT rate", "dCT + CT", "dCT alone", "NSPN PLS2", "AHBA C3")
-# AHBA C1 is computed in design_grid_pairs_weights.tsv and quoted in the figure
-# subtitle, but is not a column of the matrix: it is the static-gradient control,
-# not one of the axes being compared.
-W_VARS <- c("dCT + CT", "dCT alone", "NSPN PLS2", "AHBA C3")
-PAL <- c(DK = "grey25", HCP = "#2166ac")
+# AHBA C1 and the second snRNAseq dataset (PC1_U01V2) are computed in
+# design_grid_pairs_weights.tsv but are not columns here: C1 is the
+# static-gradient control rather than an axis under comparison, and the U01
+# version is a replication of the plotted Herring one (they agree at rho 0.54).
+W_VARS <- c("dCT + CT", "dCT alone", "NSPN PLS2", "AHBA C3", "snRNAseq PC1")
+ODD <- c(a = "dCT rate", b = "snRNAseq PC1")   # shaded rows/columns, see below
+PAL <- c(DK = "#d6604d", HCP = "#2166ac")   # light red / blue, one per parcellation
 stopifnot(setequal(unique(c(PS$var_x, PS$var_y)), S_VARS),
           all(W_VARS %in% c(PW$var_x, PW$var_y)))
 
@@ -112,6 +114,14 @@ r2 <- brow("HCP-MMP\n(Glasser)", "137 of 180\nparcels", hcp_maps)
 # variable name. Both triangles carry real, different data for regional maps;
 # for gene vectors the reference-vs-reference cells (C3/C1/NSPN) are
 # parcellation-independent and so are identical in the two triangles.
+shade <- function(vars_, odd) {
+  # every cell in the odd variable's row or column, including its diagonal cell,
+  # so the band is continuous
+  expand.grid(row = vars_, col = vars_, stringsAsFactors = FALSE) |>
+    filter(row == odd | col == odd) |>
+    mutate(row = factor(row, levels = vars_), col = factor(col, levels = vars_))
+}
+
 cells <- function(vars_) {
   expand.grid(row = vars_, col = vars_, stringsAsFactors = FALSE) |>
     mutate(i = match(row, vars_), j = match(col, vars_),
@@ -148,6 +158,8 @@ mat_theme <- theme_bw(base_size = 6.4) +
         plot.subtitle = element_text(size = 6.2, colour = "grey30", margin = margin(b = 2)))
 
 pa <- ggplot(spts, aes(x, y)) +
+  geom_rect(data = shade(S_VARS, ODD[["a"]]), aes(xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf),
+            fill = "grey93", inherit.aes = FALSE) +
   geom_point(aes(colour = parcellation), size = 0.28, alpha = 0.75) +
   geom_smooth(aes(colour = parcellation), method = "lm", se = FALSE,
               linewidth = 0.25, formula = y ~ x) +
@@ -158,7 +170,7 @@ pa <- ggplot(spts, aes(x, y)) +
   scale_colour_manual(values = PAL, guide = "none") +
   facet_grid(row ~ col, scales = "free", switch = NULL) + mat_theme +
   labs(title = "a   Regional maps \u2014 every pair",
-       subtitle = "lower triangle DK (33 regions), upper HCP-MMP (137)  \u00b7  bold rho, spin p below")
+       subtitle = "lower triangle DK (33 regions, red), upper HCP-MMP (137, blue)  \u00b7  bold rho, spin p below")
 
 # --- gene vectors
 WC <- cells(W_VARS) |> filter(!is.na(parcellation))
@@ -174,11 +186,13 @@ wlab <- WC |> rowwise() |>
   mutate(st = list(stat_of(PW, as.character(row), as.character(col), parcellation))) |>
   mutate(txt = sprintf("%.2f", st$rho), sub = sprintf("n=%.1fk", st$n / 1000)) |> ungroup()
 # the three reference-vs-reference cells are the same data in both triangles
-ref_ref <- WC |> filter(row %in% c("NSPN PLS2", "AHBA C3"),
-                        col %in% c("NSPN PLS2", "AHBA C3"), parcellation == "HCP") |>
+REFS <- c("NSPN PLS2", "AHBA C3", "snRNAseq PC1")
+ref_ref <- WC |> filter(row %in% REFS, col %in% REFS, parcellation == "HCP") |>
   mutate(mark = "=")
 
 pb <- ggplot(wpts, aes(x, y)) +
+  geom_rect(data = shade(W_VARS, ODD[["b"]]), aes(xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf),
+            fill = "grey93", inherit.aes = FALSE) +
   geom_hex(aes(fill = parcellation, alpha = after_stat(count)), bins = 22, linewidth = 0) +
   geom_text(data = wlab, aes(x = -Inf, y = Inf, label = txt), hjust = -0.25, vjust = 1.35,
             size = 2.05, fontface = "bold", inherit.aes = FALSE) +
@@ -190,7 +204,7 @@ pb <- ggplot(wpts, aes(x, y)) +
   scale_alpha_continuous(range = c(0.25, 1), guide = "none") +
   facet_grid(row ~ col, scales = "free") + mat_theme +
   labs(title = "b   Gene weights \u2014 every pair",
-       subtitle = "same triangles  \u00b7  bold rho over the shared genes, n below  \u00b7  \u201c=\u201d: cell is parcellation-independent")
+       subtitle = "same triangles  \u00b7  bold rho, shared-gene n below  \u00b7  \u201c=\u201d: parcellation-independent")
 
 # ------------------------------------------------------------------ caption ---
 d1 <- CMP |> filter(design == "dCT + CT", parcellation == "DK")
@@ -199,6 +213,10 @@ d2 <- CMP |> filter(design == "dCT alone", parcellation == "DK")
 h2 <- CMP |> filter(design == "dCT alone", parcellation == "HCP")
 d4 <- CMP |> filter(grepl("T1T2", design), parcellation == "DK")
 nspn_hcp_n <- sum(!is.na(nspnH$PLS2))
+pc1_pair <- PW |> filter(parcellation == "DK", grepl("snRNAseq", var_x), grepl("snRNAseq", var_y))
+stopifnot(nrow(pc1_pair) == 1)
+pc1_agree <- pc1_pair$rho[1]
+pc1_n <- max(PW$n[grepl("snRNAseq", PW$var_x) | grepl("snRNAseq", PW$var_y)])
 methods <- paste(
   "Methods.",
   "\u2022 Y designs: dCT + CT (PLS2, the lead signature) and dCT alone (a single Y column, so PLS1 is simply the vector of gene\u2013map correlations and nothing absorbs the",
@@ -208,12 +226,20 @@ methods <- paste(
           d1$p_spin, h1$p_spin, d2$p_spin, h2$p_spin),
   "  dCT+CT fits clear 0.05, so the single-Y fits are usable gene rankings but carry no independent spatial claim.",
   sprintf("\u2022 NSPN PLS2 in HCP-MMP space (%d of 180 parcels) is resampled from the published 308-region map through fsaverage vertices, the route in AHBA/notebooks/", nspn_hcp_n),
-  "  MT_whitakervertes.ipynb (code/18_nspn_to_hcp.py; validation against the published DK table r = 0.97, see data/reference/NSPN_HCP.md). Its effective resolution is",
-  "  therefore the 308 parcellation, not 180 \u2014 neighbouring HCP parcels can inherit one 308-value, which makes it a smoother map than a native HCP fit.",
+  "  MT_whitakervertes.ipynb (code/18_nspn_to_hcp.py; validation against the published DK table r = 0.985, see data/reference/NSPN_HCP.md). The resampling is not",
+  "  lossy in the way the weak HCP-NSPN cells might suggest: the target grid is FINER than the source (180 vs 152 parcels per hemisphere), each HCP parcel averages a",
+  "  median of 4 source parcels, and an HCP-native map survives a round trip through the 308 grid at r = 0.91 (code/19_resample_check.py). What differs is the ABCD",
+  "  component itself: its DK and HCP score maps correlate only rho = 0.74 across parcellations, and NSPN PLS2 tracks the DK one.",
+  sprintf("\u2022 snRNAseq PC1 = the snRNA-seq maturation axis from the transcriptional_maturation project (data/velmeshev_PC1_gene_loadings.csv, %s genes). Two independent",
+          format(pc1_n, big.mark = ",")),
+  sprintf("  datasets exist and agree at rho = %.2f; the Herring one is plotted and the U01 one is in design_grid_pairs_weights.tsv. It is the only axis here not derived from the AHBA.",
+          pc1_agree),
   sprintf("\u2022 Gene weights are bootstrap Z over 1,000 resamples; n = %s genes (DK) and %s (HCP-MMP), and each panel's n is the overlap of its two vectors.",
           format(d1$n_genes, big.mark = ","), format(h1$n_genes, big.mark = ",")),
   sprintf("\u2022 Imaging: %s children with \u22652 QC-passing visits, true 7.0 tabulated tables; both parcellations run on the same sample.",
           format(PROV$n_subjects[1], big.mark = ",")),
+  sprintf("\u2022 The shaded row and column of each matrix is the odd one out: %s in a (an imaging map, not a gene-derived axis) and %s in b (the only axis not derived from the AHBA).",
+          ODD[["a"]], ODD[["b"]]),
   "\u2022 Components are in the thinning orientation (multiplied by \u2212sign of their dCT salience): positive = expressed more where thinning is faster. dCT rate itself is",
   "  mm/yr, so it runs the other way \u2014 hence the negative correlations in its row. Grey parcels have no AHBA donor coverage.",
   sep = "\n")
@@ -229,17 +255,17 @@ fig <- (r1 / r2 / (pa | pb) / methods_panel) +
   # matrices ~4.35 at this width, methods ~1.3.
   # a brain cell is ~1.65 in wide and the two views together span 1295 x 425
   # polygon units, so each brain row needs ~0.55 in of height.
-  plot_layout(heights = c(0.58, 0.58, 4.35, 2.0)) +
+  plot_layout(heights = c(0.58, 0.58, 4.35, 2.9)) +
   plot_annotation(
     title = "One transcriptomic axis of adolescent thinning, and every pairwise comparison behind it",
-    subtitle = sprintf("Adding baseline CT to Y recovers AHBA C3 in both parcellations (DK rho %.2f, HCP %.2f); thinning rate alone recovers it only at 137 parcels (%.2f vs %.2f),\nbecause at 33 regions its gene weights load on the static gradient C1 as heavily as on C3 (%.2f vs %.2f). NSPN PLS2 resampled into HCP-MMP agrees with\nthe HCP fit far less well than in its native resolution (%.2f vs %.2f), which is what its 308-region effective resolution predicts.",
+    subtitle = sprintf("Adding baseline CT to Y recovers AHBA C3 in both parcellations (DK rho %.2f, HCP %.2f); thinning rate alone recovers it only at 137 parcels (%.2f vs %.2f),\nbecause at 33 regions its gene weights load on the static gradient C1 as heavily as on C3 (%.2f vs %.2f). NSPN PLS2 matches the DK fit (%.2f) but not the\nHCP one (%.2f) \u2014 not a resampling artefact (round trip r = 0.91) but the two ABCD fits' score maps differing (rho 0.74 across parcellations).",
                        stat_of(PS, "dCT + CT", "AHBA C3", "DK")$rho, stat_of(PS, "dCT + CT", "AHBA C3", "HCP")$rho,
                        stat_of(PS, "dCT alone", "AHBA C3", "HCP")$rho, stat_of(PS, "dCT alone", "AHBA C3", "DK")$rho,
                        stat_of(PW, "dCT alone", "AHBA C1", "DK")$rho, stat_of(PW, "dCT alone", "AHBA C3", "DK")$rho,
-                       stat_of(PS, "dCT + CT", "NSPN PLS2", "HCP")$rho, stat_of(PS, "dCT + CT", "NSPN PLS2", "DK")$rho),
+                       stat_of(PS, "dCT + CT", "NSPN PLS2", "DK")$rho, stat_of(PS, "dCT + CT", "NSPN PLS2", "HCP")$rho),
     theme = theme(plot.title = element_text(size = 9.6, face = "bold"),
                   plot.subtitle = element_text(size = 7.3, colour = "grey25",
                                                margin = margin(b = 4))))
 
-ggsave(file.path(FIG, "fig_signature_designs.png"), fig, width = 8.6, height = 8.5, dpi = 300, bg = "white")
+ggsave(file.path(FIG, "fig_signature_designs.png"), fig, width = 8.6, height = 9.5, dpi = 300, bg = "white")
 cat("wrote", file.path(FIG, "fig_signature_designs.png"), "\n")

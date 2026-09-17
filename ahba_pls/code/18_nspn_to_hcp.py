@@ -56,8 +56,20 @@ def annot(path: Path):
     return lab, [n.decode() if isinstance(n, bytes) else n for n in names]
 
 
+def strip_hemi(name: str) -> str:
+    """Drop a hemisphere prefix/suffix from an annot label.
+
+    The annot files are not consistent: `lh.aparc.annot` names its parcels
+    `lh_bankssts` while `rh.aparc.annot` names the same parcel `bankssts`, and
+    HCPMMP1 uses `L_V1_ROI` / `R_V1_ROI`. Without this, a bilateral groupby
+    silently splits the hemispheres into separate keys and a background test on
+    the raw name misses `lh_unknown`.
+    """
+    return re.sub(r"_ROI$", "", re.sub(r"^(lh_|rh_|L_|R_)", "", name))
+
+
 def is_bg(name: str) -> bool:
-    return name.startswith(BACKGROUND)
+    return strip_hemi(name).startswith(BACKGROUND)
 
 
 # ---------------------------------------------------------------- 308 values --
@@ -133,7 +145,7 @@ assert sum(parts.values()) == 308, parts
 HCP = pd.concat(frames["HCPMMP1"], ignore_index=True)
 DKv = pd.concat(frames["aparc"], ignore_index=True)
 
-HCP["region"] = HCP.parcel.str.replace(r"^[LR]_", "", regex=True).str.replace("_ROI$", "", regex=True)
+HCP["region"] = HCP.parcel.map(strip_hemi)
 HCP.to_csv(REF / "nspn_hcp_coverage.csv", index=False, float_format="%.5g")
 
 kept = HCP[HCP.coverage >= COVER_MIN]
@@ -145,8 +157,9 @@ bilat.index.name = "label"
 bilat.to_csv(REF / "nspn_hcp_maps.csv", float_format="%.6g")
 
 # ----------------------------------------------------------------- validation --
-DKv["region"] = DKv.parcel
+DKv["region"] = DKv.parcel.map(strip_hemi)     # bilateral key, both hemispheres
 dk_bilat = (DKv[DKv.coverage >= COVER_MIN].groupby("region")[MEASURES].mean())
+assert DKv.groupby("region").hemi.nunique().eq(2).all(), "DK validation must be bilateral"
 dk_ref = pd.read_csv(REF / "nspn_dk_maps_bilateral_34.csv", index_col=0)
 dk_ref.index = dk_ref.index.str.replace("^lh_", "", regex=True)
 shared = dk_bilat.index.intersection(dk_ref.index)
@@ -186,17 +199,40 @@ n_sub_regions) rather than by row position.
 - Bilateral average of the two hemispheres, labelled `lh_<region>`, to match
   this project's other HCP maps.
 
-**Validation** — the same vertex route run 308 -> Desikan-Killiany, against the
-published DK-level table this project already uses
-(`nspn_dk_maps_bilateral_34.csv`), over {int(V.n.iloc[0])} regions:
+**Validation** — the same vertex route run 308 -> Desikan-Killiany and averaged
+over both hemispheres, against the published DK-level table this project already
+uses (`nspn_dk_maps_bilateral_34.csv`), over {int(V.n.iloc[0])} regions:
 
 {V.round(3).to_string(index=False)}
 
-**Caveat.** This is a resampling, not a measurement in HCP-MMP space: where an
-HCP parcel is smaller than the 308-parcel containing it, neighbouring HCP
-parcels inherit the same value, so the map is smoother than a native HCP fit.
-Spatial statistics against it (spin tests) are therefore conservative in the
-sense that the effective spatial resolution is the 308 parcellation, not 180.
+**How lossy is it?** Measured, not assumed, in `code/19_resample_check.py`:
+
+- The target grid is **finer** than the source, not coarser: 152 parcels per
+  hemisphere in the 308 scheme (308 is the bilateral count) against 180 in
+  HCP-MMP.
+- Each HCP parcel is a vertex-weighted average of a median of **4** source
+  parcels (3 contributing >=5% of its vertices), and the largest contributor
+  supplies a median of 52% of the vertices (IQR 40-67%). Only 12 of 180 parcels
+  take >90% from one source parcel, so "neighbouring parcels inherit one value"
+  is not what happens.
+- An HCP-native map pushed through the 308 grid and straight back returns at
+  r = 0.90-0.91 (ABCD dCT+CT scores, AHBA C3, the thinning rate), which bounds
+  what the resampling alone can attenuate.
+- Routing 308 -> HCP -> DK instead of 308 -> DK directly costs r = 0.96.
+
+So the weak agreement between this map and the HCP-MMP fits is **not** a
+resampling artefact. It is the ABCD component that differs between
+parcellations: its DK and HCP score maps correlate rho = 0.74 (against 0.91 for
+AHBA C3 and 0.85 for the thinning rate across the same two parcellations), and
+NSPN PLS2 tracks the DK version.
+
+**Earlier bug, fixed.** `lh.aparc.annot` names its parcels `lh_bankssts` while
+`rh.aparc.annot` names the same parcel `bankssts`. The first version of the DK
+validation grouped on the raw annot name, so the two hemispheres became separate
+keys and the reported correlation compared RIGHT-hemisphere values against the
+published bilateral map (and `lh_unknown` / `lh_corpuscallosum` escaped the
+background filter). With the hemisphere prefix normalised the validation is
+bilateral-vs-bilateral, and PLS2 agreement rises from r = 0.97 to r = 0.985.
 """
 (REF / "NSPN_HCP.md").write_text(note)
 

@@ -1,0 +1,18 @@
+measurement	value	note
+parcel counts (left hemisphere)	152 in the 308 scheme, 180 in HCP-MMP, 34 in DK	the target grid is FINER than the source
+308-parcels contributing per HCP parcel (median)	4 (>=5% of vertices: 3)	an HCP parcel is a vertex-weighted average of several 308-parcels
+dominant 308-parcel share per HCP parcel (median, IQR)	0.52 (0.40-0.67)	1.00 would mean 'inherits one value'
+HCP parcels whose dominant share > 0.90	12 of 180	
+round trip HCP -> 308 -> HCP: dCT + CT	r = 0.909, rho = 0.877 (n = 137)	how much of an HCP-resolution map survives the 308 grid
+round trip HCP -> 308 -> HCP: AHBA C3	r = 0.899, rho = 0.893 (n = 137)	how much of an HCP-resolution map survives the 308 grid
+round trip HCP -> 308 -> HCP: dCT rate	r = 0.898, rho = 0.902 (n = 137)	how much of an HCP-resolution map survives the 308 grid
+NSPN PLS2: 308 -> DK direct vs 308 -> HCP -> DK	r = 0.961 (n = 34)	detouring through HCP-MMP costs nothing at DK resolution
+label alignment, nspn_hcp_maps vs the HCP arm	137 shared of 179 and 137	labels are Glasser region names in both, no positional matching
+|rho| HCP / |rho| DK, pairs WITH NSPN PLS2	median 0.47 (0.28-0.69, n = 4)	
+|rho| HCP / |rho| DK, pairs WITHOUT NSPN PLS2	median 1.20 (0.58-4.92, n = 6)	the NSPN-specific drop is not the general parcellation effect
+dCT + CT vs NSPN PLS2, both via vertices	DK regions: rho = +0.29 (n = 34)   |   HCP parcels: rho = +0.21 (n = 137)	same two maps, two spatial scales
+AHBA C3 vs NSPN PLS2, both via vertices	DK regions: rho = +0.61 (n = 34)   |   HCP parcels: rho = +0.39 (n = 137)	same two maps, two spatial scales
+dCT rate vs NSPN PLS2, both via vertices	DK regions: rho = -0.33 (n = 34)   |   HCP parcels: rho = -0.25 (n = 137)	same two maps, two spatial scales
+HCP dCT + CT pushed to DK vs the native DK dCT + CT	rho = +0.74 (n = 33)	same quantity, two parcellations
+HCP AHBA C3 pushed to DK vs the native DK AHBA C3	rho = +0.91 (n = 33)	same quantity, two parcellations
+HCP dCT rate pushed to DK vs the native DK dCT rate	rho = +0.85 (n = 33)	same quantity, two parcellations

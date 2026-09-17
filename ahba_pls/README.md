@@ -404,34 +404,85 @@ Two things worth knowing about the source table and the result:
 
 - **The published 308-region table uses −99 as a missing-value sentinel** (two PLS2 cells:
   left lateraloccipital part 8, right parahippocampal part 1). Left in place it survives the vertex
-  averaging and destroys any Pearson correlation while leaving Spearman almost intact — the DK
-  validation read r = 0.41 / ρ = 0.98 before the fix and r = 0.97 / ρ = 0.98 after.
-- **Validation**: running the same vertex route 308 → DK and correlating with the published
-  DK-level table this project already uses gives r = 0.97 (PLS2), 0.996 (CT), 0.98 (CT_delta),
-  0.99 (MT), 0.98 (MT_delta) over 34 regions.
-- **It is a resampling, not a measurement.** Where an HCP parcel is smaller than its parent
-  308-parcel, neighbours inherit one value, so the map is smoother than a native HCP fit and its
-  effective resolution is 308, not 180.
+  averaging and destroys any Pearson correlation while leaving Spearman almost intact.
+- **`lh.aparc.annot` prefixes its parcel names (`lh_bankssts`) and `rh.aparc.annot` does not**
+  (`bankssts`). The first version of the DK validation grouped on the raw annot name, so the two
+  hemispheres became separate keys and the number it reported compared *right-hemisphere* values
+  against the published *bilateral* map — and `lh_unknown` / `lh_corpuscallosum` escaped the
+  background filter. Fixed by normalising the hemisphere prefix before any matching; the validation
+  is now bilateral-vs-bilateral and PLS2 agreement rises from r = 0.97 to **r = 0.985** (CT, MT and
+  their deltas 0.998–0.9997).
 
-**What it buys: the HCP cell of the NSPN comparison is no longer empty — and it is weak.**
+### Is the resampling lossy? Measured: no — `code/19_resample_check.py`
 
-| pair | DK (33 regions) | HCP-MMP (137 parcels) |
-|:--|--:|--:|
-| ABCD dCT+CT scores vs NSPN PLS2 | ρ = 0.75, p_spin = 0.001 | ρ = 0.21, p_spin = 0.268 |
-| ABCD dCT+CT scores vs AHBA C3 | ρ = 0.83, p_spin = <0.001 | ρ = 0.70, p_spin = <0.001 |
-| NSPN PLS2 vs AHBA C3 | ρ = 0.66, p_spin = 0.001 | ρ = 0.39, p_spin = 0.020 |
-| dCT rate vs NSPN PLS2 | ρ = -0.52, p_spin = 0.012 | ρ = -0.18, p_spin = 0.395 |
+An earlier version of this section claimed the resampled map's "effective resolution is the 308
+parcellation, not 180, because neighbouring HCP parcels inherit one 308-value". **That reasoning was
+wrong twice over** and the check below replaces it: 308 is the *bilateral* count, so the target grid
+is the finer one, and an HCP parcel is a vertex-weighted average of however many source parcels it
+overlaps rather than a copy of one.
 
-Every NSPN pair weakens in HCP space while the pairs that do not involve NSPN strengthen or hold
-(dCT alone vs C3 goes 0.28 → 0.55; the two designs' gene weights agree
-0.70 → 0.90). That asymmetry is what a 308-region map resampled to 180 parcels
-should look like, so read the weak HCP–NSPN cells as a resolution limit of the reference map rather
-than as disagreement between the cohorts — the like-for-like NSPN comparison is the DK one.
+| measurement | value |
+|:--|:--|
+| parcels per hemisphere | 152 in the 308 scheme, 180 in HCP-MMP, 34 in DK |
+| 308-parcels contributing per HCP parcel (median) | 4 (>=5% of vertices: 3) |
+| dominant source share per HCP parcel | 0.52 (0.40-0.67) |
+| HCP parcels taking >90 % from one source | 12 of 180 |
+| round trip HCP → 308 → HCP, ABCD dCT+CT | r = 0.909, rho = 0.877 (n = 137) |
+| round trip HCP → 308 → HCP, AHBA C3 | r = 0.899, rho = 0.893 (n = 137) |
+| 308 → DK direct vs 308 → HCP → DK | r = 0.961 (n = 34) |
+| label alignment with the HCP arm | 137 shared of 179 and 137 |
+
+A round trip through the 308 grid returns an HCP-native map at r ≈ 0.90, so resampling alone could
+attenuate ρ = 0.75 to about 0.68 — not to 0.21. And the attenuation is specific to NSPN pairs
+(|ρ|_HCP / |ρ|_DK: median 0.47 (0.28-0.69, n = 4) for pairs involving NSPN PLS2 against
+median 1.20 (0.58-4.92, n = 6) for the rest), so it is not the general parcellation effect either.
+
+**What it actually is: the ABCD component differs between parcellations.** Pushing each HCP-space
+map down to DK regions and comparing with the native DK version of the same quantity:
+
+| quantity | ρ, HCP version pushed to DK vs native DK |
+|:--|--:|
+| ABCD dCT+CT scores | +0.74 |
+| AHBA C3 | +0.91 |
+| dCT rate | +0.85 |
+
+The reference and the imaging map survive the change of parcellation well; the *component* does not
+— despite its gene weights agreeing at ρ = 0.90 between the two fits, so it is the score map that
+moves rather than the ranking. And NSPN PLS2 tracks the DK version: the HCP-space component pushed
+down to DK agrees with the NSPN DK map at only ρ = +0.29, against +0.75 for the native DK component.
+So the weak HCP–NSPN cells say that the HCP fit is a somewhat different spatial axis — a fact about
+the two ABCD fits rather than about the NSPN reference or the conversion.
+
+### snRNAseq PC1 in the gene matrix
+
+The snRNA-seq maturation axis from
+[`transcriptional_maturation`](https://github.com/richardajdear/transcriptional_maturation) is
+vendored here as `../data/velmeshev_PC1_gene_loadings.csv` (17,631 genes, two independent datasets
+agreeing at ρ = 0.54), and `src/abcd/genemaps.snrnaseq_pc1` already loaded it. It is now a column
+of the gene-weight matrix — the Herring version plotted, the U01 version in
+`design_grid_pairs_weights.tsv`:
+
+| vs snRNAseq PC1 (gene weights) | ρ |
+|:--|--:|
+| AHBA C3 | 0.47 |
+| ABCD dCT+CT, DK | 0.31 |
+| ABCD dCT+CT, HCP-MMP | 0.29 |
+| ABCD dCT alone, DK | 0.25 |
+| NSPN PLS2 | 0.10 |
+| AHBA C1 (control) | -0.05 |
+
+The maturation axis sits closest to C3 (0.47), then the ABCD signatures
+(0.25–0.31), and is essentially unrelated to NSPN PLS2 (0.10) and to C1
+(-0.05). Since C3 and NSPN PLS2 themselves agree at 0.55, the maturation content of this
+family of axes sits in the C3 direction rather than in what NSPN PLS2 adds.
 
 **The figure is now two square pair matrices**, regional maps (panel a, five variables) and gene
-vectors (panel b, four), each with DK below the diagonal and HCP-MMP above it, ρ in bold inside
+vectors (panel b, five, including snRNAseq PC1), each with DK below the diagonal and HCP-MMP above it, ρ in bold inside
 every cell and the spin p under it. This is possible only because NSPN PLS2 exists in both
-parcellations. AHBA C1 is not a column of the gene matrix — it is the static-gradient control
+parcellations. Each matrix shades the row and column of its odd one out — dCT rate in panel a (an
+imaging map, not a gene-derived axis) and snRNAseq PC1 in panel b (the only axis not derived from
+the AHBA) — and DK is drawn in light red against HCP-MMP's blue. AHBA C1 is not a column of the gene
+matrix — it is the static-gradient control
 rather than one of the axes being compared — but its loadings are still computed in
 `design_grid_pairs_weights.tsv` and quoted where they matter (the dCT-alone C1 loading is the
 reason that design fails at 33 regions). The NSPN-vs-C3 cell of panel b is
@@ -564,11 +615,11 @@ sample-size effect: it is unchanged (+5.1 → +5.0) between the 6,537-child and
 
 ## Reproducing
 
-Analysis (python, env `ahba-pls`): `code/01_*` → `code/18_*` in order. `11_` is the parcellation
+Analysis (python, env `ahba-pls`): `code/01_*` → `code/19_*` in order. `11_` is the parcellation
 control, `12_` the HCP-MMP arm, `14_`/`15_` the single-universe enrichment and cell-class tables that
 the summary figures read, `16_` the dCT-only variant, `17_` the design grid and all pairwise statistics, `18_` the NSPN→HCP-MMP
 conversion (needs `nibabel`, and the fsaverage annot files in `~/Git/AHBA/data/parcellations/`; run it
-before `17_`). `12_` needs the backfilled HCP run
+before `17_`), `19_` the resampling audit behind that conversion. `12_` needs the backfilled HCP run
 (`ABCD_CONFIG=ct_70_hcp_noglobal_mv2 python -m abcd.assemble` then
 `Rscript R/fit_lmm.R --cores 8`, which lands in `out/thickness_hcp_70_aa6e91efba82`); everything else
 reads the DK and T1w/T2w runs listed in `tools/rerun_local.sh`.
