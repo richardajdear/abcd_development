@@ -1,0 +1,21 @@
+parcellation	level	var_x	var_y	rho	p_spin	n
+DK	weights	dCT + CT	dCT alone	0.6954		12007
+DK	weights	dCT + CT	NSPN PLS2	0.6152		11175
+DK	weights	dCT + CT	AHBA C3	0.7559		7873
+DK	weights	dCT + CT	AHBA C1	-0.1972		7873
+DK	weights	dCT alone	NSPN PLS2	0.6108		11175
+DK	weights	dCT alone	AHBA C3	0.5921		7873
+DK	weights	dCT alone	AHBA C1	0.5605		7873
+DK	weights	NSPN PLS2	AHBA C3	0.5484		7433
+DK	weights	NSPN PLS2	AHBA C1	0.2321		7433
+DK	weights	AHBA C3	AHBA C1	-0.02027		7973
+HCP	weights	dCT + CT	dCT alone	0.9043		7973
+HCP	weights	dCT + CT	NSPN PLS2	0.3494		7433
+HCP	weights	dCT + CT	AHBA C3	0.6779		7973
+HCP	weights	dCT + CT	AHBA C1	-0.1078		7973
+HCP	weights	dCT alone	NSPN PLS2	0.3717		7433
+HCP	weights	dCT alone	AHBA C3	0.6056		7973
+HCP	weights	dCT alone	AHBA C1	0.2782		7973
+HCP	weights	NSPN PLS2	AHBA C3	0.5484		7433
+HCP	weights	NSPN PLS2	AHBA C1	0.2321		7433
+HCP	weights	AHBA C3	AHBA C1	-0.02027		7973

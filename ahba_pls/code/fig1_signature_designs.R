@@ -1,256 +1,234 @@
 #!/usr/bin/env Rscript
-# fig1_signature_designs.R -- the signature under THREE Y-matrix designs and in
-# both parcellations, with all the concordance scatters in one figure.
+# fig1_signature_designs.R -- the thinning signature in both parcellations, with
+# EVERY pairwise comparison shown as two square pair matrices: regional maps and
+# gene vectors.  Each matrix carries Desikan-Killiany BELOW the diagonal and
+# HCP-MMP ABOVE it, which works because NSPN PLS2 now exists in HCP-MMP space
+# too (18_nspn_to_hcp.py).
 #
-# Replaces the cell-class panel of fig_signature_both.png (that comparison now
-# has its own figure, fig_celltypes.png) with the dCT-only and four-feature
-# scatter sets, so the three designs can be read against each other directly.
-#
-# Reads only saved tables and fits nothing; every printed statistic comes from
-# the table plotted.
-#   results/design_grid_{scores,weights,components,concordance}   (17_design_grid.py)
-#   results/hcp_y_maps_180.csv, hcp_run_provenance.tsv
+# Reads only saved tables and fits nothing; every statistic printed in a panel
+# comes from the pairs table for that panel.
+#   results/design_grid_points_scores.csv    regional values, long
+#   results/design_grid_points_weights.tsv   gene vectors, wide
+#   results/design_grid_pairs_scores.tsv     rho + spin p for every map pair
+#   results/design_grid_pairs_weights.tsv    rho for every gene-vector pair
+#   results/design_grid_components.tsv, hcp_y_maps_180.csv, hcp_run_provenance.tsv
 #   data/{y_maps_bilateral_34,dk_polygons,hcp_polygons}.csv
-#   data/reference/{nspn_dk_maps_bilateral_34,ahba_c123_scores_recomputed_ds25,
-#                   ahba_c123_gene_weights}.csv
+#   data/reference/{nspn_dk_maps_bilateral_34,nspn_hcp_maps,
+#                   ahba_c123_scores_recomputed_ds25}.csv
 # Writes figures/fig_signature_designs.png
+#
+# The four-feature design (CT + dCT + T1w/T2w + dT1w/T2w) is computed by
+# 17_design_grid.py but not plotted: it exists in DK only and its component is
+# not spin-significant.  Its numbers are in design_grid_concordance.tsv.
 
-suppressMessages({library(ggplot2); library(dplyr); library(tidyr); library(patchwork); library(scales)})
+suppressMessages({library(ggplot2); library(dplyr); library(tidyr); library(patchwork)
+                  library(scales)})
 
 ROOT <- "/Users/richard/Git/abcd_development/ahba_pls"
 RES <- file.path(ROOT, "results"); DATA <- file.path(ROOT, "data")
 REF <- file.path(DATA, "reference"); FIG <- file.path(ROOT, "figures")
-DS <- "ds25"
 
-GS   <- read.csv(file.path(RES, "design_grid_scores.csv"))
-GW   <- read.delim(file.path(RES, "design_grid_weights.tsv"))
-GC   <- read.delim(file.path(RES, "design_grid_components.tsv"))
-CC   <- read.delim(file.path(RES, "design_grid_concordance.tsv"))
+PS   <- read.delim(file.path(RES, "design_grid_pairs_scores.tsv"))
+PW   <- read.delim(file.path(RES, "design_grid_pairs_weights.tsv"))
+SP   <- read.csv(file.path(RES, "design_grid_points_scores.csv"), check.names = FALSE)
+WP   <- read.delim(file.path(RES, "design_grid_points_weights.tsv"), check.names = FALSE)
+CMP  <- read.delim(file.path(RES, "design_grid_components.tsv"))
 PROV <- read.delim(file.path(RES, "hcp_run_provenance.tsv"))
 y34  <- read.csv(file.path(DATA, "y_maps_bilateral_34.csv"), row.names = 1)
 hcpY <- read.csv(file.path(RES, "hcp_y_maps_180.csv"), row.names = 1)
-nspn34 <- read.csv(file.path(REF, "nspn_dk_maps_bilateral_34.csv"), row.names = 1)
-c3dk <- read.csv(file.path(REF, sprintf("ahba_c123_scores_recomputed_%s.csv", DS)), row.names = 1)
-c3w  <- read.csv(file.path(REF, "ahba_c123_gene_weights.csv"))
-hcpS1 <- read.csv(file.path(RES, "dct_only_scores_hcp.csv"), row.names = 1)   # carries C1-C3 in HCP space
-dkpoly <- read.csv(file.path(DATA, "dk_polygons.csv"))
-hcppoly <- read.csv(file.path(DATA, "hcp_polygons.csv"))
+# the cached DK polygon table holds both hemispheres and four views; the HCP one
+# is already left-lateral/medial. Match them, or the DK row renders four tiny
+# views per map instead of two.
+dkp  <- read.csv(file.path(DATA, "dk_polygons.csv")) |>
+  filter(hemi == "left", view %in% c("lateral", "medial"))
+hcpp <- read.csv(file.path(DATA, "hcp_polygons.csv")) |>
+  filter(view %in% c("lateral", "medial"))
+stopifnot(length(unique(dkp$view)) == 2, length(unique(hcpp$view)) == 2)
+nspn34  <- read.csv(file.path(REF, "nspn_dk_maps_bilateral_34.csv"), row.names = 1)
+nspnH   <- read.csv(file.path(REF, "nspn_hcp_maps.csv"), row.names = 1)
+c3dk <- read.csv(file.path(REF, "ahba_c123_scores_recomputed_ds25.csv"), row.names = 1)
 
-# SHOW_FOUR toggles the four-feature (CT + dCT + T1w/T2w + dT1w/T2w) row. It is
-# off by default: that design's component is not spin-significant (p = 0.098) and
-# it exists in DK only, so the figure reads more cleanly without it. The row is
-# still computed by 17_design_grid.py and its numbers are in the README table and
-# in design_grid_*.tsv -- set this to TRUE to put it back on the figure.
-SHOW_FOUR <- as.logical(Sys.getenv("SHOW_FOUR", "FALSE"))
-ALL_DESIGNS <- c("dCT + CT", "dCT alone", "CT + dCT + T1T2 + dT1T2")
-stopifnot(setequal(unique(GS$design), ALL_DESIGNS))
-DESIGNS <- if (SHOW_FOUR) ALL_DESIGNS else ALL_DESIGNS[1:2]
-have <- GC |> transmute(key = paste(design, parcellation)) |> pull(key)
+S_VARS <- c("dCT rate", "dCT + CT", "dCT alone", "NSPN PLS2", "AHBA C3")
+W_VARS <- c("dCT + CT", "dCT alone", "NSPN PLS2", "AHBA C3", "AHBA C1")
+PAL <- c(DK = "grey25", HCP = "#2166ac")
+stopifnot(setequal(unique(c(PS$var_x, PS$var_y)), S_VARS),
+          setequal(unique(c(PW$var_x, PW$var_y)), W_VARS))
 
-# statistic lookups -- nothing on this figure is typed in
-g <- function(des, parc, lvl, ref) {
-  r <- CC |> filter(design == des, parcellation == parc, level == lvl, reference == ref)
-  stopifnot(nrow(r) == 1); list(rho = r$rho[1], p = r$p_spin[1], n = r$n[1])
+pf <- function(p) if (is.na(p)) "" else if (p < 0.001) "p<0.001" else sprintf("p=%.3f", p)
+
+# ------------------------------------------------------------------- brains ----
+brain <- function(poly, vals, title = NULL, diverging = TRUE) {
+  d <- poly |> mutate(v = unname(vals[label]))
+  lim <- if (diverging) max(abs(d$v), na.rm = TRUE) * c(-1, 1) else range(d$v, na.rm = TRUE)
+  ggplot(d, aes(x, y, group = interaction(view, label, group, subgroup), fill = v)) +
+    geom_polygon(colour = "grey35", linewidth = 0.07) +
+    coord_fixed(expand = FALSE) +
+    (if (diverging) scale_fill_distiller(palette = "RdBu", limits = lim, na.value = "grey78")
+     else scale_fill_viridis_c(na.value = "grey78")) +
+    facet_wrap(~view, nrow = 1) + theme_void() +
+    theme(legend.position = "none", strip.text = element_blank(),
+          plot.title = element_text(size = 7.0, hjust = 0.5, margin = margin(b = 1)),
+          plot.margin = margin(0, 1, 0, 1)) +
+    labs(title = title)
 }
-cmp <- function(des, parc) { r <- GC |> filter(design == des, parcellation == parc)
-  stopifnot(nrow(r) == 1); r }
-pf <- function(p) if (is.na(p)) "" else if (p < 1e-3) "p_spin<0.001" else sprintf("p_spin=%.3f", p)
-scores_of <- function(des, parc) { d <- GS |> filter(design == des, parcellation == parc)
-  setNames(d$score, d$label) }
-
-# ------------------------------------------------------------------ brains ----
-dk_lh <- dkpoly |> filter(hemi == "left", view %in% c("lateral", "medial")) |>
-  mutate(grp = interaction(label, view, group, subgroup, drop = TRUE),
-         region = sub("^lh_", "", label))
-hcp_lh <- hcppoly |> mutate(grp = interaction(label, view, group, subgroup, drop = TRUE))
-
-brain <- function(poly, values, title = NULL, diverging = TRUE) {
-  d <- data.frame(region = sub("^lh_", "", names(values)), value = as.numeric(values))
-  pd <- poly |> left_join(d, by = "region")
-  sc <- if (diverging) {
-    lim <- max(abs(pd$value), na.rm = TRUE)
-    scale_fill_distiller(palette = "RdBu", direction = -1, limits = c(-lim, lim), na.value = "grey78")
-  } else scale_fill_viridis_c(na.value = "grey78")
-  ggplot(pd, aes(x, y, group = grp, fill = value)) +
-    geom_polygon(colour = "grey40", linewidth = 0.05) + sc +
-    coord_fixed(expand = FALSE) + labs(title = title) + theme_void(base_size = 7) +
-    theme(legend.position = "none",
-          plot.title = element_text(size = 6.3, hjust = 0.5, margin = margin(b = 0.5)),
-          plot.margin = margin(0.5, 1, 0.5, 1))
-}
-note <- function(txt, size = 1.95) ggplot() +
-  annotate("text", 0, 0, label = txt, size = size, colour = "grey45", lineheight = 1.15) +
-  theme_void() + theme(plot.margin = margin(0.5, 1, 0.5, 1))
 row_lab <- function(txt, sub) ggplot() +
-  annotate("text", 0, 0.34, label = txt, size = 2.25, fontface = "bold", hjust = 0.5) +
-  annotate("text", 0, -0.40, label = sub, size = 1.8, colour = "grey40", hjust = 0.5) +
+  annotate("text", 0, 0.30, label = txt, size = 2.25, fontface = "bold", hjust = 0.5) +
+  annotate("text", 0, -0.36, label = sub, size = 1.8, colour = "grey40", hjust = 0.5) +
   xlim(-1, 1) + ylim(-1, 1) + coord_cartesian(clip = "off") +
   theme_void() + theme(plot.margin = margin(0, 1, 0, 1))
 
-# columns: thinning rate, one per design shown, then the two published maps
-des_hdr <- c("dCT + CT" = "dCT + CT", "dCT alone" = "dCT alone",
-             "CT + dCT + T1T2 + dT1T2" = "four features")[DESIGNS]
-dk_brains <- c(
-  list(brain(dk_lh, setNames(y34$dCT, rownames(y34)), "thinning rate (dCT)", diverging = FALSE)),
-  lapply(DESIGNS, function(d) brain(dk_lh, scores_of(d, "DK"), des_hdr[[d]])),
-  list(brain(dk_lh, setNames(nspn34$PLS2, rownames(nspn34)), "NSPN PLS2"),
-       brain(dk_lh, setNames(c3dk$C3, rownames(c3dk)), "AHBA C3")))
-hcp_brains <- c(
-  list(brain(hcp_lh, setNames(hcpY$dCT, rownames(hcpY)), diverging = FALSE)),
-  lapply(DESIGNS, function(d)
-    if (paste(d, "HCP") %in% have) brain(hcp_lh, scores_of(d, "HCP"))
-    else note("no T1w/T2w in\nHCP-MMP\n(see caption)")),
-  list(note("NSPN PLS2 exists\nonly in DK /\n308-region space"),
-       brain(hcp_lh, setNames(hcpS1$C3, rownames(hcpS1)))))
+sc <- function(parc, v) {
+  x <- SP |> filter(parcellation == parc, variable == v)
+  setNames(x$value, x$label)
+}
+dk_maps <- list(
+  brain(dkp, setNames(y34$dCT, rownames(y34)), "dCT rate (mm/yr)", diverging = FALSE),
+  brain(dkp, sc("DK", "dCT + CT"), "dCT + CT"), brain(dkp, sc("DK", "dCT alone"), "dCT alone"),
+  brain(dkp, setNames(nspn34$PLS2, rownames(nspn34)), "NSPN PLS2"),
+  brain(dkp, setNames(c3dk$C3, rownames(c3dk)), "AHBA C3"))
+hcp_maps <- list(
+  brain(hcpp, setNames(hcpY$dCT, rownames(hcpY)), diverging = FALSE),
+  brain(hcpp, sc("HCP", "dCT + CT")), brain(hcpp, sc("HCP", "dCT alone")),
+  brain(hcpp, setNames(nspnH$PLS2, rownames(nspnH))), brain(hcpp, sc("HCP", "AHBA C3")))
 
-WID <- c(0.55, rep(1, length(dk_brains)))
+WID <- c(0.55, rep(1, length(dk_maps)))
 brow <- function(lab, sub, panels)
   Reduce(`|`, panels, init = row_lab(lab, sub)) + plot_layout(widths = WID)
-r1 <- brow("Desikan\u2013\nKilliany", "33 of 34\nparcels", dk_brains)
-r2 <- brow("HCP-MMP\n(Glasser)", "137 of 180\nparcels", hcp_brains)
+r1 <- brow("Desikan\u2013\nKilliany", "33 of 34\nparcels", dk_maps)
+r2 <- brow("HCP-MMP\n(Glasser)", "137 of 180\nparcels", hcp_maps)
 
-# ---------------------------------------------------------------- scatters ----
-sm <- theme_bw(base_size = 6.5) +
-  theme(panel.grid.minor = element_blank(),
-        panel.grid.major = element_line(linewidth = 0.15, colour = "grey94"),
-        plot.title = element_text(size = 6.4, face = "bold", margin = margin(b = 0.5)),
-        plot.subtitle = element_text(size = 6.0, colour = "grey30", margin = margin(b = 1.5)),
-        axis.title = element_text(size = 6.0), axis.text = element_text(size = 5.6),
-        plot.margin = margin(1, 3, 1, 3))
-PAL <- c(DK = "grey25", HCP = "#2166ac")
-
-scat <- function(x, y, xl, yl, title, sub, parc) {
-  ggplot(data.frame(x = x, y = y), aes(x, y)) +
-    geom_point(size = 0.5, colour = PAL[[parc]], alpha = 0.75) +
-    geom_smooth(method = "lm", se = FALSE, linewidth = 0.3, colour = "#b2182b", formula = y ~ x) +
-    labs(x = xl, y = yl, title = title, subtitle = sub) + sm
-}
-hexp <- function(x, y, xl, yl, title, sub) {
-  ggplot(data.frame(x = x, y = y), aes(x, y)) +
-    geom_hex(bins = 32, linewidth = 0) +
-    scale_fill_gradient(low = "grey88", high = "grey15", guide = "none") +
-    labs(x = xl, y = yl, title = title, subtitle = sub) + sm
+# -------------------------------------------------------------- pair matrix ----
+# One cell per ordered (row, column) pair of variables: below the diagonal the
+# DK version of the pair, above it the HCP-MMP version, on the diagonal the
+# variable name. Both triangles carry real, different data for regional maps;
+# for gene vectors the reference-vs-reference cells (C3/C1/NSPN) are
+# parcellation-independent and so are identical in the two triangles.
+cells <- function(vars_) {
+  expand.grid(row = vars_, col = vars_, stringsAsFactors = FALSE) |>
+    mutate(i = match(row, vars_), j = match(col, vars_),
+           parcellation = ifelse(i > j, "DK", ifelse(i < j, "HCP", NA)),
+           row = factor(row, levels = vars_), col = factor(col, levels = vars_))
 }
 
-c3vec <- with(c3w[!is.na(c3w$C3), ], setNames(C3, c3w[[1]][!is.na(c3w$C3)]))
-wvec <- function(des, parc) {
-  col <- make.names(paste0(des, "|", parc))
-  stopifnot(col %in% names(GW))
-  v <- GW[[col]]; z <- setNames(v, GW$gene); z[!is.na(z)]
+stat_of <- function(P, r, c, parc) {
+  h <- P |> filter(parcellation == parc,
+                   (var_x == r & var_y == c) | (var_x == c & var_y == r))
+  stopifnot(nrow(h) == 1)
+  h
 }
 
-letters_i <- 0
-nxt <- function() { letters_i <<- letters_i + 1; letters[letters_i] }
-panels <- list()
-for (des in DESIGNS) {
-  short <- c("dCT + CT" = "dCT+CT", "dCT alone" = "dCT alone",
-             "CT + dCT + T1T2 + dT1T2" = "4 features")[[des]]
-  # scores vs C3, DK then HCP
-  sdk <- g(des, "DK", "scores", "C3")
-  panels[[length(panels) + 1]] <- scat(
-    c3dk[names(scores_of(des, "DK")), "C3"], scores_of(des, "DK"),
-    "AHBA C3 score", sprintf("%s score", short),
-    sprintf("%s   DK scores vs C3", nxt()), sprintf("rho=%.2f, %s", sdk$rho, pf(sdk$p)), "DK")
-  if (paste(des, "HCP") %in% have) {
-    shc <- g(des, "HCP", "scores", "C3")
-    panels[[length(panels) + 1]] <- scat(
-      hcpS1[names(scores_of(des, "HCP")), "C3"], scores_of(des, "HCP"),
-      "AHBA C3 score", sprintf("%s score", short),
-      sprintf("%s   HCP scores vs C3", nxt()), sprintf("rho=%.2f, %s", shc$rho, pf(shc$p)), "HCP")
-  } else {
-    panels[[length(panels) + 1]] <- note("HCP-MMP: not fitted\n(no T1w/T2w parcellation)", 2.0)
-  }
-  # gene weights vs C3, DK then HCP
-  wdk <- g(des, "DK", "weights", "C3"); wdk_c1 <- g(des, "DK", "weights", "C1")
-  zdk <- wvec(des, "DK"); sh <- intersect(names(zdk), names(c3vec))
-  stopifnot(length(sh) == wdk$n)
-  panels[[length(panels) + 1]] <- hexp(
-    c3vec[sh], zdk[sh], "C3 gene weight", sprintf("%s gene Z", short),
-    sprintf("%s   DK weights vs C3", nxt()),
-    sprintf("vs C3 %.2f; vs C1 %.2f", wdk$rho, wdk_c1$rho))
-  if (paste(des, "HCP") %in% have) {
-    whc <- g(des, "HCP", "weights", "C3"); whc_c1 <- g(des, "HCP", "weights", "C1")
-    zhc <- wvec(des, "HCP"); sh2 <- intersect(names(zhc), names(c3vec))
-    stopifnot(length(sh2) == whc$n)
-    panels[[length(panels) + 1]] <- hexp(
-      c3vec[sh2], zhc[sh2], "C3 gene weight", sprintf("%s gene Z", short),
-      sprintf("%s   HCP weights vs C3", nxt()),
-      sprintf("vs C3 %.2f; vs C1 %.2f", whc$rho, whc_c1$rho))
-  } else {
-    panels[[length(panels) + 1]] <- note("HCP-MMP: not fitted\n(no T1w/T2w parcellation)", 2.0)
-  }
-}
+# --- regional maps
+SC <- cells(S_VARS) |> filter(!is.na(parcellation))
+spts <- do.call(rbind, lapply(seq_len(nrow(SC)), function(k) {
+  z <- SC[k, ]; x <- sc(z$parcellation, as.character(z$col)); y <- sc(z$parcellation, as.character(z$row))
+  lab <- intersect(names(x), names(y))
+  data.frame(row = z$row, col = z$col, parcellation = z$parcellation, x = x[lab], y = y[lab])
+}))
+slab <- SC |> rowwise() |>
+  mutate(st = list(stat_of(PS, as.character(row), as.character(col), parcellation))) |>
+  mutate(txt = sprintf("%.2f", st$rho), sub = pf(st$p_spin)) |> ungroup()
 
-des_lab <- function(des) {
-  d <- cmp(des, "DK")
-  # one line for the design name (the column is wide enough), two for the stats,
-  # with enough separation that the blocks cannot collide at any row height
-  txt <- sub("CT \\+ dCT \\+ T1T2 \\+ dT1T2", "four features", des)
-  ggplot() +
-    annotate("text", 0, 0.48, label = txt, size = 2.2, fontface = "bold", hjust = 0.5) +
-    annotate("text", 0, -0.42, label = sprintf("%s\nspin p = %.3f", d$component, d$p_spin),
-             size = 1.75, colour = "grey40", hjust = 0.5) +
-    xlim(-1, 1) + ylim(-1, 1) + coord_cartesian(clip = "off") +
-    theme_void() + theme(plot.margin = margin(0, 1, 0, 1))
-}
-srow <- function(i) (des_lab(DESIGNS[i]) | panels[[4*i-3]] | panels[[4*i-2]] |
-                       panels[[4*i-1]] | panels[[4*i]]) + plot_layout(widths = c(0.5, 1, 1, 1, 1))
+mat_theme <- theme_bw(base_size = 6.4) +
+  theme(aspect.ratio = 1, panel.grid = element_blank(),
+        axis.title = element_blank(), axis.text = element_blank(), axis.ticks = element_blank(),
+        strip.background = element_rect(fill = "grey96", colour = NA),
+        strip.text = element_text(size = 5.9, margin = margin(1.2, 1.2, 1.2, 1.2)),
+        strip.text.y.right = element_text(angle = 90),
+        panel.spacing = unit(1.2, "pt"), plot.margin = margin(1, 1, 1, 1),
+        plot.title = element_text(size = 7.6, face = "bold", margin = margin(b = 1)),
+        plot.subtitle = element_text(size = 6.2, colour = "grey30", margin = margin(b = 2)))
+
+pa <- ggplot(spts, aes(x, y)) +
+  geom_point(aes(colour = parcellation), size = 0.28, alpha = 0.75) +
+  geom_smooth(aes(colour = parcellation), method = "lm", se = FALSE,
+              linewidth = 0.25, formula = y ~ x) +
+  geom_text(data = slab, aes(x = -Inf, y = Inf, label = txt), hjust = -0.25, vjust = 1.35,
+            size = 2.05, fontface = "bold", inherit.aes = FALSE) +
+  geom_text(data = slab, aes(x = -Inf, y = Inf, label = sub), hjust = -0.3, vjust = 3.1,
+            size = 1.6, colour = "grey35", inherit.aes = FALSE) +
+  scale_colour_manual(values = PAL, guide = "none") +
+  facet_grid(row ~ col, scales = "free", switch = NULL) + mat_theme +
+  labs(title = "a   Regional maps \u2014 every pair",
+       subtitle = "lower triangle DK (33 regions), upper HCP-MMP (137)  \u00b7  bold rho, spin p below")
+
+# --- gene vectors
+WC <- cells(W_VARS) |> filter(!is.na(parcellation))
+wcol <- function(v, parc) if (v %in% c("dCT + CT", "dCT alone")) paste0(v, "|", parc) else v
+wpts <- do.call(rbind, lapply(seq_len(nrow(WC)), function(k) {
+  z <- WC[k, ]
+  x <- WP[[wcol(as.character(z$col), z$parcellation)]]
+  y <- WP[[wcol(as.character(z$row), z$parcellation)]]
+  ok <- is.finite(x) & is.finite(y)
+  data.frame(row = z$row, col = z$col, parcellation = z$parcellation, x = x[ok], y = y[ok])
+}))
+wlab <- WC |> rowwise() |>
+  mutate(st = list(stat_of(PW, as.character(row), as.character(col), parcellation))) |>
+  mutate(txt = sprintf("%.2f", st$rho), sub = sprintf("n=%.1fk", st$n / 1000)) |> ungroup()
+# the three reference-vs-reference cells are the same data in both triangles
+ref_ref <- WC |> filter(row %in% c("NSPN PLS2", "AHBA C3", "AHBA C1"),
+                        col %in% c("NSPN PLS2", "AHBA C3", "AHBA C1"), parcellation == "HCP") |>
+  mutate(mark = "=")
+
+pb <- ggplot(wpts, aes(x, y)) +
+  geom_hex(aes(fill = parcellation, alpha = after_stat(count)), bins = 22, linewidth = 0) +
+  geom_text(data = wlab, aes(x = -Inf, y = Inf, label = txt), hjust = -0.25, vjust = 1.35,
+            size = 2.05, fontface = "bold", inherit.aes = FALSE) +
+  geom_text(data = wlab, aes(x = -Inf, y = Inf, label = sub), hjust = -0.3, vjust = 3.1,
+            size = 1.6, colour = "grey35", inherit.aes = FALSE) +
+  geom_text(data = ref_ref, aes(x = Inf, y = Inf, label = mark), hjust = 1.4, vjust = 1.4,
+            size = 2.2, colour = "grey55", inherit.aes = FALSE) +
+  scale_fill_manual(values = PAL, guide = "none") +
+  scale_alpha_continuous(range = c(0.25, 1), guide = "none") +
+  facet_grid(row ~ col, scales = "free") + mat_theme +
+  labs(title = "b   Gene weights \u2014 every pair",
+       subtitle = "same triangles  \u00b7  bold rho over the shared genes  \u00b7  \u201c=\u201d: cell is parcellation-independent")
 
 # ------------------------------------------------------------------ caption ---
-d1 <- cmp(DESIGNS[1], "DK"); h1 <- cmp(DESIGNS[1], "HCP"); d2 <- cmp(DESIGNS[2], "DK")
-d3 <- cmp(ALL_DESIGNS[3], "DK")   # computed even when not plotted
-four_bullets <- if (SHOW_FOUR) c(
-  sprintf("\u2022 Third design: CT + dCT + T1w/T2w + dT1w/T2w (four columns, four components; the component shown is chosen by %s).", d3$selection),
-  "\u2022 The four-feature design is DK-only: ABCD tabulates T1w/T2w in Desikan space, and the locally-derived HCP-MMP parcellation covers thickness only, so a 137-parcel\n  T1w/T2w map would need a new surface run (tools/hcp_backfill.sbatch does thickness).") else
-  sprintf("\u2022 A third design (CT + dCT + T1w/T2w + dT1w/T2w, the closest analogue of the NSPN PNAS Y matrix) is computed by 17_design_grid.py but not shown: its C3-aligned\n  component explains %.0f%% of the cross-covariance and is not spin-significant (p = %.3f), and it is DK-only because there is no HCP-MMP T1w/T2w parcellation. Its\n  numbers are in design_grid_*.tsv and the README table; SHOW_FOUR=TRUE puts the row back on the figure.",
-          100 * d3$cov_explained, d3$p_spin)
+d1 <- CMP |> filter(design == "dCT + CT", parcellation == "DK")
+h1 <- CMP |> filter(design == "dCT + CT", parcellation == "HCP")
+d2 <- CMP |> filter(design == "dCT alone", parcellation == "DK")
+h2 <- CMP |> filter(design == "dCT alone", parcellation == "HCP")
+d4 <- CMP |> filter(grepl("T1T2", design), parcellation == "DK")
+nspn_hcp_n <- sum(!is.na(nspnH$PLS2))
 methods <- paste(
   "Methods.",
-  "\u2022 Y designs: dCT + CT (PLS2, the lead signature) and dCT alone (a single Y column, so PLS1 is simply the vector of gene\u2013map correlations and nothing absorbs the\n  baseline-thickness gradient).",
-  paste(four_bullets, collapse = "\n"),
-  sprintf("\u2022 Spin p is each component's own singular value against 5,000 rotations of the complete map: %.3f (dCT+CT, DK), %.3f (dCT+CT, HCP), %.3f (dCT alone, DK), %.3f (dCT alone, HCP).\n  Only the dCT+CT fits clear 0.05 \u2014 the single-Y fits are usable gene rankings but carry no independent spatial claim.",
-          d1$p_spin, h1$p_spin, d2$p_spin, cmp(DESIGNS[2], "HCP")$p_spin),
-  sprintf("\u2022 Gene weights are bootstrap Z over %s resamples; n = %s genes (DK, AHBA_updated ds25 matrix) and %s (HCP-MMP, abagen-data at the shipped C1\u2013C3 gene list).",
-          "1,000", format(d1$n_genes, big.mark = ","), format(h1$n_genes, big.mark = ",")),
+  "\u2022 Y designs: dCT + CT (PLS2, the lead signature) and dCT alone (a single Y column, so PLS1 is simply the vector of gene\u2013map correlations and nothing absorbs the",
+  "  baseline-thickness gradient). A four-feature design (CT + dCT + T1w/T2w + dT1w/T2w) is computed by 17_design_grid.py but not shown: DK-only, and its C3-aligned",
+  sprintf("  component is not spin-significant (p = %.3f). Its numbers are in design_grid_concordance.tsv.", d4$p_spin),
+  sprintf("\u2022 Spin p is each component's own singular value against 5,000 rotations: %.3f (dCT+CT, DK), %.3f (dCT+CT, HCP), %.3f (dCT alone, DK), %.3f (dCT alone, HCP). Only the",
+          d1$p_spin, h1$p_spin, d2$p_spin, h2$p_spin),
+  "  dCT+CT fits clear 0.05, so the single-Y fits are usable gene rankings but carry no independent spatial claim.",
+  sprintf("\u2022 NSPN PLS2 in HCP-MMP space (%d of 180 parcels) is resampled from the published 308-region map through fsaverage vertices, the route in AHBA/notebooks/", nspn_hcp_n),
+  "  MT_whitakervertes.ipynb (code/18_nspn_to_hcp.py; validation against the published DK table r = 0.97, see data/reference/NSPN_HCP.md). Its effective resolution is",
+  "  therefore the 308 parcellation, not 180 \u2014 neighbouring HCP parcels can inherit one 308-value, which makes it a smoother map than a native HCP fit.",
+  sprintf("\u2022 Gene weights are bootstrap Z over 1,000 resamples; n = %s genes (DK) and %s (HCP-MMP), and each panel's n is the overlap of its two vectors.",
+          format(d1$n_genes, big.mark = ","), format(h1$n_genes, big.mark = ",")),
   sprintf("\u2022 Imaging: %s children with \u22652 QC-passing visits, true 7.0 tabulated tables; both parcellations run on the same sample.",
           format(PROV$n_subjects[1], big.mark = ",")),
-  "\u2022 Everything is in the thinning orientation (each component multiplied by \u2212sign of its dCT salience): positive = expressed more where adolescent thinning is faster.",
-  "  Grey parcels have no AHBA donor coverage. Cell-class profiles of these rankings are in fig_celltypes.png.",
+  "\u2022 Components are in the thinning orientation (multiplied by \u2212sign of their dCT salience): positive = expressed more where thinning is faster. dCT rate itself is",
+  "  mm/yr, so it runs the other way \u2014 hence the negative correlations in its row. Grey parcels have no AHBA donor coverage.",
   sep = "\n")
-
-# one scatter row per design shown; `/` flattens, so heights must count every row
-srows <- Reduce(`/`, lapply(seq_along(DESIGNS), srow))
 methods_panel <- ggplot() +
   annotate("text", x = 0, y = 1, label = methods, hjust = 0, vjust = 1,
            size = 2.05, lineheight = 1.42, colour = "grey25") +
   xlim(0, 1) + ylim(0, 1) + coord_cartesian(clip = "off") +
   theme_void() + theme(plot.margin = margin(4, 2, 0, 2))
 
-fig <- (r1 / r2 / srows / methods_panel) +
-  # The brain panels use coord_fixed, so their aspect caps how tall their row can
-  # draw; if their relative weight is small the cap shrinks the WHOLE grid
-  # proportionally and the surplus shows up as dead space above the caption.
-  # Weighting the brain rows near 1 makes the scatter rows the binding constraint.
-  # Brains (coord_fixed, two views wide) need ~0.4x the height of a scatter row;
-  # giving them more only pads their row.
-  plot_layout(heights = c(0.42, 0.42, rep(1, length(DESIGNS)), 0.70)) +
+fig <- (r1 / r2 / (pa | pb) / methods_panel) +
+  # aspect.ratio = 1 pins the matrices' panel shape, so these weights are set to
+  # the physical height each row actually needs (inches): brains ~0.7, the 5x5
+  # matrices ~4.35 at this width, methods ~1.3.
+  plot_layout(heights = c(0.7, 0.7, 4.35, 2.0)) +
   plot_annotation(
-    title = if (SHOW_FOUR)
-      "One axis, three ways of asking for it \u2014 and the static map is what makes the difference"
-      else "One axis, two ways of asking for it \u2014 and the static map is what makes the difference",
-    subtitle = sprintf("Adding baseline CT to the Y matrix (row 1) recovers AHBA C3 at DK resolution (scores rho %.2f, p_spin \u2264 0.001); thinning rate alone (row 2) does not\n(%.2f, %s), because its gene weights load on the static gradient C1 as heavily as on C3 (%.2f vs %.2f, against %.2f vs %.2f for dCT + CT).\nAt 137 parcels that confound largely disappears (panels f and h): rho %.2f vs C3 and only %.2f vs C1, without any static map in Y.",
-                       g(DESIGNS[1], "DK", "scores", "C3")$rho,
-                       g(DESIGNS[2], "DK", "scores", "C3")$rho, pf(g(DESIGNS[2], "DK", "scores", "C3")$p),
-                       g(DESIGNS[2], "DK", "weights", "C1")$rho, g(DESIGNS[2], "DK", "weights", "C3")$rho,
-                       g(DESIGNS[1], "DK", "weights", "C1")$rho, g(DESIGNS[1], "DK", "weights", "C3")$rho,
-                       g(DESIGNS[2], "HCP", "weights", "C3")$rho, g(DESIGNS[2], "HCP", "weights", "C1")$rho),
+    title = "One transcriptomic axis of adolescent thinning, and every pairwise comparison behind it",
+    subtitle = sprintf("Adding baseline CT to Y recovers AHBA C3 in both parcellations (DK rho %.2f, HCP %.2f); thinning rate alone recovers it only at 137 parcels (%.2f vs %.2f),\nbecause at 33 regions its gene weights load on the static gradient C1 as heavily as on C3 (%.2f vs %.2f). NSPN PLS2 resampled into HCP-MMP agrees with\nthe HCP fit far less well than in its native resolution (%.2f vs %.2f), which is what its 308-region effective resolution predicts.",
+                       stat_of(PS, "dCT + CT", "AHBA C3", "DK")$rho, stat_of(PS, "dCT + CT", "AHBA C3", "HCP")$rho,
+                       stat_of(PS, "dCT alone", "AHBA C3", "HCP")$rho, stat_of(PS, "dCT alone", "AHBA C3", "DK")$rho,
+                       stat_of(PW, "dCT alone", "AHBA C1", "DK")$rho, stat_of(PW, "dCT alone", "AHBA C3", "DK")$rho,
+                       stat_of(PS, "dCT + CT", "NSPN PLS2", "HCP")$rho, stat_of(PS, "dCT + CT", "NSPN PLS2", "DK")$rho),
     theme = theme(plot.title = element_text(size = 9.6, face = "bold"),
                   plot.subtitle = element_text(size = 7.3, colour = "grey25",
                                                margin = margin(b = 4))))
 
-# title+caption take a fixed ~2.3 in; the panel stack scales with its own height weights
-# measured fixed rows (title, subtitle, caption, margins) take ~3.0 in on this
-# device; the rest is shared by the flexible panel rows at ~1.45 in per unit.
-H <- 0.9 + 1.45 * (2 * 0.42 + length(DESIGNS) + 0.70)
-ggsave(file.path(FIG, "fig_signature_designs.png"), fig, width = 8.6, height = H, dpi = 300, bg = "white")
+ggsave(file.path(FIG, "fig_signature_designs.png"), fig, width = 8.6, height = 8.6, dpi = 300, bg = "white")
 cat("wrote", file.path(FIG, "fig_signature_designs.png"), "\n")

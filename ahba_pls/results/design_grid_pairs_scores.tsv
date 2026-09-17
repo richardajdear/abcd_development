@@ -1,0 +1,21 @@
+parcellation	level	var_x	var_y	rho	p_spin	n
+DK	scores	dCT rate	dCT + CT	-0.5672	0.0024	33
+DK	scores	dCT rate	dCT alone	-0.4034	0.07139	33
+DK	scores	dCT rate	NSPN PLS2	-0.5202	0.0118	34
+DK	scores	dCT rate	AHBA C3	-0.5582	0.005599	33
+DK	scores	dCT + CT	dCT alone	0.1217	0.6437	33
+DK	scores	dCT + CT	NSPN PLS2	0.7514	0.0012	33
+DK	scores	dCT + CT	AHBA C3	0.8329	0.0009998	33
+DK	scores	dCT alone	NSPN PLS2	0.4862	0.04799	33
+DK	scores	dCT alone	AHBA C3	0.2781	0.1848	33
+DK	scores	NSPN PLS2	AHBA C3	0.6648	0.0014	33
+HCP	scores	dCT rate	dCT + CT	-0.5841	0.0003999	137
+HCP	scores	dCT rate	dCT alone	-0.555	0.0005999	137
+HCP	scores	dCT rate	NSPN PLS2	-0.1832	0.3947	179
+HCP	scores	dCT rate	AHBA C3	-0.3263	0.03259	137
+HCP	scores	dCT + CT	dCT alone	0.5983	0.0003999	137
+HCP	scores	dCT + CT	NSPN PLS2	0.2087	0.2675	137
+HCP	scores	dCT + CT	AHBA C3	0.7012	0.0003999	137
+HCP	scores	dCT alone	NSPN PLS2	0.335	0.1216	137
+HCP	scores	dCT alone	AHBA C3	0.5465	0.0003999	137
+HCP	scores	NSPN PLS2	AHBA C3	0.3857	0.0204	137

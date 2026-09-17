@@ -1,0 +1,851 @@
+parcellation,label,variable,value
+DK,lh_bankssts,dCT rate,-0.0221043
+DK,lh_caudalanteriorcingulate,dCT rate,-0.0182596
+DK,lh_caudalmiddlefrontal,dCT rate,-0.0146222
+DK,lh_cuneus,dCT rate,-0.0193237
+DK,lh_entorhinal,dCT rate,-0.00213003
+DK,lh_fusiform,dCT rate,-0.0170301
+DK,lh_inferiorparietal,dCT rate,-0.0247459
+DK,lh_inferiortemporal,dCT rate,-0.0189164
+DK,lh_insula,dCT rate,-0.0176494
+DK,lh_isthmuscingulate,dCT rate,-0.0203922
+DK,lh_lateraloccipital,dCT rate,-0.0155018
+DK,lh_lateralorbitofrontal,dCT rate,-0.0218674
+DK,lh_lingual,dCT rate,-0.0185786
+DK,lh_medialorbitofrontal,dCT rate,-0.0228537
+DK,lh_middletemporal,dCT rate,-0.0188791
+DK,lh_paracentral,dCT rate,-0.0234605
+DK,lh_parahippocampal,dCT rate,-0.014441
+DK,lh_parsopercularis,dCT rate,-0.0154329
+DK,lh_parsorbitalis,dCT rate,-0.0267934
+DK,lh_parstriangularis,dCT rate,-0.0215481
+DK,lh_pericalcarine,dCT rate,-0.0124025
+DK,lh_postcentral,dCT rate,-0.0182561
+DK,lh_posteriorcingulate,dCT rate,-0.0203867
+DK,lh_precentral,dCT rate,-0.00638414
+DK,lh_precuneus,dCT rate,-0.0248516
+DK,lh_rostralanteriorcingulate,dCT rate,-0.0201113
+DK,lh_rostralmiddlefrontal,dCT rate,-0.0240117
+DK,lh_superiorfrontal,dCT rate,-0.0209438
+DK,lh_superiorparietal,dCT rate,-0.0225189
+DK,lh_superiortemporal,dCT rate,-0.0159097
+DK,lh_supramarginal,dCT rate,-0.0200509
+DK,lh_temporalpole,dCT rate,-0.00633994
+DK,lh_transversetemporal,dCT rate,-0.0182601
+DK,lh_bankssts,dCT + CT,37.8933
+DK,lh_caudalanteriorcingulate,dCT + CT,-43.7833
+DK,lh_caudalmiddlefrontal,dCT + CT,21.2799
+DK,lh_cuneus,dCT + CT,-45.1259
+DK,lh_entorhinal,dCT + CT,-88.8021
+DK,lh_fusiform,dCT + CT,12.5811
+DK,lh_inferiorparietal,dCT + CT,7.15398
+DK,lh_inferiortemporal,dCT + CT,15.4565
+DK,lh_insula,dCT + CT,14.3519
+DK,lh_isthmuscingulate,dCT + CT,-29.9747
+DK,lh_lateraloccipital,dCT + CT,-17.5182
+DK,lh_lateralorbitofrontal,dCT + CT,37.8334
+DK,lh_lingual,dCT + CT,-45.0479
+DK,lh_medialorbitofrontal,dCT + CT,48.622
+DK,lh_middletemporal,dCT + CT,19.0919
+DK,lh_paracentral,dCT + CT,-0.540328
+DK,lh_parahippocampal,dCT + CT,-27.9352
+DK,lh_parsopercularis,dCT + CT,24.2791
+DK,lh_parsorbitalis,dCT + CT,50.2687
+DK,lh_parstriangularis,dCT + CT,49.1515
+DK,lh_pericalcarine,dCT + CT,-88.8332
+DK,lh_postcentral,dCT + CT,-23.3413
+DK,lh_posteriorcingulate,dCT + CT,7.67384
+DK,lh_precentral,dCT + CT,-5.90924
+DK,lh_precuneus,dCT + CT,24.0006
+DK,lh_rostralanteriorcingulate,dCT + CT,9.33101
+DK,lh_rostralmiddlefrontal,dCT + CT,47.8199
+DK,lh_superiorfrontal,dCT + CT,27.6359
+DK,lh_superiorparietal,dCT + CT,3.80852
+DK,lh_superiortemporal,dCT + CT,20.0187
+DK,lh_supramarginal,dCT + CT,24.9967
+DK,lh_temporalpole,dCT + CT,-54.1384
+DK,lh_transversetemporal,dCT + CT,-32.2989
+DK,lh_bankssts,dCT alone,48.1259
+DK,lh_caudalanteriorcingulate,dCT alone,-93.6543
+DK,lh_caudalmiddlefrontal,dCT alone,11.0529
+DK,lh_cuneus,dCT alone,66.0911
+DK,lh_entorhinal,dCT alone,-160.216
+DK,lh_fusiform,dCT alone,-9.65924
+DK,lh_inferiorparietal,dCT alone,32.5275
+DK,lh_inferiortemporal,dCT alone,-12.6144
+DK,lh_insula,dCT alone,-30.1934
+DK,lh_isthmuscingulate,dCT alone,-5.81284
+DK,lh_lateraloccipital,dCT alone,60.1072
+DK,lh_lateralorbitofrontal,dCT alone,13.8263
+DK,lh_lingual,dCT alone,48.6152
+DK,lh_medialorbitofrontal,dCT alone,-4.91062
+DK,lh_middletemporal,dCT alone,-11.5138
+DK,lh_paracentral,dCT alone,19.9609
+DK,lh_parahippocampal,dCT alone,-72.8757
+DK,lh_parsopercularis,dCT alone,-3.55351
+DK,lh_parsorbitalis,dCT alone,33.3407
+DK,lh_parstriangularis,dCT alone,33.0454
+DK,lh_pericalcarine,dCT alone,41.4777
+DK,lh_postcentral,dCT alone,17.7863
+DK,lh_posteriorcingulate,dCT alone,-5.45179
+DK,lh_precentral,dCT alone,2.79827
+DK,lh_precuneus,dCT alone,43.6166
+DK,lh_rostralanteriorcingulate,dCT alone,-49.4277
+DK,lh_rostralmiddlefrontal,dCT alone,32.7914
+DK,lh_superiorfrontal,dCT alone,4.33255
+DK,lh_superiorparietal,dCT alone,36.419
+DK,lh_superiortemporal,dCT alone,-1.68173
+DK,lh_supramarginal,dCT alone,23.0457
+DK,lh_temporalpole,dCT alone,-141.101
+DK,lh_transversetemporal,dCT alone,33.7052
+DK,lh_bankssts,NSPN PLS2,0.015
+DK,lh_caudalanteriorcingulate,NSPN PLS2,-0.04
+DK,lh_caudalmiddlefrontal,NSPN PLS2,0.08
+DK,lh_cuneus,NSPN PLS2,0.01
+DK,lh_entorhinal,NSPN PLS2,-0.16
+DK,lh_fusiform,NSPN PLS2,-0.04
+DK,lh_inferiorparietal,NSPN PLS2,0.02
+DK,lh_inferiortemporal,NSPN PLS2,-0.01
+DK,lh_insula,NSPN PLS2,-0.025
+DK,lh_isthmuscingulate,NSPN PLS2,-0.07
+DK,lh_lateraloccipital,NSPN PLS2,0.005
+DK,lh_lateralorbitofrontal,NSPN PLS2,0.03
+DK,lh_lingual,NSPN PLS2,-0.05
+DK,lh_medialorbitofrontal,NSPN PLS2,0.035
+DK,lh_middletemporal,NSPN PLS2,0
+DK,lh_paracentral,NSPN PLS2,-0.03
+DK,lh_parahippocampal,NSPN PLS2,-0.16
+DK,lh_parsopercularis,NSPN PLS2,0.06
+DK,lh_parsorbitalis,NSPN PLS2,0.06
+DK,lh_parstriangularis,NSPN PLS2,0.095
+DK,lh_pericalcarine,NSPN PLS2,-0.08
+DK,lh_postcentral,NSPN PLS2,-0.015
+DK,lh_posteriorcingulate,NSPN PLS2,-0.02
+DK,lh_precentral,NSPN PLS2,0
+DK,lh_precuneus,NSPN PLS2,0.005
+DK,lh_rostralanteriorcingulate,NSPN PLS2,-0.16
+DK,lh_rostralmiddlefrontal,NSPN PLS2,0.08
+DK,lh_superiorfrontal,NSPN PLS2,0.01
+DK,lh_superiorparietal,NSPN PLS2,0.015
+DK,lh_superiortemporal,NSPN PLS2,-0.005
+DK,lh_supramarginal,NSPN PLS2,0.01
+DK,lh_temporalpole,NSPN PLS2,-0.12
+DK,lh_transversetemporal,NSPN PLS2,-0.01
+DK,lh_bankssts,AHBA C3,35.3166
+DK,lh_caudalanteriorcingulate,AHBA C3,-66.1928
+DK,lh_caudalmiddlefrontal,AHBA C3,-1.99365
+DK,lh_cuneus,AHBA C3,-7.55351
+DK,lh_entorhinal,AHBA C3,-61.2011
+DK,lh_fusiform,AHBA C3,22.3358
+DK,lh_inferiorparietal,AHBA C3,19.3929
+DK,lh_inferiortemporal,AHBA C3,23.7138
+DK,lh_insula,AHBA C3,2.05089
+DK,lh_isthmuscingulate,AHBA C3,-17.0617
+DK,lh_lateraloccipital,AHBA C3,5.993
+DK,lh_lateralorbitofrontal,AHBA C3,19.1658
+DK,lh_lingual,AHBA C3,-4.47576
+DK,lh_medialorbitofrontal,AHBA C3,27.5219
+DK,lh_middletemporal,AHBA C3,14.7326
+DK,lh_paracentral,AHBA C3,-21.1133
+DK,lh_parahippocampal,AHBA C3,-14.6525
+DK,lh_parsopercularis,AHBA C3,9.9124
+DK,lh_parsorbitalis,AHBA C3,30.7061
+DK,lh_parstriangularis,AHBA C3,21.7514
+DK,lh_pericalcarine,AHBA C3,-30.7732
+DK,lh_postcentral,AHBA C3,-22.2674
+DK,lh_posteriorcingulate,AHBA C3,-7.58466
+DK,lh_precentral,AHBA C3,-27.2972
+DK,lh_precuneus,AHBA C3,19.0772
+DK,lh_rostralanteriorcingulate,AHBA C3,-10.0683
+DK,lh_rostralmiddlefrontal,AHBA C3,27.3043
+DK,lh_superiorfrontal,AHBA C3,1.75094
+DK,lh_superiorparietal,AHBA C3,7.95773
+DK,lh_superiortemporal,AHBA C3,21.8805
+DK,lh_supramarginal,AHBA C3,28.5232
+DK,lh_temporalpole,AHBA C3,-23.5216
+DK,lh_transversetemporal,AHBA C3,-23.3307
+HCP,lh_1,dCT rate,-0.0163345
+HCP,lh_10r,dCT rate,-0.0314463
+HCP,lh_10v,dCT rate,-0.0305893
+HCP,lh_11l,dCT rate,-0.0325227
+HCP,lh_13l,dCT rate,-0.0241281
+HCP,lh_2,dCT rate,-0.0207786
+HCP,lh_23c,dCT rate,-0.0256836
+HCP,lh_23d,dCT rate,-0.0320542
+HCP,lh_24dd,dCT rate,-0.0181253
+HCP,lh_24dv,dCT rate,-0.0206152
+HCP,lh_25,dCT rate,-0.0245783
+HCP,lh_31a,dCT rate,-0.0284143
+HCP,lh_31pd,dCT rate,-0.0263172
+HCP,lh_31pv,dCT rate,-0.0268147
+HCP,lh_33pr,dCT rate,-0.0110197
+HCP,lh_3a,dCT rate,-0.0171841
+HCP,lh_3b,dCT rate,-0.0147493
+HCP,lh_4,dCT rate,-0.00657174
+HCP,lh_43,dCT rate,-0.0151529
+HCP,lh_44,dCT rate,-0.0148045
+HCP,lh_45,dCT rate,-0.0218987
+HCP,lh_46,dCT rate,-0.0223157
+HCP,lh_47l,dCT rate,-0.0230997
+HCP,lh_47s,dCT rate,-0.0206537
+HCP,lh_52,dCT rate,-0.0174913
+HCP,lh_55b,dCT rate,-0.00517589
+HCP,lh_5L,dCT rate,-0.0271302
+HCP,lh_5mv,dCT rate,-0.0268678
+HCP,lh_6a,dCT rate,-0.00861955
+HCP,lh_6d,dCT rate,-0.000135853
+HCP,lh_6ma,dCT rate,-0.0150135
+HCP,lh_6mp,dCT rate,-0.0100773
+HCP,lh_7AL,dCT rate,-0.02247
+HCP,lh_7Am,dCT rate,-0.0277032
+HCP,lh_7PC,dCT rate,-0.0198141
+HCP,lh_7Pm,dCT rate,-0.0289813
+HCP,lh_7m,dCT rate,-0.0269963
+HCP,lh_8Ad,dCT rate,-0.0151497
+HCP,lh_8Av,dCT rate,-0.0197406
+HCP,lh_8BL,dCT rate,-0.0253951
+HCP,lh_8BM,dCT rate,-0.0241341
+HCP,lh_8C,dCT rate,-0.0167436
+HCP,lh_9-46d,dCT rate,-0.0226716
+HCP,lh_9a,dCT rate,-0.0232046
+HCP,lh_9m,dCT rate,-0.0289288
+HCP,lh_9p,dCT rate,-0.0193836
+HCP,lh_A1,dCT rate,-0.0206392
+HCP,lh_A4,dCT rate,-0.0163167
+HCP,lh_A5,dCT rate,-0.0203861
+HCP,lh_AIP,dCT rate,-0.022248
+HCP,lh_AVI,dCT rate,-0.0203092
+HCP,lh_DVT,dCT rate,-0.0249859
+HCP,lh_EC,dCT rate,-0.00942134
+HCP,lh_FEF,dCT rate,-0.00357333
+HCP,lh_FFC,dCT rate,-0.0183536
+HCP,lh_FOP3,dCT rate,-0.0140493
+HCP,lh_FOP4,dCT rate,-0.0155748
+HCP,lh_FST,dCT rate,-0.0202854
+HCP,lh_IFSa,dCT rate,-0.0231055
+HCP,lh_IFSp,dCT rate,-0.0197344
+HCP,lh_IP0,dCT rate,-0.0223717
+HCP,lh_IP1,dCT rate,-0.0234181
+HCP,lh_IP2,dCT rate,-0.0225296
+HCP,lh_IPS1,dCT rate,-0.0246
+HCP,lh_Ig,dCT rate,-0.0223589
+HCP,lh_LIPv,dCT rate,-0.0182607
+HCP,lh_LO3,dCT rate,-0.02074
+HCP,lh_MBelt,dCT rate,-0.0167452
+HCP,lh_MI,dCT rate,-0.0243944
+HCP,lh_MIP,dCT rate,-0.0213063
+HCP,lh_OFC,dCT rate,-0.0220834
+HCP,lh_OP4,dCT rate,-0.0215849
+HCP,lh_PBelt,dCT rate,-0.0136744
+HCP,lh_PCV,dCT rate,-0.023896
+HCP,lh_PF,dCT rate,-0.020169
+HCP,lh_PFm,dCT rate,-0.0231217
+HCP,lh_PFop,dCT rate,-0.0194776
+HCP,lh_PFt,dCT rate,-0.0195228
+HCP,lh_PGi,dCT rate,-0.02423
+HCP,lh_PGp,dCT rate,-0.0260028
+HCP,lh_PGs,dCT rate,-0.0281114
+HCP,lh_PH,dCT rate,-0.0197046
+HCP,lh_PHA1,dCT rate,-0.0142352
+HCP,lh_PHA2,dCT rate,-0.0184432
+HCP,lh_PHA3,dCT rate,-0.0172839
+HCP,lh_PHT,dCT rate,-0.020854
+HCP,lh_PI,dCT rate,-0.00938287
+HCP,lh_POS1,dCT rate,-0.0246553
+HCP,lh_POS2,dCT rate,-0.0226028
+HCP,lh_PSL,dCT rate,-0.0187095
+HCP,lh_PeEc,dCT rate,-0.00588949
+HCP,lh_PoI1,dCT rate,-0.0173384
+HCP,lh_PoI2,dCT rate,-0.020702
+HCP,lh_PreS,dCT rate,-0.0122032
+HCP,lh_RSC,dCT rate,-0.0148258
+HCP,lh_SCEF,dCT rate,-0.0169091
+HCP,lh_SFL,dCT rate,-0.0196723
+HCP,lh_STGa,dCT rate,-0.0127183
+HCP,lh_STSdp,dCT rate,-0.0242898
+HCP,lh_STSva,dCT rate,-0.0178691
+HCP,lh_STSvp,dCT rate,-0.0248754
+HCP,lh_STV,dCT rate,-0.0203569
+HCP,lh_TA2,dCT rate,-0.00956376
+HCP,lh_TE1a,dCT rate,-0.0174836
+HCP,lh_TE1m,dCT rate,-0.0180893
+HCP,lh_TE1p,dCT rate,-0.0188847
+HCP,lh_TE2a,dCT rate,-0.0181758
+HCP,lh_TE2p,dCT rate,-0.0182196
+HCP,lh_TF,dCT rate,-0.0171849
+HCP,lh_TGd,dCT rate,-0.0117828
+HCP,lh_TGv,dCT rate,-0.013464
+HCP,lh_TPOJ1,dCT rate,-0.0211634
+HCP,lh_TPOJ2,dCT rate,-0.0219262
+HCP,lh_V1,dCT rate,-0.00919467
+HCP,lh_V2,dCT rate,-0.0197938
+HCP,lh_V3,dCT rate,-0.019677
+HCP,lh_V3A,dCT rate,-0.0196771
+HCP,lh_V4,dCT rate,-0.0180068
+HCP,lh_VIP,dCT rate,-0.0241941
+HCP,lh_VMV1,dCT rate,-0.0192869
+HCP,lh_VMV3,dCT rate,-0.0211122
+HCP,lh_VVC,dCT rate,-0.0207678
+HCP,lh_a24,dCT rate,-0.022802
+HCP,lh_a24pr,dCT rate,-0.0271829
+HCP,lh_a32pr,dCT rate,-0.0227771
+HCP,lh_a47r,dCT rate,-0.0282817
+HCP,lh_a9-46v,dCT rate,-0.0274401
+HCP,lh_d23ab,dCT rate,-0.0314878
+HCP,lh_d32,dCT rate,-0.0234559
+HCP,lh_i6-8,dCT rate,-0.0144509
+HCP,lh_p24pr,dCT rate,-0.0287699
+HCP,lh_p32,dCT rate,-0.026112
+HCP,lh_p32pr,dCT rate,-0.0204649
+HCP,lh_p47r,dCT rate,-0.0226926
+HCP,lh_p9-46v,dCT rate,-0.0227223
+HCP,lh_pOFC,dCT rate,-0.00464698
+HCP,lh_s32,dCT rate,-0.0284981
+HCP,lh_1,dCT + CT,-34.016
+HCP,lh_10r,dCT + CT,41.8502
+HCP,lh_10v,dCT + CT,21.9487
+HCP,lh_11l,dCT + CT,28.5369
+HCP,lh_13l,dCT + CT,23.3306
+HCP,lh_2,dCT + CT,2.59906
+HCP,lh_23c,dCT + CT,5.79453
+HCP,lh_23d,dCT + CT,10.5096
+HCP,lh_24dd,dCT + CT,-29.385
+HCP,lh_24dv,dCT + CT,-3.02139
+HCP,lh_25,dCT + CT,14.4906
+HCP,lh_31a,dCT + CT,27.4744
+HCP,lh_31pd,dCT + CT,-5.46647
+HCP,lh_31pv,dCT + CT,24.967
+HCP,lh_33pr,dCT + CT,-37.6272
+HCP,lh_3a,dCT + CT,-54.313
+HCP,lh_3b,dCT + CT,-49.7926
+HCP,lh_4,dCT + CT,-54.9011
+HCP,lh_43,dCT + CT,-7.66454
+HCP,lh_44,dCT + CT,1.2201
+HCP,lh_45,dCT + CT,7.98766
+HCP,lh_46,dCT + CT,25.3861
+HCP,lh_47l,dCT + CT,9.01723
+HCP,lh_47s,dCT + CT,12.6452
+HCP,lh_52,dCT + CT,8.28847
+HCP,lh_55b,dCT + CT,-37.9274
+HCP,lh_5L,dCT + CT,-4.18152
+HCP,lh_5mv,dCT + CT,17.3468
+HCP,lh_6a,dCT + CT,-21.484
+HCP,lh_6d,dCT + CT,-64.2619
+HCP,lh_6ma,dCT + CT,-20.0886
+HCP,lh_6mp,dCT + CT,-54.8446
+HCP,lh_7AL,dCT + CT,2.11584
+HCP,lh_7Am,dCT + CT,4.83461
+HCP,lh_7PC,dCT + CT,-18.282
+HCP,lh_7Pm,dCT + CT,19.7288
+HCP,lh_7m,dCT + CT,2.85376
+HCP,lh_8Ad,dCT + CT,-2.2221
+HCP,lh_8Av,dCT + CT,-18.0908
+HCP,lh_8BL,dCT + CT,-15.4929
+HCP,lh_8BM,dCT + CT,3.4479
+HCP,lh_8C,dCT + CT,3.62652
+HCP,lh_9-46d,dCT + CT,15.3044
+HCP,lh_9a,dCT + CT,38.0658
+HCP,lh_9m,dCT + CT,16.3169
+HCP,lh_9p,dCT + CT,5.14891
+HCP,lh_A1,dCT + CT,-33.1906
+HCP,lh_A4,dCT + CT,4.3801
+HCP,lh_A5,dCT + CT,3.28045
+HCP,lh_AIP,dCT + CT,5.02673
+HCP,lh_AVI,dCT + CT,4.30919
+HCP,lh_DVT,dCT + CT,3.59794
+HCP,lh_EC,dCT + CT,-69.53
+HCP,lh_FEF,dCT + CT,-27.3791
+HCP,lh_FFC,dCT + CT,-0.397739
+HCP,lh_FOP3,dCT + CT,2.05885
+HCP,lh_FOP4,dCT + CT,-5.64597
+HCP,lh_FST,dCT + CT,17.6487
+HCP,lh_IFSa,dCT + CT,26.3109
+HCP,lh_IFSp,dCT + CT,11.6799
+HCP,lh_IP0,dCT + CT,21.4611
+HCP,lh_IP1,dCT + CT,0.946292
+HCP,lh_IP2,dCT + CT,2.91381
+HCP,lh_IPS1,dCT + CT,-18.461
+HCP,lh_Ig,dCT + CT,26.7896
+HCP,lh_LIPv,dCT + CT,-13.871
+HCP,lh_LO3,dCT + CT,10.6609
+HCP,lh_MBelt,dCT + CT,-11.6092
+HCP,lh_MI,dCT + CT,16.3438
+HCP,lh_MIP,dCT + CT,-1.72732
+HCP,lh_OFC,dCT + CT,27.3671
+HCP,lh_OP4,dCT + CT,-15.5058
+HCP,lh_PBelt,dCT + CT,-24.4727
+HCP,lh_PCV,dCT + CT,12.023
+HCP,lh_PF,dCT + CT,8.45476
+HCP,lh_PFm,dCT + CT,9.83287
+HCP,lh_PFop,dCT + CT,9.22687
+HCP,lh_PFt,dCT + CT,-14.7675
+HCP,lh_PGi,dCT + CT,8.09341
+HCP,lh_PGp,dCT + CT,8.28784
+HCP,lh_PGs,dCT + CT,17.6606
+HCP,lh_PH,dCT + CT,11.1327
+HCP,lh_PHA1,dCT + CT,-30.833
+HCP,lh_PHA2,dCT + CT,24.5531
+HCP,lh_PHA3,dCT + CT,10.9564
+HCP,lh_PHT,dCT + CT,1.53311
+HCP,lh_PI,dCT + CT,3.65016
+HCP,lh_POS1,dCT + CT,17.8032
+HCP,lh_POS2,dCT + CT,22.389
+HCP,lh_PSL,dCT + CT,13.8359
+HCP,lh_PeEc,dCT + CT,-31.9998
+HCP,lh_PoI1,dCT + CT,1.23874
+HCP,lh_PoI2,dCT + CT,-4.32491
+HCP,lh_PreS,dCT + CT,-28.9292
+HCP,lh_RSC,dCT + CT,-7.75505
+HCP,lh_SCEF,dCT + CT,-26.7806
+HCP,lh_SFL,dCT + CT,-33.2039
+HCP,lh_STGa,dCT + CT,2.22558
+HCP,lh_STSdp,dCT + CT,5.28703
+HCP,lh_STSva,dCT + CT,-2.03185
+HCP,lh_STSvp,dCT + CT,-1.47827
+HCP,lh_STV,dCT + CT,8.26105
+HCP,lh_TA2,dCT + CT,11.1735
+HCP,lh_TE1a,dCT + CT,-1.37723
+HCP,lh_TE1m,dCT + CT,5.00063
+HCP,lh_TE1p,dCT + CT,4.33853
+HCP,lh_TE2a,dCT + CT,2.17852
+HCP,lh_TE2p,dCT + CT,14.0753
+HCP,lh_TF,dCT + CT,4.3357
+HCP,lh_TGd,dCT + CT,-12.1039
+HCP,lh_TGv,dCT + CT,-3.64284
+HCP,lh_TPOJ1,dCT + CT,9.84791
+HCP,lh_TPOJ2,dCT + CT,-5.48612
+HCP,lh_V1,dCT + CT,-18.6506
+HCP,lh_V2,dCT + CT,-19.8526
+HCP,lh_V3,dCT + CT,-5.46675
+HCP,lh_V3A,dCT + CT,1.19248
+HCP,lh_V4,dCT + CT,-7.51875
+HCP,lh_VIP,dCT + CT,-1.50934
+HCP,lh_VMV1,dCT + CT,-0.164266
+HCP,lh_VMV3,dCT + CT,-0.146002
+HCP,lh_VVC,dCT + CT,4.00261
+HCP,lh_a24,dCT + CT,23.9002
+HCP,lh_a24pr,dCT + CT,-14.1814
+HCP,lh_a32pr,dCT + CT,-7.47326
+HCP,lh_a47r,dCT + CT,16.464
+HCP,lh_a9-46v,dCT + CT,42.5936
+HCP,lh_d23ab,dCT + CT,12.3936
+HCP,lh_d32,dCT + CT,15.133
+HCP,lh_i6-8,dCT + CT,-26.6352
+HCP,lh_p24pr,dCT + CT,-4.09481
+HCP,lh_p32,dCT + CT,30.219
+HCP,lh_p32pr,dCT + CT,5.46483
+HCP,lh_p47r,dCT + CT,16.8337
+HCP,lh_p9-46v,dCT + CT,12.2445
+HCP,lh_pOFC,dCT + CT,22.843
+HCP,lh_s32,dCT + CT,34.9692
+HCP,lh_1,dCT alone,-10.0779
+HCP,lh_10r,dCT alone,31.7384
+HCP,lh_10v,dCT alone,5.11634
+HCP,lh_11l,dCT alone,23.187
+HCP,lh_13l,dCT alone,9.29837
+HCP,lh_2,dCT alone,13.9305
+HCP,lh_23c,dCT alone,0.806894
+HCP,lh_23d,dCT alone,3.69168
+HCP,lh_24dd,dCT alone,-20.1244
+HCP,lh_24dv,dCT alone,-13.8511
+HCP,lh_25,dCT alone,-18.3026
+HCP,lh_31a,dCT alone,33.796
+HCP,lh_31pd,dCT alone,11.5519
+HCP,lh_31pv,dCT alone,35.4308
+HCP,lh_33pr,dCT alone,-58.8726
+HCP,lh_3a,dCT alone,-19.6247
+HCP,lh_3b,dCT alone,-14.064
+HCP,lh_4,dCT alone,-33.7935
+HCP,lh_43,dCT alone,-9.30695
+HCP,lh_44,dCT alone,-12.2322
+HCP,lh_45,dCT alone,3.71328
+HCP,lh_46,dCT alone,18.3135
+HCP,lh_47l,dCT alone,2.13381
+HCP,lh_47s,dCT alone,-14.4405
+HCP,lh_52,dCT alone,2.37217
+HCP,lh_55b,dCT alone,-34.6147
+HCP,lh_5L,dCT alone,6.39273
+HCP,lh_5mv,dCT alone,29.039
+HCP,lh_6a,dCT alone,-24.9002
+HCP,lh_6d,dCT alone,-50.4199
+HCP,lh_6ma,dCT alone,-26.855
+HCP,lh_6mp,dCT alone,-50.9444
+HCP,lh_7AL,dCT alone,12.9266
+HCP,lh_7Am,dCT alone,15.7244
+HCP,lh_7PC,dCT alone,-5.6834
+HCP,lh_7Pm,dCT alone,35.4308
+HCP,lh_7m,dCT alone,24.1693
+HCP,lh_8Ad,dCT alone,-5.253
+HCP,lh_8Av,dCT alone,-20.1481
+HCP,lh_8BL,dCT alone,-24.2276
+HCP,lh_8BM,dCT alone,-4.8904
+HCP,lh_8C,dCT alone,3.30116
+HCP,lh_9-46d,dCT alone,13.1371
+HCP,lh_9a,dCT alone,33.232
+HCP,lh_9m,dCT alone,1.41118
+HCP,lh_9p,dCT alone,-3.23431
+HCP,lh_A1,dCT alone,5.5426
+HCP,lh_A4,dCT alone,6.95111
+HCP,lh_A5,dCT alone,-0.244138
+HCP,lh_AIP,dCT alone,15.5969
+HCP,lh_AVI,dCT alone,-7.68797
+HCP,lh_DVT,dCT alone,25.4903
+HCP,lh_EC,dCT alone,-88.6577
+HCP,lh_FEF,dCT alone,-24.0583
+HCP,lh_FFC,dCT alone,4.6346
+HCP,lh_FOP3,dCT alone,-12.132
+HCP,lh_FOP4,dCT alone,-21.9049
+HCP,lh_FST,dCT alone,34.529
+HCP,lh_IFSa,dCT alone,22.127
+HCP,lh_IFSp,dCT alone,17.2826
+HCP,lh_IP0,dCT alone,41.8015
+HCP,lh_IP1,dCT alone,18.0167
+HCP,lh_IP2,dCT alone,12.5036
+HCP,lh_IPS1,dCT alone,9.72243
+HCP,lh_Ig,dCT alone,24.5787
+HCP,lh_LIPv,dCT alone,3.23566
+HCP,lh_LO3,dCT alone,28.576
+HCP,lh_MBelt,dCT alone,11.0386
+HCP,lh_MI,dCT alone,-18.5112
+HCP,lh_MIP,dCT alone,17.3127
+HCP,lh_OFC,dCT alone,5.15603
+HCP,lh_OP4,dCT alone,-9.29954
+HCP,lh_PBelt,dCT alone,-1.20794
+HCP,lh_PCV,dCT alone,22.8701
+HCP,lh_PF,dCT alone,11.6312
+HCP,lh_PFm,dCT alone,13.9459
+HCP,lh_PFop,dCT alone,5.21529
+HCP,lh_PFt,dCT alone,-8.42037
+HCP,lh_PGi,dCT alone,13.528
+HCP,lh_PGp,dCT alone,22.9368
+HCP,lh_PGs,dCT alone,31.0077
+HCP,lh_PH,dCT alone,22.2513
+HCP,lh_PHA1,dCT alone,-43.5056
+HCP,lh_PHA2,dCT alone,1.58462
+HCP,lh_PHA3,dCT alone,-3.59786
+HCP,lh_PHT,dCT alone,2.8157
+HCP,lh_PI,dCT alone,-14.7641
+HCP,lh_POS1,dCT alone,25.7628
+HCP,lh_POS2,dCT alone,39.3066
+HCP,lh_PSL,dCT alone,16.0215
+HCP,lh_PeEc,dCT alone,-64.9253
+HCP,lh_PoI1,dCT alone,-27.0614
+HCP,lh_PoI2,dCT alone,-37.4485
+HCP,lh_PreS,dCT alone,-36.4279
+HCP,lh_RSC,dCT alone,5.98883
+HCP,lh_SCEF,dCT alone,-28.1577
+HCP,lh_SFL,dCT alone,-37.0531
+HCP,lh_STGa,dCT alone,-27.7594
+HCP,lh_STSdp,dCT alone,9.06505
+HCP,lh_STSva,dCT alone,-14.4796
+HCP,lh_STSvp,dCT alone,-5.07471
+HCP,lh_STV,dCT alone,5.93075
+HCP,lh_TA2,dCT alone,-5.58463
+HCP,lh_TE1a,dCT alone,-16.8005
+HCP,lh_TE1m,dCT alone,-10.564
+HCP,lh_TE1p,dCT alone,-2.59366
+HCP,lh_TE2a,dCT alone,-14.6592
+HCP,lh_TE2p,dCT alone,5.0053
+HCP,lh_TF,dCT alone,-14.427
+HCP,lh_TGd,dCT alone,-45.1262
+HCP,lh_TGv,dCT alone,-27.6457
+HCP,lh_TPOJ1,dCT alone,13.6922
+HCP,lh_TPOJ2,dCT alone,1.62198
+HCP,lh_V1,dCT alone,34.554
+HCP,lh_V2,dCT alone,24.1272
+HCP,lh_V3,dCT alone,38.6447
+HCP,lh_V3A,dCT alone,41.6372
+HCP,lh_V4,dCT alone,23.7101
+HCP,lh_VIP,dCT alone,14.8408
+HCP,lh_VMV1,dCT alone,23.3759
+HCP,lh_VMV3,dCT alone,15.0228
+HCP,lh_VVC,dCT alone,0.510088
+HCP,lh_a24,dCT alone,-5.52532
+HCP,lh_a24pr,dCT alone,-35.3209
+HCP,lh_a32pr,dCT alone,-28.7567
+HCP,lh_a47r,dCT alone,12.1897
+HCP,lh_a9-46v,dCT alone,39.7242
+HCP,lh_d23ab,dCT alone,19.2462
+HCP,lh_d32,dCT alone,-3.71717
+HCP,lh_i6-8,dCT alone,-24.4427
+HCP,lh_p24pr,dCT alone,-20.0753
+HCP,lh_p32,dCT alone,5.28211
+HCP,lh_p32pr,dCT alone,-6.78816
+HCP,lh_p47r,dCT alone,14.6518
+HCP,lh_p9-46v,dCT alone,17.1379
+HCP,lh_pOFC,dCT alone,-9.56558
+HCP,lh_s32,dCT alone,11.0564
+HCP,lh_1,NSPN PLS2,-0.0109441
+HCP,lh_10r,NSPN PLS2,0.0327874
+HCP,lh_10v,NSPN PLS2,0.0272145
+HCP,lh_11l,NSPN PLS2,0.0647977
+HCP,lh_13l,NSPN PLS2,0.0160062
+HCP,lh_2,NSPN PLS2,-0.00715308
+HCP,lh_23c,NSPN PLS2,-0.00593474
+HCP,lh_23d,NSPN PLS2,-0.0118795
+HCP,lh_24dd,NSPN PLS2,-0.0225442
+HCP,lh_24dv,NSPN PLS2,-0.00445048
+HCP,lh_25,NSPN PLS2,-0.0839533
+HCP,lh_31a,NSPN PLS2,0.0025
+HCP,lh_31pd,NSPN PLS2,-0.0045797
+HCP,lh_31pv,NSPN PLS2,-0.0365122
+HCP,lh_33pr,NSPN PLS2,-0.0392891
+HCP,lh_3a,NSPN PLS2,-0.0197597
+HCP,lh_3b,NSPN PLS2,-0.0162462
+HCP,lh_4,NSPN PLS2,-0.0185882
+HCP,lh_43,NSPN PLS2,0.0100349
+HCP,lh_44,NSPN PLS2,0.0545669
+HCP,lh_45,NSPN PLS2,0.0783183
+HCP,lh_46,NSPN PLS2,0.0831813
+HCP,lh_47l,NSPN PLS2,0.0635451
+HCP,lh_47s,NSPN PLS2,0.00975019
+HCP,lh_52,NSPN PLS2,-0.0342597
+HCP,lh_55b,NSPN PLS2,0.0399399
+HCP,lh_5L,NSPN PLS2,0.00607449
+HCP,lh_5mv,NSPN PLS2,-0.0166234
+HCP,lh_6a,NSPN PLS2,0.0370625
+HCP,lh_6d,NSPN PLS2,-0.0101619
+HCP,lh_6ma,NSPN PLS2,0.0206297
+HCP,lh_6mp,NSPN PLS2,-0.0172228
+HCP,lh_7AL,NSPN PLS2,0.0154588
+HCP,lh_7Am,NSPN PLS2,0.00612784
+HCP,lh_7PC,NSPN PLS2,0.00960387
+HCP,lh_7Pm,NSPN PLS2,0.00214146
+HCP,lh_7m,NSPN PLS2,0.00991102
+HCP,lh_8Ad,NSPN PLS2,0.0613139
+HCP,lh_8Av,NSPN PLS2,0.0802767
+HCP,lh_8BL,NSPN PLS2,0.0471528
+HCP,lh_8BM,NSPN PLS2,0.010878
+HCP,lh_8C,NSPN PLS2,0.08709
+HCP,lh_9-46d,NSPN PLS2,0.0761894
+HCP,lh_9a,NSPN PLS2,0.0438133
+HCP,lh_9m,NSPN PLS2,-0.0293202
+HCP,lh_9p,NSPN PLS2,0.0423697
+HCP,lh_A1,NSPN PLS2,-0.0102207
+HCP,lh_A4,NSPN PLS2,-0.00215044
+HCP,lh_A5,NSPN PLS2,-0.00910593
+HCP,lh_AIP,NSPN PLS2,0.0121317
+HCP,lh_AVI,NSPN PLS2,0.0107911
+HCP,lh_DVT,NSPN PLS2,0.00702415
+HCP,lh_EC,NSPN PLS2,-0.16
+HCP,lh_FEF,NSPN PLS2,0.0268404
+HCP,lh_FFC,NSPN PLS2,-0.0193155
+HCP,lh_FOP3,NSPN PLS2,-0.00452171
+HCP,lh_FOP4,NSPN PLS2,0.0145512
+HCP,lh_FST,NSPN PLS2,0.00285763
+HCP,lh_IFSa,NSPN PLS2,0.0940953
+HCP,lh_IFSp,NSPN PLS2,0.0876923
+HCP,lh_IP0,NSPN PLS2,0.0264052
+HCP,lh_IP1,NSPN PLS2,0.0273984
+HCP,lh_IP2,NSPN PLS2,0.0230861
+HCP,lh_IPS1,NSPN PLS2,0.016091
+HCP,lh_Ig,NSPN PLS2,-0.0520549
+HCP,lh_LIPv,NSPN PLS2,0.0255921
+HCP,lh_LO3,NSPN PLS2,0.0158097
+HCP,lh_MBelt,NSPN PLS2,-0.0122163
+HCP,lh_MI,NSPN PLS2,-0.0274187
+HCP,lh_MIP,NSPN PLS2,0.021102
+HCP,lh_OFC,NSPN PLS2,0.00425926
+HCP,lh_OP4,NSPN PLS2,-0.00925868
+HCP,lh_PBelt,NSPN PLS2,-0.00385663
+HCP,lh_PCV,NSPN PLS2,0.00608764
+HCP,lh_PF,NSPN PLS2,0.0130319
+HCP,lh_PFm,NSPN PLS2,0.0226759
+HCP,lh_PFop,NSPN PLS2,-0.00369723
+HCP,lh_PFt,NSPN PLS2,0.00450109
+HCP,lh_PGi,NSPN PLS2,0.00247783
+HCP,lh_PGp,NSPN PLS2,0.0220049
+HCP,lh_PGs,NSPN PLS2,0.0238397
+HCP,lh_PH,NSPN PLS2,0.00765663
+HCP,lh_PHA1,NSPN PLS2,-0.163755
+HCP,lh_PHA2,NSPN PLS2,-0.157143
+HCP,lh_PHA3,NSPN PLS2,-0.0646214
+HCP,lh_PHT,NSPN PLS2,0.00488508
+HCP,lh_PI,NSPN PLS2,-0.0156853
+HCP,lh_POS1,NSPN PLS2,-0.0282507
+HCP,lh_POS2,NSPN PLS2,0.0261606
+HCP,lh_PSL,NSPN PLS2,0.00705305
+HCP,lh_PeEc,NSPN PLS2,-0.134995
+HCP,lh_PoI1,NSPN PLS2,-0.031691
+HCP,lh_PoI2,NSPN PLS2,-0.0385377
+HCP,lh_PreS,NSPN PLS2,-0.127096
+HCP,lh_RSC,NSPN PLS2,-0.0542007
+HCP,lh_SCEF,NSPN PLS2,-0.000291082
+HCP,lh_SFL,NSPN PLS2,0.0151222
+HCP,lh_STGa,NSPN PLS2,-0.035
+HCP,lh_STSdp,NSPN PLS2,0.00814092
+HCP,lh_STSva,NSPN PLS2,-0.00556559
+HCP,lh_STSvp,NSPN PLS2,0.0126192
+HCP,lh_STV,NSPN PLS2,0.00209817
+HCP,lh_TA2,NSPN PLS2,-0.0178925
+HCP,lh_TE1a,NSPN PLS2,-0.00707741
+HCP,lh_TE1m,NSPN PLS2,-7.87429e-05
+HCP,lh_TE1p,NSPN PLS2,0.00346983
+HCP,lh_TE2a,NSPN PLS2,-0.0161722
+HCP,lh_TE2p,NSPN PLS2,-0.00796394
+HCP,lh_TF,NSPN PLS2,-0.0436229
+HCP,lh_TGd,NSPN PLS2,-0.0675362
+HCP,lh_TGv,NSPN PLS2,-0.0455441
+HCP,lh_TPOJ1,NSPN PLS2,0.00316351
+HCP,lh_TPOJ2,NSPN PLS2,-0.0106288
+HCP,lh_V1,NSPN PLS2,-0.0754509
+HCP,lh_V2,NSPN PLS2,-0.0372707
+HCP,lh_V3,NSPN PLS2,0.00260064
+HCP,lh_V3A,NSPN PLS2,0.0276887
+HCP,lh_V4,NSPN PLS2,0.00520683
+HCP,lh_VIP,NSPN PLS2,0.0117954
+HCP,lh_VMV1,NSPN PLS2,-0.156884
+HCP,lh_VMV3,NSPN PLS2,-0.0257604
+HCP,lh_VVC,NSPN PLS2,-0.038785
+HCP,lh_a24,NSPN PLS2,-0.157666
+HCP,lh_a24pr,NSPN PLS2,-0.0392382
+HCP,lh_a32pr,NSPN PLS2,-0.0117348
+HCP,lh_a47r,NSPN PLS2,0.0652636
+HCP,lh_a9-46v,NSPN PLS2,0.0858808
+HCP,lh_d23ab,NSPN PLS2,-0.052137
+HCP,lh_d32,NSPN PLS2,-0.0429985
+HCP,lh_i6-8,NSPN PLS2,0.0738203
+HCP,lh_p24pr,NSPN PLS2,-0.0384408
+HCP,lh_p32,NSPN PLS2,-0.00898807
+HCP,lh_p32pr,NSPN PLS2,-0.0137971
+HCP,lh_p47r,NSPN PLS2,0.0872135
+HCP,lh_p9-46v,NSPN PLS2,0.0896469
+HCP,lh_pOFC,NSPN PLS2,-0.0276938
+HCP,lh_s32,NSPN PLS2,0.0145979
+HCP,lh_1,AHBA C3,-0.947251
+HCP,lh_10r,AHBA C3,1.10293
+HCP,lh_10v,AHBA C3,0.16848
+HCP,lh_11l,AHBA C3,0.850562
+HCP,lh_13l,AHBA C3,0.831419
+HCP,lh_2,AHBA C3,0.601066
+HCP,lh_23c,AHBA C3,-0.102357
+HCP,lh_23d,AHBA C3,0.231694
+HCP,lh_24dd,AHBA C3,-1.23126
+HCP,lh_24dv,AHBA C3,-1.02538
+HCP,lh_25,AHBA C3,-1.50988
+HCP,lh_31a,AHBA C3,0.866428
+HCP,lh_31pd,AHBA C3,-0.655135
+HCP,lh_31pv,AHBA C3,0.981548
+HCP,lh_33pr,AHBA C3,-2.78562
+HCP,lh_3a,AHBA C3,-2.44576
+HCP,lh_3b,AHBA C3,-2.38483
+HCP,lh_4,AHBA C3,-2.01289
+HCP,lh_43,AHBA C3,0.456511
+HCP,lh_44,AHBA C3,0.591689
+HCP,lh_45,AHBA C3,1.06861
+HCP,lh_46,AHBA C3,1.11654
+HCP,lh_47l,AHBA C3,0.782946
+HCP,lh_47s,AHBA C3,0.329757
+HCP,lh_52,AHBA C3,0.0592361
+HCP,lh_55b,AHBA C3,-0.750999
+HCP,lh_5L,AHBA C3,-0.378335
+HCP,lh_5mv,AHBA C3,0.000728977
+HCP,lh_6a,AHBA C3,-0.399385
+HCP,lh_6d,AHBA C3,-2.13149
+HCP,lh_6ma,AHBA C3,-0.195281
+HCP,lh_6mp,AHBA C3,-1.73448
+HCP,lh_7AL,AHBA C3,0.299826
+HCP,lh_7Am,AHBA C3,0.00292805
+HCP,lh_7PC,AHBA C3,-0.66671
+HCP,lh_7Pm,AHBA C3,0.999146
+HCP,lh_7m,AHBA C3,-0.260952
+HCP,lh_8Ad,AHBA C3,0.30109
+HCP,lh_8Av,AHBA C3,-0.292834
+HCP,lh_8BL,AHBA C3,-0.263895
+HCP,lh_8BM,AHBA C3,0.276188
+HCP,lh_8C,AHBA C3,0.387725
+HCP,lh_9-46d,AHBA C3,0.350561
+HCP,lh_9a,AHBA C3,1.47316
+HCP,lh_9m,AHBA C3,0.363464
+HCP,lh_9p,AHBA C3,0.346828
+HCP,lh_A1,AHBA C3,-2.01302
+HCP,lh_A4,AHBA C3,1.33986
+HCP,lh_A5,AHBA C3,1.06523
+HCP,lh_AIP,AHBA C3,0.712809
+HCP,lh_AVI,AHBA C3,0.361394
+HCP,lh_DVT,AHBA C3,-0.46209
+HCP,lh_EC,AHBA C3,-2.63237
+HCP,lh_FEF,AHBA C3,-0.605317
+HCP,lh_FFC,AHBA C3,0.980555
+HCP,lh_FOP3,AHBA C3,-0.48484
+HCP,lh_FOP4,AHBA C3,-0.0429287
+HCP,lh_FST,AHBA C3,1.0996
+HCP,lh_IFSa,AHBA C3,0.870521
+HCP,lh_IFSp,AHBA C3,0.743701
+HCP,lh_IP0,AHBA C3,0.675677
+HCP,lh_IP1,AHBA C3,0.614343
+HCP,lh_IP2,AHBA C3,0.694965
+HCP,lh_IPS1,AHBA C3,-1.25222
+HCP,lh_Ig,AHBA C3,1.07906
+HCP,lh_LIPv,AHBA C3,0.252415
+HCP,lh_LO3,AHBA C3,0.92301
+HCP,lh_MBelt,AHBA C3,-0.442279
+HCP,lh_MI,AHBA C3,-0.582666
+HCP,lh_MIP,AHBA C3,-0.283009
+HCP,lh_OFC,AHBA C3,0.591579
+HCP,lh_OP4,AHBA C3,-0.106502
+HCP,lh_PBelt,AHBA C3,-1.04465
+HCP,lh_PCV,AHBA C3,0.319168
+HCP,lh_PF,AHBA C3,1.27399
+HCP,lh_PFm,AHBA C3,1.39265
+HCP,lh_PFop,AHBA C3,1.14219
+HCP,lh_PFt,AHBA C3,-0.0675265
+HCP,lh_PGi,AHBA C3,0.824966
+HCP,lh_PGp,AHBA C3,0.339318
+HCP,lh_PGs,AHBA C3,1.21282
+HCP,lh_PH,AHBA C3,0.872097
+HCP,lh_PHA1,AHBA C3,-1.65863
+HCP,lh_PHA2,AHBA C3,0.57116
+HCP,lh_PHA3,AHBA C3,0.474079
+HCP,lh_PHT,AHBA C3,1.02473
+HCP,lh_PI,AHBA C3,-0.0446565
+HCP,lh_POS1,AHBA C3,0.949841
+HCP,lh_POS2,AHBA C3,1.10435
+HCP,lh_PSL,AHBA C3,1.44304
+HCP,lh_PeEc,AHBA C3,-1.79619
+HCP,lh_PoI1,AHBA C3,-0.586551
+HCP,lh_PoI2,AHBA C3,-1.585
+HCP,lh_PreS,AHBA C3,-1.85018
+HCP,lh_RSC,AHBA C3,-0.611172
+HCP,lh_SCEF,AHBA C3,-0.710137
+HCP,lh_SFL,AHBA C3,-0.799577
+HCP,lh_STGa,AHBA C3,-0.112868
+HCP,lh_STSdp,AHBA C3,1.10998
+HCP,lh_STSva,AHBA C3,0.270337
+HCP,lh_STSvp,AHBA C3,0.48085
+HCP,lh_STV,AHBA C3,1.22222
+HCP,lh_TA2,AHBA C3,0.457959
+HCP,lh_TE1a,AHBA C3,0.0774407
+HCP,lh_TE1m,AHBA C3,0.810254
+HCP,lh_TE1p,AHBA C3,1.25773
+HCP,lh_TE2a,AHBA C3,0.321337
+HCP,lh_TE2p,AHBA C3,1.3367
+HCP,lh_TF,AHBA C3,0.712786
+HCP,lh_TGd,AHBA C3,-0.963901
+HCP,lh_TGv,AHBA C3,-0.0945557
+HCP,lh_TPOJ1,AHBA C3,1.22209
+HCP,lh_TPOJ2,AHBA C3,0.760364
+HCP,lh_V1,AHBA C3,-1.90591
+HCP,lh_V2,AHBA C3,-1.48774
+HCP,lh_V3,AHBA C3,-1.29937
+HCP,lh_V3A,AHBA C3,-0.46184
+HCP,lh_V4,AHBA C3,-0.480772
+HCP,lh_VIP,AHBA C3,-0.243781
+HCP,lh_VMV1,AHBA C3,0.27371
+HCP,lh_VMV3,AHBA C3,0.658477
+HCP,lh_VVC,AHBA C3,1.32694
+HCP,lh_a24,AHBA C3,-1.13557
+HCP,lh_a24pr,AHBA C3,-1.9079
+HCP,lh_a32pr,AHBA C3,-1.40903
+HCP,lh_a47r,AHBA C3,1.00363
+HCP,lh_a9-46v,AHBA C3,1.18985
+HCP,lh_d23ab,AHBA C3,-0.533134
+HCP,lh_d32,AHBA C3,-0.251635
+HCP,lh_i6-8,AHBA C3,-0.637269
+HCP,lh_p24pr,AHBA C3,-0.633267
+HCP,lh_p32,AHBA C3,-0.0990243
+HCP,lh_p32pr,AHBA C3,-0.0325678
+HCP,lh_p47r,AHBA C3,0.467724
+HCP,lh_p9-46v,AHBA C3,0.552504
+HCP,lh_pOFC,AHBA C3,0.300044
+HCP,lh_s32,AHBA C3,-0.0767321

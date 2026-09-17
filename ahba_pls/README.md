@@ -333,7 +333,7 @@ Built from single-universe re-runs so every number on them is comparable:
 | `figures/fig_signature_both.png` | `code/fig1_signature_both.R` | the signature derived in **both** parcellations: brain maps (DK row, HCP-MMP row), six small concordance panels, and the cell-class profile of three rankings |
 | `figures/fig_enrichment_combined.png` | `code/fig2_enrichment_combined.R` | MAGMA only: every ranking's SCZ/MDD β alone, then the seven head-to-head joint models |
 | `figures/fig_celltypes.png` | `code/fig4_celltypes.R` | cell-class marker enrichment of all nine rankings, plus the astrocyte/oligodendrocyte plane |
-| **`figures/fig_signature_designs.png`** | `code/fig1_signature_designs.R` | **the version to read**: dCT+CT and dCT-alone designs × both parcellations, scatters only (`SHOW_FOUR=TRUE` adds the four-feature row) |
+| **`figures/fig_signature_designs.png`** | `code/fig1_signature_designs.R` | **the version to read**: brain maps in both parcellations, then two square pair matrices (regional maps, gene vectors) with DK below the diagonal and HCP-MMP above |
 | `figures/fig_signature_dct_only.png` | `code/fig1_signature_dct_only.R` | the dCT-alone design on its own, with its cell-class panel |
 
 HCP-MMP brain rendering needs `ggsegGlasser`, which is not on CRAN for this R
@@ -352,12 +352,11 @@ HCP ranking also beats NSPN-PLS2 for MDD, survives C1 for both disorders, and lo
 
 `code/17_design_grid.py` → `results/design_grid_{scores,weights,components,concordance}`;
 figure `figures/fig_signature_designs.png` (`code/fig1_signature_designs.R`). This is the version of
-Figure 1 to read: the cell-class panel has moved to its own figure, and in its place are the
-concordance scatters of the two thickness-only designs (dCT + CT and dCT alone) in both
-parcellations. The four-feature row is **computed but not plotted by default** — its component is
-not spin-significant and it exists in DK only, so it clutters the comparison; `SHOW_FOUR=TRUE
-Rscript code/fig1_signature_designs.R` puts it back, and its numbers are in the table below and in
-`design_grid_*.tsv` either way.
+Figure 1 to read: the cell-class panel has moved to its own figure, and in its place are two square
+pair matrices covering **every** pairwise comparison among the regional maps and among the gene
+vectors (see *NSPN PLS2 in HCP-MMP space* below). The four-feature design is computed but not
+plotted — its component is not spin-significant and it exists in DK only — and its numbers stay in
+the table below and in `design_grid_*.tsv`.
 
 The four-feature design (CT + dCT + T1w/T2w + dT1w/T2w) is the closest available analogue of the
 NSPN PNAS design. Its C3-aligned component is **selected in the script**, not assumed:
@@ -386,6 +385,53 @@ Reading, in the order the figure supports it:
   unlike the two-Y fits (0.002 DK, 0.011 HCP). It explains only 9 % of the cross-covariance, so the
   spin null on the singular value is unforgiving. The lead signature stays the two-Y fit; the
   four-feature component is the better *NSPN analogue* and a usable gene ranking, not a replacement.
+
+### NSPN PLS2 in HCP-MMP space, and every pair in one figure
+
+`code/18_nspn_to_hcp.py` → `data/reference/nspn_hcp_maps.csv`, `nspn_hcp_coverage.csv`,
+`NSPN_HCP.md`; pairs from `code/17_design_grid.py` → `design_grid_pairs_{scores,weights}.tsv`;
+figure `figures/fig_signature_designs.png` (`code/fig1_signature_designs.R`).
+
+**The conversion.** The NSPN maps are published on the 308-region subdivision of DK, and both
+that parcellation and HCP-MMP1 ship fsaverage annot files, so the transfer is parcels → vertices →
+parcels — the route in `~/Git/AHBA/notebooks/MT_whitakervertes.ipynb`. Reimplemented here with
+nibabel so the 308 values are matched to annot parcels **by name**
+(`<region>_part<N>` against hemi / region / n_sub_regions) instead of by row position, asserted to
+be a bijection. 357 of 360 HCP parcels keep ≥50 % vertex coverage
+(179 regions after bilateral averaging); `L_H`, `R_H` and `R_Pir` fall below it.
+
+Two things worth knowing about the source table and the result:
+
+- **The published 308-region table uses −99 as a missing-value sentinel** (two PLS2 cells:
+  left lateraloccipital part 8, right parahippocampal part 1). Left in place it survives the vertex
+  averaging and destroys any Pearson correlation while leaving Spearman almost intact — the DK
+  validation read r = 0.41 / ρ = 0.98 before the fix and r = 0.97 / ρ = 0.98 after.
+- **Validation**: running the same vertex route 308 → DK and correlating with the published
+  DK-level table this project already uses gives r = 0.97 (PLS2), 0.996 (CT), 0.98 (CT_delta),
+  0.99 (MT), 0.98 (MT_delta) over 34 regions.
+- **It is a resampling, not a measurement.** Where an HCP parcel is smaller than its parent
+  308-parcel, neighbours inherit one value, so the map is smoother than a native HCP fit and its
+  effective resolution is 308, not 180.
+
+**What it buys: the HCP cell of the NSPN comparison is no longer empty — and it is weak.**
+
+| pair | DK (33 regions) | HCP-MMP (137 parcels) |
+|:--|--:|--:|
+| ABCD dCT+CT scores vs NSPN PLS2 | ρ = 0.75, p_spin = 0.001 | ρ = 0.21, p_spin = 0.268 |
+| ABCD dCT+CT scores vs AHBA C3 | ρ = 0.83, p_spin = <0.001 | ρ = 0.70, p_spin = <0.001 |
+| NSPN PLS2 vs AHBA C3 | ρ = 0.66, p_spin = 0.001 | ρ = 0.39, p_spin = 0.020 |
+| dCT rate vs NSPN PLS2 | ρ = -0.52, p_spin = 0.012 | ρ = -0.18, p_spin = 0.395 |
+
+Every NSPN pair weakens in HCP space while the pairs that do not involve NSPN strengthen or hold
+(dCT alone vs C3 goes 0.28 → 0.55; the two designs' gene weights agree
+0.70 → 0.90). That asymmetry is what a 308-region map resampled to 180 parcels
+should look like, so read the weak HCP–NSPN cells as a resolution limit of the reference map rather
+than as disagreement between the cohorts — the like-for-like NSPN comparison is the DK one.
+
+**The figure is now two square pair matrices**, regional maps (panel a) and gene vectors (panel b),
+each with DK below the diagonal and HCP-MMP above it, ρ in bold inside every cell and the spin p
+under it. This is possible only because NSPN PLS2 exists in both parcellations; the three
+reference-vs-reference cells of panel b are parcellation-independent and marked "=".
 
 ### Gene bases — which comparisons are clean, and why
 
@@ -514,9 +560,11 @@ sample-size effect: it is unchanged (+5.1 → +5.0) between the 6,537-child and
 
 ## Reproducing
 
-Analysis (python, env `ahba-pls`): `code/01_*` → `code/17_*` in order. `11_` is the parcellation
+Analysis (python, env `ahba-pls`): `code/01_*` → `code/18_*` in order. `11_` is the parcellation
 control, `12_` the HCP-MMP arm, `14_`/`15_` the single-universe enrichment and cell-class tables that
-the summary figures read, `16_` the dCT-only variant and `17_` the three-design grid (seconds each — both reuse saved fits). `12_` needs the backfilled HCP run
+the summary figures read, `16_` the dCT-only variant, `17_` the design grid and all pairwise statistics, `18_` the NSPN→HCP-MMP
+conversion (needs `nibabel`, and the fsaverage annot files in `~/Git/AHBA/data/parcellations/`; run it
+before `17_`). `12_` needs the backfilled HCP run
 (`ABCD_CONFIG=ct_70_hcp_noglobal_mv2 python -m abcd.assemble` then
 `Rscript R/fit_lmm.R --cores 8`, which lands in `out/thickness_hcp_70_aa6e91efba82`); everything else
 reads the DK and T1w/T2w runs listed in `tools/rerun_local.sh`.
@@ -530,7 +578,7 @@ Rscript code/fig2_enrichment.R          # permutation + MAGMA, DK
 Rscript code/fig2_enrichment_combined.R # MAGMA only, all rankings
 Rscript code/fig3_hcp_vs_dk.R           # the HCP vs DK arm
 Rscript code/fig4_celltypes.R           # cell classes, all nine rankings
-Rscript code/fig1_signature_designs.R   # two Y designs, both parcellations (SHOW_FOUR=TRUE for three)
+Rscript code/fig1_signature_designs.R   # brain maps + the two pair matrices
 Rscript code/fig1_signature_dct_only.R  # the dCT-only design on its own
 ```
 

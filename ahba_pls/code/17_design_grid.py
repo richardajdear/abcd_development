@@ -32,6 +32,13 @@ Outputs
   results/design_grid_weights.tsv      wide: gene x design|parcellation
   results/design_grid_components.tsv   per design x parcellation component stats
   results/design_grid_concordance.tsv  scores and weights vs C3 / C1 / NSPN PLS2
+  results/design_grid_pairs_scores.tsv  EVERY pair of regional maps, per parcellation
+  results/design_grid_pairs_weights.tsv EVERY pair of gene vectors, per parcellation
+  results/design_grid_points_scores.csv the regional values behind those pairs
+  results/design_grid_points_weights.tsv the gene vectors behind those pairs
+
+NSPN PLS2 now exists in HCP-MMP space too (18_nspn_to_hcp.py), so the pair
+matrices are symmetric: every regional map is available in both parcellations.
 """
 from __future__ import annotations
 import sys
@@ -54,6 +61,7 @@ D_TWOY, D_ONEY, D_FOUR = "dCT + CT", "dCT alone", "CT + dCT + T1T2 + dT1T2"
 Y34 = pd.read_csv(DATA / "y_maps_bilateral_34.csv", index_col=0)
 Y180 = pd.read_csv(RES / "hcp_y_maps_180.csv", index_col=0)
 nspn34 = pd.read_csv(REF / "nspn_dk_maps_bilateral_34.csv", index_col=0)
+nspn_hcp = pd.read_csv(REF / "nspn_hcp_maps.csv", index_col=0)   # 18_nspn_to_hcp.py
 nspn_w = pd.read_csv(REF / "nspn_pls_gene_weights.csv").set_index("gene")
 c3dk = pd.read_csv(REF / f"ahba_c123_scores_recomputed_{DS}.csv", index_col=0)
 c123w = pd.read_csv(REF / "ahba_c123_gene_weights.csv", index_col=0)
@@ -153,7 +161,8 @@ rows = []
 for (design, parc), f in FITS.items():
     sc = f["scores"]
     refs_s = ({"C3": c3dk["C3"], "NSPN_PLS2": nspn34["PLS2"]} if parc == "DK"
-              else {"C3": hcp_c123["C3"].reindex(Y180.index).dropna()})
+              else {"C3": hcp_c123["C3"].reindex(Y180.index).dropna(),
+                    "NSPN_PLS2": nspn_hcp["PLS2"].dropna()})
     cent = pls.DK_CENTROIDS if parc == "DK" else pls.HCP_CENTROIDS
     for rn, rv in refs_s.items():
         rho, p, _ = pls.spin_corr(sc, rv.dropna(), n_perm=N_SPIN, seed=SEED, centroids=cent)
@@ -174,3 +183,70 @@ print("\n" + C.pivot_table(index=["design", "parcellation"], columns=["level", "
 print("\nscores spin p:")
 print(C[C.level == "scores"][["design", "parcellation", "reference", "rho", "p_spin", "n"]]
       .round(4).to_string(index=False))
+
+# ================================================================ pair matrix ==
+# Every pair of regional maps, and every pair of gene vectors, within each
+# parcellation -- the figure plots these as two square matrices with DK below
+# the diagonal and HCP-MMP above it.
+S_VARS = ["dCT rate", "dCT + CT", "dCT alone", "NSPN PLS2", "AHBA C3"]
+W_VARS = ["dCT + CT", "dCT alone", "NSPN PLS2", "AHBA C3", "AHBA C1"]
+
+score_vecs = {
+    "DK": {"dCT rate": Y34["dCT"], "dCT + CT": FITS[(D_TWOY, "DK")]["scores"],
+           "dCT alone": FITS[(D_ONEY, "DK")]["scores"],
+           "NSPN PLS2": nspn34["PLS2"], "AHBA C3": c3dk["C3"]},
+    "HCP": {"dCT rate": Y180["dCT"], "dCT + CT": FITS[(D_TWOY, "HCP")]["scores"],
+            "dCT alone": FITS[(D_ONEY, "HCP")]["scores"],
+            "NSPN PLS2": nspn_hcp["PLS2"], "AHBA C3": hcp_c123["C3"].reindex(Y180.index)},
+}
+weight_vecs = {
+    "DK": {"dCT + CT": FITS[(D_TWOY, "DK")]["weights"], "dCT alone": FITS[(D_ONEY, "DK")]["weights"],
+           "NSPN PLS2": nspn_w["PLS2_z"], "AHBA C3": c123w["C3"], "AHBA C1": c123w["C1"]},
+    "HCP": {"dCT + CT": FITS[(D_TWOY, "HCP")]["weights"], "dCT alone": FITS[(D_ONEY, "HCP")]["weights"],
+            "NSPN PLS2": nspn_w["PLS2_z"], "AHBA C3": c123w["C3"], "AHBA C1": c123w["C1"]},
+}
+
+# points behind the panels, so the figure fits nothing
+pts = []
+for parc, vecs in score_vecs.items():
+    common = None
+    for v in vecs.values():
+        common = v.dropna().index if common is None else common.intersection(v.dropna().index)
+    for name, v in vecs.items():
+        pts.append(pd.DataFrame({"parcellation": parc, "label": common,
+                                 "variable": name, "value": v.reindex(common).to_numpy()}))
+pd.concat(pts, ignore_index=True).to_csv(RES / "design_grid_points_scores.csv",
+                                         index=False, float_format="%.6g")
+wcols = {f"{n}|{parc}" if n in (D_TWOY, D_ONEY, "dCT + CT", "dCT alone") else n: v
+         for parc, vecs in weight_vecs.items() for n, v in vecs.items()}
+pd.DataFrame(wcols).rename_axis("gene").to_csv(RES / "design_grid_points_weights.tsv",
+                                               sep="\t", float_format="%.6g")
+
+def pair_rows(vecs, vars_, parc, level, spin):
+    rows = []
+    cent = pls.DK_CENTROIDS if parc == "DK" else pls.HCP_CENTROIDS
+    for i, a in enumerate(vars_):
+        for b in vars_[i + 1:]:
+            x, y = vecs[a].dropna(), vecs[b].dropna()
+            sh = x.index.intersection(y.index)
+            rho = stats.spearmanr(x.loc[sh], y.loc[sh]).statistic
+            p = np.nan
+            if spin:
+                # rotate the more complete map (b) and align to a, as elsewhere
+                _, p, _ = pls.spin_corr(x.loc[sh], y, n_perm=N_SPIN, seed=SEED, centroids=cent)
+            rows.append(dict(parcellation=parc, level=level, var_x=a, var_y=b,
+                             rho=rho, p_spin=p, n=len(sh)))
+    return rows
+
+PS = pd.DataFrame([r for parc, vecs in score_vecs.items()
+                   for r in pair_rows(vecs, S_VARS, parc, "scores", True)])
+PW = pd.DataFrame([r for parc, vecs in weight_vecs.items()
+                   for r in pair_rows(vecs, W_VARS, parc, "weights", False)])
+PS.to_csv(RES / "design_grid_pairs_scores.tsv", sep="\t", index=False, float_format="%.4g")
+PW.to_csv(RES / "design_grid_pairs_weights.tsv", sep="\t", index=False, float_format="%.4g")
+
+print("\nregional map pairs (Spearman rho; p_spin over 5,000 rotations):")
+print(PS.pivot_table(index=["var_x", "var_y"], columns="parcellation",
+                     values=["rho", "p_spin"]).round(3).to_string())
+print("\ngene vector pairs:")
+print(PW.pivot_table(index=["var_x", "var_y"], columns="parcellation", values="rho").round(3).to_string())

@@ -15,10 +15,12 @@ CT + dCT + T1T2 + dT1T2	DK	weights	C3	0.6246		7873
 CT + dCT + T1T2 + dT1T2	DK	weights	C1	-0.06898		7873
 CT + dCT + T1T2 + dT1T2	DK	weights	NSPN_PLS2_z	0.5713		11175
 dCT + CT	HCP	scores	C3	0.7012	0.0003999	137
+dCT + CT	HCP	scores	NSPN_PLS2	0.2087	0.2675	137
 dCT + CT	HCP	weights	C3	0.6779		7973
 dCT + CT	HCP	weights	C1	-0.1078		7973
 dCT + CT	HCP	weights	NSPN_PLS2_z	0.3494		7433
 dCT alone	HCP	scores	C3	0.5465	0.0003999	137
+dCT alone	HCP	scores	NSPN_PLS2	0.335	0.1216	137
 dCT alone	HCP	weights	C3	0.6056		7973
 dCT alone	HCP	weights	C1	0.2782		7973
 dCT alone	HCP	weights	NSPN_PLS2_z	0.3717		7433
