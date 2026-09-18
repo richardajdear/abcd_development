@@ -1,0 +1,369 @@
+kind	disorder_result	phenotype	variable	type	n_genes	beta	beta_std	se	p	file
+reverse: disorder genes ~ phenotype gene Z	PGC3_EUR	baseline_thickness	baseline_thickness	COVAR	18261	0.022744	0.022675	0.011243	0.043101	PGC3_EUR_vs_baseline_thickness.gsa.out
+reverse: disorder genes ~ phenotype gene Z	PGC3_EUR	global_slope	global_slope	COVAR	18261	0.017916	0.017659	0.011246	0.11114	PGC3_EUR_vs_global_slope.gsa.out
+reverse: disorder genes ~ phenotype gene Z	PGC3_EUR	slope_PC1	slope_PC1	COVAR	18261	-0.0030971	-0.0030195	0.01136	0.78514	PGC3_EUR_vs_slope_PC1.gsa.out
+reverse: disorder genes ~ phenotype gene Z	PGC3_EUR	slope_PC2	slope_PC2	COVAR	18261	0.0010824	0.0010587	0.011352	0.92404	PGC3_EUR_vs_slope_PC2.gsa.out
+reverse: disorder genes ~ phenotype gene Z	PGC3_EUR	slope_PC3	slope_PC3	COVAR	18261	-0.011263	-0.010897	0.011338	0.32055	PGC3_EUR_vs_slope_PC3.gsa.out
+reverse: disorder genes ~ phenotype gene Z	PGC3_primary	baseline_thickness	baseline_thickness	COVAR	18261	0.03003	0.029939	0.011364	0.0082348	PGC3_primary_vs_baseline_thickness.gsa.out
+reverse: disorder genes ~ phenotype gene Z	PGC3_primary	global_slope	global_slope	COVAR	18261	0.020863	0.020563	0.011411	0.067523	PGC3_primary_vs_global_slope.gsa.out
+reverse: disorder genes ~ phenotype gene Z	PGC3_primary	slope_PC1	slope_PC1	COVAR	18261	-0.0030921	-0.0030147	0.011515	0.7883	PGC3_primary_vs_slope_PC1.gsa.out
+reverse: disorder genes ~ phenotype gene Z	PGC3_primary	slope_PC2	slope_PC2	COVAR	18261	-0.01361	-0.013312	0.01149	0.23622	PGC3_primary_vs_slope_PC2.gsa.out
+reverse: disorder genes ~ phenotype gene Z	PGC3_primary	slope_PC3	slope_PC3	COVAR	18261	-0.015896	-0.015379	0.011501	0.16697	PGC3_primary_vs_slope_PC3.gsa.out
+reverse: disorder genes ~ phenotype gene Z	SCZ25_EUR	baseline_thickness	baseline_thickness	COVAR	18270	0.02244	0.022372	0.010949	0.040441	SCZ25_EUR_vs_baseline_thickness.gsa.out
+reverse: disorder genes ~ phenotype gene Z	SCZ25_EUR	global_slope	global_slope	COVAR	18270	0.026	0.025628	0.010998	0.018083	SCZ25_EUR_vs_global_slope.gsa.out
+reverse: disorder genes ~ phenotype gene Z	SCZ25_EUR	slope_PC1	slope_PC1	COVAR	18270	0.000791	0.00077116	0.011112	0.94325	SCZ25_EUR_vs_slope_PC1.gsa.out
+reverse: disorder genes ~ phenotype gene Z	SCZ25_EUR	slope_PC2	slope_PC2	COVAR	18270	0.0070956	0.0069402	0.011097	0.52255	SCZ25_EUR_vs_slope_PC2.gsa.out
+reverse: disorder genes ~ phenotype gene Z	SCZ25_EUR	slope_PC3	slope_PC3	COVAR	18270	-0.0032485	-0.0031425	0.011052	0.76883	SCZ25_EUR_vs_slope_PC3.gsa.out
+positive control: 2025 sets on SCZ25_META	gene sets	SCZ25_META	PGC3_genesig	SET	705	2.8026	0.53571	0.059659	2.2250999999999997e-308	SCZ25_META_sets.gsa.out
+positive control: 2025 sets on SCZ25_META	gene sets	SCZ25_META	PGC3_locus_pool	SET	861	2.6734	0.56225	0.057515	2.2250999999999997e-308	SCZ25_META_sets.gsa.out
+positive control: 2025 sets on SCZ25_META	gene sets	SCZ25_META	SCZ25_genesig	SET	778	2.9316	0.58745	0.051728	2.2250999999999997e-308	SCZ25_META_sets.gsa.out
+positive control: 2025 sets on SCZ25_META	gene sets	SCZ25_META	SCZ25_genesig_new	SET	214	1.8594	0.19849	0.076785	1.4987000000000001e-127	SCZ25_META_sets.gsa.out
+positive control: 2025 sets on SCZ25_META	gene sets	SCZ25_META	SCZ25_locus_pool	SET	1106	2.6456	0.62624	0.049375	2.2250999999999997e-308	SCZ25_META_sets.gsa.out
+positive control: 2025 sets on SCZ25_META	gene sets	SCZ25_META	SCZ25_locus_pool_new	SET	302	1.583	0.20026	0.078076	1.464e-90	SCZ25_META_sets.gsa.out
+positive control: 2025 sets on SCZ25_META	gene sets	SCZ25_META	SCZ_locus_pool	SET	457	1.9417	0.30089	0.059467	1.0084e-226	SCZ25_META_sets.gsa.out
+positive control: 2025 sets on SCZ25_META	gene sets	SCZ25_META	SCZ_pool_not_prio	SET	356	1.7216	0.23611	0.067079	1.1292e-142	SCZ25_META_sets.gsa.out
+positive control: 2025 sets on SCZ25_META	gene sets	SCZ25_META	SCZ_prio_finemap	SET	61	2.0258	0.11594	0.13759	4.7708e-49	SCZ25_META_sets.gsa.out
+positive control: 2025 sets on SCZ25_META	gene sets	SCZ25_META	SCZ_prio_rare	SET	7	2.5462	0.049435	0.38216	1.389e-11	SCZ25_META_sets.gsa.out
+positive control: 2025 sets on SCZ25_META	gene sets	SCZ25_META	SCZ_prio_smr	SET	44	1.1537	0.056103	0.15707	1.0783e-13	SCZ25_META_sets.gsa.out
+positive control: 2025 sets on SCZ25_META	gene sets	SCZ25_META	SCZ_prioritised	SET	101	1.714	0.12608	0.10704	1.4556000000000002e-57	SCZ25_META_sets.gsa.out
+positive control: 2025 sets on SCZ25_META	gene sets	SCZ25_META	SCZ_prioritised_pc	SET	101	1.714	0.12608	0.10704	1.4556000000000002e-57	SCZ25_META_sets.gsa.out
+reverse: disorder genes ~ phenotype gene Z	SCZ25_META	baseline_thickness	baseline_thickness	COVAR	18270	0.028146	0.028061	0.010714	0.0086195	SCZ25_META_vs_baseline_thickness.gsa.out
+reverse: disorder genes ~ phenotype gene Z	SCZ25_META	global_slope	global_slope	COVAR	18270	0.023194	0.022862	0.010742	0.030856	SCZ25_META_vs_global_slope.gsa.out
+reverse: disorder genes ~ phenotype gene Z	SCZ25_META	slope_PC1	slope_PC1	COVAR	18270	-0.00036813	-0.00035889	0.010873	0.97299	SCZ25_META_vs_slope_PC1.gsa.out
+reverse: disorder genes ~ phenotype gene Z	SCZ25_META	slope_PC2	slope_PC2	COVAR	18270	-0.00032054	-0.00031352	0.010845	0.97642	SCZ25_META_vs_slope_PC2.gsa.out
+reverse: disorder genes ~ phenotype gene Z	SCZ25_META	slope_PC3	slope_PC3	COVAR	18270	-0.0111	-0.010738	0.010824	0.30511	SCZ25_META_vs_slope_PC3.gsa.out
+reverse: disorder genes ~ phenotype gene Z	SCZ25_METAnaive	baseline_thickness	baseline_thickness	COVAR	18270	0.028509	0.028423	0.010631	0.0073324	SCZ25_METAnaive_vs_baseline_thickness.gsa.out
+reverse: disorder genes ~ phenotype gene Z	SCZ25_METAnaive	global_slope	global_slope	COVAR	18270	0.028254	0.02785	0.010661	0.0080535	SCZ25_METAnaive_vs_global_slope.gsa.out
+reverse: disorder genes ~ phenotype gene Z	SCZ25_METAnaive	slope_PC1	slope_PC1	COVAR	18270	-0.0047128	-0.0045946	0.010786	0.66217	SCZ25_METAnaive_vs_slope_PC1.gsa.out
+reverse: disorder genes ~ phenotype gene Z	SCZ25_METAnaive	slope_PC2	slope_PC2	COVAR	18270	0.0094649	0.0092576	0.010748	0.37856	SCZ25_METAnaive_vs_slope_PC2.gsa.out
+reverse: disorder genes ~ phenotype gene Z	SCZ25_METAnaive	slope_PC3	slope_PC3	COVAR	18270	-0.0075115	-0.0072664	0.010787	0.48621	SCZ25_METAnaive_vs_slope_PC3.gsa.out
+forward: phenotype genes ~ disorder gene Z	PGC3_EUR	baseline_thickness	PGC3_EUR	COVAR	18261	0.013661	0.021984	0.0060696	0.024421	baseline_thickness_on_PGC3_EUR.gsa.out
+forward: phenotype genes ~ disorder gene Z	PGC3_primary	baseline_thickness	PGC3_primary	COVAR	18261	0.01906	0.030866	0.0059922	0.0014723	baseline_thickness_on_PGC3_primary.gsa.out
+forward: phenotype genes ~ disorder gene Z	SCZ25_EUR	baseline_thickness	SCZ25_EUR	COVAR	18270	0.015201	0.024352	0.0060367	0.011812	baseline_thickness_on_SCZ25_EUR.gsa.out
+forward: phenotype genes ~ disorder gene Z	SCZ25_META	baseline_thickness	SCZ25_META	COVAR	18270	0.018156	0.028699	0.0060587	0.0027338	baseline_thickness_on_SCZ25_META.gsa.out
+forward: phenotype genes ~ disorder gene Z	SCZ25_METAnaive	baseline_thickness	SCZ25_METAnaive	COVAR	18270	0.01749	0.027321	0.0061804	0.004664	baseline_thickness_on_SCZ25_METAnaive.gsa.out
+gene-set marginal	gene sets	baseline_thickness	PGC3_genesig	SET	704	-0.0079434	-0.0015289	0.050071	0.56302	baseline_thickness_sets.gsa.out
+gene-set marginal	gene sets	baseline_thickness	PGC3_locus_pool	SET	858	0.10803	0.022855	0.046924	0.010668	baseline_thickness_sets.gsa.out
+gene-set marginal	gene sets	baseline_thickness	SCZ25_genesig	SET	777	0.098777	0.019932	0.044224	0.012763	baseline_thickness_sets.gsa.out
+gene-set marginal	gene sets	baseline_thickness	SCZ25_genesig_new	SET	214	0.1461	0.015719	0.06239	0.0096048	baseline_thickness_sets.gsa.out
+gene-set marginal	gene sets	baseline_thickness	SCZ25_locus_pool	SET	1103	0.059463	0.014163	0.041697	0.076936	baseline_thickness_sets.gsa.out
+gene-set marginal	gene sets	baseline_thickness	SCZ25_locus_pool_new	SET	302	-0.0089401	-0.0011399	0.062503	0.55687	baseline_thickness_sets.gsa.out
+gene-set marginal	gene sets	baseline_thickness	SCZ_locus_pool	SET	455	0.18861	0.029391	0.051711	0.00013297	baseline_thickness_sets.gsa.out
+gene-set marginal	gene sets	baseline_thickness	SCZ_pool_not_prio	SET	354	0.18275	0.025191	0.058045	0.00082256	baseline_thickness_sets.gsa.out
+gene-set marginal	gene sets	baseline_thickness	SCZ_prio_finemap	SET	61	0.10862	0.006266	0.11338	0.16902	baseline_thickness_sets.gsa.out
+gene-set marginal	gene sets	baseline_thickness	SCZ_prio_rare	SET	7	0.27141	0.0053116	0.38432	0.24003	baseline_thickness_sets.gsa.out
+gene-set marginal	gene sets	baseline_thickness	SCZ_prio_smr	SET	44	0.16023	0.0078539	0.13534	0.11822	baseline_thickness_sets.gsa.out
+gene-set marginal	gene sets	baseline_thickness	SCZ_prioritised	SET	101	0.13233	0.0098119	0.090196	0.071176	baseline_thickness_sets.gsa.out
+gene-set marginal	gene sets	baseline_thickness	SCZ_prioritised_pc	SET	101	0.13233	0.0098119	0.090196	0.071176	baseline_thickness_sets.gsa.out
+gene-set conditional on PGC3pool	gene sets	baseline_thickness	PGC3_locus_pool	SET	858	0.13967	0.029548	0.052545	0.0039336	baseline_thickness_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	baseline_thickness	PGC3_genesig	SET	704	-0.075001	-0.014436	0.056057	0.90953	baseline_thickness_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	baseline_thickness	PGC3_locus_pool	SET	858	0.077709	0.01644	0.05171	0.066458	baseline_thickness_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	baseline_thickness	SCZ25_genesig	SET	777	0.068002	0.013722	0.048733	0.081461	baseline_thickness_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	baseline_thickness	PGC3_locus_pool	SET	858	0.092882	0.01965	0.047526	0.025342	baseline_thickness_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	baseline_thickness	SCZ25_genesig_new	SET	214	0.12642	0.013602	0.063191	0.022724	baseline_thickness_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	baseline_thickness	PGC3_locus_pool	SET	858	0.11775	0.024912	0.064688	0.034364	baseline_thickness_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	baseline_thickness	SCZ25_locus_pool	SET	1103	-0.012551	-0.0029893	0.057475	0.58643	baseline_thickness_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	baseline_thickness	PGC3_locus_pool	SET	858	0.10867	0.02299	0.047232	0.010709	baseline_thickness_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	baseline_thickness	SCZ25_locus_pool_new	SET	302	0.007507	0.00095716	0.062901	0.4525	baseline_thickness_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	baseline_thickness	PGC3_locus_pool	SET	858	0.026005	0.0055015	0.054945	0.31801	baseline_thickness_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	baseline_thickness	SCZ_locus_pool	SET	455	0.17368	0.027066	0.060567	0.0020709	baseline_thickness_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	baseline_thickness	PGC3_locus_pool	SET	858	0.059668	0.012623	0.050911	0.12061	baseline_thickness_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	baseline_thickness	SCZ_pool_not_prio	SET	354	0.15408	0.021239	0.062988	0.0072239	baseline_thickness_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	baseline_thickness	PGC3_locus_pool	SET	858	0.10434	0.022074	0.04954	0.017605	baseline_thickness_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	baseline_thickness	SCZ_prio_finemap	SET	61	0.027824	0.0016051	0.11968	0.40808	baseline_thickness_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	baseline_thickness	PGC3_locus_pool	SET	858	0.10556	0.022332	0.047276	0.012786	baseline_thickness_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	baseline_thickness	SCZ_prio_rare	SET	7	0.16638	0.0032562	0.38714	0.33368	baseline_thickness_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	baseline_thickness	PGC3_locus_pool	SET	858	0.10407	0.022018	0.047093	0.013561	baseline_thickness_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	baseline_thickness	SCZ_prio_smr	SET	44	0.13484	0.0066094	0.1358	0.16038	baseline_thickness_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	baseline_thickness	PGC3_locus_pool	SET	858	0.095963	0.020302	0.049263	0.025719	baseline_thickness_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	baseline_thickness	SCZ_prioritised	SET	101	0.076185	0.0056488	0.094681	0.21052	baseline_thickness_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	baseline_thickness	PGC3_locus_pool	SET	858	0.095963	0.020302	0.049263	0.025719	baseline_thickness_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	baseline_thickness	SCZ_prioritised_pc	SET	101	0.076185	0.0056488	0.094681	0.21052	baseline_thickness_sets_condPGC3pool.gsa.out
+gene-set conditional on ST12pool	gene sets	baseline_thickness	SCZ_locus_pool	SET	455	0.21708	0.033829	0.055065	4.0542e-05	baseline_thickness_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	baseline_thickness	PGC3_genesig	SET	704	-0.08017	-0.015431	0.053293	0.93374	baseline_thickness_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	baseline_thickness	SCZ_locus_pool	SET	455	0.17368	0.027066	0.060567	0.0020709	baseline_thickness_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	baseline_thickness	PGC3_locus_pool	SET	858	0.026005	0.0055015	0.054945	0.31801	baseline_thickness_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	baseline_thickness	SCZ_locus_pool	SET	455	0.16887	0.026316	0.054764	0.0010243	baseline_thickness_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	baseline_thickness	SCZ25_genesig	SET	777	0.051241	0.01034	0.046821	0.1369	baseline_thickness_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	baseline_thickness	SCZ_locus_pool	SET	455	0.17782	0.02771	0.051996	0.00031414	baseline_thickness_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	baseline_thickness	SCZ25_genesig_new	SET	214	0.1235	0.013287	0.062716	0.024478	baseline_thickness_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	baseline_thickness	SCZ_locus_pool	SET	455	0.19326	0.030117	0.057489	0.00038829	baseline_thickness_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	baseline_thickness	SCZ25_locus_pool	SET	1103	-0.008587	-0.0020452	0.046337	0.57351	baseline_thickness_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	baseline_thickness	SCZ_locus_pool	SET	455	0.1892	0.029484	0.051754	0.00012864	baseline_thickness_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	baseline_thickness	SCZ25_locus_pool_new	SET	302	-0.018062	-0.0023029	0.062525	0.61366	baseline_thickness_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	baseline_thickness	SCZ_locus_pool	SET	455	0.16888	0.026318	0.090821	0.031487	baseline_thickness_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	baseline_thickness	SCZ_pool_not_prio	SET	354	0.026929	0.0037119	0.10193	0.39582	baseline_thickness_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	baseline_thickness	SCZ_locus_pool	SET	455	0.20847	0.032487	0.057896	0.00015913	baseline_thickness_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	baseline_thickness	SCZ_prio_finemap	SET	61	-0.096818	-0.005585	0.12688	0.77728	baseline_thickness_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	baseline_thickness	SCZ_locus_pool	SET	455	0.18709	0.029155	0.052195	0.00016943	baseline_thickness_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	baseline_thickness	SCZ_prio_rare	SET	7	0.082929	0.0016229	0.38775	0.41532	baseline_thickness_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	baseline_thickness	SCZ_locus_pool	SET	455	0.18419	0.028702	0.053094	0.00026192	baseline_thickness_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	baseline_thickness	SCZ_prio_smr	SET	44	0.051052	0.0025023	0.1389	0.35661	baseline_thickness_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	baseline_thickness	SCZ_locus_pool	SET	455	0.19581	0.030514	0.058464	0.00040615	baseline_thickness_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	baseline_thickness	SCZ_prioritised	SET	101	-0.026929	-0.0019967	0.10193	0.60418	baseline_thickness_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	baseline_thickness	SCZ_locus_pool	SET	455	0.19581	0.030514	0.058464	0.00040615	baseline_thickness_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	baseline_thickness	SCZ_prioritised_pc	SET	101	-0.026929	-0.0019967	0.10193	0.60418	baseline_thickness_sets_condST12pool.gsa.out
+forward: phenotype genes ~ disorder gene Z	PGC3_EUR	global_slope	PGC3_EUR	COVAR	18261	0.0099893	0.016076	0.0060619	0.099399	global_slope_on_PGC3_EUR.gsa.out
+forward: phenotype genes ~ disorder gene Z	PGC3_primary	global_slope	PGC3_primary	COVAR	18261	0.011376	0.018422	0.0059855	0.05738	global_slope_on_PGC3_primary.gsa.out
+forward: phenotype genes ~ disorder gene Z	SCZ25_EUR	global_slope	SCZ25_EUR	COVAR	18270	0.014107	0.0226	0.0060285	0.019296	global_slope_on_SCZ25_EUR.gsa.out
+forward: phenotype genes ~ disorder gene Z	SCZ25_META	global_slope	SCZ25_META	COVAR	18270	0.014584	0.023053	0.006051	0.015956	global_slope_on_SCZ25_META.gsa.out
+forward: phenotype genes ~ disorder gene Z	SCZ25_METAnaive	global_slope	SCZ25_METAnaive	COVAR	18270	0.012369	0.019322	0.0061727	0.045112	global_slope_on_SCZ25_METAnaive.gsa.out
+gene-set marginal	gene sets	global_slope	PGC3_genesig	SET	704	-0.034579	-0.0066558	0.049993	0.75543	global_slope_sets.gsa.out
+gene-set marginal	gene sets	global_slope	PGC3_locus_pool	SET	858	0.068224	0.014433	0.046857	0.072708	global_slope_sets.gsa.out
+gene-set marginal	gene sets	global_slope	SCZ25_genesig	SET	777	-0.011467	-0.002314	0.044163	0.60243	global_slope_sets.gsa.out
+gene-set marginal	gene sets	global_slope	SCZ25_genesig_new	SET	214	0.011656	0.0012541	0.062306	0.4258	global_slope_sets.gsa.out
+gene-set marginal	gene sets	global_slope	SCZ25_locus_pool	SET	1103	0.04139	0.0098582	0.041634	0.16009	global_slope_sets.gsa.out
+gene-set marginal	gene sets	global_slope	SCZ25_locus_pool_new	SET	302	-0.024275	-0.0030951	0.062406	0.65135	global_slope_sets.gsa.out
+gene-set marginal	gene sets	global_slope	SCZ_locus_pool	SET	455	0.1699	0.026476	0.051636	0.0005016	global_slope_sets.gsa.out
+gene-set marginal	gene sets	global_slope	SCZ_pool_not_prio	SET	354	0.1973	0.027197	0.057953	0.00033224	global_slope_sets.gsa.out
+gene-set marginal	gene sets	global_slope	SCZ_prio_finemap	SET	61	0.1392	0.0080301	0.1132	0.10941	global_slope_sets.gsa.out
+gene-set marginal	gene sets	global_slope	SCZ_prio_rare	SET	7	0.72505	0.014189	0.38369	0.029411	global_slope_sets.gsa.out
+gene-set marginal	gene sets	global_slope	SCZ_prio_smr	SET	44	-0.011771	-0.00057695	0.13513	0.5347	global_slope_sets.gsa.out
+gene-set marginal	gene sets	global_slope	SCZ_prioritised	SET	101	0.040335	0.0029907	0.090063	0.32713	global_slope_sets.gsa.out
+gene-set marginal	gene sets	global_slope	SCZ_prioritised_pc	SET	101	0.040335	0.0029907	0.090063	0.32713	global_slope_sets.gsa.out
+gene-set conditional on PGC3pool	gene sets	global_slope	PGC3_locus_pool	SET	858	0.10384	0.021969	0.052469	0.023911	global_slope_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	global_slope	PGC3_genesig	SET	704	-0.084436	-0.016252	0.055976	0.93427	global_slope_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	global_slope	PGC3_locus_pool	SET	858	0.089065	0.018842	0.051638	0.042293	global_slope_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	global_slope	SCZ25_genesig	SET	777	-0.04674	-0.0094318	0.048666	0.83157	global_slope_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	global_slope	PGC3_locus_pool	SET	858	0.068568	0.014506	0.047465	0.074298	global_slope_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	global_slope	SCZ25_genesig_new	SET	214	-0.0028691	-0.0003087	0.06311	0.51813	global_slope_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	global_slope	PGC3_locus_pool	SET	858	0.068713	0.014537	0.064595	0.14373	global_slope_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	global_slope	SCZ25_locus_pool	SET	1103	-0.00063185	-0.00015049	0.057393	0.50439	global_slope_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	global_slope	PGC3_locus_pool	SET	858	0.067018	0.014178	0.047164	0.077678	global_slope_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	global_slope	SCZ25_locus_pool_new	SET	302	-0.014132	-0.0018018	0.062811	0.58901	global_slope_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	global_slope	PGC3_locus_pool	SET	858	-0.016481	-0.0034867	0.054866	0.61806	global_slope_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	global_slope	SCZ_locus_pool	SET	455	0.17936	0.02795	0.06048	0.0015131	global_slope_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	global_slope	PGC3_locus_pool	SET	858	0.007413	0.0015683	0.050832	0.44203	global_slope_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	global_slope	SCZ_pool_not_prio	SET	354	0.19374	0.026706	0.06289	0.0010347	global_slope_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	global_slope	PGC3_locus_pool	SET	858	0.05545	0.011731	0.049468	0.13117	global_slope_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	global_slope	SCZ_prio_finemap	SET	61	0.096264	0.0055531	0.1195	0.21026	global_slope_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	global_slope	PGC3_locus_pool	SET	858	0.058327	0.01234	0.047204	0.1083	global_slope_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	global_slope	SCZ_prio_rare	SET	7	0.66702	0.013054	0.38655	0.042223	global_slope_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	global_slope	PGC3_locus_pool	SET	858	0.069063	0.014611	0.047027	0.070985	global_slope_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	global_slope	SCZ_prio_smr	SET	44	-0.02862	-0.0014028	0.13562	0.58357	global_slope_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	global_slope	PGC3_locus_pool	SET	858	0.068151	0.014418	0.049194	0.082983	global_slope_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	global_slope	SCZ_prioritised	SET	101	0.00046033	3.4131e-05	0.094548	0.49806	global_slope_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	global_slope	PGC3_locus_pool	SET	858	0.068151	0.014418	0.049194	0.082983	global_slope_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	global_slope	SCZ_prioritised_pc	SET	101	0.00046033	3.4131e-05	0.094548	0.49806	global_slope_sets_condPGC3pool.gsa.out
+gene-set conditional on ST12pool	gene sets	global_slope	SCZ_locus_pool	SET	455	0.2066	0.032195	0.054982	8.614e-05	global_slope_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	global_slope	PGC3_genesig	SET	704	-0.10332	-0.019886	0.053213	0.9739	global_slope_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	global_slope	SCZ_locus_pool	SET	455	0.17936	0.02795	0.06048	0.0015131	global_slope_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	global_slope	PGC3_locus_pool	SET	858	-0.016481	-0.0034867	0.054866	0.61806	global_slope_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	global_slope	SCZ_locus_pool	SET	455	0.19551	0.030467	0.054683	0.00017549	global_slope_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	global_slope	SCZ25_genesig	SET	777	-0.066501	-0.013419	0.046751	0.92254	global_slope_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	global_slope	SCZ_locus_pool	SET	455	0.17078	0.026613	0.051927	0.00050432	global_slope_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	global_slope	SCZ25_genesig_new	SET	214	-0.010051	-0.0010815	0.062634	0.56375	global_slope_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	global_slope	SCZ_locus_pool	SET	455	0.18225	0.0284	0.057405	0.00075143	global_slope_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	global_slope	SCZ25_locus_pool	SET	1103	-0.02278	-0.0054257	0.04627	0.68876	global_slope_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	global_slope	SCZ_locus_pool	SET	455	0.17097	0.026643	0.051679	0.00047033	global_slope_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	global_slope	SCZ25_locus_pool_new	SET	302	-0.032518	-0.0041461	0.062434	0.69875	global_slope_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	global_slope	SCZ_locus_pool	SET	455	0.078296	0.012201	0.090685	0.19397	global_slope_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	global_slope	SCZ_pool_not_prio	SET	354	0.12507	0.017239	0.10178	0.10959	global_slope_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	global_slope	SCZ_locus_pool	SET	455	0.17716	0.027607	0.057813	0.0010927	global_slope_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	global_slope	SCZ_prio_finemap	SET	61	-0.035377	-0.0020408	0.1267	0.60996	global_slope_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	global_slope	SCZ_locus_pool	SET	455	0.1596	0.024871	0.052116	0.0010999	global_slope_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	global_slope	SCZ_prio_rare	SET	7	0.56427	0.011043	0.38715	0.072505	global_slope_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	global_slope	SCZ_locus_pool	SET	455	0.18017	0.028076	0.053016	0.00033981	global_slope_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	global_slope	SCZ_prio_smr	SET	44	-0.11857	-0.0058118	0.13869	0.8037	global_slope_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	global_slope	SCZ_locus_pool	SET	455	0.20336	0.03169	0.058376	0.00024807	global_slope_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	global_slope	SCZ_prioritised	SET	101	-0.12507	-0.0092731	0.10178	0.89041	global_slope_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	global_slope	SCZ_locus_pool	SET	455	0.20336	0.03169	0.058376	0.00024807	global_slope_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	global_slope	SCZ_prioritised_pc	SET	101	-0.12507	-0.0092731	0.10178	0.89041	global_slope_sets_condST12pool.gsa.out
+forward: phenotype genes ~ disorder gene Z	PGC3_EUR	slope_PC1	PGC3_EUR	COVAR	18261	0.0010154	0.001634	0.0059927	0.86546	slope_PC1_on_PGC3_EUR.gsa.out
+forward: phenotype genes ~ disorder gene Z	PGC3_primary	slope_PC1	PGC3_primary	COVAR	18261	-0.00061544	-0.00099667	0.0059173	0.91717	slope_PC1_on_PGC3_primary.gsa.out
+forward: phenotype genes ~ disorder gene Z	SCZ25_EUR	slope_PC1	SCZ25_EUR	COVAR	18270	0.0036962	0.0059215	0.0059594	0.53511	slope_PC1_on_SCZ25_EUR.gsa.out
+forward: phenotype genes ~ disorder gene Z	SCZ25_META	slope_PC1	SCZ25_META	COVAR	18270	0.0018564	0.0029344	0.0059817	0.7563	slope_PC1_on_SCZ25_META.gsa.out
+forward: phenotype genes ~ disorder gene Z	SCZ25_METAnaive	slope_PC1	SCZ25_METAnaive	COVAR	18270	0.0033964	0.0053057	0.0061016	0.57778	slope_PC1_on_SCZ25_METAnaive.gsa.out
+gene-set marginal	gene sets	slope_PC1	PGC3_genesig	SET	704	-0.02044	-0.0039343	0.04941	0.66044	slope_PC1_sets.gsa.out
+gene-set marginal	gene sets	slope_PC1	PGC3_locus_pool	SET	858	-0.021245	-0.0044945	0.046314	0.67677	slope_PC1_sets.gsa.out
+gene-set marginal	gene sets	slope_PC1	SCZ25_genesig	SET	777	0.061467	0.012404	0.043645	0.079527	slope_PC1_sets.gsa.out
+gene-set marginal	gene sets	slope_PC1	SCZ25_genesig_new	SET	214	0.075012	0.0080707	0.061577	0.11159	slope_PC1_sets.gsa.out
+gene-set marginal	gene sets	slope_PC1	SCZ25_locus_pool	SET	1103	0.036387	0.0086664	0.041149	0.18829	slope_PC1_sets.gsa.out
+gene-set marginal	gene sets	slope_PC1	SCZ25_locus_pool_new	SET	302	0.12463	0.01589	0.06167	0.021657	slope_PC1_sets.gsa.out
+gene-set marginal	gene sets	slope_PC1	SCZ_locus_pool	SET	455	-0.01464	-0.0022814	0.051053	0.61285	slope_PC1_sets.gsa.out
+gene-set marginal	gene sets	slope_PC1	SCZ_pool_not_prio	SET	354	0.025481	0.0035124	0.0573	0.32827	slope_PC1_sets.gsa.out
+gene-set marginal	gene sets	slope_PC1	SCZ_prio_finemap	SET	61	-0.18201	-0.0105	0.11187	0.94812	slope_PC1_sets.gsa.out
+gene-set marginal	gene sets	slope_PC1	SCZ_prio_rare	SET	7	-0.22189	-0.0043425	0.37926	0.72075	slope_PC1_sets.gsa.out
+gene-set marginal	gene sets	slope_PC1	SCZ_prio_smr	SET	44	0.03346	0.0016401	0.13356	0.40109	slope_PC1_sets.gsa.out
+gene-set marginal	gene sets	slope_PC1	SCZ_prioritised	SET	101	-0.106	-0.0078592	0.089009	0.88313	slope_PC1_sets.gsa.out
+gene-set marginal	gene sets	slope_PC1	SCZ_prioritised_pc	SET	101	-0.106	-0.0078592	0.089009	0.88313	slope_PC1_sets.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC1	PGC3_locus_pool	SET	858	-0.015828	-0.0033486	0.051864	0.61988	slope_PC1_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC1	PGC3_genesig	SET	704	-0.01284	-0.0024715	0.055332	0.59175	slope_PC1_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC1	PGC3_locus_pool	SET	858	-0.059087	-0.0125	0.051035	0.87651	slope_PC1_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC1	SCZ25_genesig	SET	777	0.084868	0.017126	0.048098	0.038836	slope_PC1_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC1	PGC3_locus_pool	SET	858	-0.03102	-0.0065626	0.046912	0.74577	slope_PC1_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC1	SCZ25_genesig_new	SET	214	0.081583	0.0087777	0.062375	0.095455	slope_PC1_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC1	PGC3_locus_pool	SET	858	-0.093936	-0.019873	0.06384	0.9294	slope_PC1_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC1	SCZ25_locus_pool	SET	1103	0.093834	0.022349	0.056722	0.049047	slope_PC1_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC1	PGC3_locus_pool	SET	858	-0.010748	-0.0022739	0.046611	0.59118	slope_PC1_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC1	SCZ25_locus_pool_new	SET	302	0.123	0.015683	0.062074	0.023778	slope_PC1_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC1	PGC3_locus_pool	SET	858	-0.019658	-0.0041589	0.054246	0.64147	slope_PC1_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC1	SCZ_locus_pool	SET	455	-0.003359	-0.00052345	0.059797	0.5224	slope_PC1_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC1	PGC3_locus_pool	SET	858	-0.034435	-0.007285	0.050259	0.75337	slope_PC1_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC1	SCZ_pool_not_prio	SET	354	0.042025	0.0057928	0.062181	0.24957	slope_PC1_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC1	PGC3_locus_pool	SET	858	0.0032404	0.00068553	0.048892	0.47358	slope_PC1_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC1	SCZ_prio_finemap	SET	61	-0.18452	-0.010644	0.11811	0.94088	slope_PC1_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC1	PGC3_locus_pool	SET	858	-0.018221	-0.0038549	0.046661	0.65192	slope_PC1_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC1	SCZ_prio_rare	SET	7	-0.20376	-0.0039877	0.3821	0.70307	slope_PC1_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC1	PGC3_locus_pool	SET	858	-0.022386	-0.004736	0.046482	0.68496	slope_PC1_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC1	SCZ_prio_smr	SET	44	0.038922	0.0019078	0.13404	0.38577	slope_PC1_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC1	PGC3_locus_pool	SET	858	-0.0049103	-0.0010388	0.048621	0.54022	slope_PC1_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC1	SCZ_prioritised	SET	101	-0.10312	-0.0076462	0.093448	0.8651	slope_PC1_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC1	PGC3_locus_pool	SET	858	-0.0049103	-0.0010388	0.048621	0.54022	slope_PC1_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC1	SCZ_prioritised_pc	SET	101	-0.10312	-0.0076462	0.093448	0.8651	slope_PC1_sets_condPGC3pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC1	SCZ_locus_pool	SET	455	-0.0083689	-0.0013042	0.054369	0.56117	slope_PC1_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC1	PGC3_genesig	SET	704	-0.017655	-0.0033983	0.052619	0.63139	slope_PC1_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC1	SCZ_locus_pool	SET	455	-0.003359	-0.00052345	0.059797	0.5224	slope_PC1_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC1	PGC3_locus_pool	SET	858	-0.019658	-0.0041589	0.054246	0.64147	slope_PC1_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC1	SCZ_locus_pool	SET	455	-0.042969	-0.0066961	0.054065	0.78662	slope_PC1_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC1	SCZ25_genesig	SET	777	0.073562	0.014844	0.046223	0.055763	slope_PC1_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC1	SCZ_locus_pool	SET	455	-0.021432	-0.0033398	0.051338	0.66183	slope_PC1_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC1	SCZ25_genesig_new	SET	214	0.077736	0.0083638	0.061923	0.10468	slope_PC1_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC1	SCZ_locus_pool	SET	455	-0.042465	-0.0066174	0.056755	0.77283	slope_PC1_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC1	SCZ25_locus_pool	SET	1103	0.051339	0.012228	0.045746	0.13088	slope_PC1_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC1	SCZ_locus_pool	SET	455	-0.018787	-0.0029276	0.051089	0.64346	slope_PC1_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC1	SCZ25_locus_pool_new	SET	302	0.12553	0.016005	0.061721	0.020992	slope_PC1_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC1	SCZ_locus_pool	SET	455	-0.10272	-0.016008	0.089662	0.87403	slope_PC1_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC1	SCZ_pool_not_prio	SET	354	0.12026	0.016577	0.10063	0.11605	slope_PC1_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC1	SCZ_locus_pool	SET	455	0.028461	0.0044352	0.057154	0.30926	slope_PC1_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC1	SCZ_prio_finemap	SET	61	-0.21006	-0.012118	0.12525	0.95322	slope_PC1_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC1	SCZ_locus_pool	SET	455	-0.010788	-0.0016811	0.051531	0.58291	slope_PC1_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC1	SCZ_prio_rare	SET	7	-0.21103	-0.0041298	0.38281	0.70927	slope_PC1_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC1	SCZ_locus_pool	SET	455	-0.018488	-0.002881	0.052418	0.63784	slope_PC1_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC1	SCZ_prio_smr	SET	44	0.04442	0.0021772	0.13713	0.373	slope_PC1_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC1	SCZ_locus_pool	SET	455	0.017535	0.0027326	0.057717	0.38064	slope_PC1_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC1	SCZ_prioritised	SET	101	-0.12026	-0.0089167	0.10063	0.88395	slope_PC1_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC1	SCZ_locus_pool	SET	455	0.017535	0.0027326	0.057717	0.38064	slope_PC1_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC1	SCZ_prioritised_pc	SET	101	-0.12026	-0.0089167	0.10063	0.88395	slope_PC1_sets_condST12pool.gsa.out
+forward: phenotype genes ~ disorder gene Z	PGC3_EUR	slope_PC2	PGC3_EUR	COVAR	18261	0.0027888	0.004488	0.0060016	0.64217	slope_PC2_on_PGC3_EUR.gsa.out
+forward: phenotype genes ~ disorder gene Z	PGC3_primary	slope_PC2	PGC3_primary	COVAR	18261	-0.0046213	-0.007484	0.0059261	0.4355	slope_PC2_on_PGC3_primary.gsa.out
+forward: phenotype genes ~ disorder gene Z	SCZ25_EUR	slope_PC2	SCZ25_EUR	COVAR	18270	0.0049326	0.0079021	0.0059694	0.40864	slope_PC2_on_SCZ25_EUR.gsa.out
+forward: phenotype genes ~ disorder gene Z	SCZ25_META	slope_PC2	SCZ25_META	COVAR	18270	0.00039546	0.0006251	0.0059919	0.94738	slope_PC2_on_SCZ25_META.gsa.out
+forward: phenotype genes ~ disorder gene Z	SCZ25_METAnaive	slope_PC2	SCZ25_METAnaive	COVAR	18270	0.0026308	0.0041097	0.006112	0.66689	slope_PC2_on_SCZ25_METAnaive.gsa.out
+gene-set marginal	gene sets	slope_PC2	PGC3_genesig	SET	704	0.037299	0.0071793	0.049494	0.22555	slope_PC2_sets.gsa.out
+gene-set marginal	gene sets	slope_PC2	PGC3_locus_pool	SET	858	0.012943	0.0027382	0.046393	0.39013	slope_PC2_sets.gsa.out
+gene-set marginal	gene sets	slope_PC2	SCZ25_genesig	SET	777	0.05922	0.01195	0.04372	0.087793	slope_PC2_sets.gsa.out
+gene-set marginal	gene sets	slope_PC2	SCZ25_genesig_new	SET	214	0.051549	0.0055463	0.061683	0.20167	slope_PC2_sets.gsa.out
+gene-set marginal	gene sets	slope_PC2	SCZ25_locus_pool	SET	1103	-0.0053759	-0.0012804	0.041221	0.55188	slope_PC2_sets.gsa.out
+gene-set marginal	gene sets	slope_PC2	SCZ25_locus_pool_new	SET	302	-0.047364	-0.0060389	0.061783	0.77834	slope_PC2_sets.gsa.out
+gene-set marginal	gene sets	slope_PC2	SCZ_locus_pool	SET	455	0.018286	0.0028496	0.05114	0.36034	slope_PC2_sets.gsa.out
+gene-set marginal	gene sets	slope_PC2	SCZ_pool_not_prio	SET	354	0.036314	0.0050056	0.057397	0.26348	slope_PC2_sets.gsa.out
+gene-set marginal	gene sets	slope_PC2	SCZ_prio_finemap	SET	61	-0.11351	-0.0065479	0.11207	0.84442	slope_PC2_sets.gsa.out
+gene-set marginal	gene sets	slope_PC2	SCZ_prio_rare	SET	7	0.093616	0.0018321	0.37991	0.40268	slope_PC2_sets.gsa.out
+gene-set marginal	gene sets	slope_PC2	SCZ_prio_smr	SET	44	0.092669	0.0045422	0.13378	0.24426	slope_PC2_sets.gsa.out
+gene-set marginal	gene sets	slope_PC2	SCZ_prioritised	SET	101	-0.032046	-0.0023761	0.089165	0.64035	slope_PC2_sets.gsa.out
+gene-set marginal	gene sets	slope_PC2	SCZ_prioritised_pc	SET	101	-0.032046	-0.0023761	0.089165	0.64035	slope_PC2_sets.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC2	PGC3_locus_pool	SET	858	-0.0034997	-0.0007404	0.051952	0.52685	slope_PC2_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC2	PGC3_genesig	SET	704	0.038979	0.0075027	0.055426	0.24095	slope_PC2_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC2	PGC3_locus_pool	SET	858	-0.01635	-0.003459	0.051125	0.62544	slope_PC2_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC2	SCZ25_genesig	SET	777	0.065695	0.013257	0.048182	0.086376	slope_PC2_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC2	PGC3_locus_pool	SET	858	0.0069424	0.0014687	0.046994	0.44128	slope_PC2_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC2	SCZ25_genesig_new	SET	214	0.050078	0.005388	0.062484	0.21144	slope_PC2_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC2	PGC3_locus_pool	SET	858	0.032509	0.0068776	0.063955	0.30562	slope_PC2_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC2	SCZ25_locus_pool	SET	1103	-0.025257	-0.0060157	0.056824	0.67165	slope_PC2_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC2	PGC3_locus_pool	SET	858	0.0090177	0.0019078	0.046696	0.42344	slope_PC2_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC2	SCZ25_locus_pool_new	SET	302	-0.045999	-0.0058649	0.062188	0.77025	slope_PC2_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC2	PGC3_locus_pool	SET	858	0.0059084	0.00125	0.054339	0.45671	slope_PC2_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC2	SCZ_locus_pool	SET	455	0.014896	0.0023212	0.059899	0.40181	slope_PC2_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC2	PGC3_locus_pool	SET	858	0.0018195	0.00038493	0.050345	0.48559	slope_PC2_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC2	SCZ_pool_not_prio	SET	354	0.03544	0.0048851	0.062287	0.28469	slope_PC2_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC2	PGC3_locus_pool	SET	858	0.031212	0.0066032	0.048977	0.26198	slope_PC2_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC2	SCZ_prio_finemap	SET	61	-0.13768	-0.0079422	0.11832	0.87771	slope_PC2_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC2	PGC3_locus_pool	SET	858	0.011727	0.002481	0.046741	0.40095	slope_PC2_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC2	SCZ_prio_rare	SET	7	0.081948	0.0016037	0.38276	0.41524	slope_PC2_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC2	PGC3_locus_pool	SET	858	0.010298	0.0021786	0.046561	0.41248	slope_PC2_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC2	SCZ_prio_smr	SET	44	0.090157	0.0044191	0.13427	0.25097	slope_PC2_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC2	PGC3_locus_pool	SET	858	0.019859	0.0042014	0.048706	0.34174	slope_PC2_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC2	SCZ_prioritised	SET	101	-0.043666	-0.0032376	0.093611	0.67955	slope_PC2_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC2	PGC3_locus_pool	SET	858	0.019859	0.0042014	0.048706	0.34174	slope_PC2_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC2	SCZ_prioritised_pc	SET	101	-0.043666	-0.0032376	0.093611	0.67955	slope_PC2_sets_condPGC3pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC2	SCZ_locus_pool	SET	455	0.0057125	0.00089019	0.054461	0.45823	slope_PC2_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC2	PGC3_genesig	SET	704	0.035398	0.0068135	0.052708	0.25093	slope_PC2_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC2	SCZ_locus_pool	SET	455	0.014896	0.0023212	0.059899	0.40181	slope_PC2_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC2	PGC3_locus_pool	SET	858	0.0059084	0.00125	0.054339	0.45671	slope_PC2_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC2	SCZ_locus_pool	SET	455	-0.0050693	-0.00078996	0.054159	0.53729	slope_PC2_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC2	SCZ25_genesig	SET	777	0.060647	0.012238	0.046303	0.095144	slope_PC2_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC2	SCZ_locus_pool	SET	455	0.013937	0.0021719	0.051427	0.39319	slope_PC2_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC2	SCZ25_genesig_new	SET	214	0.049777	0.0053556	0.062031	0.21115	slope_PC2_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC2	SCZ_locus_pool	SET	455	0.0262	0.0040828	0.056854	0.32247	slope_PC2_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC2	SCZ25_locus_pool	SET	1103	-0.014601	-0.0034776	0.045826	0.62499	slope_PC2_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC2	SCZ_locus_pool	SET	455	0.019882	0.0030983	0.051182	0.34884	slope_PC2_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC2	SCZ25_locus_pool_new	SET	302	-0.048322	-0.0061612	0.061834	0.78273	slope_PC2_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC2	SCZ_locus_pool	SET	455	-0.025638	-0.0039952	0.089818	0.61234	slope_PC2_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC2	SCZ_pool_not_prio	SET	354	0.059968	0.0082662	0.10081	0.27597	slope_PC2_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC2	SCZ_locus_pool	SET	455	0.052114	0.0081211	0.057254	0.18136	slope_PC2_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC2	SCZ_prio_finemap	SET	61	-0.16487	-0.0095104	0.12547	0.90556	slope_PC2_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC2	SCZ_locus_pool	SET	455	0.016888	0.0026317	0.051619	0.37178	slope_PC2_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC2	SCZ_prio_rare	SET	7	0.076602	0.0014991	0.38347	0.42083	slope_PC2_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC2	SCZ_locus_pool	SET	455	0.010815	0.0016853	0.052507	0.41841	slope_PC2_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC2	SCZ_prio_smr	SET	44	0.086259	0.004228	0.13736	0.26502	slope_PC2_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC2	SCZ_locus_pool	SET	455	0.034331	0.0053499	0.057818	0.27634	slope_PC2_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC2	SCZ_prioritised	SET	101	-0.059968	-0.0044464	0.10081	0.72403	slope_PC2_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC2	SCZ_locus_pool	SET	455	0.034331	0.0053499	0.057818	0.27634	slope_PC2_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC2	SCZ_prioritised_pc	SET	101	-0.059968	-0.0044464	0.10081	0.72403	slope_PC2_sets_condST12pool.gsa.out
+forward: phenotype genes ~ disorder gene Z	PGC3_EUR	slope_PC3	PGC3_EUR	COVAR	18261	-0.0039791	-0.0064037	0.0060083	0.5078	slope_PC3_on_PGC3_EUR.gsa.out
+forward: phenotype genes ~ disorder gene Z	PGC3_primary	slope_PC3	PGC3_primary	COVAR	18261	-0.0053441	-0.0086544	0.0059327	0.36771	slope_PC3_on_PGC3_primary.gsa.out
+forward: phenotype genes ~ disorder gene Z	SCZ25_EUR	slope_PC3	SCZ25_EUR	COVAR	18270	-0.0035887	-0.0057493	0.0059751	0.5481	slope_PC3_on_SCZ25_EUR.gsa.out
+forward: phenotype genes ~ disorder gene Z	SCZ25_META	slope_PC3	SCZ25_META	COVAR	18270	-0.0072239	-0.011419	0.0059972	0.2284	slope_PC3_on_SCZ25_META.gsa.out
+forward: phenotype genes ~ disorder gene Z	SCZ25_METAnaive	slope_PC3	SCZ25_METAnaive	COVAR	18270	-0.0044408	-0.0069372	0.0061176	0.46791	slope_PC3_on_SCZ25_METAnaive.gsa.out
+gene-set marginal	gene sets	slope_PC3	PGC3_genesig	SET	704	-0.0061063	-0.0011753	0.04954	0.54905	slope_PC3_sets.gsa.out
+gene-set marginal	gene sets	slope_PC3	PGC3_locus_pool	SET	858	0.026706	0.0056499	0.046435	0.28261	slope_PC3_sets.gsa.out
+gene-set marginal	gene sets	slope_PC3	SCZ25_genesig	SET	777	-0.003264	-0.00065865	0.043762	0.52973	slope_PC3_sets.gsa.out
+gene-set marginal	gene sets	slope_PC3	SCZ25_genesig_new	SET	214	-0.0041951	-0.00045136	0.061741	0.52709	slope_PC3_sets.gsa.out
+gene-set marginal	gene sets	slope_PC3	SCZ25_locus_pool	SET	1103	0.013683	0.0032589	0.041258	0.37008	slope_PC3_sets.gsa.out
+gene-set marginal	gene sets	slope_PC3	SCZ25_locus_pool_new	SET	302	0.0072035	0.00091846	0.06184	0.45363	slope_PC3_sets.gsa.out
+gene-set marginal	gene sets	slope_PC3	SCZ_locus_pool	SET	455	0.042606	0.0066395	0.051186	0.2026	slope_PC3_sets.gsa.out
+gene-set marginal	gene sets	slope_PC3	SCZ_pool_not_prio	SET	354	0.048246	0.0066503	0.057449	0.20052	slope_PC3_sets.gsa.out
+gene-set marginal	gene sets	slope_PC3	SCZ_prio_finemap	SET	61	-0.046647	-0.0026909	0.11218	0.66123	slope_PC3_sets.gsa.out
+gene-set marginal	gene sets	slope_PC3	SCZ_prio_rare	SET	7	0.36498	0.0071428	0.38024	0.16857	slope_PC3_sets.gsa.out
+gene-set marginal	gene sets	slope_PC3	SCZ_prio_smr	SET	44	0.077723	0.0038096	0.13391	0.28082	slope_PC3_sets.gsa.out
+gene-set marginal	gene sets	slope_PC3	SCZ_prioritised	SET	101	0.01309	0.0009706	0.089246	0.44169	slope_PC3_sets.gsa.out
+gene-set marginal	gene sets	slope_PC3	SCZ_prioritised_pc	SET	101	0.01309	0.0009706	0.089246	0.44169	slope_PC3_sets.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC3	PGC3_locus_pool	SET	858	0.036719	0.0077682	0.052	0.24006	slope_PC3_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC3	PGC3_genesig	SET	704	-0.023736	-0.0045687	0.055476	0.66562	slope_PC3_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC3	PGC3_locus_pool	SET	858	0.034201	0.0072355	0.051174	0.25197	slope_PC3_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC3	SCZ25_genesig	SET	777	-0.016809	-0.0033919	0.048228	0.63628	slope_PC3_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC3	PGC3_locus_pool	SET	858	0.027918	0.0059062	0.047037	0.27642	slope_PC3_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC3	SCZ25_genesig_new	SET	214	-0.010109	-0.0010876	0.062541	0.5642	slope_PC3_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC3	PGC3_locus_pool	SET	858	0.030607	0.0064752	0.064013	0.31628	slope_PC3_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC3	SCZ25_locus_pool	SET	1103	-0.0050355	-0.0011993	0.056876	0.53527	slope_PC3_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC3	PGC3_locus_pool	SET	858	0.027678	0.0058556	0.046739	0.27687	slope_PC3_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC3	SCZ25_locus_pool_new	SET	302	0.011393	0.0014526	0.062245	0.42739	slope_PC3_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC3	PGC3_locus_pool	SET	858	0.0090327	0.0019109	0.054387	0.43405	slope_PC3_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC3	SCZ_locus_pool	SET	455	0.037423	0.0058317	0.059952	0.26625	slope_PC3_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC3	PGC3_locus_pool	SET	858	0.013617	0.0028807	0.05039	0.3935	slope_PC3_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC3	SCZ_pool_not_prio	SET	354	0.041704	0.0057486	0.062343	0.25177	slope_PC3_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC3	PGC3_locus_pool	SET	858	0.036663	0.0077564	0.049023	0.22727	slope_PC3_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC3	SCZ_prio_finemap	SET	61	-0.075039	-0.0043287	0.11843	0.73683	slope_PC3_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC3	PGC3_locus_pool	SET	858	0.02161	0.0045718	0.046782	0.32207	slope_PC3_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC3	SCZ_prio_rare	SET	7	0.34348	0.006722	0.38309	0.18497	slope_PC3_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC3	PGC3_locus_pool	SET	858	0.024602	0.0052048	0.046603	0.29879	slope_PC3_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC3	SCZ_prio_smr	SET	44	0.071721	0.0035154	0.13439	0.29679	slope_PC3_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC3	PGC3_locus_pool	SET	858	0.027149	0.0057435	0.04875	0.2888	slope_PC3_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC3	SCZ_prioritised	SET	101	-0.002794	-0.00020717	0.093695	0.51189	slope_PC3_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC3	PGC3_locus_pool	SET	858	0.027149	0.0057435	0.04875	0.2888	slope_PC3_sets_condPGC3pool.gsa.out
+gene-set conditional on PGC3pool	gene sets	slope_PC3	SCZ_prioritised_pc	SET	101	-0.002794	-0.00020717	0.093695	0.51189	slope_PC3_sets_condPGC3pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC3	SCZ_locus_pool	SET	455	0.050776	0.0079126	0.054509	0.1758	slope_PC3_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC3	PGC3_genesig	SET	704	-0.023	-0.004427	0.052755	0.66857	slope_PC3_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC3	SCZ_locus_pool	SET	455	0.037423	0.0058317	0.059952	0.26625	slope_PC3_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC3	PGC3_locus_pool	SET	858	0.0090327	0.0019109	0.054387	0.43405	slope_PC3_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC3	SCZ_locus_pool	SET	455	0.049196	0.0076664	0.05421	0.18208	slope_PC3_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC3	SCZ25_genesig	SET	777	-0.017112	-0.0034531	0.046347	0.64402	slope_PC3_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC3	SCZ_locus_pool	SET	455	0.043455	0.0067718	0.051474	0.19928	slope_PC3_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC3	SCZ25_genesig_new	SET	214	-0.0097187	-0.0010456	0.062087	0.56219	slope_PC3_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC3	SCZ_locus_pool	SET	455	0.04349	0.0067772	0.056904	0.22236	slope_PC3_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC3	SCZ25_locus_pool	SET	1103	-0.0016307	-0.00038839	0.045866	0.51418	slope_PC3_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC3	SCZ_locus_pool	SET	455	0.042436	0.0066129	0.051228	0.20374	slope_PC3_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC3	SCZ25_locus_pool_new	SET	302	0.0051576	0.0006576	0.06189	0.46679	slope_PC3_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC3	SCZ_locus_pool	SET	455	0.02242	0.0034938	0.089898	0.40153	slope_PC3_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC3	SCZ_pool_not_prio	SET	354	0.02756	0.0037989	0.1009	0.39237	slope_PC3_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC3	SCZ_locus_pool	SET	455	0.065402	0.010192	0.057307	0.12689	slope_PC3_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC3	SCZ_prio_finemap	SET	61	-0.1111	-0.0064087	0.12559	0.81181	slope_PC3_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC3	SCZ_locus_pool	SET	455	0.036617	0.0057061	0.051664	0.23924	slope_PC3_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC3	SCZ_prio_rare	SET	7	0.32809	0.0064209	0.3838	0.19632	slope_PC3_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC3	SCZ_locus_pool	SET	455	0.037816	0.005893	0.052554	0.2359	slope_PC3_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC3	SCZ_prio_smr	SET	44	0.055306	0.0027109	0.13748	0.34374	slope_PC3_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC3	SCZ_locus_pool	SET	455	0.04998	0.0077885	0.05787	0.19389	slope_PC3_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC3	SCZ_prioritised	SET	101	-0.02756	-0.0020435	0.1009	0.60763	slope_PC3_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC3	SCZ_locus_pool	SET	455	0.04998	0.0077885	0.05787	0.19389	slope_PC3_sets_condST12pool.gsa.out
+gene-set conditional on ST12pool	gene sets	slope_PC3	SCZ_prioritised_pc	SET	101	-0.02756	-0.0020435	0.1009	0.60763	slope_PC3_sets_condST12pool.gsa.out

@@ -1869,3 +1869,178 @@ Files added: `step9_scz2025_{normalise,score,gather,assoc,minp,collect}.{sbatch,
 `setup/build_matched_scores.py`, `R/09_prs_ancestry_strata.R`,
 `run_scz2025.sh`. Nothing per-subject is tracked (rule 16); scores live under
 the gitignored `work/scores_scz2025/`.
+
+### 2026-09-17 — Step 10 opened: MAGMA on the 2025 SCZ GWAS
+
+**Does "normal MAGMA" work on a multi-ancestry GWAS?** Not as-is. MAGMA's
+gene statistic is calibrated against the LD among a gene's SNPs, read from a
+reference panel; a panel that does not match the GWAS sample mis-states the
+effective number of independent SNPs per gene and so the gene p-values
+(weaker reference LD than the true LD → anti-conservative). Step 7 ran the
+PGC3 *primary* (multi-ancestry) file against 1000G EUR — an inherited
+mismatch that went unremarked because EUR dominated that file. For the 2025
+AFR+EUR+EAS meta the mismatch is larger (AFR is 15 % of Neff and most of the
+variant count), and no single panel exists for it. The MAGMA manual's
+prescription is the design used here:
+
+1. **Per-ancestry gene analysis with the matched 1000G panel**: SCZ25_EUR ×
+   `g1000_eur`, SCZ25_AFR × `g1000_afr`, SCZ25_EAS × `g1000_eas` (AFR/EAS
+   panels downloaded from the MAGMA site to `magma/reference_data/`, Build
+   37, dbSNP151 synonyms), all on **one annotation** built over the union of
+   the three panels' SNP positions (NCBI37.3, 35/10 kb — same gene
+   coordinates as step 7's EUR-only annotation, so results join and
+   meta-analyse), with per-SNP N from the corrected `.ma`.
+2. **`magma --meta raw=EUR,AFR,EAS`** → `SCZ25_META`: weighted Stouffer's Z
+   per gene (weights √N), gene correlations merged, so the result feeds
+   gene-set and gene-property analysis like any `.genes.raw`.
+3. **Two comparators**: `SCZ25_METAnaive` = the meta `.ma` against `g1000_eur`
+   (what normal MAGMA would do), and `PGC3_EUR` = PGC3 european against
+   `g1000_eur` (the like-for-like PGC3 comparator for the EUR arm; step 7's
+   `SCZ` = PGC3 primary, naive, is carried along as `PGC3_primary`).
+   `table_gene_level_comparison.tsv` measures what the mismatch does: gene-Z
+   correlation and Bonferroni-significant gene counts, naive vs proper meta.
+
+**Tests against the phenotypes** (both atlases; phenotype side = step 7's
+EUR-arm `magma_eur/<pheno>.genes.raw`, whose LD panel *does* match): for each
+disorder result, the reverse gene-property (`D_vs_<pheno>`: disorder genes ~
+phenotype gene Z, as legacy 04_magma step 3) and the forward one
+(`<pheno>_on_D`), both `direction=both`; and competitive gene-set tests
+(`direction=greater`, as `prioritised_gsa.sbatch`) on sets built the *same
+way* for both GWAS by `setup/build_scz2025_genesets.py` — `<G>_locus_pool`
+(genes whose 35/10 kb window holds a GWS SNP) and `<G>_genesig` (Bonferroni-
+significant genes in G's own gene analysis), G ∈ {SCZ25, PGC3}, plus
+`SCZ25_*_new` (2025 minus PGC3) and the legacy ST12 `SCZ_locus_pool` /
+`SCZ_prioritised`; the 2025 sets are also tested conditional on the PGC3
+pools, which asks whether the new GWAS adds beyond the old. The circular
+positive control (2025 sets on `SCZ25_META` itself) checks the plumbing.
+Scripts: `step10_scz2025_magma_{prep,genes,finish}.sbatch`,
+`step10_scz2025_magma_collect.py`, `run_scz2025_magma.sh`. Submitted: prep
+35742536 → genes 35742537 (1–5) → finish 35742538.
+
+### 2026-09-17 — Step 9 on the single-LMM construction (order of operations)
+
+`step9_scz2025_assoc_1lmm.sbatch` (35747639, 6 min per atlas, 30 tables
+each) runs every 2025-SCZ score directory against the single-LMM phenotypes
+of the 2026-09-15 order-of-operations check (`prs_final_1lmm/pheno/`, same
+8,596 children); `step9_scz2025_orderops.py` →
+`prs_scz2025/table_order_of_operations_scz2025.tsv` (per-region-BLUP mean vs
+single LMM, `global_slope` and `baseline_thickness`, primary and secondary
+cells). SEs identical (ratio 0.998), mean Δβ 0.0000, max |Δβ| 0.012 — as on
+2026-09-15, the construction moves β by up to one SE and never the SE.
+
+| `global_slope`, p_adj per-region → single LMM | DK | HCP |
+|:--|:--|:--|
+| EUR GWAS → EUR: C+T / PRS-CS / SBayesR / SBayesRC / PRS-CSx | 0.012→0.043 / 0.013→0.022 / 0.014→0.038 / 0.017→0.038 / 0.021→**0.014** | 0.0045→0.020 / 0.0057→0.013 / 0.0040→0.016 / 0.0043→0.016 / 0.017→**0.011** |
+| multi → pooled zanc: same order | 0.047→0.077 / 0.020→**0.010** / 0.033→0.036 / 0.0075→**0.0036** / 0.050→**0.023** | 0.016→**0.010** / 0.027→**0.0044** / 0.024→**0.013** / 0.0079→**0.0010** / 0.070→**0.0092** |
+| matched composite → pooled: C+T / PRS-CSx | 0.023→0.043 / 0.037→**0.0079** | 0.013→0.018 / 0.071→**0.0044** |
+
+Readings. (1) **The EUR-arm result survives the construction**: 5/5 on both
+atlases either way (β −0.030 to −0.044 under the single LMM), where the PGC3
+EUR cells had gone 3/4 → 0/4 on HCP under the same switch. The Bayesian betas
+attenuate by 0.005–0.007 on the single LMM, PRS-CSx does not. (2) **The
+pooled arm is stronger on the single LMM** (every single-score method's p
+falls; SBayesRC 0.0075 → 0.0036 DK, 0.0079 → 0.0010 HCP), the opposite
+direction to the EUR arm — the same pattern the 2026-09-15 check found for
+PGC3 (pooled invariant-or-better, EUR weaker), so it is a property of the
+constructions, not of the GWAS. C+T pooled on DK is the one cell that crosses
+0.05 (0.047 → 0.077). (3) PRS-CSx is the method that gains most from the
+single LMM (pooled meta 0.050 → 0.023 DK, 0.070 → 0.0092 HCP; composite
+0.037 → 0.0079 / 0.071 → 0.0044). (4) `baseline_thickness`: null in every
+cell under both constructions (|β| ≤ 0.029, p_adj ≥ 0.06), so the
+slope-specificity holds for the single LMM too.
+
+**Control panel and `baseline_thickness` on the single-LMM construction**
+(`step6_prs_1lmm_controls.sbatch`, 35748170, 6 min per atlas, 48 tables each;
+`step6_orderops_collect.py` → `prs_final_1lmm/table_order_of_operations_all.tsv`,
+every rule-4-matched trait arm × {global_slope, baseline_thickness}; the
+original SCZ/MDD-only table is untouched for the slide). `global_slope`,
+matched stratum, p_adj per-region → single LMM, count of methods < 0.05:
+
+| trait arm (→ stratum) | DK | HCP | direction |
+|:--|:--|:--|:--|
+| SCZ_pooled (PGC3) | 4/4 → 4/4 | 4/4 → 4/4 | − |
+| SCZ_eur (PGC3) | 0/4 → 0/4 | 3/4 → 0/4 | − |
+| MDD_pooled | 3/4 → 3/4 (all p smaller) | 1/4 → 3/4 | − |
+| MDD_eur | 0/4 → 2/4 | 0/4 → 3/4 | − |
+| **ALZ (Wightman, with APOE)** | 2/4 → **4/4** (0.0064–0.030) | 1/4 → **4/4** (0.0040–0.021) | − |
+| ALZ_noAPOE | 1/4 → 1/4 | 0/4 → 0/4 | − |
+| **ALZ_IGAP (Kunkle, with APOE)** | 1/4 → **3/4** (0.015–0.034) | 0/4 → **3/4** (0.018–0.023) | − |
+| ALZ_IGAP_noAPOE | 0/4 → 0/4 | 0/4 → 0/4 | − |
+| **EA (Okbay)** | 3/4 → 3/4 (0.011–0.038) | 0/4 → **3/4** (0.0076–0.032) | **+** |
+| ASD | 0/4 → 0/4 (β → 0) | 0/4 → 0/4 (β → 0) | + |
+
+`baseline_thickness`: null for every arm under both constructions except ASD
+PRS-CS (−0.040, p_adj 0.009 / 0.010, both constructions, both atlases — the
+same cell §5 lists), and the numbers are identical to three decimals between
+constructions (max |Δβ| 0.001), as expected for an intercept.
+
+**Reading, and it tempers the SCZ headline.** The single-LMM slope is *more*
+associated with polygenic risk across the board, not specifically with SCZ:
+the APOE-carrying ALZ scores go to 4/4 and 3/4 on both atlases with |β| 0.031
+to 0.045 (as large as SCZ's), the APOE-stripped versions stay null (so this is
+APOE, not polygenic AD), and EA — the SES/education confound control, opposite
+sign — goes 0/4 → 3/4 on HCP. MDD gains too. ASD is the one arm that
+attenuates. So on the single LMM the honest statement is "SCZ is one of
+several polygenic signals of comparable size on the thinning rate, alongside
+APOE and (inversely) educational attainment"; on the per-region-BLUP mean the
+SCZ cells are the most consistent but the same three arms are present at
+nominal levels. Rule 7 applies: report the panel, and read the SCZ
+association with EA and APOE alongside it, whichever construction is
+primary. The 2025 SCZ EUR result (5/5 on both atlases, either construction)
+does not change this, because the controls are not on the 2025 release.
+
+**Step 10 COMPLETE (35742536 prep 3 min; 35742537 gene analyses 10–49 min
+each; finish 35748866 30 min — the first finish, 35742538, died because
+`--meta raw=` writes only the `.genes.raw` and `--meta genes=` only the
+`.genes.out`; both are now called). Tables:
+`results_70tab{,_hcp}/magma_scz2025/table_magma_scz2025.tsv` (368 rows each)
+and `table_gene_level_comparison.tsv`.
+
+*Gene level — what the LD mismatch does.* Bonferroni-significant genes (of
+~18.5 k): SCZ25_EUR 788, SCZ25_META (per-ancestry + `--meta`) 778,
+SCZ25_METAnaive (meta file × EUR panel) 771, PGC3_EUR 705, PGC3_primary 774.
+Proper meta vs naive: gene-Z Pearson 0.916 / Spearman 0.881; 650 genes
+significant in both, **128 only in the proper meta, 121 only in the naive
+run** — normal MAGMA gets the same broad answer on this EUR-dominated meta but
+~16 % of the significant gene list is panel-dependent, which is the cost of
+the mismatch stated in genes rather than in principle. SCZ25_EUR vs PGC3_EUR:
+r 0.899, 164 genes newly significant, 81 lost. Positive control: every 2025
+and PGC3 set is enormously enriched on SCZ25_META itself (β 1.6–2.9,
+p < 1e-90), so the sets, ID mapping and `--set-annot` plumbing are sound.
+
+*Against the phenotypes (EUR-arm phenotype gene results, both atlases):*
+
+| test, `global_slope` | DK | HCP |
+|:--|:--|:--|
+| reverse gene-property, SCZ25_EUR / SCZ25_META / naive | p 0.15 / 0.19 / 0.12 | **0.018 / 0.031 / 0.0081** (β +0.023 to +0.028) |
+| same, PGC3_EUR / PGC3_primary | 0.34 / 0.26 | 0.11 / 0.068 |
+| forward gene-property (any disorder result) | p 0.21–0.47 | null |
+| gene set: ST12 `SCZ_locus_pool` (462, curated) | **0.143 (p 0.0030)** | **0.170 (0.0005)** |
+| gene set: `PGC3_locus_pool` (858, genes under GWS peaks) | 0.052 (0.13) | 0.068 (0.073) |
+| gene set: `SCZ25_locus_pool` (1,103, genes under 2025 GWS peaks) | 0.017 (0.34) | 0.041 (0.16) |
+| gene set: `SCZ25_genesig` / `PGC3_genesig` (gene-level significant) | −0.048 (0.86) / −0.080 (0.94) | −0.011 (0.60) / −0.035 (0.76) |
+| ST12 pool conditional on `PGC3_locus_pool` | 0.155 (0.0055) | 0.179 (0.0015) |
+| slope PCs, any test | null (p ≥ 0.10) | null |
+
+`baseline_thickness` behaves as at step 7: positive in every reverse and
+forward gene-property test (p 0.001–0.04) and enriched in the ST12 pool
+(0.17 / 0.19, p 4e-4 / 1e-4), in `PGC3_locus_pool` (0.105, p 0.012 / 0.011)
+and in `SCZ25_genesig` (0.10, p 0.010 / 0.013) — the thickness-not-thinning
+pattern seen throughout.
+
+Three readings. (1) **The `SCZ_locus_pool` enrichment of the thinning GWAS is
+a property of Trubetskoy's curated gene mapping, not of proximity to SCZ
+peaks**: pools built as "genes under the GWS peaks" are null for both GWAS,
+the ST12 pool stays enriched conditional on the PGC3 peak pool, and the
+gene-level-significant sets are if anything depleted. The 2025 release ships
+no fine-mapping/SMR gene table, so no like-for-like 2025 pool can be built
+yet; when one is published it is the set to test. (2) **The 2025 gene results
+give a nominal reverse gene-property signal on HCP only** (genes carrying more
+thinning association carry more SCZ gene signal; p 0.008–0.031, one atlas,
+uncorrected) that PGC3 did not reach (0.068 / 0.11) — consistent in direction
+with the PRS result, not evidence on its own. (3) On the question asked —
+does normal MAGMA work on a multi-ancestry GWAS — the answer is "it runs and
+it is not badly wrong here, but it is wrong in a measurable way": use the
+per-ancestry + `--meta` result (`SCZ25_META`) as the reference and keep the
+naive run as a sensitivity. Every phenotype-level conclusion above is the same
+under either.
