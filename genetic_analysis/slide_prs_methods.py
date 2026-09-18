@@ -32,7 +32,14 @@ import pandas as pd
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
-OUT = REPO / "docs/figures/slide_prs_methods.png"
+#: which slope construction the grid is drawn for (CLI: --construction)
+#:   perregion  mean of per-region slope BLUPs  -- the registered primary
+#:   1lmm       one LMM on the per-scan whole-cortex mean
+CONSTRUCTION = "perregion"
+OUT_BY_CONSTRUCTION = {
+    "perregion": REPO / "docs/figures/slide_prs_methods.png",
+    "1lmm": REPO / "docs/figures/slide_prs_methods_1lmm.png",
+}
 
 #: (phenotype, parcellation label, results root).  Each root holds the PGC3
 #: grid (prs_final/table_main.tsv) and the step-9 2025 SCZ GWAS re-scoring
@@ -82,26 +89,35 @@ def _fmt_p(p: float) -> str:
     return f"{p:.0e}".replace("e-0", "e-") if p < 1e-3 else f"{p:.3f}"[1:]
 
 
-def load(root: Path, phenotype: str) -> pd.DataFrame:
-    g = pd.read_csv(root / "prs_final/table_main.tsv", sep="\t")
-    g = g[g.matched == "yes"]
-    # step 9: the primary cells only (EUR GWAS -> EUR anchor; AFR+EUR+EAS
-    # meta -> pooled).  The four-method set is kept so the rows align with
-    # PGC3; PRS-CSx and the ancestry-matched composite live in the notes.
-    s = pd.read_csv(root / "prs_scz2025/table_scz2025_main.tsv", sep="\t")
-    s = s[(s.design == "primary") & s.method.isin(METHOD_ORDER)
+def load(root: Path, phenotype: str,
+         construction: str = None) -> pd.DataFrame:
+    """One row per (band, arm, method) for the requested construction.
+
+    Both constructions are read from the order-of-operations tables, which
+    carry beta/se/p_adj for each side by side (the *_perregion columns are
+    identical to prs_final/table_main.tsv and prs_scz2025/table_scz2025_main.tsv
+    design == 'primary', checked 2026-09-18).
+    """
+    c = construction or CONSTRUCTION
+    a = pd.read_csv(root / "prs_final_1lmm/table_order_of_operations_all.tsv",
+                    sep="\t")
+    s = pd.read_csv(root / "prs_scz2025/table_order_of_operations_scz2025.tsv",
+                    sep="\t")
+    s = s[s.cell.str.contains("primary") & s.method.isin(METHOD_ORDER)
           & s.trait_arm.isin(["SCZ25_EUR", "SCZ25_META"])]
-    t = pd.concat([g, s], ignore_index=True)
+    t = pd.concat([a, s[a.columns]], ignore_index=True)
     t = t[t.phenotype == phenotype]
-    keep = ((t.target_stratum == "EUR") & (t.score == "raw")) | \
-           ((t.target_stratum == "full") & (t.score == "zanc"))
+    keep = ((t.stratum == "EUR") & (t.score == "raw")) | \
+           ((t.stratum == "full") & (t.score == "zanc"))
     t = t[keep].copy()
-    t["arm"] = t.target_stratum.map({"EUR": "EUR", "full": "pooled"})
+    t["beta"], t["se"], t["p_adj"] = \
+        t[f"beta_{c}"], t[f"se_{c}"], t[f"p_adj_{c}"]
+    t["arm"] = t.stratum.map({"EUR": "EUR", "full": "pooled"})
     band_of = {ta: name for name, _, tas, _h in BANDS for ta in tas}
     t["band"] = t.trait_arm.map(band_of)
     assert t.band.notna().all(), sorted(t[t.band.isna()].trait_arm.unique())
     dup = t.duplicated(["band", "arm", "method"], keep=False)
-    assert not dup.any(), t[dup][["trait_arm", "method", "threshold"]]
+    assert not dup.any(), t[dup][["trait_arm", "method"]]
     return t
 
 
@@ -141,7 +157,7 @@ def panel(fig, rect, d, title, show_ylab):
     return ax
 
 
-NOTES = [
+NOTES_PERREGION = [
     ("Model & samples", [
         "phenotype ~ score + age + sex + PC1–10 + (1 | family); score",
         "standardised.  EUR arm n = 4,308; pooled n = 8,596 (all ancestries),",
@@ -193,26 +209,78 @@ NOTES = [
     ]),
 ]
 
+NOTES_1LMM = [
+    ("Model & samples", [
+        "phenotype ~ score + age + sex + PC1–10 + (1 | family); score",
+        "standardised.  EUR arm n = 4,308; pooled n = 8,596 (all ancestries),",
+        "score z-scored within ancestry cluster.  Release 7.0 tables.",
+    ]),
+    ("The phenotype on this slide", [
+        "Whole-cortex mean thickness per scan, then ONE mixed model per",
+        "child (random slope on age) — the simpler construction.  The",
+        "registered primary averages 68 / 358 per-region slope BLUPs instead;",
+        "r between the two = 0.93 DK / 0.82 HCP-MMP.  Each regional BLUP is",
+        "shrunk by its own variance ratio, so their mean is over-shrunk and",
+        "keeps 66 % / 57 % of this phenotype's SD.  SEs are identical",
+        "between constructions (ratio 0.998): β moves, precision does not.",
+    ]),
+    ("Discovery GWAS matched to arm", [
+        "EUR arm ← European-only GWAS; pooled ← multi-ancestry GWAS.  ASD,",
+        "ALZ and EA exist only as European GWAS so appear EUR-only.  SCZ",
+        "2025 = Nature multi-ancestry release (EUR Neff 117k → 174k); PGC3",
+        "kept beneath it.  Atlases are one measure formed two ways on the",
+        "same children — a robustness check, not replication.  Bayesian",
+        "methods share UKB European LD; C+T clumps on the target.  C+T p̃",
+        "adjusted over 8 thresholds; others one score, raw p; no correction",
+        "across the grid.",
+    ]),
+    ("What changes on this construction — read with care", [
+        "SCZ 2025: EUR arm 4/4 both atlases under either construction (β",
+        "−0.030 to −0.044); pooled 3/4 DK, 4/4 HCP-MMP.  PGC3 EUR: 0/4.",
+        "MDD gains: pooled 3/4 both atlases; EUR 2/4 DK, 3/4 HCP-MMP.",
+        "BUT the less-shrunk slope is more associated with polygenic risk",
+        "across the board: ALZ WITH APOE goes 4/4 (Wightman) and 3/4 (Kunkle)",
+        "on both atlases, |β| 0.031–0.045 — as large as SCZ — while the",
+        "APOE-stripped scores stay null (so APOE, not polygenic AD); EA",
+        "(opposite sign) is 3/4 on both atlases.  ASD is the one arm that",
+        "attenuates to zero.  Baseline thickness null in every SCZ cell.",
+    ]),
+    ("Verdict", [
+        "On this phenotype SCZ is ONE of several polygenic signals of",
+        "comparable size on the thinning rate, alongside APOE and (inversely)",
+        "educational attainment; it is the most consistent across methods",
+        "and GWAS, not the only one.  Report the panel together.",
+    ]),
+]
+NOTES = {"perregion": NOTES_PERREGION, "1lmm": NOTES_1LMM}
 
-def draw() -> Path:
+
+def draw(construction: str = None) -> Path:
+    c = construction or CONSTRUCTION
+    assert c in OUT_BY_CONSTRUCTION, c
     mpl.rcParams.update({
         "font.size": BASE, "figure.facecolor": "white",
         "savefig.facecolor": "white",
     })
     fig = plt.figure(figsize=(13.333, 7.5))
-    fig.text(0.006, 0.958, "PRS → cortical development: four methods × two "
-             "parcellations × two SCZ GWAS — SCZ is the only association "
-             "robust across all of them", fontsize=BASE + 0.5)
-    fig.text(0.006, 0.925, "ancestry-matched cells from "
-             "results_70tab{,_hcp}/prs_final/table_main.tsv and "
-             "prs_scz2025/table_scz2025_main.tsv · filled = p̃ < .05 · "
-             "○ EUR arm · ◇ pooled, within-ancestry standardised",
-             fontsize=SMALL - 0.5, color="0.35")
+    if c == "perregion":
+        title = ("PRS → cortical development: four methods × two "
+                 "parcellations × two SCZ GWAS — SCZ is the only association "
+                 "robust across all of them")
+        pheno = "slope = mean of per-region BLUPs (registered primary)"
+    else:
+        title = ("PRS → cortical development on the single-LMM slope: SCZ "
+                 "robust, but APOE and education now match it in size")
+        pheno = "slope = one LMM on the per-scan cortical mean"
+    fig.text(0.006, 0.958, title, fontsize=BASE + 0.5)
+    fig.text(0.006, 0.925, f"{pheno} · matched cells, results_70tab{{,_hcp}} "
+             "order-of-operations tables · filled = p̃ < .05 · ○ EUR · "
+             "◇ pooled (within-ancestry z)", fontsize=SMALL - 0.5, color="0.35")
 
     x0, w, gap, y0, h = 0.128, 0.127, 0.0140, 0.075, 0.755
     for k, (pheno, parc, table) in enumerate(COLUMNS):
         rect = [x0 + k * (w + gap), y0, w, h]
-        panel(fig, rect, load(table, pheno), parc, show_ylab=(k == 0))
+        panel(fig, rect, load(table, pheno, c), parc, show_ylab=(k == 0))
     # phenotype group headers spanning their two columns
     for label, a, b in GROUPS:
         xc = x0 + (a * (w + gap)) + ((b - a) * (w + gap) - gap) / 2
@@ -231,7 +299,7 @@ def draw() -> Path:
                fontsize=SMALL, handletextpad=0.3, columnspacing=0.9)
 
     xn, y = 0.695, 0.905
-    for head, lines in NOTES:
+    for head, lines in NOTES[c]:
         fig.text(xn, y, head, fontsize=SMALL - 1, fontweight="bold",
                  color="0.20", va="top")
         y -= 0.0205
@@ -240,12 +308,19 @@ def draw() -> Path:
             y -= 0.0158
         y -= 0.007
 
-    fig.savefig(OUT, dpi=200)
+    out = OUT_BY_CONSTRUCTION[c]
+    fig.savefig(out, dpi=200)
     plt.close(fig)
-    print(OUT)
-    return OUT
+    print(out)
+    return out
 
 
 if __name__ == "__main__":
-    draw()
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--construction", choices=list(OUT_BY_CONSTRUCTION),
+                    default=None, help="default: draw both")
+    a = ap.parse_args()
+    for c in ([a.construction] if a.construction else OUT_BY_CONSTRUCTION):
+        draw(c)
     sys.exit(0)
