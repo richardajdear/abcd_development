@@ -1,0 +1,13 @@
+phenotype	variable	n_genes	beta	se	p
+baseline_thickness	PGC3_locus_pool	858	0.10803	0.046924	0.010668
+baseline_thickness	SCZ25_genesig	777	0.098777	0.044224	0.012763
+baseline_thickness	SCZ25_locus_pool	1103	0.059463	0.041697	0.076936
+baseline_thickness	SCZ_locus_pool	455	0.18861	0.051711	0.00013297
+baseline_thickness	SCZ_pool_not_prio	354	0.18275	0.058045	0.00082256
+baseline_thickness	SCZ_prioritised	101	0.13233	0.090196	0.071176
+global_slope	PGC3_locus_pool	858	0.068224	0.046857	0.072708
+global_slope	SCZ25_genesig	777	-0.011467	0.044163	0.60243
+global_slope	SCZ25_locus_pool	1103	0.04139	0.041634	0.16009
+global_slope	SCZ_locus_pool	455	0.1699	0.051636	0.0005016
+global_slope	SCZ_pool_not_prio	354	0.1973	0.057953	0.00033224
+global_slope	SCZ_prioritised	101	0.040335	0.090063	0.32713

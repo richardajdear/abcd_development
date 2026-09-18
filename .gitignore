@@ -153,3 +153,6 @@ genetic_analysis/inputs/
 slurm/
 # Local re-run log written by tools/rerun_local.sh (lives in out/, listed for clarity).
 out/rerun_local.log
+# individual-level imaging rows for local figure drafts -- never committed
+genetic_analysis/fig1_inputs/hcp70_scans.csv
+genetic_analysis/fig1_inputs/hcp70_global_slope.csv
