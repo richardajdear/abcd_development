@@ -136,6 +136,17 @@ def panel_b(ax, rng):
     ax.text(18.2, summ.ols_intercept_mm + summ.ols_slope_mm_per_yr * 18.1,
             f"population\n{summ.ols_slope_mm_per_yr * 1000:.0f} µm / year",
             fontsize=ANN, va="center", ha="left")
+    handles = [
+        mpl.lines.Line2D([], [], color="0.6", lw=0.6, alpha=0.8,
+                         label="one child (250 of 8,716 shown)"),
+        mpl.lines.Line2D([], [], color="#1f4e8c", lw=0.9, marker="o", ms=2.2,
+                         label="three children with 4 scans"),
+        mpl.lines.Line2D([], [], color="black", lw=1.4,
+                         label="population trend (OLS)"),
+    ]
+    ax.legend(handles=handles, loc="lower left", frameon=False,
+              fontsize=ANN, handlelength=1.6, handletextpad=0.5,
+              borderaxespad=0.2, labelspacing=0.3)
     ax.set_xlim(8, 20.6)
     ax.set_ylim(2.25, 3.0)
     ax.set_xticks([8, 10, 12, 14, 16, 18])
@@ -158,9 +169,9 @@ def panel_c(ax):
     ax.plot([2, 3, 4], [sh.spearman_brown[sh.n_visits == k].iloc[0]
                         for k in (2, 3, 4)], "s-", color="black", ms=3,
             lw=0.9)
-    ax.text(4.15, sh.spearman_brown[sh.n_visits == 4].iloc[0],
+    ax.text(4.45, sh.spearman_brown[sh.n_visits == 4].iloc[0],
             "cortex-wide\nmean (split-half)", fontsize=ANN, va="center")
-    ax.text(4.15, rel.reliability[rel.n_visits == 4].median(),
+    ax.text(4.45, rel.reliability[rel.n_visits == 4].median(),
             "one parcel\n(358 parcels)", fontsize=ANN, va="center",
             color=SLOPE_C)
     ax.set_xticks([2, 3, 4])
@@ -249,8 +260,8 @@ def panel_e(ax, rng):
     ax.axhline(5, color="0.6", lw=0.5, ls=":")
     ax.set_xlim(0, offs[-1] + chr_len[-1])
     ax.set_xticks(offs + chr_len / 2)
-    ax.set_xticklabels([str(c + 1) if (c < 12 or c % 2) else ""
-                        for c in range(22)], fontsize=TICK - 1)
+    ax.set_xticklabels([str(c + 1) if (c < 12 or c in (13, 16, 19, 21))
+                        else "" for c in range(22)], fontsize=TICK - 1)
     ax.tick_params(axis="x", length=0)
     ax.set_xlabel("chromosome")
     ax.set_ylabel("−log10 p")
@@ -301,9 +312,93 @@ def panel_f(ax):
     ax.set_ylim(-0.6, n - 0.4)
     ax.set_xlabel("enrichment β (95% CI)")
     ax.set_title("SCZ gene sets", loc="left")
-    ax.text(0.99, 0.5, "● thinning\n   rate\n■ baseline\n   thickness\n"
+    ax.text(0.99, 0.02, "● thinning\n   rate\n■ baseline\n   thickness\n"
             "filled =\np < .05", transform=ax.transAxes, ha="right",
-            va="center", fontsize=ANN, color="0.3")
+            va="bottom", fontsize=ANN, color="0.3")
+
+
+CAPTION = REPO / "docs/figures/fig1_draft_caption.md"
+
+
+def write_caption() -> Path:
+    """Caption with every number read from fig1_inputs/ at write time."""
+    per = pd.read_csv(IN / "hcp70_scans_per_child.csv", index_col=0)
+    age = pd.read_csv(IN / "hcp70_age_by_visit.csv", index_col=0)
+    summ = pd.read_csv(IN / "hcp70_scan_summary.csv", index_col=0).value
+    rel = pd.read_csv(IN / "hcp70_regional_slope_reliability.csv")
+    sh = pd.read_csv(IN / "hcp70_global_slope_splithalf.csv")
+    h2 = pd.read_csv(IN / "hcp70_greml_h2.tsv", sep="\t").set_index("phenotype")
+    gw = pd.read_csv(IN / "hcp70_gwas_summary_eur.tsv", sep="\t").set_index("phenotype")
+    prs = pd.read_csv(IN / "hcp70_prs_key_arms.tsv", sep="\t")
+    prs = prs[prs.phenotype == "global_slope"]
+    mg = pd.read_csv(IN / "hcp70_magma_genesets.tsv", sep="\t")
+
+    n_kids, n_scans = int(per.n_children.sum()), int(age["count"].sum())
+    med = {k: rel.reliability[rel.n_visits == k].median() for k in (2, 3, 4)}
+    sb = {int(r.n_visits): r.spearman_brown for _, r in sh.iterrows()}
+    g = gw.loc["global_slope"]
+    hs = h2.loc["global_slope"]
+
+    def sig(arm):
+        d = prs[prs.trait_arm == arm]
+        return int((d.p_adj_1lmm < 0.05).sum()), len(d), d.beta_1lmm.min(), d.beta_1lmm.max()
+
+    scz_e, scz_p = sig("SCZ25_EUR"), sig("SCZ25_META")
+    mdd_e, mdd_p = sig("MDD_eur"), sig("MDD_pooled")
+    alz, ea, asd = sig("ALZ_noAPOE"), sig("EA"), sig("ASD")
+    st12 = mg[mg.variable == "SCZ_locus_pool"].set_index("phenotype")
+    npr = mg[mg.variable == "SCZ_pool_not_prio"].set_index("phenotype")
+    pri = mg[mg.variable == "SCZ_prioritised"].set_index("phenotype")
+
+    txt = f"""**Figure 1 | Polygenic risk for schizophrenia predicts the rate of adolescent
+cortical thinning.** All panels use the HCP-MMP1.0 parcellation (358 parcels)
+and ABCD release 7.0.
+
+**a**, Age at scan by study visit for the {n_kids:,} children with at least two
+usable scans ({n_scans:,} scans; {int(per.n_children[2]):,} / {int(per.n_children[3]):,} / {int(per.n_children[4]):,}
+children with 2 / 3 / 4 scans). **b**, Mean cortical thickness across parcels
+per scan against age. Thin lines join the scans of 250 randomly drawn children;
+three children with four scans are highlighted; the black line is the ordinary
+least-squares population trend ({summ.ols_slope_mm_per_yr * 1000:.0f} µm per year). Each child's
+age slope from a linear mixed model is the trait analysed below. **c**,
+Reliability of the slope estimate by scans per child. Boxes: model-based
+reliability (variance of the true slope over variance of the estimate) of a
+single parcel's slope across the 358 parcels (median {med[2]:.2f} / {med[3]:.2f} / {med[4]:.2f}
+for 2 / 3 / 4 scans). Squares: split-half consistency of the cortex-wide mean
+slope (left- vs right-hemisphere means, Spearman–Brown corrected; {sb[2]:.2f} / {sb[3]:.2f} / {sb[4]:.2f}).
+**d**, Association of polygenic scores with the thinning rate (single linear
+mixed model on the per-scan cortical mean; β per SD of score, 95 % CI). Four
+scoring methods per trait (C+T, PRS-CS, SBayesR, SBayesRC); circles, European
+ancestry arm scored with a European discovery GWAS (n = 4,308); diamonds, all
+ancestries scored with a multi-ancestry discovery GWAS and standardised within
+ancestry cluster (n = 8,596); filled, p < 0.05 after correction across C+T
+thresholds. Schizophrenia (2025 multi-ancestry GWAS): {scz_e[0]}/{scz_e[1]} methods
+significant in the European arm (β {scz_e[2]:.3f} to {scz_e[3]:.3f}) and {scz_p[0]}/{scz_p[1]} in the pooled
+arm; depression {mdd_e[0]}/{mdd_e[1]} and {mdd_p[0]}/{mdd_p[1]}; Alzheimer's disease with the APOE region
+excluded {alz[0]}/{alz[1]}; educational attainment {ea[0]}/{ea[1]} (opposite sign); autism {asd[0]}/{asd[1]}.
+**e**, Genome-wide association of the thinning rate, European arm (n = {int(g.n_mean):,};
+{g.n_snps / 1e6:.1f} M imputed variants; λGC {g.lambda_gc:.2f}; {int(g.n_p5e8)} loci at p < 5 × 10⁻⁸;
+SNP heritability from GREML {hs.h2:.2f} ± {hs.se:.2f}). *Points are placeholders until
+the summary statistics are exported.* **f**, MAGMA competitive gene-set
+enrichment of the thinning-rate GWAS (red) and of baseline thickness (grey)
+in schizophrenia gene sets: the curated locus pool of the 2022 PGC GWAS
+(Trubetskoy et al. Supplementary Table 12; {int(st12.n_genes.iloc[0])} genes) and its
+non-prioritised ({int(npr.n_genes.iloc[0])}) and prioritised ({int(pri.n_genes.iloc[0])}) subsets, genes
+under genome-wide-significant peaks of the 2022 and 2025 GWAS, and genes
+significant in the 2025 gene-level analysis. The curated pool is enriched for
+the thinning rate (p = {st12.loc['global_slope', 'p']:.1g}) and for baseline thickness
+(p = {st12.loc['baseline_thickness', 'p']:.1g}) alike, carried by its non-prioritised genes
+(p = {npr.loc['global_slope', 'p']:.1g}) rather than the prioritised ones (p = {pri.loc['global_slope', 'p']:.2f}).
+
+Methods notes
+- Thickness parsed from release FreeSurfer surfaces into HCP-MMP parcels; scans passing the release QC code; children with ≥ 2 scans.
+- Mixed model per parcel and for the cortex-wide mean: thickness ~ age + sex + (1 + age | child) + (1 | site); the trait is the child's age slope.
+- Polygenic scores from four methods; discovery GWAS matched to the target arm; pooled-arm scores z-scored within genetic-ancestry cluster; association model score + age + sex + 10 PCs + (1 | family).
+- Sensitivity analyses (DK parcellation, mean of per-parcel slopes as the trait, PGC3 2022 discovery GWAS, per-ancestry strata) in Supplementary Figures.
+"""
+    CAPTION.write_text(txt)
+    print(CAPTION)
+    return CAPTION
 
 
 def draw() -> Path:
@@ -331,4 +426,5 @@ def draw() -> Path:
 
 if __name__ == "__main__":
     draw()
+    write_caption()
     sys.exit(0)
