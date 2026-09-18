@@ -1,0 +1,3 @@
+phenotype	n_snps	n_mean	lambda_gc	n_p5e8	n_p1e5	min_p	n_chr
+baseline_thickness_1lmm	7470569	4205	1.0224	0	139	3.83447362893563e-07	22
+global_slope_1lmm	7470569	4205	1.0041	0	122	2.63905188072133e-07	22

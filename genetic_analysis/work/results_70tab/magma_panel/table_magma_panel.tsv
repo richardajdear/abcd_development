@@ -1,0 +1,165 @@
+kind	disorder_result	phenotype	construction	variable	n_genes	beta	se	p
+reverse	ALZ_noAPOE	baseline_thickness	perregion	baseline_thickness	18171	0.0084461	0.009227	0.36002
+reverse	ALZ_noAPOE	baseline_thickness	1lmm	baseline_thickness_1lmm	18177	0.0086567	0.009226	0.34811
+reverse	ALZ_noAPOE	global_slope	perregion	global_slope	18171	-0.0022718	0.0092367	0.80572
+reverse	ALZ_noAPOE	global_slope	1lmm	global_slope_1lmm	18177	-0.0024316	0.0092955	0.79365
+reverse	ALZ	baseline_thickness	perregion	baseline_thickness	18254	0.0073332	0.0093123	0.43102
+reverse	ALZ	baseline_thickness	1lmm	baseline_thickness_1lmm	18260	0.0075737	0.0093114	0.41602
+reverse	ALZ	global_slope	perregion	global_slope	18254	-0.0055543	0.0093223	0.55132
+reverse	ALZ	global_slope	1lmm	global_slope_1lmm	18260	-0.0046662	0.0093823	0.61896
+reverse	ASD	baseline_thickness	perregion	baseline_thickness	18206	-0.0050117	0.0092876	0.58947
+reverse	ASD	baseline_thickness	1lmm	baseline_thickness_1lmm	18210	-0.0045305	0.0092868	0.62567
+reverse	ASD	global_slope	perregion	global_slope	18206	-0.0071401	0.009244	0.43989
+reverse	ASD	global_slope	1lmm	global_slope_1lmm	18210	-0.0096885	0.0092816	0.29658
+reverse	EA	baseline_thickness	perregion	baseline_thickness	18264	0.028055	0.010395	0.0069647
+reverse	EA	baseline_thickness	1lmm	baseline_thickness_1lmm	18275	0.027978	0.010392	0.0071054
+reverse	EA	global_slope	perregion	global_slope	18264	0.00085186	0.010309	0.93414
+reverse	EA	global_slope	1lmm	global_slope_1lmm	18275	0.0063686	0.010362	0.53883
+reverse	MDD_EUR	baseline_thickness	perregion	baseline_thickness	18263	0.033663	0.01097	0.0021548
+reverse	MDD_EUR	baseline_thickness	1lmm	baseline_thickness_1lmm	18275	0.033792	0.010964	0.0020588
+reverse	MDD_EUR	global_slope	perregion	global_slope	18263	-0.010547	0.010921	0.33417
+reverse	MDD_EUR	global_slope	1lmm	global_slope_1lmm	18275	-0.010655	0.010974	0.33156
+reverse	MDD_div	baseline_thickness	perregion	baseline_thickness	18228	0.039083	0.011246	0.00051208
+reverse	MDD_div	baseline_thickness	1lmm	baseline_thickness_1lmm	18240	0.039042	0.011244	0.00051777
+reverse	MDD_div	global_slope	perregion	global_slope	18228	-0.011102	0.011243	0.32342
+reverse	MDD_div	global_slope	1lmm	global_slope_1lmm	18240	-0.012527	0.011299	0.26759
+reverse	PGC3_EUR	baseline_thickness	perregion	baseline_thickness	18261	0.026454	0.011255	0.018764
+reverse	PGC3_EUR	baseline_thickness	1lmm	baseline_thickness_1lmm	18270	0.026441	0.011251	0.01878
+reverse	PGC3_EUR	global_slope	perregion	global_slope	18261	0.010553	0.011154	0.34413
+reverse	PGC3_EUR	global_slope	1lmm	global_slope_1lmm	18270	0.0116	0.011185	0.2997
+reverse	PGC3_primary	baseline_thickness	perregion	baseline_thickness	18261	0.030404	0.011378	0.0075454
+reverse	PGC3_primary	baseline_thickness	1lmm	baseline_thickness_1lmm	18261	0.03007	0.011378	0.0082324
+reverse	PGC3_primary	global_slope	perregion	global_slope	18261	0.012678	0.011323	0.2629
+reverse	PGC3_primary	global_slope	1lmm	global_slope_1lmm	18261	0.012759	0.011363	0.26151
+reverse	SCZ25_EUR	baseline_thickness	perregion	baseline_thickness	18270	0.022714	0.010956	0.038173
+reverse	SCZ25_EUR	baseline_thickness	1lmm	baseline_thickness_1lmm	18282	0.02256	0.010952	0.039425
+reverse	SCZ25_EUR	global_slope	perregion	global_slope	18270	0.015799	0.010918	0.1479
+reverse	SCZ25_EUR	global_slope	1lmm	global_slope_1lmm	18282	0.017698	0.010936	0.1056
+reverse	SCZ25_META	baseline_thickness	perregion	baseline_thickness	18270	0.030264	0.010734	0.004815
+reverse	SCZ25_META	baseline_thickness	1lmm	baseline_thickness_1lmm	18282	0.030255	0.010731	0.0048197
+reverse	SCZ25_META	global_slope	perregion	global_slope	18270	0.013871	0.010671	0.19368
+reverse	SCZ25_META	global_slope	1lmm	global_slope_1lmm	18282	0.016975	0.010701	0.11271
+reverse	SCZ25_METAnaive	baseline_thickness	perregion	baseline_thickness	18270	0.029417	0.010638	0.0056948
+reverse	SCZ25_METAnaive	baseline_thickness	1lmm	baseline_thickness_1lmm	18277	0.029133	0.010636	0.0061691
+reverse	SCZ25_METAnaive	global_slope	perregion	global_slope	18270	0.016373	0.01059	0.12209
+reverse	SCZ25_METAnaive	global_slope	1lmm	global_slope_1lmm	18277	0.011807	0.010614	0.26599
+forward	ALZ	baseline_thickness	1lmm	ALZ	18260	0.0056866	0.0075388	0.45067
+forward	ALZ_noAPOE	baseline_thickness	1lmm	ALZ_noAPOE	18177	0.0063206	0.0076637	0.40953
+forward	ASD	baseline_thickness	1lmm	ASD	18210	-0.0055195	0.0076477	0.47047
+forward	EA	baseline_thickness	1lmm	EA	18275	0.022198	0.0066386	0.00082878
+forward	MDD_EUR	baseline_thickness	1lmm	MDD_EUR	18275	0.017524	0.0061417	0.0043338
+forward	MDD_div	baseline_thickness	1lmm	MDD_div	18240	0.01908	0.0061031	0.001774
+forward	PGC3_EUR	baseline_thickness	1lmm	PGC3_EUR	18270	0.015364	0.0060616	0.011266
+forward	PGC3_primary	baseline_thickness	1lmm	PGC3_primary	18261	0.019454	0.0059851	0.0011553
+forward	SCZ25_EUR	baseline_thickness	1lmm	SCZ25_EUR	18282	0.014801	0.0060282	0.014089
+forward	SCZ25_META	baseline_thickness	1lmm	SCZ25_META	18282	0.018118	0.0060493	0.0027488
+forward	SCZ25_METAnaive	baseline_thickness	1lmm	SCZ25_METAnaive	18277	0.016963	0.0061732	0.0060077
+gene-set	MDD sets	baseline_thickness	1lmm	MDD_hc_expression	56	0.056267	0.11867	0.31771
+gene-set	MDD sets	baseline_thickness	1lmm	MDD_hc_finemap	160	0.11471	0.074464	0.061726
+gene-set	MDD sets	baseline_thickness	1lmm	MDD_hc_protein	10	-0.10513	0.26562	0.65387
+gene-set	MDD sets	baseline_thickness	1lmm	MDD_highconf	213	0.069938	0.063876	0.13679
+gene-set	MDD sets	baseline_thickness	1lmm	MDD_pool	1881	0.0086621	0.026463	0.37171
+gene-set	MDD sets	baseline_thickness	1lmm	MDD_pool_not_hc	1668	-0.0036681	0.027728	0.55262
+gene-set	SCZ sets	baseline_thickness	1lmm	PGC3_genesig	704	0.012515	0.050011	0.4012
+gene-set	SCZ sets	baseline_thickness	1lmm	PGC3_locus_pool	858	0.105	0.046869	0.012545
+gene-set	SCZ sets	baseline_thickness	1lmm	SCZ25_genesig	777	0.10457	0.04417	0.0089622
+gene-set	SCZ sets	baseline_thickness	1lmm	SCZ25_genesig_new	214	0.12425	0.06232	0.023097
+gene-set	SCZ sets	baseline_thickness	1lmm	SCZ25_locus_pool	1103	0.062698	0.041647	0.066114
+gene-set	SCZ sets	baseline_thickness	1lmm	SCZ25_locus_pool_new	302	-0.0016391	0.062429	0.51047
+gene-set	SCZ sets	baseline_thickness	1lmm	SCZ_locus_pool	455	0.17394	0.051654	0.00038032
+gene-set	SCZ sets	baseline_thickness	1lmm	SCZ_pool_not_prio	354	0.18026	0.057977	0.00094015
+gene-set	SCZ sets	baseline_thickness	1lmm	SCZ_prio_finemap	61	0.077982	0.11324	0.24554
+gene-set	SCZ sets	baseline_thickness	1lmm	SCZ_prio_rare	7	0.24335	0.38387	0.26307
+gene-set	SCZ sets	baseline_thickness	1lmm	SCZ_prio_smr	44	0.10836	0.13518	0.21141
+gene-set	SCZ sets	baseline_thickness	1lmm	SCZ_prioritised	101	0.093767	0.090093	0.149
+gene-set	SCZ sets	baseline_thickness	1lmm	SCZ_prioritised_pc	101	0.093767	0.090093	0.149
+forward	ALZ	baseline_thickness	perregion	ALZ	18254	0.0054916	0.0075384	0.46633
+forward	ALZ_noAPOE	baseline_thickness	perregion	ALZ_noAPOE	18171	0.006144	0.0076633	0.42272
+forward	ASD	baseline_thickness	perregion	ASD	18206	-0.0058453	0.0076465	0.44462
+forward	EA	baseline_thickness	perregion	EA	18264	0.022299	0.0066391	0.00078499
+forward	MDD_EUR	baseline_thickness	perregion	MDD_EUR	18263	0.017427	0.0061422	0.004556
+forward	MDD_div	baseline_thickness	perregion	MDD_div	18228	0.019002	0.0061051	0.0018591
+forward	PGC3_EUR	baseline_thickness	perregion	PGC3_EUR	18261	0.01531	0.0060614	0.011551
+forward	PGC3_primary	baseline_thickness	perregion	PGC3_primary	18261	0.019604	0.0059843	0.0010559
+forward	SCZ25_EUR	baseline_thickness	perregion	SCZ25_EUR	18270	0.014841	0.0060294	0.013849
+forward	SCZ25_META	baseline_thickness	perregion	SCZ25_META	18270	0.018207	0.0060513	0.0026282
+forward	SCZ25_METAnaive	baseline_thickness	perregion	SCZ25_METAnaive	18270	0.017119	0.006173	0.0055584
+gene-set	MDD sets	baseline_thickness	perregion	MDD_hc_expression	56	0.052695	0.11866	0.3285
+gene-set	MDD sets	baseline_thickness	perregion	MDD_hc_finemap	160	0.11313	0.074458	0.064349
+gene-set	MDD sets	baseline_thickness	perregion	MDD_hc_protein	10	-0.11526	0.2656	0.66785
+gene-set	MDD sets	baseline_thickness	perregion	MDD_highconf	213	0.067079	0.063871	0.14682
+gene-set	MDD sets	baseline_thickness	perregion	MDD_pool	1881	0.0093389	0.026462	0.36208
+gene-set	MDD sets	baseline_thickness	perregion	MDD_pool_not_hc	1668	-0.002387	0.027726	0.5343
+gene-set	SCZ sets	baseline_thickness	perregion	PGC3_genesig	704	0.0065392	0.050007	0.44798
+gene-set	SCZ sets	baseline_thickness	perregion	PGC3_locus_pool	858	0.10517	0.046865	0.01242
+gene-set	SCZ sets	baseline_thickness	perregion	SCZ25_genesig	777	0.10281	0.044167	0.0099691
+gene-set	SCZ sets	baseline_thickness	perregion	SCZ25_genesig_new	214	0.12807	0.062314	0.019941
+gene-set	SCZ sets	baseline_thickness	perregion	SCZ25_locus_pool	1103	0.06215	0.041644	0.067809
+gene-set	SCZ sets	baseline_thickness	perregion	SCZ25_locus_pool_new	302	-0.0027385	0.062424	0.5175
+gene-set	SCZ sets	baseline_thickness	perregion	SCZ_locus_pool	455	0.17248	0.05165	0.00042095
+gene-set	SCZ sets	baseline_thickness	perregion	SCZ_pool_not_prio	354	0.17856	0.057973	0.0010369
+gene-set	SCZ sets	baseline_thickness	perregion	SCZ_prio_finemap	61	0.074317	0.11323	0.25582
+gene-set	SCZ sets	baseline_thickness	perregion	SCZ_prio_rare	7	0.24672	0.38384	0.26019
+gene-set	SCZ sets	baseline_thickness	perregion	SCZ_prio_smr	44	0.11214	0.13517	0.20338
+gene-set	SCZ sets	baseline_thickness	perregion	SCZ_prioritised	101	0.093411	0.090085	0.1499
+gene-set	SCZ sets	baseline_thickness	perregion	SCZ_prioritised_pc	101	0.093411	0.090085	0.1499
+forward	ALZ	global_slope	1lmm	ALZ	18260	-0.0020376	0.0075594	0.78751
+forward	ALZ_noAPOE	global_slope	1lmm	ALZ_noAPOE	18177	-0.00053806	0.0076885	0.94421
+forward	ASD	global_slope	1lmm	ASD	18210	-0.01002	0.007669	0.19136
+forward	EA	global_slope	1lmm	EA	18275	0.0047718	0.0066584	0.4736
+forward	MDD_EUR	global_slope	1lmm	MDD_EUR	18275	-0.0043143	0.0061592	0.48365
+forward	MDD_div	global_slope	1lmm	MDD_div	18240	-0.0069507	0.0061215	0.2562
+forward	PGC3_EUR	global_slope	1lmm	PGC3_EUR	18270	0.0057984	0.0060798	0.34024
+forward	PGC3_primary	global_slope	1lmm	PGC3_primary	18261	0.0056206	0.006003	0.34913
+forward	SCZ25_EUR	global_slope	1lmm	SCZ25_EUR	18282	0.0065026	0.0060438	0.28198
+forward	SCZ25_META	global_slope	1lmm	SCZ25_META	18282	0.0072052	0.0060656	0.2349
+forward	SCZ25_METAnaive	global_slope	1lmm	SCZ25_METAnaive	18277	0.0043813	0.0061887	0.47898
+gene-set	MDD sets	global_slope	1lmm	MDD_hc_expression	56	0.050224	0.11894	0.33643
+gene-set	MDD sets	global_slope	1lmm	MDD_hc_finemap	160	0.01436	0.07464	0.42372
+gene-set	MDD sets	global_slope	1lmm	MDD_hc_protein	10	0.22149	0.26622	0.20272
+gene-set	MDD sets	global_slope	1lmm	MDD_highconf	213	0.0031885	0.064024	0.48014
+gene-set	MDD sets	global_slope	1lmm	MDD_pool	1881	0.0049921	0.026524	0.42536
+gene-set	MDD sets	global_slope	1lmm	MDD_pool_not_hc	1668	0.0048799	0.027791	0.43031
+gene-set	SCZ sets	global_slope	1lmm	PGC3_genesig	704	-0.063046	0.050122	0.89577
+gene-set	SCZ sets	global_slope	1lmm	PGC3_locus_pool	858	0.022447	0.046984	0.31642
+gene-set	SCZ sets	global_slope	1lmm	SCZ25_genesig	777	-0.025749	0.044279	0.71955
+gene-set	SCZ sets	global_slope	1lmm	SCZ25_genesig_new	214	-0.012659	0.062471	0.58029
+gene-set	SCZ sets	global_slope	1lmm	SCZ25_locus_pool	1103	0.025915	0.041745	0.26737
+gene-set	SCZ sets	global_slope	1lmm	SCZ25_locus_pool_new	302	0.015835	0.062571	0.40011
+gene-set	SCZ sets	global_slope	1lmm	SCZ_locus_pool	455	0.13794	0.051779	0.0038647
+gene-set	SCZ sets	global_slope	1lmm	SCZ_pool_not_prio	354	0.16915	0.058112	0.0018051
+gene-set	SCZ sets	global_slope	1lmm	SCZ_prio_finemap	61	-0.0093454	0.1135	0.53281
+gene-set	SCZ sets	global_slope	1lmm	SCZ_prio_rare	7	0.77785	0.3847	0.021599
+gene-set	SCZ sets	global_slope	1lmm	SCZ_prio_smr	44	0.16029	0.13548	0.11839
+gene-set	SCZ sets	global_slope	1lmm	SCZ_prioritised	101	0.011123	0.090301	0.45098
+gene-set	SCZ sets	global_slope	1lmm	SCZ_prioritised_pc	101	0.011123	0.090301	0.45098
+forward	ALZ	global_slope	perregion	ALZ	18254	-0.0018576	0.0076001	0.80691
+forward	ALZ_noAPOE	global_slope	perregion	ALZ_noAPOE	18171	0.00099179	0.0077297	0.89791
+forward	ASD	global_slope	perregion	ASD	18206	-0.0087005	0.0077116	0.25924
+forward	EA	global_slope	perregion	EA	18264	0.0007801	0.0066955	0.90725
+forward	MDD_EUR	global_slope	perregion	MDD_EUR	18263	-0.0048607	0.0061937	0.4326
+forward	MDD_div	global_slope	perregion	MDD_div	18228	-0.0068243	0.0061567	0.26769
+forward	PGC3_EUR	global_slope	perregion	PGC3_EUR	18261	0.0053275	0.0061126	0.38346
+forward	PGC3_primary	global_slope	perregion	PGC3_primary	18261	0.0063908	0.0060357	0.28969
+forward	SCZ25_EUR	global_slope	perregion	SCZ25_EUR	18270	0.0076559	0.0060784	0.20787
+forward	SCZ25_META	global_slope	perregion	SCZ25_META	18270	0.0074929	0.0061012	0.21943
+forward	SCZ25_METAnaive	global_slope	perregion	SCZ25_METAnaive	18270	0.0045033	0.0062238	0.46935
+gene-set	MDD sets	global_slope	perregion	MDD_hc_expression	56	0.011338	0.1196	0.46223
+gene-set	MDD sets	global_slope	perregion	MDD_hc_finemap	160	-0.0063086	0.075049	0.53349
+gene-set	MDD sets	global_slope	perregion	MDD_hc_protein	10	0.25095	0.26768	0.17426
+gene-set	MDD sets	global_slope	perregion	MDD_highconf	213	-0.022591	0.064374	0.63718
+gene-set	MDD sets	global_slope	perregion	MDD_pool	1881	0.0085782	0.02667	0.37386
+gene-set	MDD sets	global_slope	perregion	MDD_pool_not_hc	1668	0.013674	0.027944	0.3123
+gene-set	SCZ sets	global_slope	perregion	PGC3_genesig	704	-0.079875	0.050395	0.9435
+gene-set	SCZ sets	global_slope	perregion	PGC3_locus_pool	858	0.052358	0.04724	0.13386
+gene-set	SCZ sets	global_slope	perregion	SCZ25_genesig	777	-0.047925	0.04452	0.85913
+gene-set	SCZ sets	global_slope	perregion	SCZ25_genesig_new	214	-0.015243	0.062813	0.59587
+gene-set	SCZ sets	global_slope	perregion	SCZ25_locus_pool	1103	0.017435	0.041974	0.33894
+gene-set	SCZ sets	global_slope	perregion	SCZ25_locus_pool_new	302	-0.04089	0.062913	0.74213
+gene-set	SCZ sets	global_slope	perregion	SCZ_locus_pool	455	0.14297	0.052062	0.0030187
+gene-set	SCZ sets	global_slope	perregion	SCZ_pool_not_prio	354	0.1724	0.05843	0.0015884
+gene-set	SCZ sets	global_slope	perregion	SCZ_prio_finemap	61	0.060572	0.11412	0.2978
+gene-set	SCZ sets	global_slope	perregion	SCZ_prio_rare	7	0.87228	0.38679	0.012069
+gene-set	SCZ sets	global_slope	perregion	SCZ_prio_smr	44	0.078554	0.13623	0.2821
+gene-set	SCZ sets	global_slope	perregion	SCZ_prioritised	101	0.018569	0.090796	0.41898
+gene-set	SCZ sets	global_slope	perregion	SCZ_prioritised_pc	101	0.018569	0.090796	0.41898

@@ -1,0 +1,25 @@
+trait	phenotype	atlas	est	se	p	n_genes
+Schizophrenia (2025 GWAS)	global_slope	DK	0.016975	0.010701	0.11271	18282
+Schizophrenia (2025 GWAS)	baseline_thickness	DK	0.030255	0.010731	0.0048197	18282
+Depression (MDD 2025)	global_slope	DK	-0.010655	0.010974	0.33156	18275
+Depression (MDD 2025)	baseline_thickness	DK	0.033792	0.010964	0.0020588	18275
+Autism	global_slope	DK	-0.0096885	0.0092816	0.29658	18210
+Autism	baseline_thickness	DK	-0.0045305	0.0092868	0.62567	18210
+Alzheimer's (Wightman)	global_slope	DK	-0.0046662	0.0093823	0.61896	18260
+Alzheimer's (Wightman)	baseline_thickness	DK	0.0075737	0.0093114	0.41602	18260
+Alzheimer's, APOE excluded	global_slope	DK	-0.0024316	0.0092955	0.79365	18177
+Alzheimer's, APOE excluded	baseline_thickness	DK	0.0086567	0.009226	0.34811	18177
+Educational attainment	global_slope	DK	0.0063686	0.010362	0.53883	18275
+Educational attainment	baseline_thickness	DK	0.027978	0.010392	0.0071054	18275
+Schizophrenia (2025 GWAS)	global_slope	HCP	0.020972	0.010715	0.050338	18282
+Schizophrenia (2025 GWAS)	baseline_thickness	HCP	0.028347	0.010714	0.0081599	18282
+Depression (MDD 2025)	global_slope	HCP	0.0039813	0.010971	0.71669	18275
+Depression (MDD 2025)	baseline_thickness	HCP	0.039391	0.010956	0.00032514	18275
+Autism	global_slope	HCP	-0.01179	0.0093016	0.20499	18210
+Autism	baseline_thickness	HCP	0.0018343	0.0092751	0.84323	18210
+Alzheimer's (Wightman)	global_slope	HCP	-0.0011744	0.0093664	0.90022	18260
+Alzheimer's (Wightman)	baseline_thickness	HCP	0.01074	0.0093008	0.24823	18260
+Alzheimer's, APOE excluded	global_slope	HCP	0.00082782	0.0092816	0.92893	18177
+Alzheimer's, APOE excluded	baseline_thickness	HCP	0.011811	0.0092176	0.2001	18177
+Educational attainment	global_slope	HCP	0.0082398	0.010347	0.42586	18275
+Educational attainment	baseline_thickness	HCP	0.029873	0.010392	0.00405	18275

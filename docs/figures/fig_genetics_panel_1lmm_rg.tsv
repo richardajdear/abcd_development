@@ -1,0 +1,21 @@
+trait	phenotype	atlas	est	se	p	h2_z	underpowered
+Schizophrenia (2025 GWAS)	global_slope	DK				0.15	True
+Schizophrenia (2025 GWAS)	global_slope	HCP	-0.2483	0.3823	0.516	0.4	True
+Schizophrenia (2025 GWAS)	baseline_thickness	DK	0.04482	0.05197	0.3885	4.4	False
+Schizophrenia (2025 GWAS)	baseline_thickness	HCP	0.05192	0.05336	0.3306	4.37	False
+Depression (MDD 2025)	global_slope	DK				0.15	True
+Depression (MDD 2025)	global_slope	HCP					False
+Depression (MDD 2025)	baseline_thickness	DK	-0.02487	0.05397	0.6449	4.29	False
+Depression (MDD 2025)	baseline_thickness	HCP	-0.02066	0.05522	0.7083	4.32	False
+Autism	global_slope	DK				-0.45	True
+Autism	global_slope	HCP				-0.2	True
+Autism	baseline_thickness	DK	-0.1288	0.1039	0.2151	3.26	True
+Autism	baseline_thickness	HCP	-0.1177	0.1025	0.2508	3.31	True
+Alzheimer's, APOE excluded	global_slope	DK				0.15	True
+Alzheimer's, APOE excluded	global_slope	HCP	-0.1134	0.3353	0.7353	0.43	True
+Alzheimer's, APOE excluded	baseline_thickness	DK	-0.04237	0.1057	0.6885	4.27	False
+Alzheimer's, APOE excluded	baseline_thickness	HCP	-0.0499	0.1077	0.643	4.37	False
+Educational attainment	global_slope	DK				0.15	True
+Educational attainment	global_slope	HCP	0.4458	0.8848	0.6144	0.35	True
+Educational attainment	baseline_thickness	DK	0.0993	0.05443	0.06809	4.37	False
+Educational attainment	baseline_thickness	HCP	0.1082	0.05654	0.05575	4.35	False

@@ -1,0 +1,9 @@
+phenotype	atlas	estimator	h2	se	n
+global_slope	DK	GREML	0.2072	0.0451	6011.0
+baseline_thickness	DK	GREML	0.2254	0.0464	6011.0
+global_slope	DK	LDSC	0.0149	0.0966	
+baseline_thickness	DK	LDSC	0.4168	0.09619	
+global_slope	HCP	GREML	0.1833	0.0451	6011.0
+baseline_thickness	HCP	GREML	0.2278	0.0465	6011.0
+global_slope	HCP	LDSC	0.03549	0.09517	
+baseline_thickness	HCP	LDSC	0.4094	0.09438	

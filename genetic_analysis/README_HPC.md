@@ -2044,3 +2044,117 @@ it is not badly wrong here, but it is wrong in a measurable way": use the
 per-ancestry + `--meta` result (`SCZ25_META`) as the reference and keep the
 naive run as a sensitivity. Every phenotype-level conclusion above is the same
 under either.
+
+### 2026-09-18 — Steps 11–13: heritability, rg and MAGMA on the single-LMM construction and the full panel; methods reviewed
+
+**What "the new phenotypes" required.** The single-LMM slope and intercept
+(`global_slope_1lmm`, `baseline_thickness_1lmm`; 8,596 children, both atlases)
+had PRS results only — no GWAS, so no LDSC and no MAGMA. Submitted: GENESIS
+null model + 22-chromosome scan, **EUR arm only** (the arm MAGMA's 1000G EUR
+panel and LDSC's EUR LD scores are calibrated for; the pooled scan would only
+add a λ/hit count that the per-region run already showed to be null), for both
+atlases (`run_all.sh 03 04` with `PHENO_DIR=prs_final_1lmm/pheno`,
+`KIN_DIR=kinship_eur`, outputs under `results_70tab*/scan_1lmm/`); GCTA GREML
+on the FID=IID copy of the same files (`scan_1lmm/reml_imp_pooled/`).
+
+**Methods review — what was checked and what changed.**
+
+| step | as previously written | verdict / change |
+|:--|:--|:--|
+| GENESIS scan (03/04) | `fitNullModel`, covariates sex + site + baseline_age + n_visits + 10 PC-AiR PCs, sparse PC-Relate kinship (3rd degree), score test; EUR arm = `kinship_eur` sample set | kept. `n_visits` is a legitimate covariate for both constructions (the slope's precision depends on it); the score-test `Est`/`Est.SE` are what LDSC and MAGMA consume |
+| GREML h² (05) | dense imputed GRM, PC-AiR unrelated set (8,178 → 6,011 phenotyped), sex + site + baseline_age + n_visits + 10 PCs | kept — the canonical h² (rule 11). Same estimator on the single-LMM phenotypes so the two constructions are directly comparable |
+| LDSC h² and rg (07) | ABCD EUR sumstats munged with `--N-col N`; disorders = PGC3 **primary** and MDD2025 **div** (both multi-ancestry) against **EUR** LD scores; ALZ/ASD/EA never run | **changed** (`step12_ldsc_panel.sbatch`): (i) European discovery files only — SCZ25_EUR, PGC3_EUR, MDD_EUR — the multi-ancestry files against EUR LD scores are the rule-4 mismatch in LDSC form; (ii) ASD, ALZ, ALZ_IGAP, EA added so the panel matches the PRS panel; (iii) ALZ enters **without the APOE region** (LDSC's polygenic model is violated by one locus of that size; standard practice); (iv) disorder inputs are the normalised `.ma` files with explicit A1/A2 for `--merge-alleles`; (v) rg is reported with the phenotype's h² z and flagged when z < 4 (rule 13) — at n ≈ 4,300 EUR the slope's h² z was 0.57 at step 7, so its rg is expected to be *uninformative*, and the figure has to say so rather than plot a number as if it meant something |
+| MAGMA (07/10) | gene analysis of every GWAS on 1000G EUR; disorder side PGC3 primary and MDD div (multi-ancestry) | **changed** (steps 10, 11, 13): per-ancestry gene analysis + `--meta` for the 2025 SCZ meta; `MDD_EUR` (2025 MDD2025 eur file) as the LD-matched MDD result with MDD div kept as the comparator; ASD, ALZ (± APOE), EA gene results added; all on one union annotation. Phenotype side stays EUR-arm |
+| PRS (06/09) | four methods + PRS-CSx; ancestry-matched cells; within-cluster standardisation for the pooled arm | kept (reviewed at step 9); already run on both constructions |
+
+Everything else about the disorder panel was already in place from steps 6, 9
+and 11; the new jobs are 35770950–63 (scans + collect), 35770953/54 (GREML),
+35770960 (MAGMA disorders), 35771051 (LDSC panel), 35771061 (MAGMA panel).
+Tables to come: `scan_1lmm/{assoc_eur/gwas_summary.tsv,reml_imp_pooled/
+reml_summary.tsv}`, `ldsc_1lmm/table_ldsc_panel.tsv`,
+`magma_panel/table_magma_panel.tsv`, per atlas.
+
+**Step 14 (2026-09-18) — MAGMA on the pooled arm with ABCD's own genotypes as
+the LD reference.** The EUR-arm restriction for MAGMA was a reference-panel
+choice, not a necessity: MAGMA's requirement is that the LD reference match
+the sample the p-values came from, and for the pooled admixed sample the exact
+match is the sample itself. `step14_magma_pooled_prep.sbatch` restricts the
+imputed PRS fileset to the 8,596 analysis children and builds the 35/10 kb
+NCBI37.3 annotation on its hg19 SNP positions; `step14_magma_pooled_genes.sbatch`
+runs the gene analysis of the pooled-arm GWAS (per-region and single-LMM
+phenotypes, both atlases, 8 cells; pooled single-LMM scans 35780487–8 /
+35780507–8 submitted for this) against that reference;
+`step14_magma_pooled_tests.sbatch` repeats the step-13 panel →
+`results_70tab*/magma_pooled/table_magma_pooled.tsv`. The 1000G AFR panel was
+considered and rejected for the phenotype side: it is continental African, a
+poorer match for the African-American-like cluster than the sample itself,
+and a per-cluster design would leave the Hispanic-like (928) and mixed (380)
+clusters without any matching panel. rg was **not** extended to the pooled
+arm: it would need in-sample covariate-adjusted LD scores (cov-LDSC) and a
+cross-ancestry estimator (Popcorn / S-LDXR) against the EUR disorder GWAS,
+and the slope's h² z (0.57 at n 4,308) makes rg uninformative at any n we
+have. Jobs: prep 35780457, collects 35780510/35780532, genes 35780533, tests
+35780534.
+
+**Steps 11–13 COMPLETE (EUR arm; pooled-arm MAGMA, step 14, running).**
+Single-LMM EUR scans: λ_GC 1.004 (slope) / 1.022 (baseline) on both atlases,
+0 hits (`scan_1lmm/assoc_eur/gwas_summary.tsv`). LDSC panel 11 min, MAGMA
+panel 79 min. Tables: `scan_1lmm/reml_imp_pooled/reml_summary.tsv`,
+`ldsc_1lmm/table_ldsc_panel.tsv`, `magma_panel/table_magma_panel.tsv` per root.
+
+*Heritability, per-region-BLUP mean → single LMM (same 6,011 unrelated / same
+~4,300 EUR):*
+
+| | GREML h² DK | GREML h² HCP | LDSC h² (z) DK | LDSC h² (z) HCP |
+|:--|:--|:--|:--|:--|
+| global_slope | 0.166 ± 0.045 → **0.207 ± 0.045** | 0.156 → **0.183 ± 0.045** | 0.061 (0.6) → 0.015 (0.15) | 0.170 (1.8) → 0.037 (0.4) |
+| baseline_thickness | 0.223 → 0.225 ± 0.046 | 0.225 → 0.228 | 0.416 (4.5) → 0.413 (4.4) | 0.408 (4.4) → 0.405 (4.4) |
+
+The single-LMM slope is **more heritable by GREML** (+0.04 / +0.03, about one
+SE) — consistent with it being the less shrunken, higher-variance slope — while
+its LDSC h² is *indistinguishable from zero on both atlases* (z 0.15 / 0.4;
+LDSC could not even form the rg jackknife for DK, `h2__dk__global_slope__1lmm.log`).
+The two estimators disagree for the reason step 7 gave: LDSC on 4,300 EUR
+children has SE ≈ 0.10 on h², so anything below ~0.2 is noise to it; GREML
+with the dense GRM on 6,011 is the estimate to quote. Baseline is unchanged
+and is the positive control on every estimator.
+
+*rg (EUR discovery GWAS × EUR-arm phenotype GWAS, 95 % CI in the table):*
+every slope rg is **uninformative** (phenotype h² z < 4; SEs 0.09–0.9), as
+rule 13 predicted and as the figure marks. Baseline (h² z 4.4): tight nulls
+with SCZ25 (+0.05 ± 0.05), PGC3 (+0.03), MDD (−0.02 ± 0.05), ASD (−0.13 ±
+0.10), ALZ without APOE (−0.04 ± 0.11), and a nominal positive with EA (+0.10
+± 0.05, p 0.05–0.07 across cells). Single LMM ≡ per-region for baseline to two
+decimals. No gain in rg from either the 2025 GWAS or the construction.
+
+*MAGMA (EUR arm), the requested SCZ and MDD update, reverse gene-property
+(disorder gene Z ~ phenotype gene Z), β (p):*
+
+| disorder result | slope DK 1lmm / per-region | slope HCP 1lmm / per-region | baseline DK 1lmm | baseline HCP 1lmm |
+|:--|:--|:--|:--|:--|
+| SCZ25_META (per-ancestry meta) | +0.017 (0.11) / +0.014 (0.19) | +0.021 (0.050) / +0.023 (0.031) | **+0.030 (0.005)** | **+0.028 (0.008)** |
+| SCZ25_EUR | +0.018 (0.11) / +0.016 (0.15) | +0.022 (0.045) / +0.026 (0.018) | +0.023 (0.039) | +0.023 (0.039) |
+| PGC3_primary (step 7's SCZ) | +0.013 (0.26) / +0.013 (0.26) | +0.023 (0.047) / +0.021 (0.068) | +0.030 (0.008) | +0.030 (0.008) |
+| **MDD_EUR** (LD-matched) | −0.011 (0.33) / −0.011 (0.33) | +0.004 (0.72) / +0.013 (0.22) | **+0.034 (0.002)** | **+0.039 (0.0003)** |
+| MDD_div (step 7's MDD) | −0.013 (0.27) / −0.011 (0.32) | +0.004 (0.71) / +0.012 (0.29) | +0.039 (0.0005) | +0.041 (0.0003) |
+| ASD / ALZ / ALZ_noAPOE | all p > 0.2 | all p > 0.2 | p > 0.35 | p > 0.2 |
+| EA | +0.006 (0.54) | +0.008 (0.43) | +0.028 (0.007) | +0.030 (0.004) |
+
+Gene sets: the ST12 `SCZ_locus_pool` enrichment holds on the single-LMM slope
+(0.138, p 0.0039 DK; 0.135, p 0.0046 HCP) and baseline (0.17 / 0.19, p ≤
+4e-4); `MDD_pool` / `MDD_highconf` are null on the slope (p ≥ 0.34) and at
+most marginal on baseline (HCP 0.06–0.08); the peak-window and gene-sig pools
+stay null on the slope.
+
+Readings. (1) **MDD at the gene level behaves like every other trait on the
+slope: null** (p 0.22–0.72 in every cell, both constructions, both atlases,
+either MDD file), while it is the *strongest* disorder on baseline thickness
+(p 3e-4 to 2e-3), sitting beside SCZ (p 0.005–0.04) and EA (p 0.004–0.007).
+The gene-level picture is therefore thickness, not thinning, for MDD — the
+opposite of the PRS layer, where MDD's association is with the slope and not
+baseline. (2) **SCZ is the only trait with any gene-level slope signal**, and
+it is HCP-only and nominal (p 0.02–0.05 with the 2025 results; PGC3 primary
+0.047–0.068), the same as at step 10; the single-LMM construction neither
+helps nor hurts it. (3) The single-LMM and per-region gene-level results are
+nearly identical for baseline (as they must be for an intercept) and within
+noise for the slope.

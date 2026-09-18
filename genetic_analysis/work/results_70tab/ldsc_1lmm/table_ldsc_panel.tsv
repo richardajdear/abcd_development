@@ -1,0 +1,57 @@
+disorder	atlas	phenotype	construction	rg	se	z	p	h2_obs	h2_obs_se	h2_z	gcov_int	intercept_pheno	underpowered
+ALZ_IGAP_noAPOE	dk	global_slope	perregion	0.0156	0.3101	0.05032	0.9599	0.06367	0.09806	0.65	-0.005398	1.0035	yes
+ALZ_IGAP_noAPOE	dk	global_slope	1lmm					0.0149	0.0966	0.15		1.0095	yes
+ALZ_IGAP_noAPOE	dk	baseline_thickness	perregion	0.1321	0.1233	1.072	0.2839	0.4199	0.09592	4.38	-0.001207	0.9924	no
+ALZ_IGAP_noAPOE	dk	baseline_thickness	1lmm	0.1296	0.1236	1.049	0.2943	0.4168	0.09619	4.33	-0.001134	0.9927	no
+ALZ_IGAP_noAPOE	hcp	global_slope	perregion	0.007863	0.1889	0.04162	0.9668	0.1726	0.09375	1.84	-0.003994	0.9954	yes
+ALZ_IGAP_noAPOE	hcp	global_slope	1lmm	0.1093	0.4586	0.2383	0.8116	0.03549	0.09517	0.37	-0.004151	1.0049	yes
+ALZ_IGAP_noAPOE	hcp	baseline_thickness	perregion	0.1146	0.1237	0.9264	0.3543	0.4126	0.09403	4.39	-0.0009882	0.9927	no
+ALZ_IGAP_noAPOE	hcp	baseline_thickness	1lmm	0.1101	0.1237	0.8897	0.3736	0.4094	0.09438	4.34	-0.0008619	0.9929	no
+ALZ_noAPOE	dk	global_slope	perregion	-0.02176	0.2215	-0.09825	0.9217	0.08253	0.1002	0.82	-0.00601	1.0012	yes
+ALZ_noAPOE	dk	global_slope	1lmm					0.0149	0.0966	0.15		1.0095	yes
+ALZ_noAPOE	dk	baseline_thickness	perregion	-0.04248	0.1054	-0.4029	0.687	0.4499	0.1043	4.31	0.006391	0.9899	no
+ALZ_noAPOE	dk	baseline_thickness	1lmm	-0.04237	0.1057	-0.4009	0.6885	0.4468	0.1046	4.27	0.0062	0.9902	no
+ALZ_noAPOE	hcp	global_slope	perregion	0.00591	0.1458	0.04053	0.9677	0.1997	0.09782	2.04	-0.006688	0.9924	yes
+ALZ_noAPOE	hcp	global_slope	1lmm	-0.1134	0.3353	-0.338	0.7353	0.04271	0.1002	0.43	-0.003707	1.0034	yes
+ALZ_noAPOE	hcp	baseline_thickness	perregion	-0.04836	0.1074	-0.4504	0.6524	0.4379	0.09933	4.41	0.006913	0.9906	no
+ALZ_noAPOE	hcp	baseline_thickness	1lmm	-0.0499	0.1077	-0.4635	0.643	0.4353	0.09962	4.37	0.00681	0.9908	no
+ASD	dk	global_slope	perregion					-0.0368	0.1163	-0.32	-0.0012	1.0101	yes
+ASD	dk	global_slope	1lmm					-0.0524	0.1166	-0.45	0.0005	1.0127	yes
+ASD	dk	baseline_thickness	perregion	-0.1279	0.1033	-1.237	0.2159	0.4023	0.122	3.3	0.0053	0.9921	yes
+ASD	dk	baseline_thickness	1lmm	-0.1288	0.1039	-1.24	0.2151	0.3977	0.1221	3.26	0.0052	0.9925	yes
+ASD	hcp	global_slope	perregion	0.1142	0.2913	0.3921	0.695	0.0608	0.1153	0.53	-0.0011	1.0026	yes
+ASD	hcp	global_slope	1lmm					-0.0226	0.1146	-0.2	0.0019	1.0075	yes
+ASD	hcp	baseline_thickness	perregion	-0.1161	0.1019	-1.138	0.2549	0.4053	0.1208	3.36	0.0044	0.9916	yes
+ASD	hcp	baseline_thickness	1lmm	-0.1177	0.1025	-1.148	0.2508	0.4004	0.1208	3.31	0.0044	0.992	yes
+EA	dk	global_slope	perregion	0.2139	0.2396	0.8929	0.3719	0.06182	0.09693	0.64	-0.0007468	1.0036	yes
+EA	dk	global_slope	1lmm					0.0149	0.0966	0.15		1.0095	yes
+EA	dk	baseline_thickness	perregion	0.1018	0.05426	1.877	0.06058	0.4255	0.09631	4.42	-0.006921	0.992	no
+EA	dk	baseline_thickness	1lmm	0.0993	0.05443	1.824	0.06809	0.4221	0.09655	4.37	-0.006793	0.9923	no
+EA	hcp	global_slope	perregion	0.07148	0.08726	0.8192	0.4127	0.1762	0.09305	1.89	0.00108	0.995	yes
+EA	hcp	global_slope	1lmm	0.4458	0.8848	0.5038	0.6144	0.03201	0.09244	0.35	-0.003898	1.0051	yes
+EA	hcp	baseline_thickness	perregion	0.1092	0.05628	1.94	0.05233	0.4163	0.09475	4.39	-0.006635	0.9924	no
+EA	hcp	baseline_thickness	1lmm	0.1082	0.05654	1.913	0.05575	0.4132	0.09499	4.35	-0.006566	0.9926	no
+MDD_EUR	dk	global_slope	perregion	-0.08317	0.1721	-0.4832	0.629	0.05177	0.1011	0.51	-0.0007015	1.004	yes
+MDD_EUR	dk	global_slope	1lmm					0.0149	0.0966	0.15		1.0095	yes
+MDD_EUR	dk	baseline_thickness	perregion	-0.02375	0.05366	-0.4425	0.6581	0.438	0.1011	4.33	-0.005014	0.9911	no
+MDD_EUR	dk	baseline_thickness	1lmm	-0.02487	0.05397	-0.4609	0.6449	0.4345	0.1013	4.29	-0.004915	0.9914	no
+MDD_EUR	hcp	global_slope	perregion	-0.04171	0.08298	-0.5027	0.6152	0.1627	0.09967	1.63	0.0003174	0.9957	yes
+MDD_EUR	hcp	global_slope	1lmm										no
+MDD_EUR	hcp	baseline_thickness	perregion	-0.01918	0.05492	-0.3492	0.727	0.4262	0.09768	4.36	-0.00566	0.9914	no
+MDD_EUR	hcp	baseline_thickness	1lmm	-0.02066	0.05522	-0.3742	0.7083	0.4237	0.09807	4.32	-0.00564	0.9916	no
+PGC3_EUR	dk	global_slope	perregion	-0.1471	0.1793	-0.8204	0.412	0.05707	0.09782	0.58	-0.0001801	1.0039	yes
+PGC3_EUR	dk	global_slope	1lmm					0.0149	0.0966	0.15		1.0095	yes
+PGC3_EUR	dk	baseline_thickness	perregion	0.03371	0.05614	0.6005	0.5482	0.414	0.09668	4.28	-0.0003709	0.9929	no
+PGC3_EUR	dk	baseline_thickness	1lmm	0.03337	0.05621	0.5936	0.5528	0.4106	0.09692	4.24	-0.0004667	0.9932	no
+PGC3_EUR	hcp	global_slope	perregion	-0.09771	0.08693	-1.124	0.261	0.1661	0.0939	1.77	-0.001395	0.9959	yes
+PGC3_EUR	hcp	global_slope	1lmm	-0.1389	0.2851	-0.4872	0.6261	0.03408	0.09245	0.37	-0.00236	1.0049	yes
+PGC3_EUR	hcp	baseline_thickness	perregion	0.04008	0.05767	0.695	0.487	0.4061	0.09517	4.27	-0.0002902	0.9932	no
+PGC3_EUR	hcp	baseline_thickness	1lmm	0.04081	0.05791	0.7048	0.4809	0.4029	0.09539	4.22	-0.000397	0.9934	no
+SCZ25_EUR	dk	global_slope	perregion	-0.2345	0.2204	-1.064	0.2873	0.0608	0.09892	0.61	0.002979	1.0037	yes
+SCZ25_EUR	dk	global_slope	1lmm					0.0149	0.0966	0.15		1.0095	yes
+SCZ25_EUR	dk	baseline_thickness	perregion	0.04519	0.05201	0.8688	0.3849	0.4162	0.09357	4.45	-0.002693	0.9927	no
+SCZ25_EUR	dk	baseline_thickness	1lmm	0.04482	0.05197	0.8624	0.3885	0.4129	0.09379	4.4	-0.0028	0.993	no
+SCZ25_EUR	hcp	global_slope	perregion	-0.1504	0.0883	-1.703	0.08858	0.1697	0.0948	1.79	0.002071	0.9955	yes
+SCZ25_EUR	hcp	global_slope	1lmm	-0.2483	0.3823	-0.6495	0.516	0.03713	0.09231	0.4	0.0003291	1.0048	yes
+SCZ25_EUR	hcp	baseline_thickness	perregion	0.05115	0.05327	0.9602	0.3369	0.408	0.09226	4.42	-0.002671	0.9931	no
+SCZ25_EUR	hcp	baseline_thickness	1lmm	0.05192	0.05336	0.9729	0.3306	0.4048	0.0926	4.37	-0.002796	0.9933	no
