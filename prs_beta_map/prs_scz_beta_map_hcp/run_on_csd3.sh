@@ -14,8 +14,10 @@ HERE=prs_beta_map/prs_scz_beta_map_hcp
 cd "$(dirname "$0")/../.."
 case "${1:-}" in
   push)
-    rsync -avh --progress "$HERE/" "$HOST:$RREPO/$HERE/" --exclude results/ --exclude '__pycache__'
-    ssh "$HOST" "cd $RREPO && git pull --ff-only || true; PARC=hcp sbatch --export=ALL,PARC=hcp $HERE/02_parcel_prs_assoc.sbatch" ;;
+    # pull first so the folder exists on the cluster (rsync will not mkdir -p)
+    ssh "$HOST" "cd $RREPO && git pull --ff-only && mkdir -p $HERE/work $HERE/results slurm"
+    rsync -avh --progress "$HERE/work/" "$HOST:$RREPO/$HERE/work/"
+    ssh "$HOST" "cd $RREPO && PARC=hcp sbatch --export=ALL,PARC=hcp $HERE/02_parcel_prs_assoc.sbatch" ;;
   status)
     ssh "$HOST" "squeue -u rajd2 -n prs_beta_map; cd $RREPO && tail -n 3 slurm/prs_beta_map_*.log 2>/dev/null" ;;
   pull)
