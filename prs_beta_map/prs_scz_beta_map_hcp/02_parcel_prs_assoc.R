@@ -80,7 +80,9 @@ if (opt$stratum == "EUR") {
 d <- d[is.finite(PRS)]
 
 # ---- per-parcel slopes ------------------------------------------------------
-sl <- fread(opt$slopes)
+# gz via a pipe: the GENESIS R on CSD3 has data.table without R.utils, so
+# fread() cannot open a .gz path directly
+sl <- if (grepl("\\.gz$", opt$slopes)) fread(cmd = paste("gzip -dc", shQuote(opt$slopes))) else fread(opt$slopes)
 sl[, tok := token(IID)]; sl[, IID := NULL]
 parcels <- setdiff(names(sl), "tok")
 if (!is.na(opt$`max-parcels`)) parcels <- parcels[seq_len(opt$`max-parcels`)]
