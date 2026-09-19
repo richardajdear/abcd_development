@@ -2158,3 +2158,73 @@ it is HCP-only and nominal (p 0.02–0.05 with the 2025 results; PGC3 primary
 helps nor hurts it. (3) The single-LMM and per-region gene-level results are
 nearly identical for baseline (as they must be for an intercept) and within
 noise for the slope.
+
+**Step 14, first pass (35780533/35780534) — per-region pooled cells valid,
+single-LMM pooled cells partial.** In-sample reference: 8,596 children ×
+7.07 M SNPs, 17,905 genes annotated (prep 2 min); gene analysis on the 8,596-
+person reference takes ~2 h 50 min per phenotype (vs 10–45 min on a 1000G
+panel). The four single-LMM pooled cells ran on **partial** sumstats (11/12
+and 1/2 chromosomes): `collect_1lmm.sbatch` selected the arm with
+`${ARM:-_eur}`, and `--export=ALL,ARM=` hands the job an *empty* ARM, which
+`:-` treats as unset — so the pooled collectors silently re-collected the EUR
+arm and the pooled files were the inline chr-22 stubs (rule 10, `n_chr` check
+would have caught it: it did, once read). Fixed (`ARM=pooled`, explicit),
+partial outputs purged, re-collected and resubmitted as 35796956/8 → 35796959
+(cells 2,4,6,8) → 35796961. **Do not read any `*_1lmm` row of
+`magma_pooled/table_magma_pooled.tsv` written before that job.**
+
+*Per-region pooled-arm MAGMA (valid; 8,596 children, in-sample LD), reverse
+gene-property p on `global_slope`:* SCZ25_META **0.015 DK / 0.029 HCP**,
+SCZ25_EUR 0.18 / 0.38, PGC3_EUR 0.021 / 0.046, PGC3_primary 0.053 / 0.11,
+naive meta 0.0011 / 0.0037; MDD_EUR 0.58 / 0.49, ASD/ALZ/EA ≥ 0.10. Gene sets
+on the pooled slope: `SCZ25_locus_pool` **0.0041 / 0.0039**, `SCZ25_genesig`
+0.0047 / 0.013, ST12 `SCZ_locus_pool` 0.032 / 0.044. Baseline (pooled): all
+disorder gene-property tests p ≥ 0.06 — the EUR-arm baseline signals (SCZ,
+MDD, EA p 0.0003–0.04) do **not** appear in the pooled-arm gene results.
+Reading, provisional until the single-LMM cells land: doubling n and matching
+LD moves the SCZ→slope gene-level signal from HCP-only-nominal to both atlases
+(and brings the 2025 peak-window pool in), while it removes the baseline
+disorder signals — which is a hint that the EUR-arm baseline gene-property
+results carried something the pooled model's PCs/kinship absorb.
+
+**Step 14 COMPLETE (redo 35796959/35796961; pooled single-LMM scans now
+n_chr 22, 9.43 M SNPs, λ 1.03/1.04, one GWS SNP each on HCP — min p 4e-8,
+not followed up).** Pooled arm, 8,596 children, in-sample LD; reverse
+gene-property on `global_slope`, β (p), single LMM / per-region:
+
+| disorder result | DK | HCP |
+|:--|:--|:--|
+| SCZ25_META (per-ancestry meta) | +0.023 (0.026) / +0.025 (0.015) | **+0.026 (0.011)** / +0.022 (0.029) |
+| SCZ25_EUR | +0.015 (0.14) / +0.014 (0.18) | +0.016 (0.13) / +0.009 (0.38) |
+| PGC3_EUR | +0.024 (0.022) / +0.025 (0.021) | **+0.027 (0.010)** / +0.022 (0.046) |
+| MDD_EUR | −0.004 (0.71) / −0.006 (0.58) | +0.003 (0.77) / −0.007 (0.49) |
+| ASD / ALZ / EA | p ≥ 0.10 | p ≥ 0.14 |
+| gene set `SCZ25_locus_pool` (1,103) | 0.085 (0.017) / 0.105 (0.0041) | **0.107 (0.0036)** / 0.105 (0.0039) |
+| gene set ST12 `SCZ_locus_pool` | 0.056 (0.13) / 0.093 (0.032) | 0.058 (0.13) / 0.085 (0.044) |
+
+Baseline (pooled): every disorder gene-property p ≥ 0.07 (SCZ25_EUR 0.07–0.08
+the closest), both constructions.
+
+Readings, and they change the gene-level summary. (1) **With the sample
+doubled and LD matched, SCZ is the one trait with a gene-level slope signal
+on both atlases and both constructions** (SCZ25_META p 0.011–0.029, PGC3_EUR
+0.010–0.046; the 2025 EUR-only file is weaker, 0.13–0.38, as it was in the
+EUR arm), and the 2025 *peak-window* pool — null in the EUR arm — is enriched
+on the pooled slope (p 0.004–0.017), joining the ST12 pool (0.03–0.13). None
+of this survives correction over the 11-result × 4-phenotype panel; it is
+consistent in direction with the PRS result and with itself across atlases,
+constructions and two GWAS. (2) **MDD, ASD, ALZ and EA stay null on the
+slope** in the pooled arm as in the EUR arm. (3) **The EUR-arm baseline
+gene-property signals (SCZ, MDD, EA, p 0.0003–0.04) vanish in the pooled
+arm** (p ≥ 0.07). The pooled model has the same covariates plus more people;
+the difference is the sample (and the LD reference). Whatever those EUR-arm
+baseline associations were, they are not a property of the whole cohort, and
+the write-up should present them as EUR-arm-only. (4) The single-LMM and
+per-region gene-level results agree within noise everywhere, so the
+construction is not a lever for MAGMA either.
+
+Tables: `results_70tab*/magma_pooled/table_magma_pooled.tsv`,
+`scan_1lmm/assoc/gwas_summary.tsv`. Figure `docs/figures/fig_genetics_panel_1lmm.png`
+keeps the EUR-arm MAGMA column so its three method panels share one ancestry
+frame; the pooled MAGMA numbers above are the more powerful test and belong in
+the text beside it.

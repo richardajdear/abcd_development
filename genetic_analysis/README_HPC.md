@@ -173,10 +173,18 @@ analysis is per-ancestry with matched 1000G panels, combined with
 `magma --meta`; running the meta file against the EUR panel alone changes ~16 %
 of the significant gene list but no phenotype-level conclusion.
 
-**Pending:** pooled-arm MAGMA with the ABCD sample as its own LD reference
-(step 14, jobs 35780457–35780534) — output
-`work/results_70tab*/magma_pooled/table_magma_pooled.tsv` is not yet committed;
-`fig1_draft.py` marks it n.d.
+**Step 14 (pooled-arm MAGMA, ABCD sample as its own LD reference; 8,596
+children, both constructions, both atlases; tables committed in
+`work/results_70tab*/magma_pooled/table_magma_pooled.tsv`).** With the sample
+doubled and LD matched, SCZ is the one trait with a gene-level slope signal on
+both atlases and both constructions (SCZ25_META p 0.011–0.029, PGC3_EUR
+0.010–0.046; SCZ25_EUR weaker, 0.13–0.38), and the 2025 peak-window pool
+`SCZ25_locus_pool` is enriched on the pooled slope (p 0.004–0.017), joining the
+ST12 pool (0.03–0.13). None survives correction over the 11 × 4 panel; it is
+consistent in direction with the PRS result. MDD, ASD, ALZ and EA stay null on
+the slope. The EUR-arm baseline gene-property signals (SCZ, MDD, EA) vanish in
+the pooled arm (every p ≥ 0.07): present them as EUR-arm-only. Single-LMM and
+per-region agree within noise. Run detail in the archived log (§8 step 14).
 
 ## 3. What has been tried
 
@@ -325,7 +333,7 @@ Run from the repo root on CSD3. Each step writes a summary table under
 | 9 | 2025 SCZ GWAS: normalise (Neff fix), score all methods, gather, associate, strata, min-p | `run_scz2025.sh`, `step9_scz2025_*.{sbatch,py}`, `setup/normalise_gwas.py`, `setup/build_matched_scores.py`, `R/09_prs_ancestry_strata.R`, `step9_scz2025_assoc_1lmm.sbatch`, `step9_scz2025_orderops.py` | `prs_scz2025/table_*.tsv` |
 | 10 | MAGMA on the 2025 SCZ GWAS, per ancestry + `--meta` | `run_scz2025_magma.sh`, `step10_scz2025_magma_*`, `setup/build_scz2025_genesets.py` | `magma_scz2025/` |
 | 11–13 | disorder-side MAGMA, LDSC panel, MAGMA panel on both constructions | `step11_magma_disorders.sbatch`, `step12_ldsc_panel.{sbatch,_collect.py}`, `step13_magma_panel.{sbatch,_collect.py}` | `ldsc_1lmm/`, `magma_panel/` |
-| 14 | pooled-arm MAGMA with in-sample LD | `step14_magma_pooled_{prep,genes,tests}.sbatch` | `magma_pooled/` (pending) |
+| 14 | pooled-arm MAGMA with in-sample LD | `step14_magma_pooled_{prep,genes,tests}.sbatch` | `magma_pooled/` |
 | — | tables, comparison, figures (laptop) | `build_current_results.py`, `compare_parcellations.py`, `fig1_draft.py` (reads `fig1_inputs/`), `fig_genetics_panel_1lmm.py` | `current_results.tsv`, `results_70tab_hcp/compare/`, `docs/figures/` |
 
 Unused R entry points kept for §4: `R/07_prs_conditional.R` (joint model with
