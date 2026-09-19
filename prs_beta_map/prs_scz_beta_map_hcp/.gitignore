@@ -1,0 +1,3 @@
+# per-subject tables travel to CSD3 by rsync and are never committed
+work/
+__pycache__/
