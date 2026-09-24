@@ -18,6 +18,12 @@ Disorder gene analyses (genetic_analysis/inputs/magma/<name>.genes.raw):
   PGC3_primary  = SCZ.genes.raw (PGC3 primary x g1000_eur)       what 08/14 used
   MDD_EUR       MDD2025 eur x g1000_eur                          PRIMARY MDD
   MDD_div       = MDD.genes.raw (MDD2025 div x g1000_eur)        what 08/14 used
+and, as a check of H3 (does the signature carry the genetics of thinning
+itself?), the ABCD GENESIS GWAS of global slope, EUR arm x g1000_eur:
+  global_slope_1lmm_{hcp,dk}       single-LMM whole-cortex slope (primary spec)
+  global_slope_perregion_{hcp,dk}  mean of per-region slope BLUPs
+Those GWAS have low SNP heritability (LDSC h2 z < 2 at n ~ 4,300 EUR), so a
+null there is expected and uninformative; they are run because it costs nothing.
 Missing files are reported and skipped; the table says which were run.
 
 Gene-property analysis needs no LD reference of its own: the gene-gene
@@ -34,7 +40,9 @@ Vectors (thinning orientation; positive = expressed where thinning is faster):
 Each vector is tested alone on its own universe (genes with both a weight and a
 gene result), and the lead signature jointly with C3 (does it add to C3?) and
 with C1 (is it the static gradient?) on the pair's shared universe. MAGMA's
-default gene-property model (one-sided, positive) is used, as in 08 and 14.
+default gene-property model is used, as in 08 and 14; for gene properties that
+default is TWO-SIDED (manual v1.10, --model direction), so every p here is
+two-sided and a negative coefficient can be significant.
 
 Outputs
   results/magma_disorder_panel.tsv        marginal
@@ -67,6 +75,10 @@ DISORDERS = {   # name -> (file stem, disorder, ld reference, role)
     "PGC3_primary": ("SCZ",          "SCZ", "g1000_eur (mismatched)",                   "old GWAS, as in 08/14"),
     "MDD_EUR":      ("MDD_EUR",      "MDD", "g1000_eur (matched)",                      "primary"),
     "MDD_div":      ("MDD",          "MDD", "g1000_eur (mismatched)",                   "as in 08/14"),
+    "slope_1lmm_HCP":      ("global_slope_1lmm_hcp",      "ABCD slope", "g1000_eur (EUR arm)", "primary spec"),
+    "slope_1lmm_DK":       ("global_slope_1lmm_dk",       "ABCD slope", "g1000_eur (EUR arm)", "DK"),
+    "slope_perregion_HCP": ("global_slope_perregion_hcp", "ABCD slope", "g1000_eur (EUR arm)", "per-region BLUP"),
+    "slope_perregion_DK":  ("global_slope_perregion_dk",  "ABCD slope", "g1000_eur (EUR arm)", "per-region BLUP, DK"),
 }
 present = {k: v for k, v in DISORDERS.items() if (INP / f"{v[0]}.genes.raw").exists()}
 missing = sorted(set(DISORDERS) - set(present))

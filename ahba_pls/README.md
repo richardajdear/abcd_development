@@ -655,8 +655,8 @@ analyses shipped in `genetic_analysis/inputs/magma/`: `SCZ.genes.raw` = **PGC3 p
 1000G EUR alone — the LD mismatch `genetic_analysis/README_HPC.md` step 10 documents. Script 21
 replaces them with the LD-matched gene analyses CSD3 already produced, and runs whichever are present.
 
-**Files needed (not yet local).** All four exist on CSD3 from steps 10–11; copy them (≈12 MB each) into
-`genetic_analysis/inputs/magma/` and re-run script 21 (seconds):
+**Files needed.** All four exist on CSD3 from steps 10–11, and were copied into
+`genetic_analysis/inputs/magma/` on 2026-09-24 (they are gitignored; on a fresh clone repeat this):
 
 ```sh
 R=rajd2@login-q-1.hpc.cam.ac.uk:/home/rajd2/rds/hpc-work/abcd_development/genetic_analysis/work/magma_scz2025/genes
@@ -676,7 +676,8 @@ done
 corrects for correlations between genes, but those correlations are read from the `.genes.raw` file
 itself — they were computed once, at the *gene analysis* step, from that analysis's reference panel.
 So the LD choice is made upstream, once per disorder GWAS, and the rule there is that the panel must
-match the **GWAS sample's** ancestry, not ours.
+match the **GWAS sample's** ancestry, not ours. (The test itself is two-sided: MAGMA's default for gene
+properties, unlike gene sets.)
 
 **Should the ABCD be the LD reference?** No, for the disorder side. The reference has to match the
 people whose genotypes produced the summary statistics; the ABCD's ancestry mix is not the 2025 SCZ
@@ -689,35 +690,51 @@ size is not the constraint for gene-level tests (1000G EUR is 503 people), so th
 larger in-sample panel would buy. ABCD LD *is* the right choice in one place — the gene analysis of
 **our own** ABCD GWAS — but that is the phenotype side, which this gene-property test does not use.
 
-**Current results (the two legacy gene analyses only; universes n = 16,723 SCZ / 17,322 MDD).**
+**Results, all six gene analyses** (β_std, two-sided p; each vector on its own universe, max
+n = 16,723–17,367 genes; MAGMA's gene-property default is two-sided, so a negative coefficient can be
+significant).
 
-| vector | PGC3 primary (SCZ) | MDD2025 div (MDD) |
-|:--|--:|--:|
-| ABCD_PLS2_DK | +0.023 (p = 0.058) | +0.028 (p = 0.015) |
-| ABCD_PLS2_HCP | +0.038 (p = 0.016) | +0.055 (p = 0.0002) |
-| ABCD_PLS2_DKmatched | +0.040 (p = 0.012) | +0.043 (p = 0.0036) |
-| AHBA_C3 | +0.058 (p = 0.0003) | +0.072 (p = 1.5e-06) |
-| NSPN_PLS2 | +0.031 (p = 0.00074) | +0.017 (p = 0.055) |
-| AHBA_C1 | +0.032 (p = 0.039) | +0.013 (p = 0.39) |
+| gene weights | SCZ25_META | SCZ25_EUR | PGC3_EUR | PGC3_primary | MDD_EUR | MDD_div |
+|:--|--:|--:|--:|--:|--:|--:|
+| ABCD PLS2, DK (lead) | +0.030 (0.0084) | +0.018 (0.12) | +0.023 (0.051) | +0.023 (0.058) | +0.020 (0.082) | +0.028 (0.015) |
+| ABCD PLS2, HCP-MMP | +0.036 (0.018) | +0.030 (0.053) | +0.044 (0.0047) | +0.038 (0.016) | +0.051 (0.00062) | +0.055 (0.0002) |
+| ABCD PLS2, DK on HCP genes | +0.040 (0.0085) | +0.025 (0.11) | +0.036 (0.018) | +0.040 (0.012) | +0.036 (0.015) | +0.043 (0.0036) |
+| AHBA C3 | +0.060 (8.6e-05) | +0.052 (0.001) | +0.056 (0.00037) | +0.058 (0.0003) | +0.071 (1.7e-06) | +0.072 (1.5e-06) |
+| NSPN PLS2 | +0.027 (0.00089) | +0.024 (0.0053) | +0.024 (0.0069) | +0.031 (0.00074) | +0.014 (0.1) | +0.017 (0.055) |
+| AHBA C1 (control) | +0.047 (0.0016) | +0.047 (0.0024) | +0.028 (0.066) | +0.032 (0.039) | +0.013 (0.37) | +0.013 (0.39) |
 
-| joint model | coefficient | PGC3 primary | MDD div |
-|:--|:--|--:|--:|
-| ABCD_PLS2_DK + AHBA_C3 | ABCD_PLS2_DK | -0.030 (p = 0.21) | -0.038 (p = 0.082) |
-| ABCD_PLS2_DK + AHBA_C3 | AHBA_C3 | +0.077 (p = 0.0016) | +0.103 (p = 4.6e-06) |
-| ABCD_PLS2_HCP + AHBA_C3 | ABCD_PLS2_HCP | -0.001 (p = 0.96) | +0.013 (p = 0.52) |
-| ABCD_PLS2_HCP + AHBA_C3 | AHBA_C3 | +0.058 (p = 0.0071) | +0.063 (p = 0.0018) |
-| ABCD_PLS2_DK + AHBA_C1 | ABCD_PLS2_DK | +0.035 (p = 0.03) | +0.041 (p = 0.0063) |
-| ABCD_PLS2_DK + AHBA_C1 | AHBA_C1 | +0.041 (p = 0.01) | +0.021 (p = 0.16) |
+| joint model | coefficient | SCZ25_META | SCZ25_EUR | PGC3_EUR | PGC3_primary | MDD_EUR | MDD_div |
+|:--|:--|--:|--:|--:|--:|--:|--:|
+| ABCD DK + C1 | ABCD PLS2, DK (lead) | +0.038 (0.014) | +0.025 (0.12) | +0.032 (0.043) | +0.035 (0.03) | +0.034 (0.026) | +0.041 (0.0063) |
+| ABCD DK + C1 | AHBA C1 (control) | +0.056 (0.00026) | +0.053 (0.00088) | +0.035 (0.027) | +0.041 (0.01) | +0.020 (0.18) | +0.021 (0.16) |
+| ABCD DK + C3 | ABCD PLS2, DK (lead) | -0.035 (0.12) | -0.056 (0.019) | -0.034 (0.14) | -0.030 (0.21) | -0.054 (0.015) | -0.038 (0.082) |
+| ABCD DK + C3 | AHBA C3 | +0.084 (0.00025) | +0.093 (9.2e-05) | +0.080 (0.00066) | +0.077 (0.0016) | +0.114 (4.6e-07) | +0.103 (4.6e-06) |
+| ABCD HCP + C3 | ABCD PLS2, HCP-MMP | -0.009 (0.68) | -0.009 (0.66) | +0.012 (0.57) | -0.001 (0.96) | +0.005 (0.8) | +0.013 (0.52) |
+| ABCD HCP + C3 | AHBA C3 | +0.066 (0.0015) | +0.058 (0.0072) | +0.048 (0.025) | +0.058 (0.0071) | +0.068 (0.00079) | +0.063 (0.0018) |
+| ABCD HCP + ABCD DKmatched | ABCD PLS2, HCP-MMP | +0.013 (0.56) | +0.026 (0.27) | +0.038 (0.11) | +0.019 (0.44) | +0.055 (0.015) | +0.052 (0.02) |
+| ABCD HCP + ABCD DKmatched | ABCD PLS2, DK on HCP genes | +0.030 (0.19) | +0.005 (0.82) | +0.008 (0.73) | +0.026 (0.28) | -0.005 (0.83) | +0.004 (0.87) |
 
-Each vector alone is tested on its own universe here (genes with a weight and a gene result), not the
-single shared universe of `magma_all_marginal.tsv`. That matters most for the DK lead signature, the
-only ABCD vector fitted on a wider gene list (AHBA_updated ds25): on its own 10,460 SCZ / 10,840 MDD
-genes it gives β = 0.023 / 0.028, against 0.040 / 0.043 on the 6,672 / 6,662 genes it shares with the
-7,973-gene HCP basis. The extra ~3,800 genes dilute it, so the disorder signal sits in the more
-differentially stable genes; vectors confined to the 7,973 move far less (C3 0.060 → 0.058 for SCZ).
-The reading is unchanged from Phase 3: the ABCD signature is positive for both disorders, survives the
-static-gradient control C1, and adds nothing to C3 once C3 is in the model. Whether the LD-matched
-2025 SCZ gene analysis changes that is the open cell, and it needs only the four files above.
+Reading, primary files first (`SCZ25_META`, `MDD_EUR`):
+
+1. **The 2025 SCZ GWAS strengthens the lead signature's SCZ association**: β = 0.030, p = 0.008, against
+   0.023, p = 0.058 on PGC3 primary. The gain comes from the multi-ancestry meta, not from LD matching: the
+   2025 European GWAS alone gives 0.018 (p = 0.12), and PGC3 european vs PGC3 primary barely differ
+   (0.023 vs 0.023). Fixing the LD mismatch changes little for these tests.
+2. **MDD: the HCP-MMP version carries it.** On `MDD_EUR` the HCP signature gives 0.051 (p = 0.0006) and
+   keeps its association with the gene-matched DK fit in the model (0.055, p = 0.015), while the DK
+   lead is marginal (0.020, p = 0.08). For SCZ neither parcellation survives the other.
+3. **The static gradient C1 is itself SCZ-associated in the 2025 GWAS** (0.047, p = 0.0016; it was 0.032
+   on PGC3), and not MDD-associated. The lead signature survives it (joint 0.038, p = 0.014), so it is
+   not a proxy for C1.
+4. **C3 still dominates.** C3 is the strongest ranking for every disorder file, and with C3 in the
+   model neither ABCD version adds anything. The DK lead's joint coefficient turns *negative*, and
+   nominally significantly so for `SCZ25_EUR` (-0.056, p = 0.019) and `MDD_EUR`
+   (-0.054, p = 0.015). The two vectors correlate at ρ ≈ 0.76, so this is the usual
+   suppression pattern in a collinear pair: the part of the ABCD ranking orthogonal to C3 leans
+   slightly against disorder risk. It is not evidence of an opposing biological axis, and would need
+   replication before being read as one.
+5. **NSPN PLS2** is SCZ-associated in every SCZ file but not MDD-associated in the matched file
+   (0.014, p = 0.10), matching the original PNAS claim, which was SCZ-specific.
 
 **Tooling note.** The x86_64 macOS MAGMA stopped running here (no Rosetta), so `tools/bin/magma_src/`
 now holds a native arm64 build from the v1.10 source; it reproduces `magma_all_marginal.tsv` exactly.
