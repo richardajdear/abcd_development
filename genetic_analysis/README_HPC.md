@@ -254,6 +254,8 @@ genes. Ranked by information per unit of effort:
    synaptic pruning in adolescence. Imputed C4A expression → thinning rate is
    one pre-specified test and would name a gene. The MHC is excluded from most
    PRS methods, so this is not already contained in §2.3.
+   **In progress:** [`c4_imputation/`](../c4_imputation/README.md) (pipeline
+   built and smoke-tested 2026-09-24; cluster leg staged).
 6. **Individual-level projected phenotypes (ahba_pls H4).** Project each
    child's 358 slopes onto C3 and the PLS lead component (one phenotype per
    child) and regress on the SCZ score. Averages out the parcel noise that

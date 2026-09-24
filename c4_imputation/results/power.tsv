@@ -1,0 +1,5 @@
+n	accuracy_source	r_imputed_true	mde80_per_sd_true_grex	mde80_if_perfect
+4308	leave_fold_out_thin3	0.8883	0.0481	0.0427
+4308	leave_fold_out_thin1	0.9002	0.0474	0.0427
+3730	leave_fold_out_thin3	0.8883	0.0516	0.0459
+3730	leave_fold_out_thin1	0.9002	0.0510	0.0459

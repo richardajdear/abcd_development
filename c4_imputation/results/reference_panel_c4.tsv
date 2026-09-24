@@ -1,0 +1,40 @@
+metric	key	value
+structure_count	AL-BL	92.0000
+structure_count	AL-BS	68.0000
+structure_count	AL-AL	24.0000
+structure_count	BS	16.0000
+structure_count	AL	6.0000
+structure_count	BL	3.0000
+structure_count	AL-AS-BL	2.0000
+structure_count	AL-AL-BL	2.0000
+structure_count	AL-BL-BL	2.0000
+structure_count	AL-AL-BS	2.0000
+structure_count	AL-AS-BS-BS	1.0000
+structure_count	AL-BS-BS	1.0000
+structure_count	AL-AL-AL	1.0000
+structure_count	AL-BL-BS	1.0000
+structure_count	BL-BS	1.0000
+structure_freq	AL-BL	0.4144
+structure_freq	AL-BS	0.3063
+structure_freq	AL-AL	0.1081
+structure_freq	BS	0.0721
+structure_freq	AL	0.0270
+structure_freq	BL	0.0135
+structure_freq	AL-AS-BL	0.0090
+structure_freq	AL-AL-BL	0.0090
+structure_freq	AL-BL-BL	0.0090
+structure_freq	AL-AL-BS	0.0090
+structure_freq	AL-AS-BS-BS	0.0045
+structure_freq	AL-BS-BS	0.0045
+structure_freq	AL-AL-AL	0.0045
+structure_freq	AL-BL-BS	0.0045
+structure_freq	BL-BS	0.0045
+n_haplotypes		222.0000
+frac_people_common5		0.8649
+C4A_GREx_mean		1.1842
+C4A_GREx_sd		0.3562
+C4B_GREx_mean		1.7037
+C4B_GREx_sd		0.5229
+C4A_copies_mean		2.1171
+C4A_copies_sd		0.7229
+corr_C4A_C4B_GREx		-0.4259

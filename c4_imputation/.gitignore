@@ -1,0 +1,5 @@
+# per-subject C4 calls, genotype extracts and downloaded resources: never committed
+work/
+resources/
+smoketest/out/
+__pycache__/

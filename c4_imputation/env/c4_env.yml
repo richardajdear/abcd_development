@@ -1,0 +1,11 @@
+# Tools for c4_imputation/ that CSD3 does not already provide (PLINK 1.9, the
+# GENESIS R with lme4/lmerTest and the abcd Python env are reused from
+# genetic_analysis/).  Build once:  bash c4_imputation/env/setup_csd3_env.sh
+# Laptop equivalent: the Claude Science env "c4-imputation" (same packages +
+# python/pandas; java at $CONDA_PREFIX/lib/jvm/bin/java on macOS).
+name: c4
+channels: [conda-forge, bioconda]
+dependencies:
+  - bcftools>=1.17
+  - htslib>=1.17
+  - openjdk=17
