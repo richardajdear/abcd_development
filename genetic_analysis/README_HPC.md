@@ -277,8 +277,9 @@ genes. Ranked by information per unit of effort:
 5. **The C4 hypothesis.** Complement component 4A, imputed from SNPs (Sekar
    2016 reference haplotypes), is the best-characterised SCZ mechanism tied to
    synaptic pruning in adolescence. Imputed C4A expression → thinning rate is
-   one pre-specified test and would name a gene. The MHC is excluded from most
-   PRS methods, so this is not already contained in §2.3.
+   one pre-specified test and would name a gene. The SCZ scores do carry MHC
+   SNPs (SBayesRC 2,532, C+T 980; `c4_imputation/results/mhc_in_scz_scores.tsv`),
+   so §2.3 partly contains it; C4A is null with or without the score.
    **Done, null** (§3; [`c4_imputation/`](../c4_imputation/README.md)).
 6. **Individual-level projected phenotypes (ahba_pls H4).** Project each
    child's 358 slopes onto C3 and the PLS lead component (one phenotype per
