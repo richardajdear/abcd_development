@@ -76,11 +76,13 @@ pc <- ggplot(cc, aes(rho, outcome, colour = map, alpha = sig)) +
   base_theme + theme(legend.position = "bottom", axis.line.y = element_blank(), axis.ticks.y = element_blank()) +
   guides(colour = guide_legend(nrow = 2))
 
+dct_rng <- CR |> filter(reference == "dCT", grepl("_ct$", map), outcome %in% c("anxdep", "anxdisord", "internal", "pfactor")) |> pull(rho)
+stopifnot(length(dct_rng) == 8)
 fig <- (pa | (pb / pc + plot_layout(heights = c(1, 1.25)))) + plot_layout(widths = c(0.75, 1)) +
   plot_annotation(
     title = "Later symptoms track thinning that departs from the normative gradient, not the PLS2 pattern",
-    subtitle = paste0("Per parcel: CBCL (log1p raw sum) at ages ~15\u201317 ~ thinning rate + baseline CBCL + sex + site + ages + scans [+ global thinning] [+ that parcel's baseline CT]; n \u2248 8,200.\n",
-                      "Internalising and anxiety maps correlate negatively with PLS2, but that is the dCT pattern (\u03c1 with PLS2 given dCT \u2248 0); with baseline CT, they align with slower-thinning cortex (dCT \u03c1 0.29\u20130.41)."),
+    subtitle = sprintf(paste0("Per parcel: CBCL (log1p raw sum) at ages ~15\u201317 ~ thinning rate + baseline CBCL + sex + site + ages + scans [+ global thinning] [+ that parcel's baseline CT]; n \u2248 8,200.\n",
+                      "Internalising and anxiety maps correlate negatively with PLS2, but that is the dCT pattern (\u03c1 with PLS2 given dCT \u2248 0); with baseline CT, they align with slower-thinning cortex (dCT \u03c1 %.2f\u2013%.2f)."), min(dct_rng), max(dct_rng)),
     theme = theme(plot.title = element_text(size = TXT + 2.5, face = "bold"),
                   plot.subtitle = element_text(size = TXT, colour = "grey25", lineheight = 1.15)))
 ggsave(file.path(ROOT, "figures", "fig_cbcl_assoc.png"), fig, width = 10, height = 6.8, dpi = 300, bg = "white")
