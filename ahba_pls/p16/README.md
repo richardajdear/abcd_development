@@ -646,86 +646,9 @@ are astrocyte-marker-rich, or a leave-one-region-out refit. It is not a
 sample-size effect: it is unchanged (+5.1 → +5.0) between the 6,537-child and
 8,716-child HCP runs.
 
-### Disorder panel: the signature against every disorder gene analysis — `code/21_magma_disorder_panel.py`
-
-**What has been tested so far.** Yes — the dCT+CT PLS2 gene weights have been tested against SCZ and
-MDD by MAGMA gene-property analysis since Phase 3 (scripts 08 and 14), but only against the two gene
-analyses shipped in `genetic_analysis/inputs/magma/`: `SCZ.genes.raw` = **PGC3 primary** and
-`MDD.genes.raw` = **MDD2025 div**. Both are multi-ancestry GWAS whose gene analysis was run against
-1000G EUR alone — the LD mismatch `genetic_analysis/README_HPC.md` step 10 documents. Script 21
-replaces them with the LD-matched gene analyses CSD3 already produced, and runs whichever are present.
-
-**Files needed (not yet local).** All four exist on CSD3 from steps 10–11; copy them (≈12 MB each) into
-`genetic_analysis/inputs/magma/` and re-run script 21 (seconds):
-
-```sh
-R=rajd2@login-q-1.hpc.cam.ac.uk:/home/rajd2/rds/hpc-work/abcd_development/genetic_analysis/work/magma_scz2025/genes
-for g in SCZ25_META SCZ25_EUR PGC3_EUR MDD_EUR; do
-  scp "$R/$g.genes.raw" "$R/$g.genes.out" genetic_analysis/inputs/magma/
-done
-```
-
-| gene analysis | GWAS | LD reference | role |
-|:--|:--|:--|:--|
-| `SCZ25_META` | 2025 SCZ, AFR + EUR + EAS | per-ancestry 1000G panels, then `magma --meta` | **primary SCZ** |
-| `SCZ25_EUR` | 2025 SCZ, European | `g1000_eur` (matched) | EUR sensitivity |
-| `PGC3_EUR` | PGC3 european | `g1000_eur` (matched) | old-GWAS comparator |
-| `MDD_EUR` | MDD2025 eur | `g1000_eur` (matched) | **primary MDD** |
-
-**Does the covariate analysis need an LD reference?** Not at this step. The gene-property model
-corrects for correlations between genes, but those correlations are read from the `.genes.raw` file
-itself — they were computed once, at the *gene analysis* step, from that analysis's reference panel.
-So the LD choice is made upstream, once per disorder GWAS, and the rule there is that the panel must
-match the **GWAS sample's** ancestry, not ours.
-
-**Should the ABCD be the LD reference?** No, for the disorder side. The reference has to match the
-people whose genotypes produced the summary statistics; the ABCD's ancestry mix is not the 2025 SCZ
-meta's (which has no AMR cohort and is ~15 % AFR by Neff), and a single ABCD-wide panel would be a
-mismatch of the same kind as 1000G EUR on a multi-ancestry file. It would also carry relatedness
-(siblings and twins) and imputation error into every gene's LD. The principled route for a
-multi-ancestry GWAS is the one step 10 took and the MAGMA manual prescribes: gene analysis per
-ancestry against the matching 1000G panel, then meta-analyse the gene Z (`SCZ25_META`). The panel's
-size is not the constraint for gene-level tests (1000G EUR is 503 people), so there is nothing a
-larger in-sample panel would buy. ABCD LD *is* the right choice in one place — the gene analysis of
-**our own** ABCD GWAS — but that is the phenotype side, which this gene-property test does not use.
-
-**Current results (the two legacy gene analyses only; universes n = 16,723 SCZ / 17,322 MDD).**
-
-| vector | PGC3 primary (SCZ) | MDD2025 div (MDD) |
-|:--|--:|--:|
-| ABCD_PLS2_DK | +0.023 (p = 0.058) | +0.028 (p = 0.015) |
-| ABCD_PLS2_HCP | +0.038 (p = 0.016) | +0.055 (p = 0.0002) |
-| ABCD_PLS2_DKmatched | +0.040 (p = 0.012) | +0.043 (p = 0.0036) |
-| AHBA_C3 | +0.058 (p = 0.0003) | +0.072 (p = 1.5e-06) |
-| NSPN_PLS2 | +0.031 (p = 0.00074) | +0.017 (p = 0.055) |
-| AHBA_C1 | +0.032 (p = 0.039) | +0.013 (p = 0.39) |
-
-| joint model | coefficient | PGC3 primary | MDD div |
-|:--|:--|--:|--:|
-| ABCD_PLS2_DK + AHBA_C3 | ABCD_PLS2_DK | -0.030 (p = 0.21) | -0.038 (p = 0.082) |
-| ABCD_PLS2_DK + AHBA_C3 | AHBA_C3 | +0.077 (p = 0.0016) | +0.103 (p = 4.6e-06) |
-| ABCD_PLS2_HCP + AHBA_C3 | ABCD_PLS2_HCP | -0.001 (p = 0.96) | +0.013 (p = 0.52) |
-| ABCD_PLS2_HCP + AHBA_C3 | AHBA_C3 | +0.058 (p = 0.0071) | +0.063 (p = 0.0018) |
-| ABCD_PLS2_DK + AHBA_C1 | ABCD_PLS2_DK | +0.035 (p = 0.03) | +0.041 (p = 0.0063) |
-| ABCD_PLS2_DK + AHBA_C1 | AHBA_C1 | +0.041 (p = 0.01) | +0.021 (p = 0.16) |
-
-Each vector alone is tested on its own universe here (genes with a weight and a gene result), not the
-single shared universe of `magma_all_marginal.tsv`. That matters most for the DK lead signature, the
-only ABCD vector fitted on a wider gene list (AHBA_updated ds25): on its own 10,460 SCZ / 10,840 MDD
-genes it gives β = 0.023 / 0.028, against 0.040 / 0.043 on the 6,672 / 6,662 genes it shares with the
-7,973-gene HCP basis. The extra ~3,800 genes dilute it, so the disorder signal sits in the more
-differentially stable genes; vectors confined to the 7,973 move far less (C3 0.060 → 0.058 for SCZ).
-The reading is unchanged from Phase 3: the ABCD signature is positive for both disorders, survives the
-static-gradient control C1, and adds nothing to C3 once C3 is in the model. Whether the LD-matched
-2025 SCZ gene analysis changes that is the open cell, and it needs only the four files above.
-
-**Tooling note.** The x86_64 macOS MAGMA stopped running here (no Rosetta), so `tools/bin/magma_src/`
-now holds a native arm64 build from the v1.10 source; it reproduces `magma_all_marginal.tsv` exactly.
-Build recipe in `tools/bin/README.md`.
-
 ## Reproducing
 
-Analysis (python, env `ahba-pls`): `code/01_*` → `code/21_*` in order. `11_` is the parcellation
+Analysis (python, env `ahba-pls`): `code/01_*` → `code/20_*` in order. `11_` is the parcellation
 control, `12_` the HCP-MMP arm, `14_`/`15_` the single-universe enrichment and cell-class tables that
 the summary figures read, `16_` the dCT-only variant, `17_` the design grid and all pairwise statistics, `18_` the NSPN→HCP-MMP
 conversion (needs `nibabel`, and the fsaverage annot files in `~/Git/AHBA/data/parcellations/`; run it

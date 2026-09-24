@@ -30,7 +30,14 @@ REPO = ROOT.parent
 RES, REF = ROOT / "results", ROOT / "data" / "reference"
 GS = REF / "gene_sets"
 RUN = RES / "magma_runs"; RUN.mkdir(exist_ok=True)
-MAGMA = REPO / "tools" / "bin" / ("magma_mac/magma" if (REPO / "tools/bin/magma_mac/magma").exists() else "magma")
+def _magma_bin(repo):
+    # native arm64 build first (tools/bin/magma_src, compiled from the v1.10
+    # source), then the x86_64 macOS build (needs Rosetta), then the Linux one
+    for c in ("magma_src/magma", "magma_mac/magma", "magma"):
+        if (repo / "tools" / "bin" / c).exists():
+            return repo / "tools" / "bin" / c
+    raise FileNotFoundError("no MAGMA binary under tools/bin; see tools/bin/README.md")
+MAGMA = _magma_bin(REPO)
 RAW = {"SCZ": REPO / "genetic_analysis/inputs/magma/SCZ.genes.raw", "MDD": REPO / "genetic_analysis/inputs/magma/MDD.genes.raw"}
 for p in RAW.values():
     assert p.exists(), p
