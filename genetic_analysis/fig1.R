@@ -8,7 +8,7 @@
 # Reads only committed tables in genetic_analysis/fig1_inputs/ (plus the lh
 # Glasser polygons in ahba_pls/data/hcp_polygons.csv) and fits nothing; every
 # printed statistic is read from the table plotted, via sprintf.
-#   hcp70_group_maps.csv              a   per-parcel baseline CT and thinning
+#   hcp70_group_maps.csv              a   per-parcel CT at the age centre and ΔCT
 #   hcp70_age_by_visit.csv,
 #   hcp70_scans_per_child.csv         b   design
 #   hcp70_scans.csv (gitignored, individual-level; falls back to
@@ -82,8 +82,8 @@ n_missing <- length(setdiff(unique(poly$label), maps$label))
 # precomputed with the fig5_hcp_summary palettes (white->blue CT, red->white dCT)
 CT_COLS  <- c("white", "#c6dbef", "#6baed6", "#2171b5", "#08306b")
 DCT_COLS <- c("#67000d", "#cb181d", "#fb6a4a", "#fcbba1", "white")
-lo <- unname(floor(quantile(maps$baseline_ct, 0.02) * 10) / 10)
-hi <- unname(ceiling(quantile(maps$baseline_ct, 0.98) * 10) / 10)
+lo <- unname(floor(quantile(maps$ct_at_centre, 0.02) * 10) / 10)
+hi <- unname(ceiling(quantile(maps$ct_at_centre, 0.98) * 10) / 10)
 um <- maps$slope_mm_per_yr * 1000
 vmin <- unname(floor(quantile(um, 0.02) / 5) * 5)
 pal <- function(cols, v, a, b) {
@@ -92,7 +92,7 @@ pal <- function(cols, v, a, b) {
 H <- max(poly$y); W <- max(poly$x); GAP <- 0.30          # map height/width, data units
 row_off <- c(base = 0, thin = -(H + GAP))
 map_df <- bind_rows(
-  poly |> left_join(transmute(maps, label, col = pal(CT_COLS, baseline_ct, lo, hi)), by = "label") |>
+  poly |> left_join(transmute(maps, label, col = pal(CT_COLS, ct_at_centre, lo, hi)), by = "label") |>
     mutate(y = y + row_off["base"], grp = paste("b", grp)),
   poly |> left_join(transmute(maps, label, col = pal(DCT_COLS, slope_mm_per_yr * 1000, vmin, 0)),
                     by = "label") |>
@@ -115,13 +115,13 @@ pa <- ggplot() +
   geom_tile(data = tiles, aes(x, y, fill = fill, height = h), width = 0.06) +
   geom_text(data = btxt, aes(x, y, label = lab), hjust = 0, size = (BASE - 1.5) / .pt) +
   geom_text(data = bttl, aes(x, y, label = lab), hjust = 0, vjust = 0, size = (BASE - 1.5) / .pt) +
-  annotate("text", x = 0, y = row_off["thin"] + H + 0.06, label = "Thinning rate",
+  annotate("text", x = 0, y = row_off["thin"] + H + 0.06, label = "Thinning rate (ΔCT)",
            hjust = 0, vjust = 0, fontface = "bold", size = BASE / .pt) +
   scale_fill_identity() +
   coord_fixed(xlim = c(0, W + 0.42), ylim = c(row_off["thin"], H + 0.02), expand = FALSE,
               clip = "off") +
   guides(x = "none", y = "none") +
-  labs(title = "a   Baseline thickness") +
+  labs(title = "a   Cortical thickness (CT)") +
   theme_void(base_size = BASE) +
   theme(plot.title = element_text(size = BASE, face = "bold", hjust = 0, margin = margin(b = 4)),
         plot.title.position = "plot", plot.margin = margin(3, 3, 3, 3))
@@ -154,9 +154,9 @@ dens_panel <- function(v, colour, xlab, title, fmt) {
                axis.line.y = element_blank(), panel.grid.major.y = element_blank())
 }
 pb1 <- dens_panel("thickness_mm", "#2171b5",
-                  sprintf("thickness at age %.1f (mm)", csv_("thickness_mm", "age_centre")),
+                  sprintf("CT at age %.1f (mm)", csv_("thickness_mm", "age_centre")),
                   "b   Per-child traits", "mean %.2f\nSD %.3f mm")
-pb2 <- dens_panel("slope_um_per_yr", SLOPE_C, "thinning rate (µm / year)", NULL,
+pb2 <- dens_panel("slope_um_per_yr", SLOPE_C, "ΔCT (µm / year)", NULL,
                   "mean %.1f\nSD %.1f µm/yr")
 pb <- (pb1 / pb2)
 
@@ -193,8 +193,8 @@ pc <- pc +
   scale_x_continuous(breaks = seq(8, 18, 2)) +
   scale_y_continuous(limits = YL, expand = c(0, 0)) +
   coord_cartesian(xlim = c(8.5, 18)) +
-  labs(x = "age (years)", y = "mean cortical thickness (mm)",
-       title = "c   Each child's slope is the trait") +
+  labs(x = "age (years)", y = "cortex-wide CT (mm)",
+       title = "c   Each child's ΔCT is the trait") +
   th + theme(legend.position = c(0.02, 0.01), legend.justification = c(0, 0),
              legend.key.width = unit(8, "pt"), legend.key.height = unit(6, "pt"),
              legend.text = element_text(size = BASE - 1.5),
@@ -213,13 +213,13 @@ pd_ <- ggplot() +
                                y = m, yend = m), colour = SLOPE_C, linewidth = 0.6) +
   geom_line(data = cw, aes(factor(n_visits), mean, group = 1), linewidth = 0.4) +
   geom_point(data = cw, aes(factor(n_visits), mean), shape = 15, size = 1.3) +
-  annotate("text", x = 0.55, y = 0.66, label = "cortex-wide slope\n(single LMM, mean)",
+  annotate("text", x = 0.55, y = 0.66, label = "cortex-wide ΔCT\n(single LMM, mean)",
            hjust = 0, vjust = 1, size = (BASE - 1.5) / .pt, lineheight = 0.9) +
   annotate("text", x = 0.55, y = 0.50, label = "one parcel\n(358 parcels)",
            hjust = 0, vjust = 1, size = (BASE - 1.5) / .pt, colour = SLOPE_C, lineheight = 0.9) +
   scale_y_continuous(limits = c(0, 0.7), breaks = seq(0, 0.6, 0.2)) +
-  labs(x = "scans per child", y = expression("slope reliability  1 - v/" * tau^2),
-       title = "d   Slope reliability") +
+  labs(x = "scans per child", y = expression(Delta * "CT reliability  1 - v/" * tau^2),
+       title = "d   ΔCT reliability") +
   th
 
 # ------------------------------------------------------------ e, f: PRS ----
@@ -273,11 +273,11 @@ forest <- function(ph, title, subtitle, colour, show_y) {
                axis.text.y = element_text(size = BASE - 1, colour = "grey10"),
                plot.title = element_text(face = "bold", size = BASE))
 }
-pe <- forest("global_slope", "e   PRS → thinning rate",
+pe <- forest("global_slope", "e   PRS → ΔCT",
              sprintf("schizophrenia %s methods EUR, %s pooled",
                      count_sig("global_slope", "SCZ25_EUR"),
                      count_sig("global_slope", "SCZ25_META")), SLOPE_C, TRUE)
-pf <- forest("baseline_thickness", "f   PRS → baseline",
+pf <- forest("baseline_thickness", "f   PRS → CT",
              sprintf("schizophrenia %s EUR, %s pooled",
                      count_sig("baseline_thickness", "SCZ25_EUR"),
                      count_sig("baseline_thickness", "SCZ25_META")), BASE_C, FALSE) + labs(x = "β per SD (95% CI)")
@@ -286,7 +286,7 @@ pf <- forest("baseline_thickness", "f   PRS → baseline",
 SETS <- c(SCZ_locus_pool = "SCZ loci", SCZ_WES = "SCZ exome",
           MDD_highconf = "MDD high-conf.", MDD_WES = "MDD exome")
 # exome (rare-variant) sets, magma_gene_sets/genesets_wes.txt: the step-15b
-# cluster table when present, else the local EUR-arm thinning-rate run
+# cluster table when present, else the local run on the synced step-13/14 gene results
 SET_TESTS <- file.path(HERE, "work/results_70tab_hcp/magma_set_tests/table_magma_set_tests.tsv")
 if (file.exists(SET_TESTS)) {
   wes <- read.delim(SET_TESTS) |>
@@ -294,8 +294,10 @@ if (file.exists(SET_TESTS)) {
     transmute(arm = ifelse(version == "EUR_1000G", "EUR", "pooled"), phenotype, variable,
               n_genes = ngenes, beta, se, p)
 } else {
-  wes <- read.delim(file.path(IN, "hcp70_magma_wes_sets_local.tsv")) |>
-    filter(variable %in% c("SCZ_WES", "MDD_WES"))
+  wes <- read.delim(file.path(IN, "magma_wes_sets_local.tsv")) |>
+    filter(atlas == "hcp", variable %in% c("SCZ_WES", "MDD_WES")) |>
+    transmute(arm = ifelse(version == "EUR_1000G", "EUR", "pooled"), phenotype, variable,
+              n_genes = ngenes, beta, se, p)
 }
 mg <- read.delim(file.path(IN, "hcp70_magma_locus_sets.tsv"))
 mg <- bind_rows(mg, wes[, intersect(names(mg), names(wes))])
@@ -313,7 +315,7 @@ slots <- expand.grid(variable = names(SETS),
                          arm == "EUR" ~ -0.10, TRUE ~ -0.30),
          y = (length(SETS) + 1 - match(variable, names(SETS))) + off) |>
   left_join(mg, by = c("variable", "phenotype", "arm")) |>
-  mutate(trait = ifelse(phenotype == "global_slope", "thinning rate", "baseline thickness"),
+  mutate(trait = ifelse(phenotype == "global_slope", "ΔCT", "CT"),
          arm = factor(arm, levels = c("EUR", "pooled")))
 ngenes <- mg |> group_by(variable) |> summarise(n = first(n_genes))
 glab <- sprintf("%s\n(%s)", SETS, comma(ngenes$n[match(names(SETS), ngenes$variable)]))
@@ -336,8 +338,8 @@ pg <- ggplot(have, aes(beta, y, colour = trait)) +
             hjust = 0, size = (BASE - 1.5) / .pt, show.legend = FALSE) +
   geom_text(data = filter(slots, is.na(beta)), aes(0.005, y, label = "n.d."),
             inherit.aes = FALSE, hjust = 0, size = (BASE - 2) / .pt, colour = "grey55") +
-  scale_colour_manual(values = c("thinning rate" = SLOPE_C, "baseline thickness" = BASE_C)) +
-  scale_fill_manual(values = c("thinning rate" = SLOPE_C, "baseline thickness" = BASE_C),
+  scale_colour_manual(values = c("ΔCT" = SLOPE_C, "CT" = BASE_C)) +
+  scale_fill_manual(values = c("ΔCT" = SLOPE_C, "CT" = BASE_C),
                     guide = "none") +
   scale_shape_manual(values = c(EUR = 21, pooled = 23), guide = "none") +
   scale_y_continuous(breaks = rev(seq_along(SETS)), labels = glab, limits = c(0.5, length(SETS) + 0.5),
@@ -364,7 +366,7 @@ cb <- cb |>
   mutate(block = ifelse(model == "change", "CBCL change (β per SD)", "KSADS dx (OR per SD)"),
          lab = ifelse(model == "change", CBL[outcome], DXL2[outcome]),
          lab = factor(lab, rev(c(CBL, DXL2))),
-         trait = ifelse(brain == "global_slope", "thinning rate", "baseline thickness"),
+         trait = ifelse(brain == "global_slope", "ΔCT", "CT"),
          dy = ifelse(brain == "global_slope", 0.17, -0.17),
          yy = as.numeric(lab) + dy,
          ref = ifelse(model == "change", 0, 1))
@@ -379,9 +381,9 @@ h_block <- function(d, title, xlab_) {
     geom_point(shape = 21, fill = "white", size = 1.25, stroke = 0.45) +
     geom_point(data = filter(d, p < 0.05), aes(fill = trait), shape = 21, size = 1.25,
                stroke = 0.45) +
-    scale_colour_manual(values = c("thinning rate" = SLOPE_C, "baseline thickness" = BASE_C),
+    scale_colour_manual(values = c("ΔCT" = SLOPE_C, "CT" = BASE_C),
                         guide = "none") +
-    scale_fill_manual(values = c("thinning rate" = SLOPE_C, "baseline thickness" = BASE_C),
+    scale_fill_manual(values = c("ΔCT" = SLOPE_C, "CT" = BASE_C),
                       guide = "none") +
     scale_y_continuous(breaks = seq_along(lv), labels = lv, limits = c(0.5, length(lv) + 0.5),
                        expand = expansion(0)) +
@@ -430,10 +432,10 @@ row2 <- (pe | pf | pg | ph) + plot_layout(widths = c(0.62, 0.46, 0.62, 0.6), gui
 fig <- (wrap_elements(full = row1) / wrap_elements(full = row2)) +
   plot_layout(heights = c(0.8, 1.0)) +
   plot_annotation(
-    title = "Polygenic risk for schizophrenia predicts the rate, not the baseline level, of adolescent cortical thinning",
+    title = "Polygenic risk for schizophrenia predicts the rate of adolescent cortical thinning (ΔCT), not cortical thickness (CT)",
     subtitle = paste0("Every parcel thins (a); each child's cortex-wide slope is estimated from 2–4 scans with modest reliability, higher than a single parcel's once a child has 3–4 scans (b–d).\n",
-                      "Schizophrenia PRS predicts faster thinning in both ancestry arms (e) but not baseline thickness (f); MAGMA evidence is weaker and arm-dependent (g);\n",
-                      "faster thinning goes with rising depressive symptoms, while baseline thickness has its own, different symptom associations (h)."),
+                      "Schizophrenia PRS predicts faster thinning in both ancestry arms (e) but not CT (f); MAGMA evidence is weaker and not specific to ΔCT (g);\n",
+                      "faster thinning goes with rising depressive symptoms, while CT has its own, different symptom associations (h)."),
     theme = theme(plot.title = element_text(size = BASE + 1.5, face = "bold"),
                   plot.subtitle = element_text(size = BASE - 0.5, colour = "grey30",
                                                margin = margin(b = 4))))
@@ -444,27 +446,30 @@ cat(OUT, "\n")
 cwm <- setNames(cw$mean, cw$n_visits)
 k <- function(arm_, ph = "global_slope") count_sig(ph, arm_)
 cap <- c(
-  "**Figure 1 | Polygenic risk for schizophrenia predicts the rate, not the baseline level, of adolescent cortical thinning.**",
+  "**Figure 1 | Polygenic risk for schizophrenia predicts the rate of adolescent cortical thinning (ΔCT), not cortical thickness (CT).**",
+  sprintf("CT and ΔCT are the intercept and slope of one linear mixed model per region (a) or on the per-scan cortex-wide mean (b–h): CT is thickness at the sample-mean scan age (%.1f years), not at the first scan, and ΔCT is the per-year change (negative = thinning). Both are fitted from all of a child's scans.", csv_("thickness_mm", "age_centre")),
   "",
-  sprintf("- **a** Group maps per parcel (bilateral mean, left hemisphere shown): baseline thickness and mean per-child thinning rate (%.0f to %.1f µm / year).", min(um), max(um)),
-  sprintf("- **b** Distributions of the two per-child traits from the single LMM on the per-scan cortical mean (%s children with 2 / 3 / 4 scans: %s / %s / %s; %s scans): thickness at the age centre (%.1f years; the baseline-thickness phenotype of e–h) and the thinning rate. Per-child estimates are shrunk toward the mean (SD %.1f µm/yr against a model between-child SD of %.1f µm/yr); every child's estimated slope is negative.",
+  sprintf("- **a** Group maps per parcel (bilateral mean, left hemisphere shown): mean per-child CT (%.1f–%.1f mm) and ΔCT (%.0f to %.1f µm / year).", min(maps$ct_at_centre), max(maps$ct_at_centre), min(um), max(um)),
+  sprintf("- **b** Distributions of the two per-child traits from the single LMM on the per-scan cortical mean (%s children with 2 / 3 / 4 scans: %s / %s / %s; %s scans): CT and ΔCT, the phenotypes of e–h. Per-child estimates are shrunk toward the mean (SD %.1f µm/yr against a model between-child SD of %.1f µm/yr); every child's estimated slope is negative.",
           comma(n_kids), comma(per$n_children[per$n_scans == 2]), comma(per$n_children[per$n_scans == 3]),
-          comma(per$n_children[per$n_scans == 4]), comma(n_scans), csv_("thickness_mm", "age_centre"),
+          comma(per$n_children[per$n_scans == 4]), comma(n_scans),
           csv_("slope_um_per_yr", "sd"), csv_("slope_um_per_yr", "model_sd")),
   sprintf("- **c** Per-scan cortical mean vs age for 250 random children (grey), three children with four scans (colour), population OLS trend %.0f µm / year (black).",
           sv["ols_slope_mm_per_yr"] * 1000),
   sprintf("- **d** Slope reliability 1 − v/τ², where v is a child's conditional (posterior) variance of the slope random effect and τ² the between-child slope variance: boxes, per-parcel LMMs (358 parcels; each value the mean over children; medians %.2f / %.2f / %.2f for 2 / 3 / 4 scans); squares, the single LMM on the cortical mean (mean over children %.2f / %.2f / %.2f).",
           med$m[1], med$m[2], med$m[3], cwm["2"], cwm["3"], cwm["4"]),
-  sprintf("- **e, f** PRS association with thinning rate (e) and baseline thickness (f); β per SD with 95%% CI. Schizophrenia (2025 GWAS): thinning %s EUR / %s pooled, baseline %s / %s. Alzheimer's %s with APOE, %s without; depression %s / %s; education %s (opposite sign); autism %s.",
+  sprintf("- **e, f** PRS association with ΔCT (e) and CT (f); β per SD with 95%% CI. Schizophrenia (2025 GWAS): ΔCT %s EUR / %s pooled, CT %s / %s. Alzheimer's %s with APOE, %s without; depression %s / %s; education %s (opposite sign); autism %s.",
           k("SCZ25_EUR"), k("SCZ25_META"), k("SCZ25_EUR", "baseline_thickness"),
           k("SCZ25_META", "baseline_thickness"), k("ALZ"), k("ALZ_noAPOE"),
           k("MDD_eur"), k("MDD_pooled"), k("EA"), k("ASD")),
-  sprintf("- **g** MAGMA competitive gene-set enrichment (thinning rate red, baseline thickness grey; ○ EUR arm on 1000 Genomes EUR LD, ◇ pooled arm on the ABCD sample as its own LD reference; n.d. = not yet run). Common-variant sets: SCZ curated loci (Trubetskoy 2022 ST12, %s genes) and MDD2025 high-confidence genes (%s). Rare-variant (exome) sets: SCZ, genes at q < 0.05 in the 2025 exome meta-analysis (doi:10.1038/s41467-025-62429-y, Supplementary Data 2; %s testable here); MDD, genes associated with depressive symptoms in UK Biobank exomes (doi:10.1038/s41380-024-02804-1, ST7 single-variant p < 5 × 10⁻⁸ and ST9 gene-based q < 0.05; %s testable). SCZ exome p = %s for the thinning rate (EUR); MDD exome p = %s.",
+  sprintf("- **g** MAGMA competitive gene-set enrichment (ΔCT red, CT grey; ○ EUR arm on 1000 Genomes EUR LD, ◇ pooled arm on the ABCD sample as its own LD reference; n.d. = not run). Common-variant sets: SCZ curated loci (Trubetskoy 2022 ST12, %s genes) and MDD2025 high-confidence genes (%s). Rare-variant (exome) sets: SCZ, genes at q < 0.05 in the 2025 exome meta-analysis (doi:10.1038/s41467-025-62429-y, Supplementary Data 2; %s testable here); MDD, genes associated with depressive symptoms in UK Biobank exomes (doi:10.1038/s41380-024-02804-1, ST7 single-variant p < 5 × 10⁻⁸ and ST9 gene-based q < 0.05; %s testable). SCZ exome p, ΔCT / CT: EUR %s / %s, pooled %s / %s, i.e. not specific to ΔCT (like the SCZ loci); MDD exome p ≥ %s.",
           comma(ngenes$n[ngenes$variable == "SCZ_locus_pool"][1]),
           comma(ngenes$n[ngenes$variable == "MDD_highconf"][1]),
           comma(ngenes$n[ngenes$variable == "SCZ_WES"][1]), comma(ngenes$n[ngenes$variable == "MDD_WES"][1]),
-          mp("SCZ_WES", "global_slope"), mp("MDD_WES", "global_slope")),
-  sprintf("- **h** Symptoms against the same single-LMM phenotypes (thinning rate red, baseline thickness grey; each fitted alone; filled = p < 0.05). CBCL (parent report, log1p raw scale sums): symptoms at ages ~15–17 (mean of the available waves 5–7) adjusted for the same score at baseline (ANCOVA; not a difference score and not a per-child symptom slope), y_late ~ phenotype + y_baseline + age_late + sex + site, β in SD of y_late. KSADS: diagnosis (present or past) at any administered session from baseline to year 6, i.e. lifetime and including baseline cases, logistic with age at the last CBCL, odds ratio per SD. Both phenotypes are signed as in e–f (slope: negative = faster thinning), so β < 0 or OR < 1 means more symptoms with faster thinning or thinner baseline cortex. Estimates are unchanged when both phenotypes enter one model (slope–intercept r = 0.06). Family-clustered SEs; n = %s (CBCL change) and %s (KSADS). Faster thinning goes with rising depressive symptoms (p = %s) and parent-reported MDD (OR %.2f, p = %s); thinner baseline cortex goes with youth-reported MDD (OR %.2f, p = %s) and parent-reported psychosis spectrum (OR %.2f, p = %s). Exploratory, uncorrected.",
+          mp("SCZ_WES", "global_slope"), mp("SCZ_WES", "baseline_thickness"),
+          mp("SCZ_WES", "global_slope", "pooled"), mp("SCZ_WES", "baseline_thickness", "pooled"),
+          fmt_p(min(mg$p[mg$variable == "MDD_WES"]))),
+  sprintf("- **h** Symptoms against the same single-LMM phenotypes (ΔCT red, CT grey; each fitted alone; filled = p < 0.05). CBCL (parent report, log1p raw scale sums): symptoms at ages ~15–17 (mean of the available waves 5–7) adjusted for the same score at baseline (ANCOVA; not a difference score and not a per-child symptom slope), y_late ~ phenotype + y_baseline + age_late + sex + site, β in SD of y_late. KSADS: diagnosis (present or past) at any administered session from baseline to year 6, i.e. lifetime and including baseline cases, logistic with age at the last CBCL, odds ratio per SD. Both phenotypes are signed as in e–f (ΔCT negative = faster thinning), so β < 0 or OR < 1 means more symptoms with faster thinning or with thinner cortex. Estimates are unchanged when both phenotypes enter one model (CT–ΔCT r = 0.06). Family-clustered SEs; n = %s (CBCL change) and %s (KSADS). Faster thinning goes with rising depressive symptoms (p = %s) and parent-reported MDD (OR %.2f, p = %s); thinner cortex (CT) goes with youth-reported MDD (OR %.2f, p = %s) and parent-reported psychosis spectrum (OR %.2f, p = %s). Exploratory, uncorrected.",
           comma(max(cb$n[cb$model == "change"])), comma(max(cb$n[cb$model == "ksads_logit"])),
           fmt_p(hp("depress", "global_slope")), he("mdd_parent_DX", "global_slope"), fmt_p(hp("mdd_parent_DX", "global_slope")),
           he("mdd_youth_DX", "baseline_thickness"), fmt_p(hp("mdd_youth_DX", "baseline_thickness")),
