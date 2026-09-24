@@ -186,21 +186,28 @@ the slope. The EUR-arm baseline gene-property signals (SCZ, MDD, EA) vanish in
 the pooled arm (every p ≥ 0.07): present them as EUR-arm-only. Single-LMM and
 per-region agree within noise. Run detail in the archived log (§8 step 14).
 
-**Step 15 (scripted 2026-09-24, not yet run) — EUR-arm MAGMA on ABCD's own
-LD, and disorder gene sets defined by gene-level significance.**
-`step15_magma_eur_abcdld.sbatch` (array 1–4) re-runs the EUR-arm single-LMM
-gene analysis with the ABCD EUR analysis sample (step-14 reference ∩
-`eur_anchor.keep`) as LD reference, so EUR and pooled arms differ only in
-sample, not in panel (step 13 used 1000G EUR, n = 503). Then
-`step15_magma_set_tests.sbatch` tests the step-13 SCZ/MDD sets plus
-`magma_gene_sets/genesets_topgenes.txt` (MDD / SCZ25 Bonferroni and
-top-100/250/500 genes from the EUR discovery GWAS's own gene analysis, MHC
-excluded; `build_topgene_sets.py`) on all three gene-result versions (EUR
-1000G, EUR ABCD, pooled ABCD) → `results_70tab*/magma_set_tests/table_magma_set_tests.tsv`.
-Local EUR-1000G preview, HCP single-LMM thinning rate: MDD_genesig (394 genes)
-p = 0.037, MDD_top100/250/500 p = 0.75/0.063/0.14; SCZ25_genesig (586) p =
-0.017; top-N sets unstable in both disorders. None survives correction over the
-sets tried. Run order: step14 prep (done) → 15a → 15b.
+**Step 15 (run 2026-09-24) — EUR-arm MAGMA on ABCD's own LD, and gene-set
+tests on three gene-result versions (tables committed in
+`work/results_70tab*/magma_set_tests/table_magma_set_tests.tsv`).**
+15a re-ran the EUR-arm single-LMM gene analysis with the ABCD EUR children
+(step-14 reference ∩ `eur_anchor.keep`, n = 4,308; 17,901 genes) as LD
+reference, so the EUR and pooled arms now differ only in sample. 15b tested 31
+sets (step-13 SCZ/MDD sets, `genesets_topgenes.txt`, `genesets_wes.txt`) on
+EUR_1000G, EUR_ABCD and pooled_ABCD gene results. EUR_1000G rows reproduce
+step 13 exactly (SCZ_locus_pool, HCP slope, p 0.0046; SCZ_WES 0.026, MDD_WES
+0.97). **Swapping the LD panel removes the headline ST12-pool result:**
+SCZ_locus_pool on the HCP slope goes from p 0.0046 (1000G) to 0.15 (ABCD EUR;
+pooled 0.13), and on baseline thickness from 1e-4 to 0.43. DK is the same (0.004
+→ 0.23; 4e-4 → 0.61). The §2.5 ST12-pool rows therefore reflect the
+503-person 1000G panel, not the sample: treat them as not robust. HCP, EUR_ABCD
+vs EUR_1000G, p (slope / baseline): SCZ_locus_pool 0.15 / 0.43 vs 0.0046 /
+1e-4; MDD_highconf 0.31 / 0.045 vs 0.59 / 0.075; SCZ_WES (24 genes) 0.050 / 0.061
+vs 0.026 / 0.021 (pooled 0.18 / 0.055; DK EUR_ABCD slope 0.027); MDD_WES 0.55 /
+0.20 vs 0.97 / 0.49. What does strengthen on the ABCD panel is the
+gene-level-significant MDD set on the slope (MDD_genesig p 0.0044 HCP, 0.0021 DK;
+top-250 0.003 / 0.006; pooled 0.013), same direction in all three versions.
+Nothing survives Bonferroni over 31 sets (0.0016). Run order: step14 prep → 15a
+(4 × 1.5 h) → 15b (9 min).
 
 ## 3. What has been tried
 
