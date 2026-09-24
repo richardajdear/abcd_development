@@ -1,0 +1,7 @@
+method	arm	file	n_snps	n_mhc
+CT	SCZ25_EUR	SCZ25_EUR.clumped	396780.0	980.0
+PRSCS	SCZ25_EUR	(no weight table found)		
+PRSCSX	SCZ25_EUR	(no weight table found)		
+SBayesR	SCZ25_EUR	SCZ25_EUR.snpRes	1076468.0	337.0
+SBayesRC	SCZ25_EUR	SCZ25_EUR.snpRes	1154522.0	2532.0
+SBayesRC	SCZ25_EUR	SCZ25_EUR_imp.imputed.ma	1154522.0	2532.0

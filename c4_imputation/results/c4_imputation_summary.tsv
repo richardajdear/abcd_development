@@ -1,0 +1,73 @@
+group	metric	key	value
+all	n_samples		11670
+all	post_mean_median		0.845
+all	frac_post_mean_ge_0.7		0.8611825192802056
+all	frac_common5		0.9404455869751499
+all	C4A_copies_mean		2.155304547742783
+all	C4A_copies_sd		0.5550018834728451
+all	C4B_copies_mean		1.748181434351013
+all	C4B_copies_sd		0.4073655235194224
+all	HERV_copies_mean		2.925129852375785
+all	HERV_copies_sd		0.8678321283164109
+all	C4A_GREx_mean		1.175305277416479
+all	C4A_GREx_sd		0.3054645818370362
+all	C4B_GREx_mean		1.6601337672119199
+all	C4B_GREx_sd		0.37561104094401215
+all	corr_C4A_C4B_GREx		-0.16944655076990903
+all	structure_freq_hardcall	AL-BL	0.4282776349614396
+all	structure_freq_hardcall	AL-BS	0.3461439588688946
+all	structure_freq_hardcall	AL-AL	0.09584404455869751
+all	structure_freq_hardcall	BS	0.07472150814053127
+all	structure_freq_hardcall	AL	0.02506426735218509
+all	structure_freq_hardcall	AL-AS-BS-BS	0.01062553556126821
+all	structure_freq_hardcall	AL-AS-BL	0.008097686375321336
+all	structure_freq_hardcall	AL-AL-BL	0.005998286203941731
+all	structure_freq_hardcall	AL-BS-BS	0.004370179948586119
+all	structure_freq_hardcall	AL-BL-BL	0.00034275921165381317
+all	structure_freq_hardcall	BL	0.0002999143101970865
+all	structure_freq_hardcall	BL-BS	0.00012853470437017994
+all	structure_freq_hardcall	AL-AL-BS	8.568980291345329e-05
+keep	n_samples		5656
+keep	post_mean_median		0.8613366336633663
+keep	frac_post_mean_ge_0.7		0.9052333804809052
+keep	frac_common5		0.925035360678925
+keep	C4A_copies_mean		2.1163193207855144
+keep	C4A_copies_sd		0.6099107727336835
+keep	C4B_copies_mean		1.7729117558091008
+keep	C4B_copies_sd		0.3908964688483676
+keep	HERV_copies_mean		2.988629023568513
+keep	HERV_copies_sd		0.9428041350175271
+keep	C4A_GREx_mean		1.177190998900542
+keep	C4A_GREx_sd		0.3378910531086172
+keep	C4B_GREx_mean		1.697053033710521
+keep	C4B_GREx_sd		0.3579556766990816
+keep	corr_C4A_C4B_GREx		-0.1888792928052957
+keep	structure_freq_hardcall	AL-BL	0.4716230551626591
+keep	structure_freq_hardcall	AL-BS	0.28836633663366334
+keep	structure_freq_hardcall	BS	0.10015912305516265
+keep	structure_freq_hardcall	AL-AL	0.09008132956152758
+keep	structure_freq_hardcall	AL-AS-BL	0.012995049504950494
+keep	structure_freq_hardcall	AL	0.012022630834512023
+keep	structure_freq_hardcall	AL-AS-BS-BS	0.010166195190947667
+keep	structure_freq_hardcall	AL-AL-BL	0.007690947666195191
+keep	structure_freq_hardcall	AL-BS-BS	0.005746110325318246
+keep	structure_freq_hardcall	AL-BL-BL	0.0007072135785007072
+keep	structure_freq_hardcall	BL	0.0001768033946251768
+keep	structure_freq_hardcall	BL-BS	0.0001768033946251768
+keep	structure_freq_hardcall	AL-AL-BS	8.84016973125884e-05
+reference_panel	structure_freq	AL-BL	0.4144144144144144
+reference_panel	structure_freq	AL-BS	0.3063063063063063
+reference_panel	structure_freq	AL-AL	0.10810810810810811
+reference_panel	structure_freq	BS	0.07207207207207207
+reference_panel	structure_freq	AL	0.02702702702702703
+reference_panel	structure_freq	BL	0.013513513513513514
+reference_panel	structure_freq	AL-AS-BL	0.009009009009009009
+reference_panel	structure_freq	AL-AL-BL	0.009009009009009009
+reference_panel	structure_freq	AL-BL-BL	0.009009009009009009
+reference_panel	structure_freq	AL-AL-BS	0.009009009009009009
+reference_panel	structure_freq	AL-AS-BS-BS	0.0045045045045045045
+reference_panel	structure_freq	AL-BS-BS	0.0045045045045045045
+reference_panel	structure_freq	AL-AL-AL	0.0045045045045045045
+reference_panel	structure_freq	AL-BL-BS	0.0045045045045045045
+reference_panel	structure_freq	BL-BS	0.0045045045045045045
+all	beagle_DR2_per_allele	AL-AL-1,AL-BS-1,BS,AL-BL-3,AL-AS-BL,AL-AL-2,AL-BS-3,AL-BS-4,AL-BS-5,AL-BL-2,AL-BL-other,AL-BL-1,AL-AL-BL,AL-BS-other,BL,AL-AS-BS-BS,AL-BS-2,AL-AL-3,AL,AL-BL-BL,AL-BS-BS,AL-AL-BS,AL-AL-AL,AL-BL-BS,BL-BS	0.68,0.73,0.93,0.51,0.48,0.27,0.95,0.89,0.92,0.64,0.5,0.3,0.35,0.66,0.1,0.91,0.88,0.13,0.67,0.08,0.49,0.1,0.04,0.02,0.29

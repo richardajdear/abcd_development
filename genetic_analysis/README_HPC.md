@@ -226,6 +226,7 @@ Closed means do not repeat without a new reason; the reason is given.
 | MAGMA gene-property and gene sets, SCZ/MDD/ASD/ALZ/EA, both directions | §2.5 | **current** |
 | AHBA C1–C3 and ahba_pls signature as MAGMA gene properties (H3) | null, both atlases | closed |
 | per-parcel SCZ-PRS β map vs C3 / PLS lead, spin test | null; the map is a uniform shift plus noise (lh–rh ρ 0.3) | closed at parcel level; the projected-phenotype version (H4) is open |
+| imputed C4A expression → slope (`c4_imputation/`, Sekar panel, EUR arm) | null: β −0.011 (95 % CI −0.039, +0.017), excludes the pre-specified MDE 0.048; imputation QC fine | closed; only the pooled arm (Kamitaki panel, dbGaP) is untried |
 | PRS conditional on EA (`R/07_prs_conditional.R`) | run only on 6.0-vintage data | **open**: re-run on the current trait (§4, item 1) |
 | PRS × age interaction in a one-stage LMM (`tools/age_prs_interaction.R`) | run only on 6.0-vintage data | **open** (§4, item 2) |
 
@@ -278,8 +279,7 @@ genes. Ranked by information per unit of effort:
    synaptic pruning in adolescence. Imputed C4A expression → thinning rate is
    one pre-specified test and would name a gene. The MHC is excluded from most
    PRS methods, so this is not already contained in §2.3.
-   **In progress:** [`c4_imputation/`](../c4_imputation/README.md) (pipeline
-   built and smoke-tested 2026-09-24; cluster leg staged).
+   **Done, null** (§3; [`c4_imputation/`](../c4_imputation/README.md)).
 6. **Individual-level projected phenotypes (ahba_pls H4).** Project each
    child's 358 slopes onto C3 and the PLS lead component (one phenotype per
    child) and regress on the SCZ score. Averages out the parcel noise that

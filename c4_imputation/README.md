@@ -1,10 +1,12 @@
 # c4_imputation — does imputed C4A expression predict the adolescent thinning rate?
 
-**Status, 2026-09-24.** The local leg is complete: the pipeline is built, the
-reference panel and tools are pinned by checksum, and the steps have been
-smoke-tested end to end on held-out panel individuals and on a planted-effect
-fixture (all pass). **The cluster leg is staged and has not been run.** Next
-action: `bash c4_imputation/run_on_csd3.sh setup`, then `submit` (§6).
+**Status, 2026-09-24: run, null, closed.** Imputed C4A expression does not
+predict the thinning rate (EUR arm, n 4,308; M1 β −0.011, 95 % CI −0.039 to
++0.017, p 0.45); the secondary models and the other two cells agree. Imputation
+QC passed (4,837 array SNPs aligned; EUR structure frequencies match the
+panel). Tables in `results/c4_assoc_*.tsv`; the record is in
+[`genetic_analysis/README_HPC.md`](../genetic_analysis/README_HPC.md) §3.
+The plan below is kept as it was run.
 
 ---
 
