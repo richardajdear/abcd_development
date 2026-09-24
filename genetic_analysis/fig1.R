@@ -78,43 +78,54 @@ poly <- poly |>
   mutate(grp = interaction(label, view, group, subgroup, drop = TRUE))
 n_missing <- length(setdiff(unique(poly$label), maps$label))
 
-brain <- function(values, title, subtitle, scale) {
-  d <- poly |> left_join(values, by = "label")
-  ggplot(d, aes(x, y, group = grp, fill = value)) +
-    geom_polygon(colour = "white", linewidth = 0.06) + scale +
-    coord_fixed(expand = FALSE) +
-    guides(fill = guide_colourbar(barwidth = unit(60, "pt"), barheight = unit(3, "pt"),
-                                  title.position = "left", title.vjust = 1)) +
-    labs(title = title) +
-    theme_void(base_size = BASE) +
-    theme(plot.title = element_text(size = BASE, face = "bold", hjust = 0,
-                                    margin = margin(b = 1)),
-          plot.subtitle = element_text(size = BASE - 1, colour = "grey30",
-                                       hjust = 0, margin = margin(b = 2)),
-          plot.title.position = "plot",
-          legend.position = "bottom", legend.title = element_text(size = BASE - 1.5),
-          legend.text = element_text(size = BASE - 1.5),
-          legend.margin = margin(0, 0, 0, 0), legend.box.spacing = unit(1, "pt"),
-          plot.margin = margin(3, 3, 2, 3))
-}
+# both maps and their colourbars in ONE fixed-aspect ggplot, colours
+# precomputed with the fig5_hcp_summary palettes (white->blue CT, red->white dCT)
+CT_COLS  <- c("white", "#c6dbef", "#6baed6", "#2171b5", "#08306b")
+DCT_COLS <- c("#67000d", "#cb181d", "#fb6a4a", "#fcbba1", "white")
 lo <- unname(floor(quantile(maps$baseline_ct, 0.02) * 10) / 10)
 hi <- unname(ceiling(quantile(maps$baseline_ct, 0.98) * 10) / 10)
 um <- maps$slope_mm_per_yr * 1000
 vmin <- unname(floor(quantile(um, 0.02) / 5) * 5)
-pa1 <- brain(
-  data.frame(label = maps$label, value = maps$baseline_ct),
-  "a   Baseline thickness",
-  sprintf("at age ~10; %.1f–%.1f mm across parcels", min(maps$baseline_ct), max(maps$baseline_ct)),
-  scale_fill_gradient(low = "white", high = "#08306B", limits = c(lo, hi),
-                      oob = squish, na.value = "grey85", name = "mm",
-                      breaks = c(lo, hi)))
-pa2 <- brain(
-  data.frame(label = maps$label, value = um),
-  "     Thinning rate",
-  sprintf("every parcel thins: %.0f to %.1f µm/yr", min(um), max(um)),
-  scale_fill_distiller(palette = "Reds", direction = -1, limits = c(vmin, 0),
-                       oob = squish, na.value = "grey85", name = "µm / yr",
-                       breaks = c(vmin, 0)))
+pal <- function(cols, v, a, b) {
+  f <- scales::gradient_n_pal(cols); f(scales::rescale(pmin(pmax(v, a), b), from = c(a, b)))
+}
+H <- max(poly$y); W <- max(poly$x); GAP <- 0.30          # map height/width, data units
+row_off <- c(base = 0, thin = -(H + GAP))
+map_df <- bind_rows(
+  poly |> left_join(transmute(maps, label, col = pal(CT_COLS, baseline_ct, lo, hi)), by = "label") |>
+    mutate(y = y + row_off["base"], grp = paste("b", grp)),
+  poly |> left_join(transmute(maps, label, col = pal(DCT_COLS, slope_mm_per_yr * 1000, vmin, 0)),
+                    by = "label") |>
+    mutate(y = y + row_off["thin"], grp = paste("t", grp))) |>
+  mutate(col = ifelse(is.na(col), "grey85", col))
+# vertical colourbars right of each map
+bar <- function(cols, a, b, off, lab, fmt) {
+  n <- 60; v <- seq(a, b, length.out = n); hgt <- H * 0.8; y0 <- off + H * 0.1
+  list(tiles = data.frame(x = W + 0.10, y = y0 + (seq_len(n) - 0.5) * hgt / n,
+                          fill = pal(cols, v, a, b), h = hgt / n),
+       text = data.frame(x = W + 0.17, y = c(y0, y0 + hgt), lab = sprintf(fmt, c(a, b))),
+       title = data.frame(x = W + 0.07, y = y0 + hgt + 0.08, lab = lab))
+}
+b1 <- bar(CT_COLS, lo, hi, row_off["base"], "mm", "%.1f")
+b2 <- bar(DCT_COLS, vmin, 0, row_off["thin"], "µm/yr", "%.0f")
+tiles <- rbind(b1$tiles, b2$tiles); btxt <- rbind(b1$text, b2$text); bttl <- rbind(b1$title, b2$title)
+pa <- ggplot() +
+  geom_polygon(data = map_df, aes(x, y, group = grp, fill = col), colour = "white",
+               linewidth = 0.06) +
+  geom_tile(data = tiles, aes(x, y, fill = fill, height = h), width = 0.06) +
+  geom_text(data = btxt, aes(x, y, label = lab), hjust = 0, size = (BASE - 1.5) / .pt) +
+  geom_text(data = bttl, aes(x, y, label = lab), hjust = 0, vjust = 0, size = (BASE - 1.5) / .pt) +
+  annotate("text", x = 0, y = row_off["thin"] + H + 0.06, label = "Thinning rate",
+           hjust = 0, vjust = 0, fontface = "bold", size = BASE / .pt) +
+  scale_fill_identity() +
+  coord_fixed(xlim = c(0, W + 0.42), ylim = c(row_off["thin"], H + 0.02), expand = FALSE,
+              clip = "off") +
+  guides(x = "none", y = "none") +
+  labs(title = "a   Baseline thickness") +
+  theme_void(base_size = BASE) +
+  theme(plot.title = element_text(size = BASE, face = "bold", hjust = 0, margin = margin(b = 4)),
+        plot.title.position = "plot", plot.margin = margin(3, 3, 3, 3))
+PA_ASPECT <- (W + 0.42) / (H + 0.02 - row_off["thin"])    # width / height of the map block
 
 # ------------------------------------------------------------ b: design ----
 age <- read.csv(file.path(IN, "hcp70_age_by_visit.csv"))
@@ -151,46 +162,70 @@ pb <- pb +
 # ------------------------------------------------------ c: trajectories ----
 summ <- read.csv(file.path(IN, "hcp70_scan_summary.csv"))
 sv <- setNames(summ$value, summ$metric)
+at <- read.csv(file.path(IN, "hcp70_ct_at_age.csv"))      # fig1_prep_1lmm.R
+YL <- c(2.3, 3.0)
 trend <- data.frame(age = c(8.3, 18.2)) |>
-  mutate(ct = sv["ols_intercept_mm"] + sv["ols_slope_mm_per_yr"] * age,
-         kind = "population trend (OLS)")
-KIND_C <- c("one child" = "grey72", "child with 4 scans" = "#1f4e8c",
-            "population trend (OLS)" = "black")
+  mutate(ct = sv["ols_intercept_mm"] + sv["ols_slope_mm_per_yr"] * age)
+HI_C <- c("#E69F00", "#009E73", "#882255")               # three highlighted children
 if (file.exists(scans_f)) {
   set.seed(7)
   kids <- sample(unique(sc$sid), 250)
   hi3 <- sample(unique(sc$sid[sc$n_visits == 4]), 3)
-  lines_bg <- sc |> filter(sid %in% kids) |> mutate(kind = "one child")
-  lines_hi <- sc |> filter(sid %in% hi3) |> mutate(kind = "child with 4 scans")
+  lines_bg <- sc |> filter(sid %in% kids)
+  lines_hi <- sc |> filter(sid %in% hi3) |> mutate(child = factor(match(sid, hi3)))
   pc <- ggplot() +
-    geom_line(data = lines_bg, aes(age, mean_ct, group = sid, colour = kind),
+    geom_line(data = lines_bg, aes(age, mean_ct, group = sid, colour = "one child (250 shown)"),
               linewidth = 0.2, alpha = 0.7) +
-    geom_line(data = lines_hi, aes(age, mean_ct, group = sid, colour = kind),
-              linewidth = 0.45) +
-    geom_point(data = lines_hi, aes(age, mean_ct, colour = kind), size = 0.7)
+    geom_line(data = lines_hi, aes(age, mean_ct, group = sid), colour = HI_C[lines_hi$child],
+              linewidth = 0.5) +
+    geom_point(data = lines_hi, aes(age, mean_ct), colour = HI_C[lines_hi$child], size = 0.8)
 } else {
   h2 <- read.csv(file.path(IN, "hcp70_scans_hist2d.csv"))
-  pc <- ggplot() + geom_tile(data = h2, aes(age_bin + 0.125, ct_bin + 0.01,
-                                            alpha = n), fill = "grey50") +
-    scale_alpha(guide = "none")
+  pc <- ggplot() + geom_tile(data = h2, aes(age_bin + 0.125, ct_bin + 0.01, alpha = n),
+                             fill = "grey50") + scale_alpha(guide = "none")
 }
 pc <- pc +
-  geom_line(data = trend, aes(age, ct, colour = kind), linewidth = 0.8) +
-  scale_colour_manual(values = KIND_C,
-                      labels = c("one child" = "one child (250 shown)",
-                                 "child with 4 scans" = "child with 4 scans (3)",
-                                 "population trend (OLS)" = "population trend (OLS)")) +
+  geom_vline(xintercept = at$age, linetype = "22", linewidth = 0.3, colour = "grey45") +
+  annotate("text", x = at$age, y = YL[2] - 0.012, label = sprintf("age %d", at$age),
+           hjust = c(-0.08, 1.08), vjust = 1, size = (BASE - 1.5) / .pt, colour = "grey30") +
+  geom_line(data = trend, aes(age, ct, colour = "population trend (OLS)"), linewidth = 0.8) +
+  scale_colour_manual(values = c("one child (250 shown)" = "grey72",
+                                 "population trend (OLS)" = "black"),
+                      breaks = c("one child (250 shown)", "population trend (OLS)")) +
   scale_x_continuous(breaks = seq(8, 18, 2)) +
-  coord_cartesian(xlim = c(8.5, 18), ylim = c(2.3, 3.0)) +
-  labs(x = "age (years)", y = "mean cortical thickness (mm)",
-       title = "c   Each child's slope is the trait") +
-  th + theme(legend.position = c(0.02, 0.02), legend.justification = c(0, 0),
-             legend.key.width = unit(10, "pt"))
+  scale_y_continuous(limits = YL, expand = c(0, 0)) +
+  coord_cartesian(xlim = c(8.5, 18)) +
+  labs(x = "age (years)", y = "mean cortical thickness (mm)") +
+  th + theme(legend.position = c(0.02, 0.01), legend.justification = c(0, 0),
+             legend.key.width = unit(8, "pt"), legend.key.height = unit(6, "pt"),
+             legend.text = element_text(size = BASE - 1.5),
+             legend.background = element_rect(fill = alpha("white", 0.8), colour = NA))
+
+# marginal densities: model-implied child-level CT at ages 9 (left) and 17 (right)
+yy <- seq(YL[1], YL[2], length.out = 300)
+dens <- do.call(rbind, lapply(seq_len(nrow(at)), function(i)
+  data.frame(age = at$age[i], ct = yy, d = dnorm(yy, at$mean_mm[i], at$sd_mm[i]))))
+marg <- function(a, side) {
+  dd <- dens[dens$age == a, ]
+  r <- at[at$age == a, ]
+  g <- ggplot(dd, aes(d, ct)) +
+    geom_area(orientation = "y", fill = "grey80", colour = "grey35", linewidth = 0.3) +
+    annotate("segment", x = 0, xend = max(dd$d), y = r$mean_mm, yend = r$mean_mm,
+             linewidth = 0.3, colour = "grey20") +
+    scale_y_continuous(limits = YL, expand = c(0, 0)) +
+    theme_void(base_size = BASE) + theme(plot.margin = margin(3, 1, 3, 1))
+  if (side == "left") g + scale_x_reverse(expand = c(0, 0)) else g + scale_x_continuous(expand = c(0, 0))
+}
+pcl <- marg(9, "left") + labs(title = "c   Each child's slope is the trait") +
+  theme(plot.title = element_text(size = BASE, face = "bold", hjust = 0,
+                                  margin = margin(b = 4)))
+pcr <- marg(17, "right")
+pc_all <- (pcl | pc | pcr) + plot_layout(widths = c(0.2, 1, 0.2))
 
 # ------------------------------------------------------- d: reliability ----
 rel <- read.csv(file.path(IN, "hcp70_regional_slope_reliability.csv"))
-sh <- read.csv(file.path(IN, "hcp70_global_slope_splithalf.csv")) |> filter(n_visits > 0)
-med <- rel |> group_by(n_visits) |> summarise(m = median(reliability))
+cw <- read.csv(file.path(IN, "hcp70_global_slope_reliability_1lmm.csv"))  # fig1_prep_1lmm.R
+med <- rel |> group_by(n_visits) |> summarise(m = median(reliability, na.rm = TRUE))
 pd_ <- ggplot() +
   geom_boxplot(data = rel, aes(factor(n_visits), reliability),
                outlier.shape = NA, width = 0.55, linewidth = 0.3,
@@ -198,17 +233,14 @@ pd_ <- ggplot() +
   geom_segment(data = med, aes(x = as.numeric(factor(n_visits)) - 0.27,
                                xend = as.numeric(factor(n_visits)) + 0.27,
                                y = m, yend = m), colour = SLOPE_C, linewidth = 0.6) +
-  geom_line(data = sh, aes(factor(n_visits), spearman_brown, group = 1),
-            linewidth = 0.4) +
-  geom_point(data = sh, aes(factor(n_visits), spearman_brown), shape = 15,
-             size = 1.3) +
-  annotate("text", x = 3.35, y = sh$spearman_brown[sh$n_visits == 4] - 0.07,
-           label = "cortex-wide\n(split-half)", hjust = 1, vjust = 1,
-           size = (BASE - 1.5) / .pt, lineheight = 0.9) +
-  annotate("text", x = 3.35, y = max(med$m) + 0.22, label = "one parcel\n(358)",
-           hjust = 1, size = (BASE - 1.5) / .pt, colour = SLOPE_C, lineheight = 0.9) +
-  scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.25)) +
-  labs(x = "scans per child", y = "slope reliability",
+  geom_line(data = cw, aes(factor(n_visits), mean, group = 1), linewidth = 0.4) +
+  geom_point(data = cw, aes(factor(n_visits), mean), shape = 15, size = 1.3) +
+  annotate("text", x = 0.55, y = 0.66, label = "cortex-wide slope\n(single LMM, mean)",
+           hjust = 0, vjust = 1, size = (BASE - 1.5) / .pt, lineheight = 0.9) +
+  annotate("text", x = 0.55, y = 0.50, label = "one parcel\n(358 parcels)",
+           hjust = 0, vjust = 1, size = (BASE - 1.5) / .pt, colour = SLOPE_C, lineheight = 0.9) +
+  scale_y_continuous(limits = c(0, 0.7), breaks = seq(0, 0.6, 0.2)) +
+  labs(x = "scans per child", y = expression("slope reliability  1 - v/" * tau^2),
        title = "d   Slope reliability") +
   th
 
@@ -346,16 +378,22 @@ ptxt <- ggplot() +
   theme_void() + theme(plot.margin = margin(2, 3, 0, 3))
 
 # ----------------------------------------------------------- assemble ------
-row1 <- ((pa1 / pa2) | pb | pc | pd_) + plot_layout(widths = c(1.35, 1, 1.15, 0.75))
+# row-1 panel height ~ 1.95 in; other columns 1 : 1.5 : 0.78 share the rest of
+# the 7.2 in width; choose panel-a's relative width so its cell is as wide as
+# the map block needs at that height (+ the colourbar labels)
+ROW1_H_IN <- 1.75   # effective map-block height, calibrated on the render
+pa_in <- ROW1_H_IN * PA_ASPECT
+PA_W <- pa_in / ((7.2 - pa_in) / (1 + 1.5 + 0.78))
+row1 <- (pa | pb | pc_all | pd_) + plot_layout(widths = c(PA_W, 1, 1.5, 0.78))
 row2 <- (pe | pf | pg) + plot_layout(widths = c(1, 0.72, 0.8), guides = "collect") &
   theme(legend.position = "bottom", legend.box = "horizontal",
         legend.margin = margin(0, 0, 0, 0))
-fig <- (row1 / row2) +
+fig <- (wrap_elements(full = row1) / wrap_elements(full = row2)) +
   plot_layout(heights = c(1, 1.0)) +
   plot_annotation(
     title = "Polygenic risk for schizophrenia predicts the rate, not the baseline level, of adolescent cortical thinning",
-    subtitle = paste0("Every parcel thins (a) and each child's cortex-wide slope is measured reliably (b–d). Schizophrenia PRS predicts faster thinning in both ancestry arms (e)\n",
-                      "but not baseline thickness (f); gene-level MAGMA evidence is weaker and arm-dependent (g)."),
+    subtitle = paste0("Every parcel thins (a); each child's cortex-wide slope is estimated from 2–4 scans with modest reliability, higher than a single parcel's once a child has 3–4 scans (b–d).\n",
+                      "Schizophrenia PRS predicts faster thinning in both ancestry arms (e) but not baseline thickness (f); gene-level MAGMA evidence is weaker and arm-dependent (g)."),
     theme = theme(plot.title = element_text(size = BASE + 1.5, face = "bold"),
                   plot.subtitle = element_text(size = BASE - 0.5, colour = "grey30",
                                                margin = margin(b = 4))))
@@ -363,7 +401,7 @@ ggsave(OUT, fig, width = 7.2, height = 5.1, dpi = 300, bg = "white")
 cat(OUT, "\n")
 
 # ------------------------------------------------------------ caption ------
-sb <- setNames(sh$spearman_brown, sh$n_visits)
+cwm <- setNames(cw$mean, cw$n_visits)
 k <- function(arm_, ph = "global_slope") count_sig(ph, arm_)
 cap <- c(
   "**Figure 1 | Polygenic risk for schizophrenia predicts the rate, not the baseline level, of adolescent cortical thinning.**",
@@ -372,9 +410,10 @@ cap <- c(
   sprintf("- **b** Age at scan by visit; %s children, %s scans; 2 / 3 / 4 scans per child for %s / %s / %s children.",
           comma(n_kids), comma(n_scans), comma(per$n_children[per$n_scans == 2]),
           comma(per$n_children[per$n_scans == 3]), comma(per$n_children[per$n_scans == 4])),
-  sprintf("- **c** Per-scan cortical mean vs age for 250 random children (grey), three with four scans (blue), population OLS trend %.0f µm / year (black).", sv["ols_slope_mm_per_yr"] * 1000),
-  sprintf("- **d** Slope reliability: single-parcel model-based reliability across 358 parcels (boxes, medians %.2f / %.2f / %.2f for 2 / 3 / 4 scans) vs split-half consistency of the cortex-wide slope (squares; %.2f / %.2f / %.2f).",
-          med$m[1], med$m[2], med$m[3], sb["2"], sb["3"], sb["4"]),
+  sprintf("- **c** Per-scan cortical mean vs age for 250 random children (grey), three children with four scans (colour), population OLS trend %.0f µm / year (black). Side densities: model-implied distribution of child-level thickness at ages %d (left) and %d (right) from the single LMM (mean %.2f and %.2f mm, SD %.3f and %.3f mm; site variance excluded).",
+          sv["ols_slope_mm_per_yr"] * 1000, at$age[1], at$age[2], at$mean_mm[1], at$mean_mm[2], at$sd_mm[1], at$sd_mm[2]),
+  sprintf("- **d** Slope reliability 1 − v/τ², where v is a child's conditional (posterior) variance of the slope random effect and τ² the between-child slope variance: boxes, per-parcel LMMs (358 parcels; each value the mean over children; medians %.2f / %.2f / %.2f for 2 / 3 / 4 scans); squares, the single LMM on the cortical mean (mean over children %.2f / %.2f / %.2f).",
+          med$m[1], med$m[2], med$m[3], cwm["2"], cwm["3"], cwm["4"]),
   sprintf("- **e, f** PRS association with thinning rate (e) and baseline thickness (f); β per SD with 95%% CI. Schizophrenia (2025 GWAS): thinning %s EUR / %s pooled, baseline %s / %s. Alzheimer's %s with APOE, %s without; depression %s / %s; education %s (opposite sign); autism %s.",
           k("SCZ25_EUR"), k("SCZ25_META"), k("SCZ25_EUR", "baseline_thickness"),
           k("SCZ25_META", "baseline_thickness"), k("ALZ"), k("ALZ_noAPOE"),
