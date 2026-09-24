@@ -140,10 +140,10 @@ def panel_design(ax):
             y = r["count"] * 0.25 * np.exp(-0.5 * ((x - r["mean"]) / r["std"]) ** 2) \
                 / (r["std"] * np.sqrt(2 * np.pi))
             ax.fill_between(x, y, color=VISIT_COLOR[v], lw=0)
-    ax.set_ylim(0, ax.get_ylim()[1] * 1.55)
+    ax.set_ylim(0, ax.get_ylim()[1] * 1.85)
     for v, r in age.iterrows():
-        ax.text(r["mean"], ax.get_ylim()[1] * (0.62 if v in ("v0", "v4")
-                                                else 0.54), VISIT_LABEL[v],
+        ax.text(r["mean"], ax.get_ylim()[1] * (0.56 if v in ("v0", "v4")
+                                                else 0.49), VISIT_LABEL[v],
                 ha="center", va="bottom", fontsize=ANN,
                 color=VISIT_COLOR[v] if v != "v0" else "0.45")
     ax.set_xlabel("age at scan (years)")
