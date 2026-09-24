@@ -91,6 +91,9 @@ for comp, s in (("PLS1", S1), ("PLS2", S2)):
                                   centroids=pls.HCP_CENTROIDS)
         rows.append(dict(x=ref, y=comp, rho=rho, p_spin=p,
                          n=int(s.index.intersection(maps[ref].dropna().index).size)))
+# the two imaging maps against each other, on every parcel (not just AHBA-covered)
+rho, p, _ = pls.spin_corr(maps["CT"], maps["dCT"], n_perm=N_SPIN, seed=SEED, centroids=pls.HCP_CENTROIDS)
+rows.append(dict(x="CT", y="dCT", rho=rho, p_spin=p, n=int(maps[["CT", "dCT"]].dropna().shape[0])))
 MP = pd.DataFrame(rows)
 MP.to_csv(RES / "hcp_summary_map_pairs.tsv", sep="\t", index=False, float_format="%.4g")
 

@@ -756,22 +756,37 @@ keeps the raw SVD sign). PLS2 is in the thinning orientation used everywhere els
 - **PLS2 is the thinning axis and is C3**: ρ = -0.58 with dCT (dCT is negative mm/yr, so this is faster thinning), -0.01 with CT; 0.70 / 0.68
   with C3. SCZ 0.036, p = 0.018, MDD 0.055, p = 0.0002; C3 is stronger for both
   (0.060, p = 8.6e-05 / 0.072, p = 1.5e-06).
-- **Panel d uses `MDD_div`**, so both disorders are multi-ancestry GWAS. The two files differ in LD
+- **Panel e uses `MDD_div`**, so both disorders are multi-ancestry GWAS. The two files differ in LD
   handling: SCZ25_META is per-ancestry against matched panels, while MDD div is the multi-ancestry file
   against 1000G EUR. That makes little difference here (PLS2: 0.051, p = 0.00062 on MDD_EUR).
-- **Systems in b, c**: parcels are coloured by Glasser 2016's 22 cortices (`data/reference/hcp_cortices/`:
-  `HCP-MMP1_UniqueRegionList.csv`, `Cortex_ID`), grouped as in `HCP-MMP1_cortices.txt`: 1–5 visual,
-  6–9 sensorimotor, 10–12 auditory (which includes insular/frontal opercular, as that file groups it),
-  13–22 association. The 137 covered parcels split 86 association / 19 sensorimotor / 19 auditory / 13 visual. Downloaded 2026-09-24 from
+- **Panel layout** (letters as on the slide): a maps (CT / PLS1 / C1 over dCT / PLS2 / C3), b CT vs
+  dCT, c components vs CT and dCT, d regions and genes vs C1/C3, e MAGMA, f cell classes and layers;
+  e and f list PLS1, C1, PLS2, C3 top to bottom. The methods live here, not on the slide.
+- **CT vs dCT (b)**: ρ = 0.09, p_spin = 0.63 over all 179 parcels. Baseline thickness and thinning rate
+  are spatially unrelated, which is why Y = [dCT, CT] separates cleanly into a static and a thinning
+  component.
+- **Imaging colour scales (a)**: white-anchored. CT runs white (thinnest) to blue (thickest); dCT runs white
+  (0 mm/yr, no thinning) to red (fastest thinning).
+- **Systems in b–d**: two groups from Glasser 2016's 22 cortices (`data/reference/hcp_cortices/`:
+  `HCP-MMP1_UniqueRegionList.csv`, `Cortex_ID`, groupings from `HCP-MMP1_cortices.txt`). Cortices 1–12 (visual,
+  sensorimotor, auditory incl. insular/frontal opercular) = **sensorimotor**; 13–22 = **association**.
+  The 137 covered parcels split 51 sensorimotor / 86 association. The four-way lookup is kept in
+  `hcp_parcel_systems.csv`; the slide collapses it. Downloaded 2026-09-24 from
   bitbucket.org/dpat/tools (linked from neuroimaging-core-docs); lookup `hcp_parcel_systems.csv`.
-- **Fading (alpha 0.3)**: b, c region panels at spin p ≥ 0.05; d at p ≥ 0.05; e at BH q ≥ 0.05. Gene-level ρ
+- **Fading (alpha 0.3)**: b–d region panels at spin p ≥ 0.05; e at p ≥ 0.05; f at BH q ≥ 0.05. Gene-level ρ
   has no valid p (7,973 co-expressed genes make every ρ nominally significant), so each gene panel is
   faded with its matching region pair.
-- **Panel e**: square size = |z| (capped at 20), fill = direction. Enrichment z uses an
+- **Panel f**: square size = |z| (capped at 20), fill = direction. Enrichment z uses an
   independent-gene null, which marker co-expression makes anti-conservative. Layers = Maynard 2021,
   FDR < 0.05 and t > 0, the `which='maynard'` definition of `AHBA/code/enrichments_data.get_layer_genes`.
 - **Global slope**: tested (`slope_{1lmm,perregion}_{HCP,DK}` in `magma_disorder_panel.tsv`) and left off
   the slide — none of PLS1, PLS2, C1, C3 is associated with any of the four gene analyses (smallest p = 0.28).
+
+- **Other details that were on the slide**: ABCD 7.0, 8,716 children and 26,946 sessions (`hcp_run_provenance.tsv`);
+  CT and dCT are the intercept and age slope of one mixed model per parcel; 179 bilateral HCP-MMP
+  parcels, 137 with AHBA coverage; PLS on the 7,973-gene C1–C3 gene set, spin p of the singular values
+  PLS1 < 0.001 and PLS2 = 0.011; map ρ are Spearman with 5,000-rotation spin tests; MAGMA gene-property
+  tests are two-sided.
 
 ## Reproducing
 
