@@ -1,0 +1,84 @@
+*******************************************************************
+* Genome-wide Complex Trait Analysis (GCTA)
+* version v1.94.1 Linux
+* Built at Nov 15 2022 21:14:25, by GCC 8.5
+* (C) 2010-present, Yang Lab, Westlake University
+* Please report bugs to Jian Yang <jian.yang@westlake.edu.cn>
+*******************************************************************
+Analysis started at 17:51:30 BST on Thu Sep 24 2026.
+Hostname: cpu-q-612
+
+Accepted options:
+--reml
+--grm /home/rajd2/rds/hpc-work/abcd_development/legacy/hpc/work/results/grm_imp_pooled/abcd_imp.pcair
+--pheno /home/rajd2/rds/hpc-work/abcd_development/ahba_pls/h4_projection/work/pheno_h4_fidiid.txt
+--mpheno 6
+--qcovar /home/rajd2/rds/hpc-work/abcd_development/genetic_analysis/work/pheno_70tab_hcp_fidiid/covar_quant.txt
+--covar /home/rajd2/rds/hpc-work/abcd_development/genetic_analysis/work/pheno_70tab_hcp_fidiid/covar_categorical.txt
+--thread-num 8
+--out /home/rajd2/rds/hpc-work/abcd_development/ahba_pls/h4_projection/results/reml/slope_projPLS2_resid
+
+Note: the program will be running on 8 threads.
+
+Reading IDs of the GRM from [/home/rajd2/rds/hpc-work/abcd_development/legacy/hpc/work/results/grm_imp_pooled/abcd_imp.pcair.grm.id].
+8178 IDs are read from [/home/rajd2/rds/hpc-work/abcd_development/legacy/hpc/work/results/grm_imp_pooled/abcd_imp.pcair.grm.id].
+Reading the GRM from [/home/rajd2/rds/hpc-work/abcd_development/legacy/hpc/work/results/grm_imp_pooled/abcd_imp.pcair.grm.bin].
+GRM for 8178 individuals are included from [/home/rajd2/rds/hpc-work/abcd_development/legacy/hpc/work/results/grm_imp_pooled/abcd_imp.pcair.grm.bin].
+Reading phenotypes from [/home/rajd2/rds/hpc-work/abcd_development/ahba_pls/h4_projection/work/pheno_h4_fidiid.txt].
+There are 6 traits specified in the file [/home/rajd2/rds/hpc-work/abcd_development/ahba_pls/h4_projection/work/pheno_h4_fidiid.txt].
+Trait #6 is included for analysis.
+Non-missing phenotypes of 8597 individuals are included from [/home/rajd2/rds/hpc-work/abcd_development/ahba_pls/h4_projection/work/pheno_h4_fidiid.txt].
+Reading quantitative covariate(s) from [/home/rajd2/rds/hpc-work/abcd_development/genetic_analysis/work/pheno_70tab_hcp_fidiid/covar_quant.txt].
+12 quantitative covariate(s) of 8597 individuals are included from [/home/rajd2/rds/hpc-work/abcd_development/genetic_analysis/work/pheno_70tab_hcp_fidiid/covar_quant.txt].
+Reading discrete covariate(s) from [/home/rajd2/rds/hpc-work/abcd_development/genetic_analysis/work/pheno_70tab_hcp_fidiid/covar_categorical.txt].
+2 discrete covariate(s) of 8597 individuals are included from [/home/rajd2/rds/hpc-work/abcd_development/genetic_analysis/work/pheno_70tab_hcp_fidiid/covar_categorical.txt].
+
+12 quantitative variable(s) included as covariate(s).
+2 discrete variable(s) included as covariate(s).
+6011 individuals are in common in these files.
+
+Performing  REML analysis ... (Note: may take hours depending on sample size).
+6011 observations, 32 fixed effect(s), and 2 variance component(s)(including residual variance).
+Calculating prior values of variance components by EM-REML ...
+Updated prior values: 145302 149755
+logL: -40601.3
+Running AI-REML algorithm ...
+Iter.	logL	V(G)	V(e)	
+1	-40598.69	109308.90482	180484.20225	
+2	-40583.20	87246.15870	200250.91674	
+3	-40576.54	73296.01651	213175.17172	
+4	-40573.64	64294.47762	221710.89058	
+5	-40572.36	58409.58739	227382.62751	
+6	-40571.80	54529.61484	231165.35183	
+7	-40571.54	46389.82703	239167.48243	
+8	-40571.34	46818.76929	238816.46251	
+9	-40571.34	46800.61460	238833.13536	
+10	-40571.34	46801.41375	238832.40647	
+Log-likelihood ratio converged.
+
+Calculating the logLikelihood for the reduced model ...
+(variance component 1 is dropped from the model)
+Calculating prior values of variance components by EM-REML ...
+Updated prior values: 282961.61398
+logL: -40580.17328
+Running AI-REML algorithm ...
+Iter.	logL	V(e)	
+1	-40579.23	282949.44549	
+2	-40579.23	282923.10890	
+Log-likelihood ratio converged.
+
+Summary result of REML analysis:
+Source	Variance	SE
+V(G)	46801.413752	12709.305365
+V(e)	238832.406472	12365.792775
+Vp	285633.820224	5341.094741
+V(G)/Vp	0.163851	0.043756
+
+Sampling variance/covariance of the estimates of variance components:
+1.615264e+08	-1.429560e+08	
+-1.429560e+08	1.529128e+08	
+
+Summary result of REML analysis has been saved in the file [/home/rajd2/rds/hpc-work/abcd_development/ahba_pls/h4_projection/results/reml/slope_projPLS2_resid.hsq].
+
+Analysis finished at 17:51:43 BST on Thu Sep 24 2026
+Overall computational time: 12.45 sec.

@@ -1,0 +1,7 @@
+phenotype	h2	se	pval	n
+global_slope	0.1560	0.0446	1.4369e-04	6011
+slope_cov137	0.1416	0.0443	4.5993e-04	6011
+slope_projC3	0.1458	0.0447	3.6717e-04	6011
+slope_projPLS2	0.1729	0.0440	1.6123e-05	6011
+slope_projC3_resid	0.1586	0.0446	1.0372e-04	6011
+slope_projPLS2_resid	0.1639	0.0438	3.5545e-05	6011
