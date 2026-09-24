@@ -16,7 +16,8 @@
 #   pooled_ABCD magma_pooled/genes         (step 14; ABCD analysis-sample LD)
 # Sets: the step-13 SCZ and MDD sets plus magma_gene_sets/genesets_topgenes.txt
 # (MDD / SCZ25 Bonferroni and top-100/250/500 genes from the EUR discovery
-# GWAS's own gene analysis, MHC excluded; built by build_topgene_sets.py).
+# GWAS's own gene analysis, MHC excluded; built by build_topgene_sets.py) and
+# genesets_wes.txt (SCZ 2025 exome q<0.05; MDD UKB-exome depressive-symptom genes).
 # -> results_70tab*/magma_set_tests/table_magma_set_tests.tsv
 set -euo pipefail
 REPO=/home/rajd2/rds/hpc-work/abcd_development
@@ -24,7 +25,8 @@ MAGMA="$REPO/legacy/hpc/work/bin/magma"; PY="$REPO/legacy/hpc/work/envs/abcd/bin
 ROOT="$REPO/genetic_analysis/work/magma_scz2025"
 SETS=( "scz:$ROOT/genesets_scz2025.txt"
        "mdd:$REPO/legacy/hpc/work/genesets/mdd_highconf.txt"
-       "top:$REPO/genetic_analysis/magma_gene_sets/genesets_topgenes.txt" )
+       "top:$REPO/genetic_analysis/magma_gene_sets/genesets_topgenes.txt"
+       "wes:$REPO/genetic_analysis/magma_gene_sets/genesets_wes.txt" )
 for S in "" "_hcp"; do
   R="$REPO/genetic_analysis/work/results_70tab$S"; OUT="$R/magma_set_tests"; mkdir -p "$OUT"
   for V in "EUR_1000G:magma_panel" "EUR_ABCD:magma_panel_abcdld" "pooled_ABCD:magma_pooled"; do

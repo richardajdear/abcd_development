@@ -1,0 +1,5 @@
+arm	ld_reference	phenotype	variable	n_genes	beta	se	p
+EUR	1000 Genomes EUR (g1000_eur)	global_slope	MDD_WES	22	-0.33723	0.17774	0.9711
+EUR	1000 Genomes EUR (g1000_eur)	global_slope	MDD_WES_genebased	3	-0.97208	0.48575	0.9773
+EUR	1000 Genomes EUR (g1000_eur)	global_slope	MDD_WES_noMHC	13	-0.60473	0.2326	0.99533
+EUR	1000 Genomes EUR (g1000_eur)	global_slope	SCZ_WES	23	0.33922	0.17469	0.026091
