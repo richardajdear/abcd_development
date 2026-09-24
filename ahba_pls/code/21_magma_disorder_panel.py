@@ -35,6 +35,7 @@ Vectors (thinning orientation; positive = expressed where thinning is faster):
   ABCD_PLS2_DK         the lead signature, DK, AHBA_updated ds25
   ABCD_PLS2_HCP        the same design at 137 HCP-MMP parcels
   ABCD_PLS2_DKmatched  DK on the HCP gene basis (the parcellation-only contrast)
+  ABCD_PLS1_HCP        PLS1 of the HCP fit, the static component (positive = thicker)
   AHBA_C3, NSPN_PLS2   the published benchmarks;  AHBA_C1  static-gradient control
 
 Each vector is tested alone on its own universe (genes with both a weight and a
@@ -94,10 +95,13 @@ nspn = pd.read_csv(REF / "nspn_pls_gene_weights.csv").set_index("gene")
 vectors = {
     "ABCD_PLS2_DK": -dk_w["PLS2_Z"],
     "ABCD_PLS2_HCP": -hcp_w["hcp_opt2_dCT_CT_PLS2_Z"],
+    # PLS1 of the same fit is the static (baseline-thickness) component: CT
+    # salience +0.99, so positive = expressed where cortex is THICKER
+    "ABCD_PLS1_HCP": hcp_w["hcp_opt2_dCT_CT_PLS1_Z"],
     "ABCD_PLS2_DKmatched": dk_m["DK_PLS2_matchedX"],
     "AHBA_C3": c123["C3"], "NSPN_PLS2": nspn["PLS2_z"], "AHBA_C1": c123["C1"],
 }
-JOINT = [("ABCD_PLS2_DK", "AHBA_C3"), ("ABCD_PLS2_HCP", "AHBA_C3"),
+JOINT = [("ABCD_PLS2_DK", "AHBA_C3"), ("ABCD_PLS2_HCP", "AHBA_C3"), ("ABCD_PLS1_HCP", "AHBA_C1"),
          ("ABCD_PLS2_DK", "AHBA_C1"), ("ABCD_PLS2_HCP", "ABCD_PLS2_DKmatched")]
 
 # symbol -> Entrez from the gene-location file the gene analyses were annotated

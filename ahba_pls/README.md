@@ -740,9 +740,31 @@ Reading, primary files first (`SCZ25_META`, `MDD_EUR`):
 now holds a native arm64 build from the v1.10 source; it reproduces `magma_all_marginal.tsv` exactly.
 Build recipe in `tools/bin/README.md`.
 
+### HCP-MMP summary slide — `code/22_hcp_summary.py` → `code/fig5_hcp_summary.R`
+
+`figures/fig_hcp_summary.png` (16:9) summarises the HCP-MMP arm alone: the option-2 fit (Y = dCT + CT,
+137 parcels) with **both** components against AHBA C1 and C3. Script 22 repeats that fit to recover the
+PLS1 region scores 12_hcp_pls.py did not save, and asserts the refit's gene weights and PLS2 scores
+match the saved ones. Tables: `results/hcp_summary_{maps.csv,map_pairs,gene_pairs,gene_weights,sets}.tsv`.
+
+- **PLS1 is the static axis**: it tracks baseline thickness (ρ = 0.59 with CT, 0.11 with dCT) and *is* AHBA
+  C1 with the sign flipped (regions ρ = −0.99, genes −0.95). Its SCZ association (β = −0.030, p = 0.044 on
+  SCZ25_META) is therefore C1's (+0.047, p = 0.002) seen from the other side, not a separate finding.
+- **PLS2 is the thinning axis**: it tracks dCT (ρ = −0.58 with the rate in mm/yr, i.e. faster thinning;
+  −0.01 with CT) and matches C3 (regions 0.70, genes 0.68). It is associated with SCZ (0.036, p = 0.018)
+  and MDD (0.051, p = 0.0006); C3 is stronger for both (0.060 / 0.071).
+- **Enrichment, one 7,973-gene universe, BH within vector**: PLS2 reproduces C3's profile (excitatory and
+  inhibitory neurons, L2–L3 up; oligodendrocytes, microglia, white matter down) with one exception,
+  astrocytes (+5 for PLS2, −9 for C3), the parcellation effect noted above. PLS1 mirrors C1.
+- **Layer sets**: Maynard 2021 spatial transcriptomics, a layer's genes = FDR < 0.05 and t > 0, which is
+  the `which='maynard'` definition of `AHBA/code/enrichments_data.get_layer_genes` (Dear et al. 2024).
+- **Global slope**: tested (`slope_{1lmm,perregion}_{HCP,DK}` in `magma_disorder_panel.tsv`) and left
+  off the slide by design — none of PLS1, PLS2, C1, C3 is associated with any of the four global-slope
+  gene analyses (smallest p = 0.28), as expected from that GWAS's low heritability.
+
 ## Reproducing
 
-Analysis (python, env `ahba-pls`): `code/01_*` → `code/21_*` in order. `11_` is the parcellation
+Analysis (python, env `ahba-pls`): `code/01_*` → `code/22_*` in order. `11_` is the parcellation
 control, `12_` the HCP-MMP arm, `14_`/`15_` the single-universe enrichment and cell-class tables that
 the summary figures read, `16_` the dCT-only variant, `17_` the design grid and all pairwise statistics, `18_` the NSPN→HCP-MMP
 conversion (needs `nibabel`, and the fsaverage annot files in `~/Git/AHBA/data/parcellations/`; run it
