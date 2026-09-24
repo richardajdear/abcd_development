@@ -957,7 +957,9 @@ Results (10 of 112 map–reference tests pass both nulls):
    ρ = 0.41 (p_spin 0.001, p_perm 0.002). These survive partialling out PLS2 (ρ = 0.37 for anxiety,
    0.37 for the p-factor).
    - dCT is negative mm/yr, so this means that children whose symptoms rise thin relatively *more* where cortex
-     normally thins least, and *less* in the fast-thinning sensorimotor strip.
+     normally thins least, and *less* in the fastest-thinning orbital/polar frontal and posterior cingulate cortex.
+     The somatosensory/motor strip is an exception: it thins slowly (15 µm/yr) but carries slightly negative
+     associations (the blue band in panel a). An earlier version of this sentence called it fast-thinning, which is wrong.
    - The case-control maps showed the same flattened gradient. This is a cut-off-free definition in the same
      children, so it is a robustness check, not an independent replication.
 3. **Rule-breaking goes the other way**: its CT-adjusted map aligns with C3 (ρ = 0.31, p_spin 0.004, p_perm 0.031;

@@ -191,6 +191,44 @@ DC["c"] = DC.apply(lambda r: f"{r.y_sd_beta:+.3f} ({r.p:.2g})", axis=1)
 print(DC[DC.outcome.isin(["totprob", "pfactor", "anxdisord", "internal", "rulebreak", "external"])]
       .pivot_table(index=["outcome", "spec"], columns="term", values="c", aggfunc="first").to_string(), file=sys.stderr)
 
+# ------------------------------------------- the same split, by the PLS2 map
+# Which pole of the transcriptomic axis carries the symptom-linked thinning?
+# Thirds of the PLS2 score from the unfiltered-AHBA fit (hcp_summary_base_maps.csv,
+# 177 parcels; PLS2-high = neuronal / L2-3 genes, PLS2-low = oligodendrocyte / WM / L1).
+pm = pd.read_csv(RES / "hcp_summary_base_maps.csv", index_col=0)
+pm.index = [lab[l.lower()] for l in pm.index]
+p2 = pm.PLS2.dropna()
+ptier = pd.qcut(p2, 3, labels=["PLS2-low", "PLS2-mid", "PLS2-high"])
+for t in ptier.cat.categories:
+    k = t.replace("-", "_")
+    D[f"thin_{k}"] = thin.loc[D.index, ptier.index[ptier == t]].mean(axis=1)
+    D[f"thin_{k}_z"] = (D[f"thin_{k}"] - D[f"thin_{k}"].mean()) / D[f"thin_{k}"].std()
+print("PLS2 thirds: n", ptier.value_counts().to_dict(), "| normative thinning um/yr",
+      {t: round(1000 * g.loc[ptier.index[ptier == t]].mean(), 1) for t in ptier.cat.categories}, file=sys.stderr)
+prow = []
+T3 = ["thin_PLS2_low_z", "thin_PLS2_mid_z", "thin_PLS2_high_z"]
+for o in OUT:
+    d = D.dropna(subset=[f"{o}_late", f"{o}_base", "age_late"])
+    for spec, terms, extra in ([(f"{t.split('_')[2]} alone", [t], []) for t in T3]
+                               + [("low + high", [T3[0], T3[2]], []),
+                                  ("low + high | CT, QC", [T3[0], T3[2]], ["glob_ct_z", "ct_grad_slope_z", "qc_defects_z"])]):
+        m = smf.ols(f"{o}_late ~ {' + '.join(terms)} + {o}_base + {BASE}" + "".join(f" + {e}" for e in extra), d
+                    ).fit(cov_type="cluster", cov_kwds={"groups": d.family})
+        for tt_ in terms:
+            prow.append(dict(outcome=o, spec=spec, term=tt_.replace("thin_", "").replace("_z", "").replace("_", "-"),
+                             beta=m.params[tt_], se=m.bse[tt_], p=m.pvalues[tt_], y_sd_beta=m.params[tt_] / d[f"{o}_late"].std(), n=int(m.nobs)))
+        if spec.startswith("low + high"):
+            c = m.params[T3[0]] - m.params[T3[2]]
+            v = m.cov_params().loc[T3[0], T3[0]] + m.cov_params().loc[T3[2], T3[2]] - 2 * m.cov_params().loc[T3[0], T3[2]]
+            from scipy.stats import norm
+            prow.append(dict(outcome=o, spec=spec, term="low - high", beta=c, se=np.sqrt(v), p=2 * norm.sf(abs(c) / np.sqrt(v)),
+                             y_sd_beta=c / d[f"{o}_late"].std(), n=int(m.nobs)))
+PT = pd.DataFrame(prow)
+PT.to_csv(RES / "gradient_scores_pls2tiers.tsv", sep="\t", index=False, float_format="%.5g")
+PT["c"] = PT.apply(lambda r: f"{r.y_sd_beta:+.3f} ({r.p:.2g})", axis=1)
+print(PT[PT.outcome.isin(["totprob", "pfactor", "internal", "anxdisord", "rulebreak"])]
+      .pivot_table(index=["outcome", "spec"], columns="term", values="c", aggfunc="first").to_string(), file=sys.stderr)
+
 pd.set_option("display.width", 220)
 q = A[A["sample"] == "all"].assign(c=lambda x: x.apply(lambda r: f"{r.y_sd_beta:+.3f} ({r.p:.2g})", axis=1),
                                    col=lambda x: x.score + " " + x.adjust)

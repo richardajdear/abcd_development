@@ -1,0 +1,82 @@
+outcome	spec	term	beta	se	p	y_sd_beta	n
+totprob	low alone	PLS2-low	0.018167	0.010063	0.071026	0.01694	8187
+totprob	mid alone	PLS2-mid	0.017794	0.010174	0.080304	0.016592	8187
+totprob	high alone	PLS2-high	0.010588	0.010012	0.29027	0.0098731	8187
+totprob	low + high	PLS2-low	0.028823	0.017022	0.090396	0.026876	8187
+totprob	low + high	PLS2-high	-0.012957	0.016939	0.44431	-0.012082	8187
+totprob	low + high	low - high	0.04178	0.032276	0.19551	0.038959	8187
+totprob	low + high | CT, QC	PLS2-low	0.016	0.017938	0.37241	0.014919	8187
+totprob	low + high | CT, QC	PLS2-high	-0.013963	0.018329	0.44617	-0.01302	8187
+totprob	low + high | CT, QC	low - high	0.029963	0.033121	0.36565	0.027939	8187
+internal	low alone	PLS2-low	0.019529	0.0089368	0.028871	0.021829	8189
+internal	mid alone	PLS2-mid	0.021385	0.0090812	0.018529	0.023903	8189
+internal	high alone	PLS2-high	0.013682	0.008978	0.12753	0.015293	8189
+internal	low + high	PLS2-low	0.025237	0.014876	0.089785	0.028209	8189
+internal	low + high	PLS2-high	-0.0069389	0.01496	0.64276	-0.007756	8189
+internal	low + high	low - high	0.032176	0.028303	0.2556	0.035965	8189
+internal	low + high | CT, QC	PLS2-low	0.012201	0.01556	0.43296	0.013638	8189
+internal	low + high | CT, QC	PLS2-high	-0.0076429	0.016209	0.63727	-0.0085429	8189
+internal	low + high | CT, QC	low - high	0.019844	0.02898	0.49349	0.022181	8189
+external	low alone	PLS2-low	0.01432	0.0086165	0.09653	0.016424	8185
+external	mid alone	PLS2-mid	0.012153	0.0085462	0.15501	0.013939	8185
+external	high alone	PLS2-high	0.013132	0.0083671	0.11655	0.015062	8185
+external	low + high	PLS2-low	0.010735	0.014713	0.4656	0.012313	8185
+external	low + high	PLS2-high	0.0043588	0.014275	0.7601	0.0049994	8185
+external	low + high	low - high	0.0063763	0.027582	0.81718	0.0073134	8185
+external	low + high | CT, QC	PLS2-low	0.012895	0.015472	0.40461	0.01479	8185
+external	low + high | CT, QC	PLS2-high	0.011431	0.015351	0.4565	0.013111	8185
+external	low + high | CT, QC	low - high	0.0014641	0.028132	0.95849	0.0016792	8185
+depress	low alone	PLS2-low	0.019511	0.0076075	0.010324	0.027625	8181
+depress	mid alone	PLS2-mid	0.022911	0.0077591	0.0031492	0.032438	8181
+depress	high alone	PLS2-high	0.017352	0.0075736	0.021956	0.024568	8181
+depress	low + high	PLS2-low	0.015955	0.012735	0.21027	0.02259	8181
+depress	low + high	PLS2-high	0.0043245	0.012677	0.73301	0.0061228	8181
+depress	low + high	low - high	0.011631	0.024123	0.6297	0.016467	8181
+depress	low + high | CT, QC	PLS2-low	0.013827	0.013416	0.30268	0.019577	8181
+depress	low + high | CT, QC	PLS2-high	0.0103	0.01379	0.45513	0.014583	8181
+depress	low + high | CT, QC	low - high	0.0035278	0.024867	0.88718	0.0049948	8181
+anxdisord	low alone	PLS2-low	0.01687	0.0066486	0.011169	0.025984	8185
+anxdisord	mid alone	PLS2-mid	0.016881	0.0068507	0.013733	0.026001	8185
+anxdisord	high alone	PLS2-high	0.011543	0.0067268	0.086168	0.017779	8185
+anxdisord	low + high	PLS2-low	0.02247	0.011154	0.043949	0.034609	8185
+anxdisord	low + high	PLS2-high	-0.0068097	0.011299	0.54671	-0.010488	8185
+anxdisord	low + high	low - high	0.02928	0.021321	0.16966	0.045098	8185
+anxdisord	low + high | CT, QC	PLS2-low	0.011044	0.011596	0.34088	0.01701	8185
+anxdisord	low + high | CT, QC	PLS2-high	-0.012386	0.012216	0.31062	-0.019077	8185
+anxdisord	low + high | CT, QC	low - high	0.02343	0.021785	0.28214	0.036088	8185
+anxdep	low alone	PLS2-low	0.015814	0.0073058	0.030419	0.021847	8184
+anxdep	mid alone	PLS2-mid	0.017521	0.0074623	0.018876	0.024206	8184
+anxdep	high alone	PLS2-high	0.0087031	0.0073491	0.23632	0.012023	8184
+anxdep	low + high	PLS2-low	0.026376	0.012267	0.031541	0.036439	8184
+anxdep	low + high	PLS2-high	-0.012838	0.012351	0.29864	-0.017735	8184
+anxdep	low + high	low - high	0.039214	0.023379	0.093478	0.054174	8184
+anxdep	low + high | CT, QC	PLS2-low	0.01186	0.012847	0.3559	0.016385	8184
+anxdep	low + high | CT, QC	PLS2-high	-0.02011	0.013335	0.13153	-0.027783	8184
+anxdep	low + high | CT, QC	low - high	0.031971	0.023952	0.18195	0.044167	8184
+withdep	low alone	PLS2-low	0.017191	0.0071262	0.015847	0.026039	8189
+withdep	mid alone	PLS2-mid	0.021505	0.0072263	0.0029207	0.032572	8189
+withdep	high alone	PLS2-high	0.021701	0.0071152	0.0022891	0.032869	8189
+withdep	low + high	PLS2-low	-0.0020179	0.012189	0.86851	-0.0030564	8189
+withdep	low + high	PLS2-high	0.023349	0.012179	0.055223	0.035365	8189
+withdep	low + high	low - high	-0.025367	0.023192	0.27406	-0.038421	8189
+withdep	low + high | CT, QC	PLS2-low	-0.0046683	0.01276	0.71448	-0.0070708	8189
+withdep	low + high | CT, QC	PLS2-high	0.026214	0.01315	0.046221	0.039704	8189
+withdep	low + high | CT, QC	low - high	-0.030882	0.023683	0.19224	-0.046775	8189
+rulebreak	low alone	PLS2-low	0.016487	0.0068313	0.015805	0.026346	8182
+rulebreak	mid alone	PLS2-mid	0.017753	0.0067618	0.0086534	0.028369	8182
+rulebreak	high alone	PLS2-high	0.019037	0.0065825	0.003827	0.030422	8182
+rulebreak	low + high	PLS2-low	0.0025308	0.011584	0.82707	0.0040442	8182
+rulebreak	low + high	PLS2-high	0.016969	0.011149	0.12799	0.027117	8182
+rulebreak	low + high	low - high	-0.014439	0.021616	0.50415	-0.023073	8182
+rulebreak	low + high | CT, QC	PLS2-low	0.010214	0.012164	0.40111	0.016321	8182
+rulebreak	low + high | CT, QC	PLS2-high	0.027639	0.011954	0.020765	0.044168	8182
+rulebreak	low + high | CT, QC	low - high	-0.017426	0.02198	0.4279	-0.027846	8182
+pfactor	low alone	PLS2-low	0.05066	0.021611	0.019068	0.022865	8162
+pfactor	mid alone	PLS2-mid	0.049967	0.021867	0.022312	0.022552	8162
+pfactor	high alone	PLS2-high	0.041682	0.021326	0.050648	0.018812	8162
+pfactor	low + high	PLS2-low	0.049835	0.035765	0.1635	0.022492	8162
+pfactor	low + high	PLS2-high	0.0010028	0.035267	0.97731	0.00045262	8162
+pfactor	low + high	low - high	0.048832	0.067329	0.46828	0.02204	8162
+pfactor	low + high | CT, QC	PLS2-low	0.02311	0.037732	0.54021	0.010431	8162
+pfactor	low + high | CT, QC	PLS2-high	-0.00015059	0.038168	0.99685	-6.7969e-05	8162
+pfactor	low + high | CT, QC	low - high	0.023261	0.068943	0.73582	0.010498	8162
