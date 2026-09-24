@@ -397,7 +397,7 @@ cap <- c(
           sv["ols_slope_mm_per_yr"] * 1000),
   sprintf("- **d** ΔCT reliability 1 − v/τ², where v is a child's conditional (posterior) variance of the slope random effect and τ² the between-child slope variance: boxes, per-parcel LMMs (358 parcels; each value the mean over children; medians %.2f / %.2f / %.2f for 2 / 3 / 4 scans); squares, the single LMM on the cortical mean (mean over children %.2f / %.2f / %.2f).",
           med$m[1], med$m[2], med$m[3], cwm["2"], cwm["3"], cwm["4"]),
-  sprintf("- **e** Distributions of the two per-child traits from the single LMM on the per-scan cortical mean (%s children with 2 / 3 / 4 scans: %s / %s / %s; %s scans): CT and ΔCT, the phenotypes of e–h. Per-child estimates are shrunk toward the mean (SD %.1f µm/yr against a model between-child SD of %.1f µm/yr); every child's estimated slope is negative.",
+  sprintf("- **e** Distributions of the two per-child traits from the single LMM on the per-scan cortical mean (%s children with 2 / 3 / 4 scans: %s / %s / %s; %s scans): CT and ΔCT, the phenotypes of f–g. Per-child estimates are shrunk toward the mean (SD %.1f µm/yr against a model between-child SD of %.1f µm/yr); every child's estimated slope is negative.",
           comma(n_kids), comma(per$n_children[per$n_scans == 2]), comma(per$n_children[per$n_scans == 3]),
           comma(per$n_children[per$n_scans == 4]), comma(n_scans),
           csv_("slope_um_per_yr", "sd"), csv_("slope_um_per_yr", "model_sd")),
