@@ -910,7 +910,27 @@ anxious/depressed, withdrawn/depressed, internalising, rule-breaking, the p-fact
 - The two maps positively aligned with C3 (withdrawn/depressed and parent MDD, absolute ρ ≈ 0.2) pass spin but
   not the label null.
 
-Outputs: `results/casecontrol_maps.tsv` (per-parcel d, t, p), `results/casecontrol_map_corr.tsv`,
+**Adjusting for baseline thickness** (the `_ct` maps). Each parcel's model adds the child's observed thickness
+in that parcel at the first scan: `thin ~ case + covariates [+ global thinning] + CT0_r`.
+- This matters because thinning slopes are negatively coupled to the starting value, through biology and through
+  measurement error in the first scan. Cases may also differ at baseline.
+- The adjusted maps correlate with the unadjusted ones at ρ = 0.64–0.80.
+
+Results:
+1. **The internalising–PLS2 correlation disappears**: ρ = -0.05 (p_spin 0.67), or -0.09 also
+   adjusting for global thinning. The earlier negative correlation reflected where internalising cases already
+   differed in thickness at baseline.
+2. **No adjusted map tracks PLS2**: ρ = -0.16 to 0.16, and none passes either null.
+3. **C3 correlations all turn positive** (ρ = 0.01 to 0.24 across 16 maps), but only
+   1 passes the spin null and none passes the label null.
+4. **New: p-factor and DSM anxiety maps align with the normative thinning map.** p-factor ρ = 0.30
+   (p_spin 0.002, p_label 0.017); anxiety 0.27 (p_spin 0.006, p_label 0.029).
+   dCT is a slope in mm/yr (all 179 parcels negative), so higher dCT = *slower* normative thinning. A positive ρ
+   therefore means that, given the same starting thickness, these children's extra thinning sits where cortex
+   normally thins least. For the p-factor, mean d = −0.012 in the fastest-thinning third of parcels vs +0.014 in
+   the slowest. That is a flattening of the normative gradient, not an exaggeration of it, and not PLS2-specific.
+
+Outputs: `results/casecontrol_maps.tsv` (per-parcel d, t, p; maps absolute / relative / absolute_ct / relative_ct), `results/casecontrol_map_corr.tsv`,
 `figures/fig_casecontrol.png`. All are group-level.
 
 ## Reproducing

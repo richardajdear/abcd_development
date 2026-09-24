@@ -35,13 +35,17 @@ Map, per parcel r (OLS, all parcels at once):
   d_r = beta_case / residual SD  (Cohen's d, positive = cases thin FASTER)
   "absolute" map without global_i; "relative" map with global thinning as a
   covariate (where cases thin more than their own global rate predicts).
+  "_ct" variants add the child's baseline thickness IN THAT PARCEL (observed at
+  the first scan, lh/rh mean) -- a parcel-specific covariate, fitted per parcel.
   n_visits and age_span are covariates because slope BLUPs are shrunk more for
   children with fewer / closer scans, and scan count may differ by case status.
 
 Map-level tests (Spearman rho):
   vs PLS2 (137 AHBA parcels), AHBA C3, and the normative thinning map dCT
-  (179 parcels; a proportional "cases thin more everywhere" effect would make the
-  absolute map mirror dCT, which itself correlates with PLS2).
+  (179 parcels; dCT is mm/yr, all negative, so higher = SLOWER thinning. A
+  proportional "cases thin faster, most where everyone thins fastest" effect
+  gives rho < 0 with dCT; rho > 0 means cases' extra thinning is where normative
+  thinning is slowest, i.e. a flattened gradient).
   p_spin  : 5,000 spin rotations (HCP centroids)
   p_label : 1,000 permutations of case/control labels within site -- is the
             observed map more PLS2-like than maps from random groups of the same size?
@@ -75,6 +79,14 @@ glob = thin.mean(axis=1)                                      # both hemispheres
 thin = thin.T.groupby(thin.columns.str.slice(3)).mean().T
 thin.columns = "lh_" + thin.columns
 assert thin.shape[1] == 179, thin.shape
+# baseline thickness: the child's OBSERVED thickness at their first scan in each
+# parcel (v0 for 92% of children; age_first is a covariate), lh/rh mean
+tt = pd.read_parquet(RUN / "model_table.parquet", columns=["subject", "label", "value", "age"])
+ct0 = (tt.sort_values("age").groupby(["subject", "label"]).value.first().unstack())
+ct0 = ct0.T.groupby(ct0.columns.str.slice(3)).mean().T
+ct0.columns = "lh_" + ct0.columns
+ct0 = ct0.loc[thin.index, thin.columns]
+del tt
 mt = pd.read_parquet(RUN / "model_table.parquet",
                      columns=["subject", "visit", "sex", "site", "age_first", "age_span", "n_visits"]
                      ).drop_duplicates("subject").set_index("subject")
@@ -146,20 +158,29 @@ for name, (cas, ctl) in DEF.items():
     idx = y.index[C.loc[y.index].notna().all(axis=1).to_numpy()]
     y = y.loc[idx]; Yb = thin.loc[idx].to_numpy()
     sites = C.loc[idx, "site"].astype(str).to_numpy()
-    for adj in (False, True):
+    CTb = ct0.loc[idx].to_numpy()
+    for adj, adj_ct in ((False, False), (True, False), (False, True), (True, True)):
         Z = design(idx, adj)
         H = lambda M: M - Z @ np.linalg.lstsq(Z, M, rcond=None)[0]
         R = H(Yb)                                             # residualised thinning (FWL)
+        Q = H(CTb) if adj_ct else None                        # residualised parcel CT, one column per parcel
+        if adj_ct:                                            # partial each parcel's own CT out of its thinning
+            R = R - Q * ((R * Q).sum(0) / (Q * Q).sum(0))
         def dmap(lbl):
             rc = H(lbl.astype(float))
-            b = (R * rc[:, None]).sum(0) / (rc @ rc)
-            res = R - np.outer(rc, b)
-            dof = len(lbl) - Z.shape[1] - 1
+            if adj_ct:                                        # ... and out of the case indicator, per parcel
+                RC = rc[:, None] - Q * ((rc[:, None] * Q).sum(0) / (Q * Q).sum(0))
+            else:
+                RC = np.repeat(rc[:, None], R.shape[1], axis=1)
+            ss = (RC * RC).sum(0)
+            b = (R * RC).sum(0) / ss
+            res = R - RC * b
+            dof = len(lbl) - Z.shape[1] - 1 - int(adj_ct)
             s = np.sqrt((res ** 2).sum(0) / dof)
-            return b / s, b / (s / np.sqrt(rc @ rc)), dof
+            return b / s, b / (s / np.sqrt(ss)), dof
         d, t, dof = dmap(y.to_numpy())
         pv = 2 * stats.t.sf(np.abs(t), dof)
-        kind = "relative" if adj else "absolute"
+        kind = ("relative" if adj else "absolute") + ("_ct" if adj_ct else "")
         m = pd.Series(d, index=thin.columns)
         maprows.append(pd.DataFrame({"outcome": name, "map": kind, "label": thin.columns, "d": d, "t": t, "p": pv,
                                      "n_case": int(y.sum()), "n_ctrl": int((y == 0).sum())}))

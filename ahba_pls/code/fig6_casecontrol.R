@@ -55,25 +55,29 @@ pb <- ggplot(bi, aes(PLS2, d)) + geom_hline(yintercept = 0, colour = "grey70", l
 cc <- CR |> filter(reference %in% c("PLS2", "C3", "dCT")) |>
   mutate(sig = p_spin < 0.05 & p_label < 0.05,
          outcome = factor(OUT[outcome], rev(OUT)),
-         reference = factor(recode(reference, dCT = "normative dCT"), c("PLS2", "C3", "normative dCT")),
-         map = factor(recode(map, absolute = "absolute", relative = "| global thinning"), c("absolute", "| global thinning")))
+         reference = factor(recode(reference, dCT = "dCT (higher = slower thinning)"), c("PLS2", "C3", "dCT (higher = slower thinning)")),
+         map = factor(recode(map, absolute = "unadjusted", relative = "| global thinning",
+                             absolute_ct = "| baseline CT", relative_ct = "| global thinning + baseline CT"),
+                      c("unadjusted", "| global thinning", "| baseline CT", "| global thinning + baseline CT")))
 pc <- ggplot(cc, aes(rho, outcome, colour = map, alpha = sig)) +
   geom_vline(xintercept = 0, colour = "grey60", linewidth = 0.3) +
-  geom_point(size = 1.6, position = position_dodge(width = 0.55)) +
-  scale_colour_manual(values = c(absolute = "grey25", "| global thinning" = "#b2182b"), name = NULL) +
+  geom_point(size = 1.5, position = position_dodge(width = 0.7)) +
+  scale_colour_manual(values = c(unadjusted = "grey25", "| global thinning" = "#b2182b",
+                                 "| baseline CT" = "#4393c3", "| global thinning + baseline CT" = "#762a83"), name = NULL) +
   scale_alpha_manual(values = c(`TRUE` = 1, `FALSE` = FADE), guide = "none") +
-  facet_wrap(~reference, nrow = 1) + scale_x_continuous(breaks = c(-0.3, 0, 0.3)) +
+  facet_wrap(~reference, nrow = 1) + scale_x_continuous(breaks = c(-0.2, 0, 0.2)) +
   labs(x = "Spearman rho of the case-control map with the reference map", y = NULL,
        title = "c  Map agreement (opaque: p_spin and p_label < 0.05)") +
-  base_theme + theme(legend.position = "bottom", axis.line.y = element_blank(), axis.ticks.y = element_blank())
+  base_theme + theme(legend.position = "bottom", axis.line.y = element_blank(), axis.ticks.y = element_blank()) +
+  guides(colour = guide_legend(nrow = 2))
 
 fig <- (pa | (pb / pc + plot_layout(heights = c(1, 1.25)))) + plot_layout(widths = c(0.75, 1)) +
   plot_annotation(
     title = "Children who develop symptoms thin slightly faster overall, but not in the PLS2 pattern",
     subtitle = paste0("Case = below the CBCL borderline cut-off at baseline and at/above it at ages ~15\u201317 (KSADS: lifetime diagnosis); ",
-                      "control = below it at every wave.\nOnly internalising reaches p < 0.05 against PLS2, in the opposite direction: ",
-                      "cases' extra thinning sits where PLS2 is low."),
+                      "control = below it at every wave.\nWithout baseline thickness, internalising correlates negatively with PLS2; ",
+                      "adjusting each parcel for the child's baseline thickness removes that, and no map then tracks PLS2."),
     theme = theme(plot.title = element_text(size = TXT + 2.5, face = "bold"),
                   plot.subtitle = element_text(size = TXT, colour = "grey25", lineheight = 1.15)))
-ggsave(file.path(ROOT, "figures", "fig_casecontrol.png"), fig, width = 10, height = 6.4, dpi = 300, bg = "white")
+ggsave(file.path(ROOT, "figures", "fig_casecontrol.png"), fig, width = 10, height = 6.8, dpi = 300, bg = "white")
 cat("wrote fig_casecontrol.png\n")
