@@ -11,7 +11,7 @@ cell class	Micro	PLS1	391	-0.179	-3.617	0.00025	0.0005
 cell class	Micro	PLS2	391	-0.5463	-11.09	5e-05	7.272e-05
 cell class	Micro	C1	391	-0.2018	-4.084	5e-05	0.0001143
 cell class	Micro	C3	391	-0.4205	-8.583	5e-05	6.154e-05
-cell class	Neuro	PLS1	600	0.03667	0.928	0.3523	0.3523
+cell class	Neuro	PLS1	600	0.03667	0.9279	0.3523	0.3523
 cell class	Neuro	PLS2	600	0.4623	11.66	5e-05	7.272e-05
 cell class	Neuro	C1	600	0.0544	1.378	0.1674	0.1786
 cell class	Neuro	C3	600	0.6614	16.82	5e-05	6.154e-05

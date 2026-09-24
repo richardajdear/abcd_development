@@ -765,14 +765,14 @@ keeps the raw SVD sign). PLS2 is in the thinning orientation used everywhere els
 - **CT vs dCT (b)**: ρ = 0.09, p_spin = 0.63 over all 179 parcels. Baseline thickness and thinning rate
   are spatially unrelated, which is why Y = [dCT, CT] separates cleanly into a static and a thinning
   component.
-- **Imaging colour scales (a)**: white-anchored. CT runs white (thinnest) to blue (thickest); dCT runs white
-  (0 mm/yr, no thinning) to red (fastest thinning).
-- **Systems in b–d**: two groups from Glasser 2016's 22 cortices (`data/reference/hcp_cortices/`:
-  `HCP-MMP1_UniqueRegionList.csv`, `Cortex_ID`, groupings from `HCP-MMP1_cortices.txt`). Cortices 1–12 (visual,
-  sensorimotor, auditory incl. insular/frontal opercular) = **sensorimotor**; 13–22 = **association**.
-  The 137 covered parcels split 51 sensorimotor / 86 association. The four-way lookup is kept in
-  `hcp_parcel_systems.csv`; the slide collapses it. Downloaded 2026-09-24 from
-  bitbucket.org/dpat/tools (linked from neuroimaging-core-docs); lookup `hcp_parcel_systems.csv`.
+- **Colour scales (a)**: CT and dCT are white-anchored — CT white (thinnest) to blue (thickest), dCT white
+  (0 mm/yr, no thinning) to red (fastest thinning). Component and AHBA maps use Spectral, so they are not
+  confused with panel f's red–blue enrichment scale. No panel carries a subtitle; points are uncoloured.
+- **Parcel systems**: the Glasser 2016 cortex lookup is kept in `hcp_summary*_maps.csv` but no longer drawn,
+  because colouring the points made the scatters harder to read. It lives in
+  `data/reference/hcp_cortices/hcp_parcel_systems.csv`, from `HCP-MMP1_UniqueRegionList.csv` `Cortex_ID` with
+  the groupings of `HCP-MMP1_cortices.txt`: cortices 1–12 sensorimotor (51 of 137 parcels), 13–22
+  association (86). Downloaded 2026-09-24 from bitbucket.org/dpat/tools, linked from neuroimaging-core-docs.
 - **Fading (alpha 0.3)**: b–d region panels at spin p ≥ 0.05; e at p ≥ 0.05; f at BH q ≥ 0.05. Gene-level ρ
   has no valid p (7,973 co-expressed genes make every ρ nominally significant), so each gene panel is
   faded with its matching region pair.
@@ -787,6 +787,47 @@ keeps the raw SVD sign). PLS2 is in the thinning orientation used everywhere els
   parcels, 137 with AHBA coverage; PLS on the 7,973-gene C1–C3 gene set, spin p of the singular values
   PLS1 < 0.001 and PLS2 = 0.011; map ρ are Spearman with 5,000-rotation spin tests; MAGMA gene-property
   tests are two-sided.
+
+#### Three versions by AHBA matrix
+
+`22_hcp_summary.py <variant>` and `fig5_hcp_summary.R <variant>` build the same slide from three AHBA matrices
+(`~/Git/AHBA/data/abagen-data/expression/`), fitting the components from scratch each time. The 3d_ds5
+fit reproduces 12_hcp_pls.py's saved weights, bootstrap Z and PLS2 scores (asserted).
+
+- `3d_ds5` → `figures/fig_hcp_summary.png`: `hcp_3d_ds5.csv`, the ≥3-donor region filter plus the DS5 gene
+  filter. This is the matrix C1–C3 were fitted on, and it is identical to `hcp_3d.csv` restricted to those genes.
+- `ds5` → `fig_hcp_summary_ds5.png`: `hcp_ds5.csv`, no region filter but its own DS5 gene set. Its 7,973
+  genes share 7,862 with C1–C3.
+- `base` → `fig_hcp_summary_base.png`: `hcp_base.csv`, no filter.
+
+In every version parcel ids 1–180 are the left-hemisphere `regionID`s of `HCP-MMP1_UniqueRegionList.csv`,
+checked against the 137-parcel id→label table. Parcels with no samples and genes with any missing
+value are dropped (one gene in each unfiltered matrix). AHBA C1/C3 are always the published maps and
+weights, so the region comparisons with C1/C3 use their 137 parcels even when PLS covers 177.
+
+| | 3d_ds5 | ds5 | base |
+|:--|--:|--:|--:|
+| matrix | hcp_3d_ds5.csv | hcp_ds5.csv | hcp_base.csv |
+| parcels × genes | 137 × 7,973 | 177 × 7,972 | 177 × 15,636 |
+| PLS1 / PLS2 cov | 86% / 14% | 86% / 14% | 81% / 19% |
+| PLS2 spin p | 0.0106 | 0.0006 | 0.0028 |
+| PLS1–C1 regions / genes | 0.99 / 0.95 | 0.99 / 0.94 | 0.97 / 0.90 |
+| PLS2–C3 regions / genes | 0.70 / 0.68 | 0.72 / 0.71 | 0.73 / 0.69 |
+| PLS2–dCT | -0.58 | -0.55 | -0.52 |
+| PLS2 SCZ β (p) | 0.036 (0.018) | 0.036 (0.017) | 0.033 (0.0006) |
+| PLS2 MDD β (p) | 0.055 (0.0002) | 0.054 (0.00027) | 0.040 (7.1e-05) |
+| PLS1 SCZ β (p) | 0.030 (0.044) | 0.030 (0.045) | 0.019 (0.04) |
+| PLS2 astro z | +5.3 | +3.9 | +2.9 |
+| min p, global slope | 0.28 | 0.29 | 0.29 |
+
+- **The signature is robust to both filters.** Without the region filter the components become more
+  C3-like and more spin-significant (PLS2 p 0.011 → 0.0006). Removing the gene filter as well keeps
+  the same structure: PLS2–C3 ρ = 0.73 on regions and 0.69 on genes.
+- **MAGMA β is smaller without the gene filter, but p is smaller too.** The `base` vectors are tested on
+  roughly twice the genes (own universe), so β_std is diluted by the lower-stability genes while the
+  larger n tightens the estimate. It is the same pattern as the DK signature on its wider gene list.
+- **The astrocyte loading shrinks as filters are removed** (+5.3 → +2.9), moving toward C3's negative value.
+- **Global slope stays null** in all three versions.
 
 ## Reproducing
 

@@ -1,0 +1,3 @@
+variant	matrix	component	n_parcels	n_genes	cov_explained	p_spin_singular	boot_reproducibility	sal_dCT	sal_CT
+3d_ds5	hcp_3d_ds5.csv	PLS1	137	7973	0.85701	0.00039992	0.98232	0.1496	0.98875
+3d_ds5	hcp_3d_ds5.csv	PLS2	137	7973	0.14299	0.010598	0.89885	0.98875	-0.1496
