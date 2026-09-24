@@ -1,0 +1,81 @@
+outcome	map	reference	rho	p_spin	p_label	n_parcels	n_case	n_ctrl
+depress	absolute	PLS2	-0.1427	0.2148	0.2877	137	1109	4572
+depress	absolute	C3	-0.03347	0.801	0.8182	137	1109	4572
+depress	absolute	dCT	0.08323	0.4867	0.5285	179	1109	4572
+depress	absolute	PLS1	0.2907	0.07758		137	1109	4572
+depress	absolute	PLS2 | dCT	-0.08862			137	1109	4572
+depress	relative	PLS2	-0.1873	0.09838	0.1399	137	1109	4572
+depress	relative	C3	-0.1466	0.2242	0.2527	137	1109	4572
+depress	relative	dCT	0.1385	0.2563	0.2767	179	1109	4572
+depress	relative	PLS1	0.1905	0.2462		137	1109	4572
+depress	relative	PLS2 | dCT	-0.09122			137	1109	4572
+withdep	absolute	PLS2	0.122	0.178	0.3427	137	910	6160
+withdep	absolute	C3	0.1877	0.04279	0.1548	137	910	6160
+withdep	absolute	dCT	-0.1621	0.04239	0.2258	179	910	6160
+withdep	absolute	PLS1	0.0648	0.4905		137	910	6160
+withdep	absolute	PLS2 | dCT	0.07631			137	910	6160
+withdep	relative	PLS2	0.05058	0.5725	0.7013	137	910	6160
+withdep	relative	C3	0.0342	0.7191	0.8072	137	910	6160
+withdep	relative	dCT	-0.07109	0.3359	0.5534	179	910	6160
+withdep	relative	PLS1	-0.07746	0.4469		137	910	6160
+withdep	relative	PLS2 | dCT	0.06357			137	910	6160
+anxdep	absolute	PLS2	-0.1113	0.3433	0.3776	137	782	6288
+anxdep	absolute	C3	0.02687	0.8374	0.8511	137	782	6288
+anxdep	absolute	dCT	0.1424	0.2927	0.2488	179	782	6288
+anxdep	absolute	PLS1	0.2349	0.1284		137	782	6288
+anxdep	absolute	PLS2 | dCT	-0.03924			137	782	6288
+anxdep	relative	PLS2	-0.1428	0.234	0.2468	137	782	6288
+anxdep	relative	C3	-0.0518	0.6855	0.7063	137	782	6288
+anxdep	relative	dCT	0.1916	0.1456	0.1309	179	782	6288
+anxdep	relative	PLS1	0.1651	0.2472		137	782	6288
+anxdep	relative	PLS2 | dCT	-0.03667			137	782	6288
+anxdisord	absolute	PLS2	-0.01583	0.8788	0.9181	137	741	4914
+anxdisord	absolute	C3	0.01998	0.8486	0.8861	137	741	4914
+anxdisord	absolute	dCT	0.07895	0.3987	0.5554	179	741	4914
+anxdisord	absolute	PLS1	0.1795	0.09298		137	741	4914
+anxdisord	absolute	PLS2 | dCT	0.05319			137	741	4914
+anxdisord	relative	PLS2	-0.06707	0.5113	0.5814	137	741	4914
+anxdisord	relative	C3	-0.1145	0.2366	0.3676	137	741	4914
+anxdisord	relative	dCT	0.1461	0.1296	0.2547	179	741	4914
+anxdisord	relative	PLS1	0.06718	0.5123		137	741	4914
+anxdisord	relative	PLS2 | dCT	0.0465			137	741	4914
+internal	absolute	PLS2	-0.2629	0.0246	0.03796	137	1200	4974
+internal	absolute	C3	-0.1419	0.2322	0.2797	137	1200	4974
+internal	absolute	dCT	0.1956	0.1072	0.1259	179	1200	4974
+internal	absolute	PLS1	0.06331	0.6881		137	1200	4974
+internal	absolute	PLS2 | dCT	-0.1379			137	1200	4974
+internal	relative	PLS2	-0.2777	0.0196	0.02498	137	1200	4974
+internal	relative	C3	-0.1888	0.1052	0.1169	137	1200	4974
+internal	relative	dCT	0.2178	0.07718	0.07592	179	1200	4974
+internal	relative	PLS1	0.009997	0.9496		137	1200	4974
+internal	relative	PLS2 | dCT	-0.1395			137	1200	4974
+rulebreak	absolute	PLS2	0.1362	0.2438	0.2797	137	329	7320
+rulebreak	absolute	C3	0.1491	0.1752	0.2787	137	329	7320
+rulebreak	absolute	dCT	-0.1052	0.4127	0.4186	179	329	7320
+rulebreak	absolute	PLS1	0.1615	0.2344		137	329	7320
+rulebreak	absolute	PLS2 | dCT	0.1238			137	329	7320
+rulebreak	relative	PLS2	0.09742	0.3891	0.4456	137	329	7320
+rulebreak	relative	C3	0.06903	0.5275	0.5664	137	329	7320
+rulebreak	relative	dCT	-0.06626	0.5821	0.6214	179	329	7320
+rulebreak	relative	PLS1	0.07638	0.6547		137	329	7320
+rulebreak	relative	PLS2 | dCT	0.115			137	329	7320
+pfactor	absolute	PLS2	-0.1021	0.2847	0.4376	137	737	3937
+pfactor	absolute	C3	0.04303	0.6677	0.7273	137	737	3937
+pfactor	absolute	dCT	0.1165	0.209	0.3706	179	737	3937
+pfactor	absolute	PLS1	0.1228	0.2438		137	737	3937
+pfactor	absolute	PLS2 | dCT	0.009215			137	737	3937
+pfactor	relative	PLS2	-0.1485	0.142	0.2348	137	737	3937
+pfactor	relative	C3	-0.03505	0.7309	0.7682	137	737	3937
+pfactor	relative	dCT	0.1613	0.101	0.2008	179	737	3937
+pfactor	relative	PLS1	0.0558	0.5733		137	737	3937
+pfactor	relative	PLS2 | dCT	-0.009122			137	737	3937
+mdd_parent	absolute	PLS2	0.1658	0.155	0.1888	137	791	7925
+mdd_parent	absolute	C3	0.2327	0.04419	0.07892	137	791	7925
+mdd_parent	absolute	dCT	-0.0879	0.4895	0.5045	179	791	7925
+mdd_parent	absolute	PLS1	0.1175	0.2625		137	791	7925
+mdd_parent	absolute	PLS2 | dCT	0.05583			137	791	7925
+mdd_parent	relative	PLS2	0.1515	0.1918	0.2318	137	791	7925
+mdd_parent	relative	C3	0.1307	0.2681	0.3327	137	791	7925
+mdd_parent	relative	dCT	-0.02739	0.8384	0.8292	179	791	7925
+mdd_parent	relative	PLS1	-0.01435	0.8956		137	791	7925
+mdd_parent	relative	PLS2 | dCT	0.09225			137	791	7925

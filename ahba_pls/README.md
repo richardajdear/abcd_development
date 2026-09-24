@@ -875,6 +875,44 @@ the spin null is significant in 0 of 54 tests (smallest p_spin 0.14). All effect
 weights carry. What predicts depression is the global rate of thinning, and the PLS2 pattern adds nothing
 specific beyond it. The 5.1 run (baseline–year 4, 988 fits, min q 0.085, 0 of 36 spin tests) agrees.
 
+### Case-control thinning maps (exploratory) — `code/24_casecontrol_maps.py` → `code/fig6_casecontrol.R`
+
+Hypothesis: the regional pattern by which children who **develop** symptoms thin differently from those who do
+not resembles PLS2. Outcomes are those associated with global thinning in a developmental model of
+`cbcl_explore_assoc.tsv` (p < 0.05 in change / years 5–7 / symptom slope): CBCL depressive (DSM), anxiety (DSM),
+anxious/depressed, withdrawn/depressed, internalising, rule-breaking, the p-factor, and KSADS parent-reported MDD.
+
+- **Cases and controls.**
+  - CBCL: a case is below the Achenbach borderline cut-off at baseline and at or above it at any of ages ~15–17
+    (T ≥ 65; internalising T ≥ 60). A control is below it at every wave.
+  - p-factor: a case is in the top decile late and not at baseline; a control is below the 75th percentile throughout.
+  - KSADS: lifetime diagnosis vs never.
+  - Case numbers run from 329 to 1,200.
+- **Map.** Per bilateral parcel (179, lh/rh mean of each child's slope BLUP):
+  `thin ~ case + sex + site + age_first + age_span + n_visits [+ global thinning]`. The map is Cohen's d =
+  β_case / residual SD, positive = cases thin faster. `age_span` and `n_visits` are included because slope BLUPs
+  shrink more for children with fewer or closer scans. The *absolute* map omits global thinning; the *relative*
+  map includes it.
+- **Tests.** Spearman ρ with PLS2 (137 parcels), C3 and the normative dCT map. Two nulls:
+  - p_spin: 5,000 spin rotations;
+  - p_label: 1,000 within-site permutations of case labels (random groups of the same size).
+
+**Result: the hypothesis is not supported.**
+- Cases thin slightly faster everywhere: mean absolute d = +0.014 to +0.045.
+- The *pattern* does not resemble PLS2. Only 2 of 64 map–reference
+  tests pass both nulls: internalising vs PLS2, absolute ρ = -0.26 (p_spin 0.025, p_label 0.038) and
+  relative ρ = -0.28 (p_spin 0.020, p_label 0.025). This is **negative**, the opposite of the
+  hypothesis: internalising cases' extra thinning sits where PLS2 is low. It matches the child-level result, where
+  the PLS2 contrast ran slightly negative for internalising change.
+- With dCT partialled out, the internalising relative map gives ρ = -0.14.
+- The eight maps correlate with each other at median ρ ≈ 0.4 (overlapping cases), so one nominal hit among
+  about 16 PLS2 tests is not strong evidence.
+- The two maps positively aligned with C3 (withdrawn/depressed and parent MDD, absolute ρ ≈ 0.2) pass spin but
+  not the label null.
+
+Outputs: `results/casecontrol_maps.tsv` (per-parcel d, t, p), `results/casecontrol_map_corr.tsv`,
+`figures/fig_casecontrol.png`. All are group-level.
+
 ## Reproducing
 
 Analysis (python, env `ahba-pls`): `code/01_*` → `code/22_*` in order. `11_` is the parcellation
