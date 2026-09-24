@@ -15,7 +15,7 @@
 #   hcp70_scans_hist2d.csv), hcp70_scan_summary.csv       c   trajectories
 #   hcp70_regional_slope_reliability.csv,
 #   hcp70_global_slope_splithalf.csv  d   reliability
-#   hcp70_prs_key_arms.tsv            e,f PRS (single-LMM columns)
+#   hcp70_prs_key_arms.tsv            f   PRS (single-LMM columns; fig1_prep_prs.py)
 #   hcp70_magma_locus_sets.tsv (+ work/results_70tab_hcp/magma_pooled/
 #   (MAGMA gene-set panel removed; gene-set results go to SI)
 # Writes docs/figures/fig1.png and docs/figures/fig1_caption.md.
@@ -285,9 +285,23 @@ ROWS <- tribble(
   "ALZ",        "Alzheimer's",              "EUR",
   "ALZ_noAPOE", "Alzheimer's, no APOE",     "EUR",
   "EA",         "education",                "EUR",
-  "ASD",        "autism",                   "EUR") |>
-  mutate(y = rev(seq_len(n())))
-prs <- read.delim(file.path(IN, "hcp70_prs_key_arms.tsv")) |>
+  "ASD",        "autism",                   "EUR")
+prs_raw <- read.delim(file.path(IN, "hcp70_prs_key_arms.tsv"))  # fig1_prep_prs.py
+# bipolar / ADHD rows appear after depression once fig1_prep_prs.py finds their
+# tables; arm read from the trait_arm suffix (…_pooled / …_META = pooled)
+new_arms <- sort(unique(grep("^(BIP|ADHD)", prs_raw$trait_arm, value = TRUE)))
+if (length(new_arms)) {
+  nm <- c(BIP = "bipolar", ADHD = "ADHD")[sub("^(BIP|ADHD).*", "\\1", new_arms)]
+  pooled <- grepl("pooled|META", new_arms, ignore.case = TRUE)
+  extra <- tibble(trait_arm = new_arms,
+                  label = ifelse(pooled, paste(nm, "· pooled"),
+                                 ifelse(grepl("eur", new_arms, ignore.case = TRUE), paste(nm, "· EUR"), nm)),
+                  arm = ifelse(pooled, "pooled", "EUR")) |>
+    arrange(match(sub("^(BIP|ADHD).*", "\\1", trait_arm), c("BIP", "ADHD")), arm)
+  ROWS <- bind_rows(ROWS[1:4, ], extra, ROWS[-(1:4), ])
+}
+ROWS <- ROWS |> mutate(y = rev(seq_len(n())))
+prs <- prs_raw |>
   filter(method %in% names(METHODS)) |>
   inner_join(ROWS, by = "trait_arm") |>
   mutate(method = factor(METHODS[method], levels = METHODS),
