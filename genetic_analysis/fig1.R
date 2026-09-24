@@ -17,7 +17,7 @@
 #   hcp70_global_slope_splithalf.csv  d   reliability
 #   hcp70_prs_key_arms.tsv            e,f PRS (single-LMM columns)
 #   hcp70_magma_locus_sets.tsv (+ work/results_70tab_hcp/magma_pooled/
-#   table_magma_pooled.tsv when committed)                g   MAGMA
+#   (MAGMA gene-set panel removed; gene-set results go to SI)
 # Writes docs/figures/fig1.png and docs/figures/fig1_caption.md.
 
 stopifnot("run with LC_ALL=en_US.UTF-8" = l10n_info()$`UTF-8`)
@@ -33,7 +33,6 @@ IN <- file.path(HERE, "fig1_inputs")
 OUT <- file.path(REPO, "docs/figures/fig1.png")
 CAP <- file.path(REPO, "docs/figures/fig1_caption.md")
 POLY <- file.path(REPO, "ahba_pls/data/hcp_polygons.csv")
-POOLED_MAGMA <- file.path(HERE, "work/results_70tab_hcp/magma_pooled/table_magma_pooled.tsv")
 
 # ---------------------------------------------------------------- style ----
 BASE <- 7
@@ -282,77 +281,7 @@ pf <- forest("baseline_thickness", "f   PRS → CT",
                      count_sig("baseline_thickness", "SCZ25_EUR"),
                      count_sig("baseline_thickness", "SCZ25_META")), BASE_C, FALSE) + labs(x = "β per SD (95% CI)")
 
-# ----------------------------------------------------------- g: MAGMA ------
-SETS <- c(SCZ_locus_pool = "SCZ loci", SCZ_WES = "SCZ exome",
-          MDD_highconf = "MDD high-conf.", MDD_WES = "MDD exome")
-# exome (rare-variant) sets, magma_gene_sets/genesets_wes.txt: the step-15b
-# cluster table when present, else the local run on the synced step-13/14 gene results
-SET_TESTS <- file.path(HERE, "work/results_70tab_hcp/magma_set_tests/table_magma_set_tests.tsv")
-if (file.exists(SET_TESTS)) {
-  wes <- read.delim(SET_TESTS) |>
-    filter(variable %in% c("SCZ_WES", "MDD_WES"), version %in% c("EUR_1000G", "pooled_ABCD")) |>
-    transmute(arm = ifelse(version == "EUR_1000G", "EUR", "pooled"), phenotype, variable,
-              n_genes = ngenes, beta, se, p)
-} else {
-  wes <- read.delim(file.path(IN, "magma_wes_sets_local.tsv")) |>
-    filter(atlas == "hcp", variable %in% c("SCZ_WES", "MDD_WES")) |>
-    transmute(arm = ifelse(version == "EUR_1000G", "EUR", "pooled"), phenotype, variable,
-              n_genes = ngenes, beta, se, p)
-}
-mg <- read.delim(file.path(IN, "hcp70_magma_locus_sets.tsv"))
-mg <- bind_rows(mg, wes[, intersect(names(mg), names(wes))])
-if (file.exists(POOLED_MAGMA)) {
-  pl <- read.delim(POOLED_MAGMA) |> filter(kind == "gene-set", variable %in% names(SETS))
-  if ("construction" %in% names(pl)) pl <- filter(pl, construction == "1lmm")
-  pl$arm <- "pooled"
-  mg <- bind_rows(mg, pl[, intersect(names(mg), names(pl))])
-}
-slots <- expand.grid(variable = names(SETS),
-                     phenotype = c("global_slope", "baseline_thickness"),
-                     arm = c("EUR", "pooled"), stringsAsFactors = FALSE) |>
-  mutate(off = case_when(phenotype == "global_slope" & arm == "EUR" ~ 0.30,
-                         phenotype == "global_slope" ~ 0.10,
-                         arm == "EUR" ~ -0.10, TRUE ~ -0.30),
-         y = (length(SETS) + 1 - match(variable, names(SETS))) + off) |>
-  left_join(mg, by = c("variable", "phenotype", "arm")) |>
-  mutate(trait = ifelse(phenotype == "global_slope", "ΔCT", "CT"),
-         arm = factor(arm, levels = c("EUR", "pooled")))
-ngenes <- mg |> group_by(variable) |> summarise(n = first(n_genes))
-glab <- sprintf("%s\n(%s)", SETS, comma(ngenes$n[match(names(SETS), ngenes$variable)]))
-mp <- function(v, ph, a = "EUR") {
-  x <- mg$p[mg$variable == v & mg$phenotype == ph & mg$arm == a]
-  if (length(x)) fmt_p(x) else "n.d."
-}
-have <- filter(slots, !is.na(beta))
-pg <- ggplot(have, aes(beta, y, colour = trait)) +
-  annotate("rect", xmin = -Inf, xmax = Inf, ymin = c(0.5, 2.5), ymax = c(1.5, 3.5), fill = "grey95") +
-  geom_vline(xintercept = 0, linewidth = 0.3, colour = "grey30") +
-  geom_errorbarh(aes(xmin = beta - 1.96 * se, xmax = beta + 1.96 * se),
-                 height = 0, linewidth = 0.35) +
-  geom_point(aes(shape = arm), fill = "white", size = 1.25, stroke = 0.45,
-             show.legend = FALSE) +
-  geom_point(data = filter(have, p < 0.05), aes(shape = arm, fill = trait),
-             size = 1.25, stroke = 0.45, show.legend = FALSE) +
-  geom_text(data = filter(have, p < 0.05),
-            aes(x = beta + 1.96 * se + 0.012, y = y, label = sprintf("p = %s", fmt_p(p))),
-            hjust = 0, size = (BASE - 1.5) / .pt, show.legend = FALSE) +
-  geom_text(data = filter(slots, is.na(beta)), aes(0.005, y, label = "n.d."),
-            inherit.aes = FALSE, hjust = 0, size = (BASE - 2) / .pt, colour = "grey55") +
-  scale_colour_manual(values = c("ΔCT" = SLOPE_C, "CT" = BASE_C)) +
-  scale_fill_manual(values = c("ΔCT" = SLOPE_C, "CT" = BASE_C),
-                    guide = "none") +
-  scale_shape_manual(values = c(EUR = 21, pooled = 23), guide = "none") +
-  scale_y_continuous(breaks = rev(seq_along(SETS)), labels = glab, limits = c(0.5, length(SETS) + 0.5),
-                     expand = expansion(0)) +
-  scale_x_continuous(breaks = c(-0.5, 0, 0.5)) +
-  coord_cartesian(xlim = c(-0.75, 1.3), clip = "off") +
-  labs(x = "enrichment β (95% CI)", y = NULL, title = "g   MAGMA gene sets") +
-  th + theme(panel.grid.major.y = element_blank(), axis.line.y = element_blank(),
-             axis.ticks.y = element_blank(),
-             axis.text.y = element_text(size = BASE - 1, colour = "grey10"),
-             legend.position = "none")
-
-# ---------------------------------------------------------- h: symptoms ----
+# ---------------------------------------------------------- g: symptoms ----
 # fig1_prep_cbcl.py: same single-LMM phenotypes as e/f, each fitted alone;
 # outcome definitions from ahba_pls/code/23_cbcl_explore.py
 cb <- read.delim(file.path(IN, "hcp70_cbcl_assoc.tsv")) |> filter(fit == "alone", outcome != "thought")
@@ -372,7 +301,7 @@ cb <- cb |>
          ref = ifelse(model == "change", 0, 1))
 hp <- function(o, b) cb$p[cb$outcome == o & cb$brain == b]
 he <- function(o, b) cb$est[cb$outcome == o & cb$brain == b]
-h_block <- function(d, title, xlab_) {
+h_block <- function(d, title, xlab_, key = FALSE) {
   lv <- levels(droplevels(d$lab))
   d <- d |> mutate(yy = match(as.character(lab), lv) + dy)
   ggplot(d, aes(est, yy, colour = trait)) +
@@ -381,10 +310,9 @@ h_block <- function(d, title, xlab_) {
     geom_point(shape = 21, fill = "white", size = 1.25, stroke = 0.45) +
     geom_point(data = filter(d, p < 0.05), aes(fill = trait), shape = 21, size = 1.25,
                stroke = 0.45) +
-    scale_colour_manual(values = c("ΔCT" = SLOPE_C, "CT" = BASE_C),
-                        guide = "none") +
-    scale_fill_manual(values = c("ΔCT" = SLOPE_C, "CT" = BASE_C),
-                      guide = "none") +
+    scale_colour_manual(values = c("ΔCT" = SLOPE_C, "CT" = BASE_C), breaks = c("ΔCT", "CT"),
+                        name = NULL, guide = if (key) "legend" else "none") +
+    scale_fill_manual(values = c("ΔCT" = SLOPE_C, "CT" = BASE_C), guide = "none") +
     scale_y_continuous(breaks = seq_along(lv), labels = lv, limits = c(0.5, length(lv) + 0.5),
                        expand = expansion(0)) +
     labs(x = xlab_, y = NULL, title = title) +
@@ -394,20 +322,17 @@ h_block <- function(d, title, xlab_) {
                axis.title.x = element_text(size = BASE - 1.5))
 }
 n_cb <- n_distinct(cb$outcome[cb$model == "change"]); n_dx <- n_distinct(cb$outcome[cb$model != "change"])
-ph1 <- h_block(filter(cb, model == "change"), "h   Symptoms", "CBCL change, β per SD")
+ph1 <- h_block(filter(cb, model == "change"), "g   Symptoms", "CBCL change, β per SD", key = TRUE)
 ph2 <- h_block(filter(cb, model != "change"), NULL, "KSADS diagnosis, OR per SD")
 ph <- (ph1 / ph2) + plot_layout(heights = c(n_cb, n_dx))
 
 # -------------------------------------------------------- methods panel ----
-pooled_done <- any(mg$arm == "pooled")
 bullets <- c(
   sprintf("\u2022  ABCD release 7.0, HCP-MMP1.0 (358 parcels; %d lh polygon%s without a value drawn grey); %s children with >= 2 QC-passing scans.",
           n_missing, ifelse(n_missing == 1, "", "s"), comma(n_kids)),
   "\u2022  Slope model: thickness ~ age + sex + (1 + age | child) + (1 | site), per parcel (a, d) and on the per-scan cortical mean (c, e–g); the trait is the child's age slope.",
-  "\u2022  PRS: C+T, PRS-CS, SBayesRC; EUR arm scored with European discovery GWAS, pooled arm with multi-ancestry GWAS, z-scored within ancestry cluster; model score + age + sex + 10 PCs + (1 | family); filled = p < 0.05 (C+T corrected over its thresholds).",
-  sprintf("\u2022  MAGMA competitive gene-set test; EUR arm on 1000 Genomes EUR LD; pooled arm on the ABCD analysis sample as LD reference%s.",
-          ifelse(pooled_done, "", " (pending, n.d.)")))
-SI_NOTE <- "- Sensitivity analyses (DK parcellation, mean of per-parcel slopes, PGC3 2022 GWAS, SBayesR, per-ancestry strata) in Supplementary Information."
+  "\u2022  PRS: C+T, PRS-CS, SBayesRC; EUR arm scored with European discovery GWAS, pooled arm with multi-ancestry GWAS, z-scored within ancestry cluster; model score + age + sex + 10 PCs + (1 | family); filled = p < 0.05 (C+T corrected over its thresholds).")
+SI_NOTE <- "- MAGMA gene-set tests (SCZ/MDD common-variant and exome sets, three LD references) are in Supplementary Information: no set is enriched for ΔCT once ABCD's own EUR children are the LD reference.\n- Sensitivity analyses (DK parcellation, mean of per-parcel slopes, PGC3 2022 GWAS, SBayesR, per-ancestry strata) in Supplementary Information."
 ptxt <- ggplot() +
   annotate("text", x = 0, y = 1,
            label = paste(vapply(bullets, function(b) paste(strwrap(b, 150, exdent = 3),
@@ -426,16 +351,16 @@ ROW1_H_IN <- 1.75   # effective map-block height, calibrated on the render
 pa_in <- ROW1_H_IN * PA_ASPECT
 PA_W <- pa_in / ((7.2 - pa_in) / (1 + 1.15 + 0.78))
 row1 <- (pa | pb | pc | pd_) + plot_layout(widths = c(PA_W, 1, 1.15, 0.78))
-row2 <- (pe | pf | pg | ph) + plot_layout(widths = c(0.62, 0.46, 0.62, 0.6), guides = "collect") &
+row2 <- (pe | pf | ph) + plot_layout(widths = c(0.62, 0.46, 0.72), guides = "collect") &
   theme(legend.position = "bottom", legend.box = "horizontal",
         legend.margin = margin(0, 0, 0, 0))
 fig <- (wrap_elements(full = row1) / wrap_elements(full = row2)) +
   plot_layout(heights = c(0.8, 1.0)) +
   plot_annotation(
     title = "Polygenic risk for schizophrenia predicts the rate of adolescent cortical thinning (ΔCT), not cortical thickness (CT)",
-    subtitle = paste0("Every parcel thins (a); each child's cortex-wide slope is estimated from 2–4 scans with modest reliability, higher than a single parcel's once a child has 3–4 scans (b–d).\n",
-                      "Schizophrenia PRS predicts faster thinning in both ancestry arms (e) but not CT (f); MAGMA evidence is weaker and not specific to ΔCT (g);\n",
-                      "faster thinning goes with rising depressive symptoms, while CT has its own, different symptom associations (h)."),
+    subtitle = paste0("Every parcel thins (a); each child's cortex-wide ΔCT is estimated from 2–4 scans with modest reliability, higher than a single parcel's once a child has 3–4 scans (b–d).\n",
+                      "Schizophrenia PRS predicts faster thinning in both ancestry arms (e) but not CT (f);\n",
+                      "faster thinning also goes with rising depressive symptoms, while CT has its own, different symptom associations (g)."),
     theme = theme(plot.title = element_text(size = BASE + 1.5, face = "bold"),
                   plot.subtitle = element_text(size = BASE - 0.5, colour = "grey30",
                                                margin = margin(b = 4))))
@@ -456,20 +381,13 @@ cap <- c(
           csv_("slope_um_per_yr", "sd"), csv_("slope_um_per_yr", "model_sd")),
   sprintf("- **c** Per-scan cortical mean vs age for 250 random children (grey), three children with four scans (colour), population OLS trend %.0f µm / year (black).",
           sv["ols_slope_mm_per_yr"] * 1000),
-  sprintf("- **d** Slope reliability 1 − v/τ², where v is a child's conditional (posterior) variance of the slope random effect and τ² the between-child slope variance: boxes, per-parcel LMMs (358 parcels; each value the mean over children; medians %.2f / %.2f / %.2f for 2 / 3 / 4 scans); squares, the single LMM on the cortical mean (mean over children %.2f / %.2f / %.2f).",
+  sprintf("- **d** ΔCT reliability 1 − v/τ², where v is a child's conditional (posterior) variance of the slope random effect and τ² the between-child slope variance: boxes, per-parcel LMMs (358 parcels; each value the mean over children; medians %.2f / %.2f / %.2f for 2 / 3 / 4 scans); squares, the single LMM on the cortical mean (mean over children %.2f / %.2f / %.2f).",
           med$m[1], med$m[2], med$m[3], cwm["2"], cwm["3"], cwm["4"]),
   sprintf("- **e, f** PRS association with ΔCT (e) and CT (f); β per SD with 95%% CI. Schizophrenia (2025 GWAS): ΔCT %s EUR / %s pooled, CT %s / %s. Alzheimer's %s with APOE, %s without; depression %s / %s; education %s (opposite sign); autism %s.",
           k("SCZ25_EUR"), k("SCZ25_META"), k("SCZ25_EUR", "baseline_thickness"),
           k("SCZ25_META", "baseline_thickness"), k("ALZ"), k("ALZ_noAPOE"),
           k("MDD_eur"), k("MDD_pooled"), k("EA"), k("ASD")),
-  sprintf("- **g** MAGMA competitive gene-set enrichment (ΔCT red, CT grey; ○ EUR arm on 1000 Genomes EUR LD, ◇ pooled arm on the ABCD sample as its own LD reference; n.d. = not run). Common-variant sets: SCZ curated loci (Trubetskoy 2022 ST12, %s genes) and MDD2025 high-confidence genes (%s). Rare-variant (exome) sets: SCZ, genes at q < 0.05 in the 2025 exome meta-analysis (doi:10.1038/s41467-025-62429-y, Supplementary Data 2; %s testable here); MDD, genes associated with depressive symptoms in UK Biobank exomes (doi:10.1038/s41380-024-02804-1, ST7 single-variant p < 5 × 10⁻⁸ and ST9 gene-based q < 0.05; %s testable). SCZ exome p, ΔCT / CT: EUR %s / %s, pooled %s / %s, i.e. not specific to ΔCT (like the SCZ loci); MDD exome p ≥ %s.",
-          comma(ngenes$n[ngenes$variable == "SCZ_locus_pool"][1]),
-          comma(ngenes$n[ngenes$variable == "MDD_highconf"][1]),
-          comma(ngenes$n[ngenes$variable == "SCZ_WES"][1]), comma(ngenes$n[ngenes$variable == "MDD_WES"][1]),
-          mp("SCZ_WES", "global_slope"), mp("SCZ_WES", "baseline_thickness"),
-          mp("SCZ_WES", "global_slope", "pooled"), mp("SCZ_WES", "baseline_thickness", "pooled"),
-          fmt_p(min(mg$p[mg$variable == "MDD_WES"]))),
-  sprintf("- **h** Symptoms against the same single-LMM phenotypes (ΔCT red, CT grey; each fitted alone; filled = p < 0.05). CBCL (parent report, log1p raw scale sums): symptoms at ages ~15–17 (mean of the available waves 5–7) adjusted for the same score at baseline (ANCOVA; not a difference score and not a per-child symptom slope), y_late ~ phenotype + y_baseline + age_late + sex + site, β in SD of y_late. KSADS: diagnosis (present or past) at any administered session from baseline to year 6, i.e. lifetime and including baseline cases, logistic with age at the last CBCL, odds ratio per SD. Both phenotypes are signed as in e–f (ΔCT negative = faster thinning), so β < 0 or OR < 1 means more symptoms with faster thinning or with thinner cortex. Estimates are unchanged when both phenotypes enter one model (CT–ΔCT r = 0.06). Family-clustered SEs; n = %s (CBCL change) and %s (KSADS). Faster thinning goes with rising depressive symptoms (p = %s) and parent-reported MDD (OR %.2f, p = %s); thinner cortex (CT) goes with youth-reported MDD (OR %.2f, p = %s) and parent-reported psychosis spectrum (OR %.2f, p = %s). Exploratory, uncorrected.",
+  sprintf("- **g** Symptoms against the same single-LMM phenotypes (ΔCT red, CT grey; each fitted alone; filled = p < 0.05). CBCL (parent report, log1p raw scale sums): symptoms at ages ~15–17 (mean of the available waves 5–7) adjusted for the same score at baseline (ANCOVA; not a difference score and not a per-child symptom slope), y_late ~ phenotype + y_baseline + age_late + sex + site, β in SD of y_late. KSADS: diagnosis (present or past) at any administered session from baseline to year 6, i.e. lifetime and including baseline cases, logistic with age at the last CBCL, odds ratio per SD. Both phenotypes are signed as in e–f (ΔCT negative = faster thinning), so β < 0 or OR < 1 means more symptoms with faster thinning or with thinner cortex. Estimates are unchanged when both phenotypes enter one model (CT–ΔCT r = 0.06). Family-clustered SEs; n = %s (CBCL change) and %s (KSADS). Faster thinning goes with rising depressive symptoms (p = %s) and parent-reported MDD (OR %.2f, p = %s); thinner cortex (CT) goes with youth-reported MDD (OR %.2f, p = %s) and parent-reported psychosis spectrum (OR %.2f, p = %s). Exploratory, uncorrected.",
           comma(max(cb$n[cb$model == "change"])), comma(max(cb$n[cb$model == "ksads_logit"])),
           fmt_p(hp("depress", "global_slope")), he("mdd_parent_DX", "global_slope"), fmt_p(hp("mdd_parent_DX", "global_slope")),
           he("mdd_youth_DX", "baseline_thickness"), fmt_p(hp("mdd_youth_DX", "baseline_thickness")),
