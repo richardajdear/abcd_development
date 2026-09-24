@@ -336,9 +336,9 @@ pg <- ggplot(have, aes(beta, y, colour = trait)) +
 # ---------------------------------------------------------- h: symptoms ----
 # fig1_prep_cbcl.py: same single-LMM phenotypes as e/f, each fitted alone;
 # outcome definitions from ahba_pls/code/23_cbcl_explore.py
-cb <- read.delim(file.path(IN, "hcp70_cbcl_assoc.tsv")) |> filter(fit == "alone")
+cb <- read.delim(file.path(IN, "hcp70_cbcl_assoc.tsv")) |> filter(fit == "alone", outcome != "thought")
 CBL <- c(pfactor = "p-factor", internal = "internalising", external = "externalising",
-         depress = "depressive (DSM)", thought = "thought problems")
+         depress = "depressive (DSM)")
 DXL <- c(mdd_youth_DX = "MDD, youth", mdd_parent_DX = "MDD, parent",
          psychosis_parent_DX = "psychosis, parent")
 ncase <- cb |> filter(model == "ksads_logit") |> group_by(outcome) |> summarise(k = first(n_cases))
@@ -405,7 +405,7 @@ row2 <- (pe | pf | pg | ph) + plot_layout(widths = c(0.68, 0.5, 0.48, 0.62), gui
   theme(legend.position = "bottom", legend.box = "horizontal",
         legend.margin = margin(0, 0, 0, 0))
 fig <- (wrap_elements(full = row1) / wrap_elements(full = row2)) +
-  plot_layout(heights = c(1, 1.0)) +
+  plot_layout(heights = c(0.8, 1.0)) +
   plot_annotation(
     title = "Polygenic risk for schizophrenia predicts the rate, not the baseline level, of adolescent cortical thinning",
     subtitle = paste0("Every parcel thins (a); each child's cortex-wide slope is estimated from 2–4 scans with modest reliability, higher than a single parcel's once a child has 3–4 scans (b–d).\n",
@@ -414,7 +414,7 @@ fig <- (wrap_elements(full = row1) / wrap_elements(full = row2)) +
     theme = theme(plot.title = element_text(size = BASE + 1.5, face = "bold"),
                   plot.subtitle = element_text(size = BASE - 0.5, colour = "grey30",
                                                margin = margin(b = 4))))
-ggsave(OUT, fig, width = 7.2, height = 5.3, dpi = 300, bg = "white")
+ggsave(OUT, fig, width = 7.2, height = 5.0, dpi = 300, bg = "white")
 cat(OUT, "\n")
 
 # ------------------------------------------------------------ caption ------
@@ -442,7 +442,7 @@ cap <- c(
           mp("SCZ_locus_pool", "global_slope", "pooled"), mp("SCZ_locus_pool", "baseline_thickness", "pooled"),
           mp("MDD_highconf", "global_slope"), mp("MDD_highconf", "baseline_thickness"),
           mp("MDD_highconf", "global_slope", "pooled"), mp("MDD_highconf", "baseline_thickness", "pooled")),
-  sprintf("- **h** Symptoms against the same single-LMM phenotypes (thinning rate red, baseline thickness grey; each fitted alone; filled = p < 0.05). CBCL (parent report): change in log-scored symptoms from baseline to ages ~15–17 (mean of waves 5–7), y_late ~ phenotype + y_baseline + age + sex + site, β in SD of y_late. KSADS: lifetime diagnosis at any wave, logistic, odds ratio per SD. Both phenotypes are signed as in e–f (slope: negative = faster thinning), so β < 0 or OR < 1 means more symptoms with faster thinning or thinner baseline cortex. Estimates are unchanged when both phenotypes enter one model (slope–intercept r = 0.06). Family-clustered SEs; n = %s (CBCL change) and %s (KSADS). Faster thinning goes with rising depressive symptoms (p = %s) and parent-reported MDD (OR %.2f, p = %s); thinner baseline cortex goes with youth-reported MDD (OR %.2f, p = %s) and parent-reported psychosis spectrum (OR %.2f, p = %s). Exploratory, uncorrected.",
+  sprintf("- **h** Symptoms against the same single-LMM phenotypes (thinning rate red, baseline thickness grey; each fitted alone; filled = p < 0.05). CBCL (parent report, log1p raw scale sums): symptoms at ages ~15–17 (mean of the available waves 5–7) adjusted for the same score at baseline (ANCOVA; not a difference score and not a per-child symptom slope), y_late ~ phenotype + y_baseline + age_late + sex + site, β in SD of y_late. KSADS: diagnosis (present or past) at any administered session from baseline to year 6, i.e. lifetime and including baseline cases, logistic with age at the last CBCL, odds ratio per SD. Both phenotypes are signed as in e–f (slope: negative = faster thinning), so β < 0 or OR < 1 means more symptoms with faster thinning or thinner baseline cortex. Estimates are unchanged when both phenotypes enter one model (slope–intercept r = 0.06). Family-clustered SEs; n = %s (CBCL change) and %s (KSADS). Faster thinning goes with rising depressive symptoms (p = %s) and parent-reported MDD (OR %.2f, p = %s); thinner baseline cortex goes with youth-reported MDD (OR %.2f, p = %s) and parent-reported psychosis spectrum (OR %.2f, p = %s). Exploratory, uncorrected.",
           comma(max(cb$n[cb$model == "change"])), comma(max(cb$n[cb$model == "ksads_logit"])),
           fmt_p(hp("depress", "global_slope")), he("mdd_parent_DX", "global_slope"), fmt_p(hp("mdd_parent_DX", "global_slope")),
           he("mdd_youth_DX", "baseline_thickness"), fmt_p(hp("mdd_youth_DX", "baseline_thickness")),
