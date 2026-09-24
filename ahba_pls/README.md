@@ -972,6 +972,51 @@ nominal hit and needs replication.
 Outputs: `results/cbcl_assoc_maps.tsv` (per-parcel partial r, t, p), `cbcl_assoc_map_corr.tsv`,
 `cbcl_assoc_map_partial.tsv`, `figures/fig_cbcl_assoc.png`. All are group-level.
 
+### Per-child gradient scores (exploratory) — `code/26_gradient_scores.py` → `code/fig8_gradient_scores.R`
+
+The map analyses above pointed to children whose symptoms rise having a **flatter version of the normative
+thinning pattern**. This tests that directly, with one number per child instead of 179 parcel fits. With g_r = the
+group mean thinning rate in parcel r (the normative gradient), each child gets:
+
+- **gradient slope** b_i: the slope of the child's regional thinning on g across the 179 parcels,
+  `thin_ir = a_i + b_i·g_r`. b = 1 is typical, b < 1 flatter (less difference between fast- and slow-thinning
+  cortex), b > 1 steeper. Across children, SD = 0.07.
+- **gradient fit** r_i: the correlation across parcels between the child's thinning and g, i.e. how typical the
+  *shape* of their thinning pattern is, whatever its scale (median 0.91).
+- **PLS2 beyond gradient** c_i: the loading on z(PLS2) in `thin ~ g + z(PLS2)` over the 137 AHBA parcels, i.e.
+  whether the child's thinning follows PLS2 beyond the gradient.
+
+Model: `CBCL_15–17 ~ score + CBCL_baseline + sex + site + age_late + age_first + age_span + n_visits`, plus in the
+full model the global thinning rate, global baseline CT, the same slope score computed on baseline thickness,
+and **image quality**. Image quality is the log FreeSurfer topological defect count (`mr_y_qc__post__aut.tsv`),
+averaged over the child's sessions. Gradient fit correlates −0.21 with it, which is why it is included. Scores are
+standardised; SEs are family-clustered; n ≈ 8,200.
+
+**Results (full model; BH over the 27 score × outcome tests, 6 at q < 0.05):**
+1. **Gradient fit predicts later externalising symptoms.** Children with less typical thinning patterns have more
+   symptoms at 15–17 than baseline predicts: rule-breaking β = -0.056 SD per SD (p = 6e-06),
+   externalising -0.044 (p = 0.0001), and smaller effects for total problems, p-factor and DSM
+   depression.
+   - The effect sits in the least typical 20% of children: +0.06 to +0.09 SD for rule-breaking (panel c).
+   - It survives image quality (it strengthens slightly) and holds in children with ≥ 3 scans (rule-breaking
+     -0.051, p = 0.0001).
+2. **Gradient slope (flattening) is weaker**: total problems -0.028 (p = 0.0039), p-factor -0.020
+   (p = 0.038), anxiety -0.016 (p = 0.12). The direction matches the flatter pattern seen in the maps, but it
+   is small and does not pass FDR for anxiety, where the maps were strongest.
+3. **PLS2 beyond the gradient predicts nothing** (all |β| ≤ 0.014).
+
+**Caveats.**
+- Effects are small: about 0.05 SD per SD of score.
+- Image quality is only partly captured by the defect count, so residual motion confounding is still possible for a
+  score that measures how *typical* a child's measured change is.
+- Slope BLUPs are shrunk toward the group gradient itself. This is why scan count and span are covariates and the
+  ≥ 3-scan check is reported.
+- A test of whether gradient fit *precedes* symptoms (using earlier scan intervals only) would strengthen the
+  interpretation.
+
+Outputs: `results/gradient_scores_assoc.tsv` (all scores × outcomes × adjustment sets × samples),
+`results/gradient_scores_bins.tsv` (group-level decile means), `figures/fig_gradient_scores.png`.
+
 ## Reproducing
 
 Analysis (python, env `ahba-pls`): `code/01_*` → `code/22_*` in order. `11_` is the parcellation
