@@ -29,7 +29,7 @@ as the positive control for every genetic readout.
 them genotyped = the **pooled arm**; 4,308 of those in the European-ancestry
 anchor set = the **EUR arm**. GREML uses the 6,011 PC-AiR-unrelated children.
 
-**Primary specification** (the one `fig1_draft.py` uses; everything else is a
+**Primary specification** (the one `fig1.R` uses; everything else is a
 sensitivity analysis):
 
 | choice | primary | kept as sensitivity | why |
@@ -334,7 +334,7 @@ Run from the repo root on CSD3. Each step writes a summary table under
 | 10 | MAGMA on the 2025 SCZ GWAS, per ancestry + `--meta` | `run_scz2025_magma.sh`, `step10_scz2025_magma_*`, `setup/build_scz2025_genesets.py` | `magma_scz2025/` |
 | 11–13 | disorder-side MAGMA, LDSC panel, MAGMA panel on both constructions | `step11_magma_disorders.sbatch`, `step12_ldsc_panel.{sbatch,_collect.py}`, `step13_magma_panel.{sbatch,_collect.py}` | `ldsc_1lmm/`, `magma_panel/` |
 | 14 | pooled-arm MAGMA with in-sample LD | `step14_magma_pooled_{prep,genes,tests}.sbatch` | `magma_pooled/` |
-| — | tables, comparison, figures (laptop) | `build_current_results.py`, `compare_parcellations.py`, `fig1_draft.py` (reads `fig1_inputs/`), `fig_genetics_panel_1lmm.py` | `current_results.tsv`, `results_70tab_hcp/compare/`, `docs/figures/` |
+| — | tables, comparison, figures (laptop) | `build_current_results.py`, `compare_parcellations.py`, `fig1.R` (R, ggplot2 + patchwork; `LC_ALL=en_US.UTF-8 Rscript`, env ahba-pls-r; reads `fig1_inputs/`), `fig_genetics_panel_1lmm.py` | `current_results.tsv`, `results_70tab_hcp/compare/`, `docs/figures/` |
 
 Unused R entry points kept for §4: `R/07_prs_conditional.R` (joint model with
 EA). `R/01_make_gds.R` and `R/02_kinship.R` are provenance only; do not re-run.
