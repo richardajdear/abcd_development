@@ -85,7 +85,7 @@ brain <- function(values, title, subtitle, scale) {
     coord_fixed(expand = FALSE) +
     guides(fill = guide_colourbar(barwidth = unit(60, "pt"), barheight = unit(3, "pt"),
                                   title.position = "left", title.vjust = 1)) +
-    labs(title = title, subtitle = subtitle) +
+    labs(title = title) +
     theme_void(base_size = BASE) +
     theme(plot.title = element_text(size = BASE, face = "bold", hjust = 0,
                                     margin = margin(b = 1)),
@@ -105,7 +105,7 @@ pa1 <- brain(
   data.frame(label = maps$label, value = maps$baseline_ct),
   "a   Baseline thickness",
   sprintf("at age ~10; %.1f–%.1f mm across parcels", min(maps$baseline_ct), max(maps$baseline_ct)),
-  scale_fill_gradient(low = "grey97", high = "grey10", limits = c(lo, hi),
+  scale_fill_gradient(low = "white", high = "#08306B", limits = c(lo, hi),
                       oob = squish, na.value = "grey85", name = "mm",
                       breaks = c(lo, hi)))
 pa2 <- brain(
@@ -145,9 +145,7 @@ pb <- pb +
   scale_y_continuous(expand = expansion(mult = c(0, 0.02)), labels = comma) +
   coord_cartesian(ylim = c(0, ymax * 1.2)) +
   labs(x = "age at scan (years)", y = "scans",
-       title = sprintf("b   %s children, %s scans", comma(n_kids), comma(n_scans)),
-       subtitle = sprintf("2 / 3 / 4 scans per child: %.0f%% / %.0f%% / %.0f%%",
-                          100 * share["2"], 100 * share["3"], 100 * share["4"])) +
+       title = sprintf("b   %s children, %s scans", comma(n_kids), comma(n_scans))) +
   th
 
 # ------------------------------------------------------ c: trajectories ----
@@ -185,9 +183,7 @@ pc <- pc +
   scale_x_continuous(breaks = seq(8, 18, 2)) +
   coord_cartesian(xlim = c(8.5, 18), ylim = c(2.3, 3.0)) +
   labs(x = "age (years)", y = "mean cortical thickness (mm)",
-       title = "c   Each child's slope is the trait",
-       subtitle = sprintf("mean %.0f µm/yr; children vary around it",
-                          sv["ols_slope_mm_per_yr"] * 1000)) +
+       title = "c   Each child's slope is the trait") +
   th + theme(legend.position = c(0.02, 0.02), legend.justification = c(0, 0),
              legend.key.width = unit(10, "pt"))
 
@@ -213,10 +209,7 @@ pd_ <- ggplot() +
            hjust = 1, size = (BASE - 1.5) / .pt, colour = SLOPE_C, lineheight = 0.9) +
   scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.25)) +
   labs(x = "scans per child", y = "slope reliability",
-       title = "d   Slope reliability",
-       subtitle = sprintf("cortex-wide %.2f; one parcel %.2f",
-                          sh$spearman_brown[sh$n_visits == 4],
-                          med$m[med$n_visits == 4])) +
+       title = "d   Slope reliability") +
   th
 
 # ------------------------------------------------------------ e, f: PRS ----
@@ -264,12 +257,11 @@ forest <- function(ph, title, subtitle, colour, show_y) {
     scale_y_continuous(breaks = ROWS$y, labels = if (show_y) ROWS$label else NULL,
                        expand = expansion(add = 0.5)) +
     scale_x_continuous(limits = c(-0.09, 0.09), breaks = c(-0.05, 0, 0.05)) +
-    labs(x = "β per SD of score (95% CI)", y = NULL, title = title,
-         subtitle = subtitle) +
+    labs(x = "β per SD of score (95% CI)", y = NULL, title = title) +
     th + theme(panel.grid.major.y = element_blank(), axis.line.y = element_blank(),
                axis.ticks.y = element_blank(),
                axis.text.y = element_text(size = BASE - 1, colour = "grey10"),
-               plot.title = element_text(colour = colour, face = "bold", size = BASE))
+               plot.title = element_text(face = "bold", size = BASE))
 }
 pe <- forest("global_slope", "e   PRS → thinning rate",
              sprintf("schizophrenia %s methods EUR, %s pooled",
@@ -281,7 +273,7 @@ pf <- forest("baseline_thickness", "f   PRS → baseline thickness",
                      count_sig("baseline_thickness", "SCZ25_META")), BASE_C, FALSE)
 
 # ----------------------------------------------------------- g: MAGMA ------
-SETS <- c(SCZ_locus_pool = "SCZ loci", MDD_pool = "MDD loci")
+SETS <- c(SCZ_locus_pool = "SCZ loci", MDD_highconf = "MDD high-confidence")
 mg <- read.delim(file.path(IN, "hcp70_magma_locus_sets.tsv"))
 if (file.exists(POOLED_MAGMA)) {
   pl <- read.delim(POOLED_MAGMA) |> filter(kind == "gene-set", variable %in% names(SETS))
@@ -315,6 +307,9 @@ pg <- ggplot(have, aes(beta, y, colour = trait)) +
              show.legend = FALSE) +
   geom_point(data = filter(have, p < 0.05), aes(shape = arm, fill = trait),
              size = 1.25, stroke = 0.45, show.legend = FALSE) +
+  geom_text(data = filter(have, p < 0.05),
+            aes(x = beta + 1.96 * se + 0.012, y = y, label = sprintf("p = %s", fmt_p(p))),
+            hjust = 0, size = (BASE - 1.5) / .pt, show.legend = FALSE) +
   geom_text(data = filter(slots, is.na(beta)), aes(0.005, y, label = "n.d."),
             inherit.aes = FALSE, hjust = 0, size = (BASE - 2) / .pt, colour = "grey55") +
   scale_colour_manual(values = c("thinning rate" = SLOPE_C, "baseline thickness" = BASE_C)) +
@@ -323,13 +318,8 @@ pg <- ggplot(have, aes(beta, y, colour = trait)) +
   scale_shape_manual(values = c(EUR = 21, pooled = 23), guide = "none") +
   scale_y_continuous(breaks = c(2, 1), labels = glab, limits = c(0.5, 2.5),
                      expand = expansion(0)) +
-  scale_x_continuous(limits = c(-0.12, 0.36), breaks = c(0, 0.15, 0.3)) +
-  labs(x = "enrichment β (95% CI)", y = NULL, title = "g   MAGMA gene sets",
-       subtitle = sprintf("SCZ loci p, thinning / baseline:\nEUR %s / %s · pooled %s / %s",
-                          mp("SCZ_locus_pool", "global_slope"),
-                          mp("SCZ_locus_pool", "baseline_thickness"),
-                          mp("SCZ_locus_pool", "global_slope", "pooled"),
-                          mp("SCZ_locus_pool", "baseline_thickness", "pooled"))) +
+  scale_x_continuous(limits = c(-0.16, 0.44), breaks = c(0, 0.2, 0.4)) +
+  labs(x = "enrichment β (95% CI)", y = NULL, title = "g   MAGMA gene sets") +
   th + theme(panel.grid.major.y = element_blank(), axis.line.y = element_blank(),
              axis.ticks.y = element_blank(),
              axis.text.y = element_text(size = BASE - 1, colour = "grey10"),
@@ -360,8 +350,8 @@ row1 <- ((pa1 / pa2) | pb | pc | pd_) + plot_layout(widths = c(1.35, 1, 1.15, 0.
 row2 <- (pe | pf | pg) + plot_layout(widths = c(1, 0.72, 0.8), guides = "collect") &
   theme(legend.position = "bottom", legend.box = "horizontal",
         legend.margin = margin(0, 0, 0, 0))
-fig <- (row1 / row2 / ptxt) +
-  plot_layout(heights = c(1, 1.0, 0.47)) +
+fig <- (row1 / row2) +
+  plot_layout(heights = c(1, 1.0)) +
   plot_annotation(
     title = "Polygenic risk for schizophrenia predicts the rate, not the baseline level, of adolescent cortical thinning",
     subtitle = paste0("Every parcel thins (a) and each child's cortex-wide slope is measured reliably (b–d). Schizophrenia PRS predicts faster thinning in both ancestry arms (e)\n",
@@ -369,7 +359,7 @@ fig <- (row1 / row2 / ptxt) +
     theme = theme(plot.title = element_text(size = BASE + 1.5, face = "bold"),
                   plot.subtitle = element_text(size = BASE - 0.5, colour = "grey30",
                                                margin = margin(b = 4))))
-ggsave(OUT, fig, width = 7.2, height = 6.0, dpi = 300, bg = "white")
+ggsave(OUT, fig, width = 7.2, height = 5.1, dpi = 300, bg = "white")
 cat(OUT, "\n")
 
 # ------------------------------------------------------------ caption ------
@@ -389,13 +379,13 @@ cap <- c(
           k("SCZ25_EUR"), k("SCZ25_META"), k("SCZ25_EUR", "baseline_thickness"),
           k("SCZ25_META", "baseline_thickness"), k("ALZ"), k("ALZ_noAPOE"),
           k("MDD_eur"), k("MDD_pooled"), k("EA"), k("ASD")),
-  sprintf("- **g** MAGMA enrichment in SCZ curated loci (Trubetskoy 2022 ST12, %s genes) and MDD loci (%s genes), p thinning / baseline. SCZ: EUR %s / %s, pooled %s / %s. MDD: EUR %s / %s, pooled %s / %s. EUR arm on 1000 Genomes EUR LD; pooled arm on the ABCD analysis sample as its own LD reference.",
+  sprintf("- **g** MAGMA enrichment in SCZ curated loci (Trubetskoy 2022 ST12, %s genes) and MDD high-confidence genes (MDD2025 prioritised; %s genes), p thinning / baseline; p printed on points with p < 0.05. SCZ: EUR %s / %s, pooled %s / %s. MDD: EUR %s / %s, pooled %s / %s. EUR arm on 1000 Genomes EUR LD; pooled arm on the ABCD analysis sample as its own LD reference.",
           comma(ngenes$n[ngenes$variable == "SCZ_locus_pool"][1]),
-          comma(ngenes$n[ngenes$variable == "MDD_pool"][1]),
+          comma(ngenes$n[ngenes$variable == "MDD_highconf"][1]),
           mp("SCZ_locus_pool", "global_slope"), mp("SCZ_locus_pool", "baseline_thickness"),
           mp("SCZ_locus_pool", "global_slope", "pooled"), mp("SCZ_locus_pool", "baseline_thickness", "pooled"),
-          mp("MDD_pool", "global_slope"), mp("MDD_pool", "baseline_thickness"),
-          mp("MDD_pool", "global_slope", "pooled"), mp("MDD_pool", "baseline_thickness", "pooled")),
+          mp("MDD_highconf", "global_slope"), mp("MDD_highconf", "baseline_thickness"),
+          mp("MDD_highconf", "global_slope", "pooled"), mp("MDD_highconf", "baseline_thickness", "pooled")),
   "", "Methods", sub("^\u2022  ", "- ", bullets), SI_NOTE)
 writeLines(cap, CAP)
 cat(CAP, "\n")

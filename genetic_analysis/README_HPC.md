@@ -186,6 +186,22 @@ the slope. The EUR-arm baseline gene-property signals (SCZ, MDD, EA) vanish in
 the pooled arm (every p ≥ 0.07): present them as EUR-arm-only. Single-LMM and
 per-region agree within noise. Run detail in the archived log (§8 step 14).
 
+**Step 15 (scripted 2026-09-24, not yet run) — EUR-arm MAGMA on ABCD's own
+LD, and disorder gene sets defined by gene-level significance.**
+`step15_magma_eur_abcdld.sbatch` (array 1–4) re-runs the EUR-arm single-LMM
+gene analysis with the ABCD EUR analysis sample (step-14 reference ∩
+`eur_anchor.keep`) as LD reference, so EUR and pooled arms differ only in
+sample, not in panel (step 13 used 1000G EUR, n = 503). Then
+`step15_magma_set_tests.sbatch` tests the step-13 SCZ/MDD sets plus
+`magma_gene_sets/genesets_topgenes.txt` (MDD / SCZ25 Bonferroni and
+top-100/250/500 genes from the EUR discovery GWAS's own gene analysis, MHC
+excluded; `build_topgene_sets.py`) on all three gene-result versions (EUR
+1000G, EUR ABCD, pooled ABCD) → `results_70tab*/magma_set_tests/table_magma_set_tests.tsv`.
+Local EUR-1000G preview, HCP single-LMM thinning rate: MDD_genesig (394 genes)
+p = 0.037, MDD_top100/250/500 p = 0.75/0.063/0.14; SCZ25_genesig (586) p =
+0.017; top-N sets unstable in both disorders. None survives correction over the
+sets tried. Run order: step14 prep (done) → 15a → 15b.
+
 ## 3. What has been tried
 
 Closed means do not repeat without a new reason; the reason is given.

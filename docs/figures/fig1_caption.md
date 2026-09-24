@@ -5,7 +5,7 @@
 - **c** Per-scan cortical mean vs age for 250 random children (grey), three with four scans (blue), population OLS trend -19 µm / year (black).
 - **d** Slope reliability: single-parcel model-based reliability across 358 parcels (boxes, medians 0.15 / 0.21 / 0.25 for 2 / 3 / 4 scans) vs split-half consistency of the cortex-wide slope (squares; 0.91 / 0.89 / 0.89).
 - **e, f** PRS association with thinning rate (e) and baseline thickness (f); β per SD with 95% CI. Schizophrenia (2025 GWAS): thinning 3/3 EUR / 3/3 pooled, baseline 0/3 / 0/3. Alzheimer's 3/3 with APOE, 0/3 without; depression 2/3 / 2/3; education 2/3 (opposite sign); autism 0/3.
-- **g** MAGMA enrichment in SCZ curated loci (Trubetskoy 2022 ST12, 455 genes) and MDD loci (1,881 genes), p thinning / baseline. SCZ: EUR 0.005 / 1e-04, pooled 0.13 / 0.24. MDD: EUR 0.34 / 0.06, pooled 0.39 / 0.49. EUR arm on 1000 Genomes EUR LD; pooled arm on the ABCD analysis sample as its own LD reference.
+- **g** MAGMA enrichment in SCZ curated loci (Trubetskoy 2022 ST12, 455 genes) and MDD high-confidence genes (MDD2025 prioritised; 213 genes), p thinning / baseline; p printed on points with p < 0.05. SCZ: EUR 0.005 / 1e-04, pooled 0.13 / 0.24. MDD: EUR 0.59 / 0.08, pooled 0.39 / 0.37. EUR arm on 1000 Genomes EUR LD; pooled arm on the ABCD analysis sample as its own LD reference.
 
 Methods
 - ABCD release 7.0, HCP-MMP1.0 (358 parcels; 1 lh polygon without a value drawn grey); 8,716 children with >= 2 QC-passing scans.

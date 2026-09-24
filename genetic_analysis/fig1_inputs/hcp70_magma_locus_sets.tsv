@@ -1,5 +1,7 @@
 arm	ld_reference	phenotype	variable	n_genes	beta	se	p
+EUR	1000 Genomes EUR (g1000_eur)	baseline_thickness	MDD_highconf	213	0.091952	0.063932	0.075186
 EUR	1000 Genomes EUR (g1000_eur)	baseline_thickness	MDD_pool	1881	0.040487	0.026485	0.063186
 EUR	1000 Genomes EUR (g1000_eur)	baseline_thickness	SCZ_locus_pool	455	0.18915	0.051697	0.00012717
+EUR	1000 Genomes EUR (g1000_eur)	global_slope	MDD_highconf	213	-0.014466	0.06406	0.58933
 EUR	1000 Genomes EUR (g1000_eur)	global_slope	MDD_pool	1881	0.010808	0.026539	0.34191
 EUR	1000 Genomes EUR (g1000_eur)	global_slope	SCZ_locus_pool	455	0.13509	0.051809	0.0045656
