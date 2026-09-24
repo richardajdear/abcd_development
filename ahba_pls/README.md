@@ -829,6 +829,40 @@ weights, so the region comparisons with C1/C3 use their 137 parcels even when PL
 - **The astrocyte loading shrinks as filters are removed** (+5.3 → +2.9), moving toward C3's negative value.
 - **Global slope stays null** in all three versions.
 
+### CBCL exploration (exploratory; not on the slide) — `code/23_cbcl_explore.py`
+
+Do children whose thinning follows the PLS2 pattern have more CBCL symptoms? Inputs: the per-child slope and
+intercept BLUPs of the HCP-MMP fit (`out/thickness_hcp_70_aa6e91efba82/fits/blups.parquet`, 8,716 children) and,
+until the 7.0 `mh_p_cbcl` table is local, the **5.1** CBCL (`core/mental-health/mh_p_cbcl.csv`, same child IDs,
+baseline to year 4). Individual-level data are read locally and never written; only
+`results/cbcl_explore_{assoc,spin}.tsv` (coefficients) are committed. Heatmap: `figures/fig_cbcl_explore.png`.
+
+- **Phenotypes** (higher = more thinning):
+  - global mean thinning;
+  - PLS2 projection (thinning weighted by the z-scored PLS2 map, a mean-zero spatial contrast);
+  - PLS2 top-decile mean and top − bottom decile;
+  - C3 projection;
+  - PLS1 projections of thinning and of baseline thickness, as controls.
+- **Outcomes**: raw CBCL scores, log1p (the syndrome T-scores are floored at 50): 3 broadband, 8 syndrome and 6 DSM
+  scales, plus a p-factor (PC1 of the syndromes, all loadings 0.29–0.38).
+- **Models**: baseline, year 3 (n ≈ 7,991), year 3 adjusted for baseline, year 4 (40% complete in 5.1), and
+  logistic for T ≥ 65. All have site fixed effects, sex and age, with family-clustered SEs. Each spatial phenotype
+  is also fitted with global thinning as a covariate.
+- **Specificity**: a spin null of the PLS2 and C3 projections against 1,000 spin-rotated maps, after all covariates.
+
+**Result: null.** 988 fits give 79 at p < 0.05 (about 49 expected by chance); the
+smallest BH q is 0.085, and every |β| ≤ 0.06 SD per SD. The spin null is significant in 0 of 36 tests
+(smallest p_spin 0.078). The largest nominal effects are off-target:
+- the PLS1 baseline-thickness contrast goes with baseline rule-breaking and conduct (β ≈ +0.04, the only q < 0.1 cells);
+- C3-pattern thinning goes with *fewer* year-4 anxiety symptoms (β ≈ −0.06, on the 40% wave).
+
+With n ≈ 8,000 the 95% CI on a standardised β is about ±0.022, so child-level PLS2–CBCL associations larger than
+|β| ≈ 0.03 are unlikely in this window.
+
+**Caveats that argue for re-running on 7.0 before concluding:**
+- Year 3 is age ~13, before most adolescent-onset symptoms; the 7.0 CBCL adds the 5- and 6-year follow-ups.
+- Per-child slopes from 2–4 scans are noisy, and the BLUPs are shrunk, which attenuates associations.
+
 ## Reproducing
 
 Analysis (python, env `ahba-pls`): `code/01_*` → `code/22_*` in order. `11_` is the parcellation

@@ -59,7 +59,7 @@ brain <- function(v, title, fill_scale) {
           plot.margin = margin(1, 3, 2, 3))
 }
 div <- function(v) { l <- max(abs(maps[[v]]), na.rm = TRUE) * c(-1, 1)
-  scale_fill_distiller(palette = "Spectral", limits = l, na.value = "grey82", breaks = pretty_breaks(3), name = NULL) }
+  scale_fill_distiller(palette = "RdBu", limits = l, na.value = "grey82", breaks = pretty_breaks(3), name = NULL) }
 # white-anchored: CT white (thinnest) -> blue (thickest); dCT white (0 mm/yr, no
 # thinning) -> red (fastest thinning), i.e. warm = high thinning rate
 # (ColorBrewer Blues / Reds stops; a two-stop gradient washes out the mid-range)
@@ -116,9 +116,9 @@ scat <- function(xs, xl) {
     theme(strip.placement = "outside", panel.spacing = unit(6, "pt"))
 }
 pb <- scat(c("CT", "dCT"), "imaging map") + theme(legend.position = "none") +
-  labs(title = "c  What each component tracks")
+  labs(title = "b  What each component tracks")
 pc1 <- scat(c("C1", "C3"), "AHBA score") + theme(legend.position = "none") +
-  labs(title = "d  Regions vs AHBA")
+  labs(title = "c  Regions vs AHBA")
 
 gl <- GW |> pivot_longer(c(C1, C3), names_to = "xv", values_to = "x") |>
   pivot_longer(c(PLS1, PLS2), names_to = "yv", values_to = "y") |>
@@ -180,7 +180,7 @@ pe <- ggplot(e, aes(set, vector)) +
   scale_alpha_manual(values = c(`TRUE` = 1, `FALSE` = FADE), labels = c(`TRUE` = "q < 0.05", `FALSE` = "n.s."),
                      name = NULL) +
   scale_y_discrete(limits = rev) + facet_grid(~kind, scales = "free_x", space = "free_x") +
-  labs(x = NULL, y = NULL, title = "f  Cell classes and cortical layers") +
+  labs(x = NULL, y = NULL, title = "d  Cell classes and cortical layers") +
   guides(size = guide_legend(order = 1, override.aes = list(fill = "grey60")),
          fill = guide_colourbar(order = 2, barwidth = unit(4, "pt"), barheight = unit(22, "pt")),
          alpha = guide_legend(order = 3, override.aes = list(size = 3, fill = "#b2182b"))) +
@@ -191,10 +191,12 @@ pe <- ggplot(e, aes(set, vector)) +
 
 # ------------------------------------------------------------- assemble -------
 # methods live in the README (HCP-MMP summary slide section), not on the slide
-row1 <- (pa | pctd) + plot_layout(widths = c(2.6, 1))
-row2 <- (pb | pc1 | pc2) + plot_layout(widths = c(1, 1, 1))
-row3 <- (pd | pe) + plot_layout(widths = c(1, 1.55))
-fig <- (row1 / row2 / row3) + plot_layout(heights = c(1.1, 0.95, 0.72))
+# pctd (CT vs dCT) is still built above but not placed; the CBCL panel will
+# take the slot beside the MAGMA panel once its analysis is settled.
+row1 <- (pa | pb) + plot_layout(widths = c(1.55, 1))
+row2 <- (pc1 | pc2 | pe) + plot_layout(widths = c(1, 1, 1.9))
+row3 <- (pd | plot_spacer()) + plot_layout(widths = c(1, 1.55))
+fig <- (row1 / row2 / row3) + plot_layout(heights = c(1.15, 0.95, 0.72))
 fig <- fig + plot_annotation(
     title = "HCP-MMP: the ABCD thinning component is the AHBA C3 axis, and it carries SCZ and MDD risk",
     subtitle = sprintf(paste0("PLS of AHBA expression against adolescent thickness and thinning separates a static component (PLS1 = AHBA C1, thin cortex) from a thinning component (PLS2 = AHBA C3).\n",
