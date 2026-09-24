@@ -18,6 +18,11 @@ interest.
 
 ## Status — 2026-09-15: the 7.0 re-run is complete, on two parcellations
 
+> **Genetics numbers below are dated 2026-09-15.** The current state (HCP-MMP,
+> single-LMM slope, 2025 SCZ GWAS, full control panel) is
+> [`genetic_analysis/README_HPC.md`](genetic_analysis/README_HPC.md) §2; where
+> they differ, that file wins.
+
 **What happened.** Every result in this repo dated before 2026-09-14 was
 computed from the ABCD **6.0** tabulated tables, which sat in a directory
 labelled 7.0 (column-identical; only the six-year row count tells them apart,
@@ -47,8 +52,7 @@ The map did not change; the per-child slopes did (r = 0.92 on shared children),
 and that is exactly where the re-run found its gains: subject-level precision.
 
 **Genetics on the 7.0 phenotype — what changed against the 6.0 benchmark.**
-Tables: `genetic_analysis/work/results_70tab/summary_70tab.tsv` (DK, 694 rows,
-each with its 6.0 partner) and `…/results_70tab_hcp/summary_70tab.tsv` (HCP);
+Tables (6.0-vs-7.0 comparison, now legacy): `legacy/genetic_analysis/tables/summary_70tab_{dk,hcp}.tsv`;
 side by side in `…/results_70tab_hcp/compare/table_dk_vs_hcp.tsv`.
 
 - **Every matched SCZ/MDD polygenic-score SE tightened**, no sign flipped.
@@ -110,9 +114,9 @@ live under [`legacy/`](legacy/README.md). Do not quote them as current; the
 | you want | go to |
 |:---|:---|
 | **what changed with the 7.0 tables, old vs new** | [`docs/RERUN_7.0_TABULATED.md`](docs/RERUN_7.0_TABULATED.md), `docs/vintage_comparison.csv` |
-| **the cluster genetics: state, what was learnt, the steps to run** | [`genetic_analysis/README_HPC.md`](genetic_analysis/README_HPC.md) |
-| the PRS results on one slide (4 methods × 2 parcellations, controls, all caveats) | [`docs/figures/slide_prs_methods.png`](docs/figures/slide_prs_methods.png), generator [`genetic_analysis/slide_prs_methods.py`](genetic_analysis/slide_prs_methods.py) |
-| whether the slope construction matters (mean-of-BLUPs vs one LMM on the per-scan mean) | [`docs/figures/slide_prs_orderops.png`](docs/figures/slide_prs_orderops.png), generator [`genetic_analysis/slide_prs_orderops.py`](genetic_analysis/slide_prs_orderops.py) |
+| **the cluster genetics: current results, what has been tried, next analyses, the steps to run** | [`genetic_analysis/README_HPC.md`](genetic_analysis/README_HPC.md); every number in [`genetic_analysis/current_results.tsv`](genetic_analysis/current_results.tsv) |
+| the PRS results on one slide (4 methods × 2 parcellations, controls, all caveats) | [`docs/figures/slide_prs_methods.png`](docs/figures/slide_prs_methods.png), generator (legacy, PGC3-era) [`legacy/genetic_analysis/slide_prs_methods.py`](legacy/genetic_analysis/slide_prs_methods.py) |
+| whether the slope construction matters (mean-of-BLUPs vs one LMM on the per-scan mean) | [`docs/figures/slide_prs_orderops.png`](docs/figures/slide_prs_orderops.png), generator (legacy) [`legacy/genetic_analysis/slide_prs_orderops.py`](legacy/genetic_analysis/slide_prs_orderops.py) |
 | the findings, their caveats and the corrections (prose numbers are 6.0-vintage; tables and figures are current) | [`docs/REPORT_7.0.md`](docs/REPORT_7.0.md) |
 | how the mixed model works and why | [`notebooks/01_longitudinal_model.qmd`](notebooks/01_longitudinal_model.qmd) |
 | spatial nulls and the map-to-gene tests | [`notebooks/02_maps_and_genes.qmd`](notebooks/02_maps_and_genes.qmd) |
@@ -161,7 +165,7 @@ live under [`legacy/`](legacy/README.md). Do not quote them as current; the
 **Genetics** — see the Status section: the legacy result is a benchmark, the
 re-run is pending. The reasoning that governs it (PRS as the primary
 disorder test, why rg is uninformative at this h², why controls are mandatory,
-why region selection is not a lever) is in `genetic_analysis/README_HPC.md` §4.
+why region selection is not a lever) is in `genetic_analysis/README_HPC.md` §3 and §6.
 
 ## HCP-MMP (Glasser) thickness
 
