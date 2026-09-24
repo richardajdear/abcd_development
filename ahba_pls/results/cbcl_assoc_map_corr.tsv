@@ -1,0 +1,113 @@
+outcome	map	reference	rho	p_spin	p_perm	n
+depress	absolute	PLS2	0.01123	0.9302	0.9361	8181
+depress	absolute	C3	0.08982	0.4769	0.4845	8181
+depress	absolute	dCT	0.05473	0.6517	0.6513	8181
+depress	absolute	PLS1	0.1594	0.3445		8181
+depress	relative	PLS2	-0.04868	0.7069	0.6873	8181
+depress	relative	C3	-0.04073	0.7475	0.7652	8181
+depress	relative	dCT	0.1215	0.3411	0.3307	8181
+depress	relative	PLS1	0.05902	0.7087		8181
+depress	absolute_ct	PLS2	0.03717	0.751	0.7762	8181
+depress	absolute_ct	C3	0.1257	0.2989	0.3886	8181
+depress	absolute_ct	dCT	0.1299	0.2789	0.3447	8181
+depress	absolute_ct	PLS1	-0.0895	0.6197		8181
+depress	relative_ct	PLS2	0.007738	0.9502	0.9491	8181
+depress	relative_ct	C3	0.03701	0.7698	0.7922	8181
+depress	relative_ct	dCT	0.164	0.1742	0.2198	8181
+depress	relative_ct	PLS1	-0.1705	0.3331		8181
+anxdisord	absolute	PLS2	-0.2161	0.06579	0.08192	8185
+anxdisord	absolute	C3	-0.07138	0.5907	0.5934	8185
+anxdisord	absolute	dCT	0.1668	0.1916	0.2048	8185
+anxdisord	absolute	PLS1	0.1576	0.4137		8185
+anxdisord	relative	PLS2	-0.2609	0.0212	0.03097	8185
+anxdisord	relative	C3	-0.1891	0.1066	0.1329	8185
+anxdisord	relative	dCT	0.2257	0.06519	0.08591	8185
+anxdisord	relative	PLS1	0.06307	0.7217		8185
+anxdisord	absolute_ct	PLS2	-0.1867	0.1202	0.1479	8185
+anxdisord	absolute_ct	C3	-0.06581	0.5753	0.6284	8185
+anxdisord	absolute_ct	dCT	0.3603	0.0018	0.004995	8185
+anxdisord	absolute_ct	PLS1	-0.1096	0.4751		8185
+anxdisord	relative_ct	PLS2	-0.2354	0.05259	0.06993	8185
+anxdisord	relative_ct	C3	-0.1599	0.1982	0.2178	8185
+anxdisord	relative_ct	dCT	0.4112	0.0005999	0.001998	8185
+anxdisord	relative_ct	PLS1	-0.1676	0.3017		8185
+anxdep	absolute	PLS2	-0.1975	0.1054	0.1209	8184
+anxdep	absolute	C3	-0.08103	0.5937	0.5495	8184
+anxdep	absolute	dCT	0.147	0.2849	0.2677	8184
+anxdep	absolute	PLS1	0.1947	0.4363		8184
+anxdep	relative	PLS2	-0.2498	0.03579	0.03297	8184
+anxdep	relative	C3	-0.181	0.1972	0.1429	8184
+anxdep	relative	dCT	0.2072	0.1262	0.1079	8184
+anxdep	relative	PLS1	0.1186	0.6397		8184
+anxdep	absolute_ct	PLS2	-0.1664	0.1618	0.2168	8184
+anxdep	absolute_ct	C3	-0.05292	0.6603	0.7053	8184
+anxdep	absolute_ct	dCT	0.3176	0.004199	0.01099	8184
+anxdep	absolute_ct	PLS1	-0.09442	0.5431		8184
+anxdep	relative_ct	PLS2	-0.2137	0.06699	0.1119	8184
+anxdep	relative_ct	C3	-0.1512	0.2352	0.2987	8184
+anxdep	relative_ct	dCT	0.3597	0.0007998	0.006993	8184
+anxdep	relative_ct	PLS1	-0.1373	0.4123		8184
+withdep	absolute	PLS2	0.1232	0.2386	0.3377	8189
+withdep	absolute	C3	0.1474	0.124	0.2697	8189
+withdep	absolute	dCT	-0.2256	0.0182	0.07992	8189
+withdep	absolute	PLS1	0.1729	0.03459		8189
+withdep	relative	PLS2	0.08495	0.3895	0.5185	8189
+withdep	relative	C3	0.007626	0.9296	0.955	8189
+withdep	relative	dCT	-0.1684	0.05539	0.2078	8189
+withdep	relative	PLS1	0.02753	0.7259		8189
+withdep	absolute_ct	PLS2	0.04732	0.6687	0.7353	8189
+withdep	absolute_ct	C3	0.147	0.1294	0.3087	8189
+withdep	absolute_ct	dCT	-0.07174	0.4971	0.5904	8189
+withdep	absolute_ct	PLS1	0.06997	0.4941		8189
+withdep	relative_ct	PLS2	0.03442	0.7558	0.7972	8189
+withdep	relative_ct	C3	0.05121	0.6007	0.7203	8189
+withdep	relative_ct	dCT	-0.04827	0.6563	0.7073	8189
+withdep	relative_ct	PLS1	-0.05976	0.5039		8189
+internal	absolute	PLS2	-0.1769	0.1374	0.1578	8189
+internal	absolute	C3	-0.01589	0.9104	0.9041	8189
+internal	absolute	dCT	0.1304	0.3045	0.3357	8189
+internal	absolute	PLS1	0.1607	0.4649		8189
+internal	relative	PLS2	-0.2282	0.04959	0.06693	8189
+internal	relative	C3	-0.114	0.3821	0.3686	8189
+internal	relative	dCT	0.1886	0.1408	0.1469	8189
+internal	relative	PLS1	0.09238	0.6679		8189
+internal	absolute_ct	PLS2	-0.1345	0.2717	0.3247	8189
+internal	absolute_ct	C3	0.01168	0.9176	0.951	8189
+internal	absolute_ct	dCT	0.2503	0.03539	0.05894	8189
+internal	absolute_ct	PLS1	-0.1535	0.3649		8189
+internal	relative_ct	PLS2	-0.1848	0.1298	0.1758	8189
+internal	relative_ct	C3	-0.08125	0.5159	0.5584	8189
+internal	relative_ct	dCT	0.2847	0.0172	0.02697	8189
+internal	relative_ct	PLS1	-0.202	0.2464		8189
+rulebreak	absolute	PLS2	0.07851	0.4729	0.5365	8182
+rulebreak	absolute	C3	0.1529	0.153	0.2557	8182
+rulebreak	absolute	dCT	-0.0488	0.6457	0.7193	8182
+rulebreak	absolute	PLS1	0.05593	0.6771		8182
+rulebreak	relative	PLS2	0.04792	0.6489	0.7253	8182
+rulebreak	relative	C3	0.03683	0.7329	0.7912	8182
+rulebreak	relative	dCT	-0.004752	0.9612	0.964	8182
+rulebreak	relative	PLS1	-0.0714	0.6469		8182
+rulebreak	absolute_ct	PLS2	0.2322	0.05199	0.07493	8182
+rulebreak	absolute_ct	C3	0.308	0.004399	0.03097	8182
+rulebreak	absolute_ct	dCT	-0.191	0.126	0.1419	8182
+rulebreak	absolute_ct	PLS1	0.04779	0.7045		8182
+rulebreak	relative_ct	PLS2	0.2284	0.04739	0.08292	8182
+rulebreak	relative_ct	C3	0.2297	0.03439	0.08292	8182
+rulebreak	relative_ct	dCT	-0.1604	0.1852	0.2188	8182
+rulebreak	relative_ct	PLS1	-0.1295	0.3785		8182
+pfactor	absolute	PLS2	-0.127	0.2817	0.3217	8162
+pfactor	absolute	C3	0.002161	0.9878	0.994	8162
+pfactor	absolute	dCT	0.1695	0.1618	0.1928	8162
+pfactor	absolute	PLS1	0.06925	0.7459		8162
+pfactor	relative	PLS2	-0.1867	0.1036	0.1289	8162
+pfactor	relative	C3	-0.1331	0.2949	0.2777	8162
+pfactor	relative	dCT	0.2382	0.05279	0.04795	8162
+pfactor	relative	PLS1	-0.04347	0.8288		8162
+pfactor	absolute_ct	PLS2	-0.09972	0.3827	0.4715	8162
+pfactor	absolute_ct	C3	0.0233	0.8466	0.8721	8162
+pfactor	absolute_ct	dCT	0.2879	0.005399	0.02797	8162
+pfactor	absolute_ct	PLS1	-0.2075	0.1838		8162
+pfactor	relative_ct	PLS2	-0.129	0.2687	0.3457	8162
+pfactor	relative_ct	C3	-0.08108	0.5253	0.5574	8162
+pfactor	relative_ct	dCT	0.3238	0.0016	0.008991	8162
+pfactor	relative_ct	PLS1	-0.2871	0.07538		8162

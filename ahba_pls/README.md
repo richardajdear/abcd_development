@@ -933,6 +933,45 @@ Results:
 Outputs: `results/casecontrol_maps.tsv` (per-parcel d, t, p; maps absolute / relative / absolute_ct / relative_ct), `results/casecontrol_map_corr.tsv`,
 `figures/fig_casecontrol.png`. All are group-level.
 
+### Linear association maps: thinning vs symptoms at 15–17 given baseline (exploratory) — `code/25_cbcl_assoc_maps.py` → `code/fig7_cbcl_assoc.R`
+
+This is the continuous counterpart of the case-control maps: every child is kept and there are no cut-offs. The
+outcomes are the seven CBCL scales from above (log1p raw sums; the KSADS diagnosis is binary and left out).
+For each bilateral parcel:
+
+`CBCL_15–17 ~ thin_r + CBCL_baseline + sex + site + age_late + age_first + age_span + n_visits [+ global thinning] [+ CT0_r]`
+
+- The map value is the partial correlation of the later score with that parcel's thinning rate; positive means
+  faster thinning goes with more symptoms than baseline predicts. n = 8,162–8,189.
+- The four variants and the spin null are as in the case-control maps. p_perm is a within-site Freedman–Lane
+  permutation of the covariate-residualised outcome (1,000 draws).
+- PLS2 and dCT correlate at ρ = −0.58 over the 137 parcels, so `results/cbcl_assoc_map_partial.tsv` gives each
+  map's correlation with PLS2 given dCT, and with dCT given PLS2.
+
+Results (10 of 112 map–reference tests pass both nulls):
+1. **Internalising and anxiety maps correlate *negatively* with PLS2** (ρ = -0.26 to about −0.2; DSM anxiety
+   with global thinning adjusted: -0.26, p_spin 0.021, p_perm 0.031). **That is the dCT pattern, not
+   PLS2:** given dCT, the PLS2 correlation is -0.13 to 0.04.
+2. **With baseline CT adjusted, the anxiety, internalising and p-factor maps align with the normative thinning
+   map**: ρ = 0.25–0.41; 7 of 8 pass both nulls (the exception is internalising without global thinning, ρ = 0.25, p_spin 0.035). For DSM anxiety with global thinning and CT adjusted,
+   ρ = 0.41 (p_spin 0.001, p_perm 0.002). These survive partialling out PLS2 (ρ = 0.37 for anxiety,
+   0.37 for the p-factor).
+   - dCT is negative mm/yr, so this means that children whose symptoms rise thin relatively *more* where cortex
+     normally thins least, and *less* in the fast-thinning sensorimotor strip.
+   - The case-control maps showed the same flattened gradient. This is a cut-off-free definition in the same
+     children, so it is a robustness check, not an independent replication.
+3. **Rule-breaking goes the other way**: its CT-adjusted map aligns with C3 (ρ = 0.31, p_spin 0.004, p_perm 0.031;
+   0.26 given dCT) and positively, though not significantly, with PLS2 (0.23).
+4. **Depressive and withdrawn/depressed maps track none of the reference maps.**
+
+**Reading.** The hypothesis that symptom-linked thinning follows PLS2 is not supported for internalising
+symptoms. What is reproducible across both designs is a *departure from the normative gradient* among children
+whose anxiety or general symptoms rise. The one externalising scale leans toward C3/PLS2; this is a single
+nominal hit and needs replication.
+
+Outputs: `results/cbcl_assoc_maps.tsv` (per-parcel partial r, t, p), `cbcl_assoc_map_corr.tsv`,
+`cbcl_assoc_map_partial.tsv`, `figures/fig_cbcl_assoc.png`. All are group-level.
+
 ## Reproducing
 
 Analysis (python, env `ahba-pls`): `code/01_*` → `code/22_*` in order. `11_` is the parcellation
