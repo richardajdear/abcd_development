@@ -1,0 +1,2 @@
+check	seed	n_half	rho_full_vs_shipped	rho_halfA_vs_full	rho_halfB_vs_full	rho_halfA_vs_halfB	r_projB_halfAweights_vs_fullweights	r_projA_halfBweights_vs_fullweights
+split_half_PLS_lead_map	0	4358	1.00000	0.99991	0.99990	0.99978	0.99998	0.99998

@@ -1,0 +1,7 @@
+phenotype	r_with_global	r_with_projC3	r_with_projPLS2	r_lh_rh	spearman_brown	r_map_C3_vs_PLS2
+slope_projC3	0.4369	1.0000	0.6880	0.4901	0.6578	0.7012
+slope_projPLS2	0.1907	0.6880	1.0000	0.4596	0.6298	0.7012
+slope_projC3_resid	-0.0000	0.8995	0.6722			0.7012
+slope_projPLS2_resid	-0.0000	0.6160	0.9817			0.7012
+slope_cov137	0.9943	0.4468	0.1841	0.8018	0.8900	0.7012
+global_slope	1.0000	0.4369	0.1907	0.8038	0.8912	0.7012
