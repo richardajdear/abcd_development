@@ -156,3 +156,4 @@ out/rerun_local.log
 # individual-level imaging rows for local figure drafts -- never committed
 genetic_analysis/fig1_inputs/hcp70_scans.csv
 genetic_analysis/fig1_inputs/hcp70_global_slope.csv
+genetic_analysis/fig1_inputs/hcp70_child_traits.csv

@@ -109,13 +109,19 @@ bar <- function(cols, a, b, off, lab, fmt) {
 b1 <- bar(CT_COLS, lo, hi, row_off["base"], "mm", "%.1f")
 b2 <- bar(DCT_COLS, vmin, 0, row_off["thin"], "µm/yr", "%.0f")
 tiles <- rbind(b1$tiles, b2$tiles); btxt <- rbind(b1$text, b2$text); bttl <- rbind(b1$title, b2$title)
+PA_ASPECT <- (W + 0.42) / (H + 0.02 - row_off["thin"])    # width / height of the map block
+ROW1_H_IN <- 1.75   # effective map-block height, calibrated on the render
+# the "a   " tag sits inside panel a's title; shift the second title by its width
+tag_in <- grid::convertWidth(grid::grobWidth(grid::textGrob("a   ",
+            gp = grid::gpar(fontsize = BASE, fontface = "bold"))), "inches", valueOnly = TRUE)
+TAG_DX <- 1.16 * tag_in * (H + 0.02 - row_off["thin"]) / ROW1_H_IN   # 1.16: calibrated on the render
 pa <- ggplot() +
   geom_polygon(data = map_df, aes(x, y, group = grp, fill = col), colour = "white",
                linewidth = 0.06) +
   geom_tile(data = tiles, aes(x, y, fill = fill, height = h), width = 0.06) +
   geom_text(data = btxt, aes(x, y, label = lab), hjust = 0, size = (BASE - 1.5) / .pt) +
   geom_text(data = bttl, aes(x, y, label = lab), hjust = 0, vjust = 0, size = (BASE - 1.5) / .pt) +
-  annotate("text", x = 0, y = row_off["thin"] + H + 0.06, label = "Thinning rate (ΔCT)",
+  annotate("text", x = TAG_DX, y = row_off["thin"] + H + 0.06, label = "Thinning rate (ΔCT)",
            hjust = 0, vjust = 0, fontface = "bold", size = BASE / .pt) +
   scale_fill_identity() +
   coord_fixed(xlim = c(0, W + 0.42), ylim = c(row_off["thin"], H + 0.02), expand = FALSE,
@@ -125,7 +131,6 @@ pa <- ggplot() +
   theme_void(base_size = BASE) +
   theme(plot.title = element_text(size = BASE, face = "bold", hjust = 0, margin = margin(b = 4)),
         plot.title.position = "plot", plot.margin = margin(3, 3, 3, 3))
-PA_ASPECT <- (W + 0.42) / (H + 0.02 - row_off["thin"])    # width / height of the map block
 
 # ------------------------------------------------------------ b: design ----
 age <- read.csv(file.path(IN, "hcp70_age_by_visit.csv"))
@@ -184,7 +189,38 @@ pb1 <- dens_panel("thickness_mm", BASE_C,
                   "e   Per-child traits", "mean %.2f\nSD %.3f mm")
 pb2 <- dens_panel("slope_um_per_yr", SLOPE_C, "ΔCT (µm / year)", NULL,
                   "mean %.1f\nSD %.1f µm/yr")
-pe <- (pb1 / pb2)
+
+traits_f <- file.path(IN, "hcp70_child_traits.csv")          # per-child, gitignored
+ctr <- c(csv_("thickness_mm", "mean"), csv_("slope_um_per_yr", "mean"))
+XL <- c(2.5, 3.0); YLe <- c(-28, -12)
+if (file.exists(traits_f)) {
+  tr <- read.csv(traits_f)
+  pe_main <- ggplot(tr, aes(ct_mm, dct_um_per_yr)) +
+    geom_point(size = 0.35, alpha = 0.3, colour = "grey25", stroke = 0)
+  r_ct <- cor(tr$ct_mm, tr$dct_um_per_yr)
+} else {
+  h2e <- read.csv(file.path(IN, "hcp70_child_hist2d.csv"))
+  pe_main <- ggplot(h2e, aes(ct_bin, dct_bin, alpha = N)) + geom_tile(fill = "grey30") +
+    scale_alpha(guide = "none")
+  r_ct <- NA
+}
+pe_main <- pe_main +
+  annotate("text", x = XL[2] - 0.01, y = YLe[2] - 0.3, hjust = 1, vjust = 1, size = (BASE - 1.5) / .pt,
+           label = if (is.na(r_ct)) "" else sprintf("r = %.2f", r_ct), colour = "grey20") +
+  coord_cartesian(xlim = XL, ylim = YLe, expand = FALSE) +
+  labs(x = "CT (mm)", y = "ΔCT (µm / year)") + th
+d_ct <- cd[cd$var == "thickness_mm", ]; d_sl <- cd[cd$var == "slope_um_per_yr", ]
+pe_top <- ggplot(d_ct, aes(x, density)) +
+  geom_area(fill = BASE_C, alpha = 0.35, colour = BASE_C, linewidth = 0.35) +
+  coord_cartesian(xlim = XL, expand = FALSE) +
+  labs(title = "e   Whole-cortex traits") + theme_void(base_size = BASE) +
+  theme(plot.title = element_text(size = BASE, face = "bold", margin = margin(b = 3)),
+        plot.title.position = "plot")
+pe_right <- ggplot(d_sl, aes(x, density)) +
+  geom_area(fill = SLOPE_C, alpha = 0.35, colour = SLOPE_C, linewidth = 0.35) +
+  coord_flip(xlim = YLe, expand = FALSE) + theme_void(base_size = BASE)
+pe <- pe_top + plot_spacer() + pe_main + pe_right +
+  plot_layout(ncol = 2, widths = c(4, 1), heights = c(1, 4))
 
 # ------------------------------------------------------ c: trajectories ----
 summ <- read.csv(file.path(IN, "hcp70_scan_summary.csv"))
@@ -192,11 +228,19 @@ sv <- setNames(summ$value, summ$metric)
 YL <- c(2.3, 3.0)
 trend <- data.frame(age = c(8.3, 18.2)) |>
   mutate(ct = sv["ols_intercept_mm"] + sv["ols_slope_mm_per_yr"] * age)
-HI_C <- c("#009E73", "#7B3294", "#8C510A")               # highlighted children: not yellow, CT blue or ΔCT red
+HI_C <- c("#1B7837", "#762A83", "#E08214")               # highlighted children: not yellow, CT blue or ΔCT red
 if (file.exists(scans_f)) {
   set.seed(7)
   kids <- sample(unique(sc$sid), 250)
-  hi3 <- sample(unique(sc$sid[sc$n_visits == 4]), 3)
+  # highlighted children: mean offset from the OLS line of 0.06-0.10 mm (clear of
+  # the line, not outliers), two above / one below, 4 / 4 / 3 scans
+  off <- sc |> mutate(res = mean_ct - (sv["ols_intercept_mm"] + sv["ols_slope_mm_per_yr"] * age)) |>
+    group_by(sid, n_visits) |> summarise(m = mean(res), s = sd(res), .groups = "drop") |>
+    filter(s < 0.03)
+  off0 <- off
+  off <- filter(off, abs(m) > 0.05, abs(m) < 0.10)
+  pick <- function(n, lo, hi) sample(off$sid[off$n_visits == n & off$m > lo & off$m < hi], 1)
+  hi3 <- c(pick(4, 0.05, 0.08), pick(4, -0.09, -0.06), sample(off0$sid[off0$n_visits == 3 & off0$m > 0.11 & off0$m < 0.14], 1))
   lines_bg <- sc |> filter(sid %in% kids)
   lines_hi <- sc |> filter(sid %in% hi3) |> mutate(child = factor(match(sid, hi3)))
   pc <- ggplot() +
@@ -367,7 +411,6 @@ ptxt <- ggplot() +
 # row-1 panel height ~ 1.95 in; other columns 1 : 1.5 : 0.78 share the rest of
 # the 7.2 in width; choose panel-a's relative width so its cell is as wide as
 # the map block needs at that height (+ the colourbar labels)
-ROW1_H_IN <- 1.75   # effective map-block height, calibrated on the render
 pa_in <- ROW1_H_IN * PA_ASPECT
 PA_W <- pa_in / ((7.2 - pa_in) / (0.9 + 1.3 + 0.73))
 row1 <- (pa | pb | pc | pd_) + plot_layout(widths = c(PA_W, 0.9, 1.3, 0.73))
@@ -399,14 +442,13 @@ cap <- c(
   sprintf("- **b** Age at scan by visit; %s children, %s scans; 2 / 3 / 4 scans per child for %s / %s / %s children.",
           comma(n_kids), comma(n_scans), comma(per$n_children[per$n_scans == 2]),
           comma(per$n_children[per$n_scans == 3]), comma(per$n_children[per$n_scans == 4])),
-  sprintf("- **c** Per-scan cortical mean vs age for 250 random children (grey), three children with four scans (colour), OLS line of best fit %.0f µm / year (red). Title: the linear mixed model fitted to each child's scans, whose child-level intercept and slope are CT and ΔCT.",
+  sprintf("- **c** Per-scan cortical mean vs age for 250 random children (grey), three children offset from the fit line (colour; two with four scans, one with three), OLS line of best fit %.0f µm / year (red). Title: the linear mixed model fitted to each child's scans, whose child-level intercept and slope are CT and ΔCT.",
           sv["ols_slope_mm_per_yr"] * 1000),
   sprintf("- **d** ΔCT reliability 1 − v/τ², where v is a child's conditional (posterior) variance of the slope random effect and τ² the between-child slope variance: boxes, per-parcel LMMs (358 parcels; each value the mean over children; medians %.2f / %.2f / %.2f for 2 / 3 / 4 scans); squares, the single LMM on the cortical mean (mean over children %.2f / %.2f / %.2f).",
           med$m[1], med$m[2], med$m[3], cwm["2"], cwm["3"], cwm["4"]),
-  sprintf("- **e** Distributions of the two per-child traits from the single LMM on the per-scan cortical mean (%s children with 2 / 3 / 4 scans: %s / %s / %s; %s scans): CT and ΔCT, the phenotypes of f–g. Per-child estimates are shrunk toward the mean (SD %.1f µm/yr against a model between-child SD of %.1f µm/yr); every child's estimated slope is negative.",
-          comma(n_kids), comma(per$n_children[per$n_scans == 2]), comma(per$n_children[per$n_scans == 3]),
-          comma(per$n_children[per$n_scans == 4]), comma(n_scans),
-          csv_("slope_um_per_yr", "sd"), csv_("slope_um_per_yr", "model_sd")),
+  sprintf("- **e** Whole-cortex CT and ΔCT for each of the %s children (single LMM on the per-scan cortical mean; CT at the sample-mean scan age, %.1f years): scatter, with marginal densities (CT blue, ΔCT red). Per-child estimates are shrunk toward the mean (ΔCT SD %.1f µm/yr against a model between-child SD of %.1f µm/yr); every child's estimated ΔCT is negative, and CT and ΔCT are nearly independent (r = %.2f).",
+          comma(n_kids), csv_("thickness_mm", "age_centre"), csv_("slope_um_per_yr", "sd"),
+          csv_("slope_um_per_yr", "model_sd"), r_ct),
   sprintf("- **f** PRS-CS polygenic score association with ΔCT (red) and CT (blue) on each row; β per SD of score with 95%% CI; filled = p < 0.05. Schizophrenia (2025 GWAS): ΔCT p = %s EUR / %s pooled, CT p = %s / %s. C+T and SBayesRC give the same ΔCT pattern (SI). * p < 0.05, ** p < 0.01, *** p < 0.001 (uncorrected).",
           sp("SCZ25_EUR", "global_slope"), sp("SCZ25_META", "global_slope"),
           sp("SCZ25_EUR", "baseline_thickness"), sp("SCZ25_META", "baseline_thickness")),

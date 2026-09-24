@@ -59,6 +59,14 @@ sx <- d[, .(sex = first(sex)), by = subject][match(rownames(re), subject)]
 ct_c  <- fx[["(Intercept)"]] + fx[[3]] * (sx$sex == names(fx)[3] |> sub(pattern = "^sex", replacement = "")) + re[["(Intercept)"]]
 sl_c  <- (fx[["age_c"]] + re[["age_c"]]) * 1000                  # um / yr
 dens1 <- function(v, name) { k <- density(v, n = 256); data.table(var = name, x = k$x, density = k$y) }
+# per-child CT / ΔCT for the Figure 1e scatter: individual-level -> gitignored
+fwrite(data.table(ct_mm = round(ct_c, 4), dct_um_per_yr = round(sl_c, 3)),
+       "genetic_analysis/fig1_inputs/hcp70_child_traits.csv")
+# committed fallback: 2-D counts, cells with n < 10 suppressed
+bx <- cut(ct_c, seq(2.4, 3.1, 0.01), labels = FALSE); by <- cut(sl_c, seq(-32, -8, 0.4), labels = FALSE)
+h2 <- data.table(ct_bin = 2.4 + (bx - 0.5) * 0.01, dct_bin = -32 + (by - 0.5) * 0.4)[, .N, by = .(ct_bin, dct_bin)][N >= 10]
+fwrite(h2[order(ct_bin, dct_bin)], "genetic_analysis/fig1_inputs/hcp70_child_hist2d.csv")
+cat("r(CT, dCT) =", round(cor(ct_c, sl_c), 3), "  hist2d cells kept:", nrow(h2), "children in kept cells:", sum(h2$N), "\n")
 fwrite(rbind(dens1(ct_c, "thickness_mm"), dens1(sl_c, "slope_um_per_yr")),
        "genetic_analysis/fig1_inputs/hcp70_child_density.csv")
 fwrite(data.table(var = c("thickness_mm", "slope_um_per_yr"), n = length(ct_c),
