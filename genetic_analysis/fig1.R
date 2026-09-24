@@ -202,6 +202,7 @@ HI_C <- c("#E08214", "#762A83", "#1B7837")               # highlighted children:
 if (file.exists(scans_f)) {
   set.seed(7)
   kids <- sample(unique(sc$sid), 250)
+  set.seed(25)                                   # highlighted-child draw (grey sample unchanged)
   # highlighted children, chosen on the fitted traits so they differ visibly in
   # BOTH CT and ΔCT: a thick fast thinner and a thin slow thinner (4 scans each)
   # and a near-average child (3 scans); smooth trajectories only
@@ -238,7 +239,7 @@ if (file.exists(scans_f)) {
 pc <- pc +
   {if (file.exists(scans_f)) list(
     geom_line(data = fit_hi, aes(age, ct, group = sid), colour = HI_C[fit_hi$child],
-              linewidth = 0.75),
+              linewidth = 0.45),
     geom_point(data = lines_hi, aes(age, mean_ct), colour = HI_C[lines_hi$child], size = 1.1))} +
   scale_colour_manual(values = c("one child (250 shown)" = "grey72"),
                       breaks = "one child (250 shown)") +
