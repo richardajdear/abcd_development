@@ -28,7 +28,8 @@ Models (OLS, site FE, sex, family-clustered SE; scores standardised):
 Caveat: slope BLUPs are shrunk toward the fixed effects, which ARE the group
 gradient, so b_i is pulled toward 1 more for children with fewer / closer scans --
 hence n_visits and age_span as covariates and a >= 3-scan sensitivity check.
-Group-level outputs only: results/gradient_scores_assoc.tsv, gradient_scores_bins.tsv.
+Group-level outputs only: results/gradient_scores_assoc.tsv, gradient_scores_bins.tsv,
+gradient_scores_decomposition.tsv (fast / mid / slow thirds of normative thinning).
 """
 from __future__ import annotations
 import sys, warnings
@@ -151,6 +152,44 @@ for o in ["rulebreak", "external", "pfactor", "totprob", "anxdisord"]:
             brows.append(dict(outcome=o, score=sc, decile=int(k), score_mid=float(d[sc][dec == k].median()),
                               mean_resid_sd=v.mean(), se=v.std() / np.sqrt(len(v)), n=len(v)))
 pd.DataFrame(brows).to_csv(RES / "gradient_scores_bins.tsv", sep="\t", index=False, float_format="%.5g")
+
+# ---------------------------------------------------------------- decomposition
+# Where does a flatter slope / a less typical pattern come from? Split parcels into
+# thirds of NORMATIVE thinning (fast / mid / slow, 60/59/60 parcels) and model each
+# child's mean thinning in each third. No global-thinning covariate here: the
+# question is about absolute rates. (Group-level coefficients only.)
+tier = pd.qcut(g, 3, labels=["slow", "mid", "fast"])
+for t in ("fast", "mid", "slow"):
+    D[f"thin_{t}"] = thin.loc[D.index, tier.index[tier == t]].mean(axis=1)
+    D[f"thin_{t}_z"] = (D[f"thin_{t}"] - D[f"thin_{t}"].mean()) / D[f"thin_{t}"].std()
+print("tier sizes:", tier.value_counts().to_dict(), "| mean thinning (um/yr):",
+      {t: round(1000 * D[f"thin_{t}"].mean(), 1) for t in ("fast", "mid", "slow")}, file=sys.stderr)
+print("score vs tier rates (r):", D[["grad_slope", "grad_fit", "thin_fast", "thin_mid", "thin_slow", "glob_thin"]]
+      .corr().loc[["grad_slope", "grad_fit"], ["thin_fast", "thin_mid", "thin_slow", "glob_thin"]].round(2).to_dict("index"), file=sys.stderr)
+drows = []
+BASE = "C(sex) + C(site) + age_late + age_first + age_span + n_visits"
+for o in OUT:
+    d = D.dropna(subset=[f"{o}_late", f"{o}_base", "age_late"])
+    for spec, terms, extra in (("fast alone", ["thin_fast_z"], []), ("mid alone", ["thin_mid_z"], []),
+                               ("slow alone", ["thin_slow_z"], []), ("fast + slow", ["thin_fast_z", "thin_slow_z"], []),
+                               ("fast + slow | CT, QC", ["thin_fast_z", "thin_slow_z"], ["glob_ct_z", "ct_grad_slope_z", "qc_defects_z"])):
+        m = smf.ols(f"{o}_late ~ {' + '.join(terms)} + {o}_base + {BASE}" + "".join(f" + {e}" for e in extra), d
+                    ).fit(cov_type="cluster", cov_kwds={"groups": d.family})
+        for tt_ in terms:
+            drows.append(dict(outcome=o, spec=spec, term=tt_.replace("_z", ""), beta=m.params[tt_], se=m.bse[tt_],
+                              p=m.pvalues[tt_], y_sd_beta=m.params[tt_] / d[f"{o}_late"].std(), n=int(m.nobs)))
+        if spec.startswith("fast + slow"):                   # is the slow-tier effect larger than the fast-tier one?
+            c = m.params["thin_slow_z"] - m.params["thin_fast_z"]
+            v = m.cov_params().loc["thin_slow_z", "thin_slow_z"] + m.cov_params().loc["thin_fast_z", "thin_fast_z"] \
+                - 2 * m.cov_params().loc["thin_slow_z", "thin_fast_z"]
+            from scipy.stats import norm
+            drows.append(dict(outcome=o, spec=spec, term="slow - fast", beta=c, se=np.sqrt(v),
+                              p=2 * norm.sf(abs(c) / np.sqrt(v)), y_sd_beta=c / d[f"{o}_late"].std(), n=int(m.nobs)))
+DC = pd.DataFrame(drows)
+DC.to_csv(RES / "gradient_scores_decomposition.tsv", sep="\t", index=False, float_format="%.5g")
+DC["c"] = DC.apply(lambda r: f"{r.y_sd_beta:+.3f} ({r.p:.2g})", axis=1)
+print(DC[DC.outcome.isin(["totprob", "pfactor", "anxdisord", "internal", "rulebreak", "external"])]
+      .pivot_table(index=["outcome", "spec"], columns="term", values="c", aggfunc="first").to_string(), file=sys.stderr)
 
 pd.set_option("display.width", 220)
 q = A[A["sample"] == "all"].assign(c=lambda x: x.apply(lambda r: f"{r.y_sd_beta:+.3f} ({r.p:.2g})", axis=1),

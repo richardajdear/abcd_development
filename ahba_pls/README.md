@@ -1014,6 +1014,25 @@ standardised; SEs are family-clustered; n ≈ 8,200.
 - A test of whether gradient fit *precedes* symptoms (using earlier scan intervals only) would strengthen the
   interpretation.
 
+**Where the flatter gradient comes from** (`results/gradient_scores_decomposition.tsv`, `figures/fig_gradient_decomposition.png`).
+Parcels are split into thirds by normative thinning rate (fast 26, middle 20, slow 13 µm/yr), and later symptoms
+are modelled on each child's mean rate in each third. There is no global-thinning covariate, because the question
+is about absolute rates.
+1. **Each third on its own:** children with rising total problems / p-factor thin more in the **slow** third
+   (total problems +0.022, p = 0.021; p-factor +0.027, p = 0.0074). The fast third
+   is at the typical rate (+0.004, p = 0.7; +0.014, p = 0.15).
+2. **Fast and slow thirds together** (plus baseline CT and image quality): slow third +0.047, fast third
+   -0.048 (p = 0.0034); slow − fast = 0.095, p = 0.0008. At the same slow-cortex rate, faster
+   fast-cortex thinning goes with *fewer* problems. The flatter slope therefore has two parts: the absolute
+   difference is extra thinning in slow cortex, and fast cortex thins at a typical rate that is *relatively*
+   slow for these children's overall pace.
+3. **Across all children, gradient slope tracks fast-third thinning (r = 0.55), not slow-third (−0.05).** Most
+   variation in the slope is about fast cortex, but the part that predicts symptoms is the slow-cortex part. That
+   is why the slope score is only weakly associated with symptoms while the slow third is clearly associated.
+4. **Rule-breaking is different:** it rises with thinning in all three thirds alike (fast +0.028, slow
+   +0.031; slow − fast -0.010, p = 0.75). Its association with a less typical pattern
+   (gradient fit) is therefore not a flattening. The atypicality is within, not between, the thirds.
+
 Outputs: `results/gradient_scores_assoc.tsv` (all scores × outcomes × adjustment sets × samples),
 `results/gradient_scores_bins.tsv` (group-level decile means), `figures/fig_gradient_scores.png`.
 
