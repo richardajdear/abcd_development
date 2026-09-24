@@ -2096,6 +2096,41 @@ and the slope's h² z (0.57 at n 4,308) makes rg uninformative at any n we
 have. Jobs: prep 35780457, collects 35780510/35780532, genes 35780533, tests
 35780534.
 
+**Step 15 (2026-09-24) — AHBA C1–C3 gene-property on the single-LMM fit.**
+Both halves of this test already existed and had never been crossed. Step 7
+ran the C1–C3 gene-property test (`magma_eur/magma_summary.tsv`, rows
+`*_ahba_components_posneg`) but only on the per-region constructions — its
+loop is over `magma_eur/`, which holds per-region `.genes.raw` only. Step 13
+computed the single-LMM gene analyses (`magma_panel/genes/*_1lmm.genes.raw`)
+and spent them on the disorder panel, never on C1–C3.
+`step15_magma_ahba_c123.sbatch` is the missing cell and costs seconds: it
+reuses those `.genes.raw`, as step 8 reuses step 7's. Per `.genes.raw`: the
+six pos/neg covariates jointly (replicating step 7) plus each signed component
+marginally, `--model direction=both` throughout →
+`results_70tab*/magma_ahba_c123/table_ahba_c123.tsv`.
+
+The covariate file is rebuilt from committed data by
+`make_ahba_c123_gene_covar.py` rather than by `python -m abcd.magma_export`,
+because that exporter's preferred input is the Entrez-keyed loading table
+shipped by the *sibling* AHBA repo, which is not in this repo and so cannot be
+regenerated on any checkout but the one step 7 was built on. A gene-property
+test whose point is comparability across constructions cannot depend on an
+input that only one machine has. `data/symbol2entrez.csv` alone maps 6,626 of
+the 7,973 AHBA genes — it was built for the snRNA-seq PC1 list and is missing
+current symbols outright (AAAS, AARS, ABR, ACTG1); adding the Entrez-keyed
+mygene records under `ahba_pls/data/reference/gene_sets/` (inverting an
+id→symbol query, not string-matching an alias table) takes it to 7,289 (91.4%).
+Because that gene set is not identical to step 7's, step 15 re-runs the
+per-region phenotypes through the same file: a single-LMM number is only
+interpretable against a per-region number on the same gene set. The pooled
+arm (step 14 raws) is run opportunistically and skipped where absent.
+
+Stated prior, carried from step 8 / `ahba_pls/FOLLOWUP_GENETICS.md`: **expect
+null.** C1–C3 is null on every per-region construction (best p 0.068, C3− on
+baseline thickness, HCP) and the 1lmm and per-region gene Z track each other
+very closely across the whole step-13 panel — MDD_div on baseline thickness is
+β 0.04074 per-region vs 0.04062 single-LMM. Report null as null.
+
 **Steps 11–13 COMPLETE (EUR arm; pooled-arm MAGMA, step 14, running).**
 Single-LMM EUR scans: λ_GC 1.004 (slope) / 1.022 (baseline) on both atlases,
 0 hits (`scan_1lmm/assoc_eur/gwas_summary.tsv`). LDSC panel 11 min, MAGMA
