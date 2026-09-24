@@ -5,7 +5,8 @@ components, against AHBA C1 and C3.
 
 PLS1 and PLS2 of that fit:
   PLS1  the static component: CT salience +0.99, 86% of the cross-covariance.
-        Oriented so positive = higher baseline thickness.
+        Oriented to align with AHBA C1 (so positive = THINNER baseline cortex;
+        rho with C1 is +0.99 in this orientation).
   PLS2  the thinning signature: dCT salience +0.99. Oriented so positive =
         faster thinning (the thinning orientation used everywhere here).
 
@@ -58,18 +59,28 @@ sal = fit.saliences()
 assert sal.loc["CT", "PLS1"] > 0.9 and sal.loc["dCT", "PLS2"] > 0.9, sal
 
 sc = fit.scores()
-S1 = sc["PLS1_gene_scores"]                 # CT salience > 0: positive = thicker
+S1 = -sc["PLS1_gene_scores"]                # CT salience > 0, flipped: aligns with C1, positive = thinner
 S2 = -sc["PLS2_gene_scores"]                # dCT salience > 0: flip -> faster thinning
 old = pd.read_csv(RES / "hcp_pls_scores.csv", index_col=0)["thinning_score"]
 assert np.corrcoef(S2.loc[old.index], old)[0, 1] > 0.9999, "PLS2 scores do not match the saved ones"
+assert stats.spearmanr(S1, c123s.assign(l="lh_" + c123s.label.astype(str)).set_index("l").C1.reindex(S1.index)).statistic > 0.9
 
-Z = pd.DataFrame({"PLS1": saved["hcp_opt2_dCT_CT_PLS1_Z"],
+Z = pd.DataFrame({"PLS1": -saved["hcp_opt2_dCT_CT_PLS1_Z"],
                   "PLS2": -saved["hcp_opt2_dCT_CT_PLS2_Z"],
                   "C1": c123w["C1"], "C3": c123w["C3"]}).dropna()
 Z.rename_axis("gene").to_csv(RES / "hcp_summary_gene_weights.tsv", sep="\t", float_format="%.6g")
 
 C = c123s.assign(label="lh_" + c123s.label.astype(str)).set_index("label")[["C1", "C3"]]
 maps = Y180[["CT", "dCT"]].join(pd.DataFrame({"PLS1": S1, "PLS2": S2})).join(C)
+# functional system per parcel: Glasser 2016's 22 cortices (HCP-MMP1_UniqueRegionList.csv,
+# Cortex_ID) grouped as in HCP-MMP1_cortices.txt: 1-5 visual, 6-9 sensorimotor,
+# 10-12 auditory (incl. insular/frontal opercular), 13-22 association.
+# Case-insensitive: the atlas spells 7Pl, the ABCD tables 7PL.
+syst = pd.read_csv(ROOT / "data" / "reference" / "hcp_cortices" / "hcp_parcel_systems.csv")
+syst = syst.assign(key=syst.label.str.lower()).set_index("key")
+maps["system"] = syst.system.reindex(maps.index.str.lower()).to_numpy()
+maps["cortex"] = syst.cortex.reindex(maps.index.str.lower()).to_numpy()
+assert maps.system.notna().all(), maps.index[maps.system.isna()].tolist()
 maps.rename_axis("label").to_csv(RES / "hcp_summary_maps.csv", float_format="%.6g")
 
 # ---- map pairs (spin) --------------------------------------------------------

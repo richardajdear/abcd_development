@@ -747,20 +747,31 @@ Build recipe in `tools/bin/README.md`.
 PLS1 region scores 12_hcp_pls.py did not save, and asserts the refit's gene weights and PLS2 scores
 match the saved ones. Tables: `results/hcp_summary_{maps.csv,map_pairs,gene_pairs,gene_weights,sets}.tsv`.
 
-- **PLS1 is the static axis**: it tracks baseline thickness (ρ = 0.59 with CT, 0.11 with dCT) and *is* AHBA
-  C1 with the sign flipped (regions ρ = −0.99, genes −0.95). Its SCZ association (β = −0.030, p = 0.044 on
-  SCZ25_META) is therefore C1's (+0.047, p = 0.002) seen from the other side, not a separate finding.
-- **PLS2 is the thinning axis**: it tracks dCT (ρ = −0.58 with the rate in mm/yr, i.e. faster thinning;
-  −0.01 with CT) and matches C3 (regions 0.70, genes 0.68). It is associated with SCZ (0.036, p = 0.018)
-  and MDD (0.051, p = 0.0006); C3 is stronger for both (0.060 / 0.071).
-- **Enrichment, one 7,973-gene universe, BH within vector**: PLS2 reproduces C3's profile (excitatory and
-  inhibitory neurons, L2–L3 up; oligodendrocytes, microglia, white matter down) with one exception,
-  astrocytes (+5 for PLS2, −9 for C3), the parcellation effect noted above. PLS1 mirrors C1.
-- **Layer sets**: Maynard 2021 spatial transcriptomics, a layer's genes = FDR < 0.05 and t > 0, which is
-  the `which='maynard'` definition of `AHBA/code/enrichments_data.get_layer_genes` (Dear et al. 2024).
-- **Global slope**: tested (`slope_{1lmm,perregion}_{HCP,DK}` in `magma_disorder_panel.tsv`) and left
-  off the slide by design — none of PLS1, PLS2, C1, C3 is associated with any of the four global-slope
-  gene analyses (smallest p = 0.28), as expected from that GWAS's low heritability.
+**Orientation.** PLS1 is flipped to align with AHBA C1, so positive = *thinner* baseline cortex (this
+applies to `hcp_summary_*` and to `ABCD_PLS1_HCP` in `magma_disorder_panel.tsv`; `hcp_pls_weights.tsv`
+keeps the raw SVD sign). PLS2 is in the thinning orientation used everywhere else.
+
+- **PLS1 is the static axis and is C1**: ρ = -0.59 with CT, -0.11 with dCT; 0.99 with C1 across
+  regions and 0.95 across genes. SCZ 0.030, p = 0.044 (C1: 0.047, p = 0.0016); MDD n.s.
+- **PLS2 is the thinning axis and is C3**: ρ = -0.58 with dCT (dCT is negative mm/yr, so this is faster thinning), -0.01 with CT; 0.70 / 0.68
+  with C3. SCZ 0.036, p = 0.018, MDD 0.055, p = 0.0002; C3 is stronger for both
+  (0.060, p = 8.6e-05 / 0.072, p = 1.5e-06).
+- **Panel d uses `MDD_div`**, so both disorders are multi-ancestry GWAS. The two files differ in LD
+  handling: SCZ25_META is per-ancestry against matched panels, while MDD div is the multi-ancestry file
+  against 1000G EUR. That makes little difference here (PLS2: 0.051, p = 0.00062 on MDD_EUR).
+- **Systems in b, c**: parcels are coloured by Glasser 2016's 22 cortices (`data/reference/hcp_cortices/`:
+  `HCP-MMP1_UniqueRegionList.csv`, `Cortex_ID`), grouped as in `HCP-MMP1_cortices.txt`: 1–5 visual,
+  6–9 sensorimotor, 10–12 auditory (which includes insular/frontal opercular, as that file groups it),
+  13–22 association. The 137 covered parcels split 86 association / 19 sensorimotor / 19 auditory / 13 visual. Downloaded 2026-09-24 from
+  bitbucket.org/dpat/tools (linked from neuroimaging-core-docs); lookup `hcp_parcel_systems.csv`.
+- **Fading (alpha 0.3)**: b, c region panels at spin p ≥ 0.05; d at p ≥ 0.05; e at BH q ≥ 0.05. Gene-level ρ
+  has no valid p (7,973 co-expressed genes make every ρ nominally significant), so each gene panel is
+  faded with its matching region pair.
+- **Panel e**: square size = |z| (capped at 20), fill = direction. Enrichment z uses an
+  independent-gene null, which marker co-expression makes anti-conservative. Layers = Maynard 2021,
+  FDR < 0.05 and t > 0, the `which='maynard'` definition of `AHBA/code/enrichments_data.get_layer_genes`.
+- **Global slope**: tested (`slope_{1lmm,perregion}_{HCP,DK}` in `magma_disorder_panel.tsv`) and left off
+  the slide — none of PLS1, PLS2, C1, C3 is associated with any of the four gene analyses (smallest p = 0.28).
 
 ## Reproducing
 

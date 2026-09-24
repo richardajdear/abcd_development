@@ -1,0 +1,37 @@
+These are described in the Glasser 2016 Supplemental file:
+"Supplementary Neuroanatomical Results For
+A Multi-modal Parcellation of Human Cerebral Cortex"
+
+The 22 Cortices ("Regions"):
+The first five regions cover early and intermediate visual cortex:
+1) Primary_Visual
+2) Early_Visual
+3) Dorsal_Stream_Visual
+4) Ventral_Stream_Visual
+5) MT+_Complex_and_Neighboring_Visual_Areas
+
+The next four regions cover the  sensorimotor areas:
+6) Somatosensory_and_Motor
+7) Paracentral_Lobular_and_Mid_Cingulate
+8) Premotor
+9) Posterior_Opercular
+
+Next are three auditory regions:
+10) Early_Auditory
+11) Auditory_Association
+12) Insular_and_Frontal_Opercular
+Two regions covering the rest of the temporal cortex:
+13) Medial_Temporal
+14) Lateral_Temporal
+
+Four regions covering the rest of the posterior cortex:
+15) Temporo-Parieto-Occipital_Junction
+16) Superior_Parietal
+17) Inferior_Parietal
+18) Posterior_Cingulate
+
+The final four regions cover the rest of anterior cortex:
+19) Anterior_Cingulate_and_Medial_Prefrontal
+20) Orbital_and_Polar_Frontal
+21) Inferior_Frontal
+22) Dorsolateral_Prefrontal
