@@ -262,9 +262,15 @@ genes. Ranked by information per unit of effort:
    cortical thickness (e.g. Warrier et al. 2023 or ENIGMA) should predict
    `baseline_thickness`; whether it predicts the rate tells us how much of the
    rate's genetics is shared with adult structure. (ii) The ENIGMA-Plasticity
-   longitudinal change GWAS (Brouwer et al. 2022) is the only published GWAS
-   of cortical change: test a score from it on our rate, and our rate's gene
-   results against it. (iii) Replicate the SCZ-PRS → thinning association in
+   longitudinal change GWAS (Brouwer et al. 2022, 15,640 people aged 4–99) is
+   the only published GWAS of cortical change, but **ABCD release 3.0 is one of
+   its cohorts**, so its summary statistics cannot be scored in, or
+   correlated with, ABCD without a leave-ABCD-out version from ENIGMA. Its
+   thickness-change GWAS is also weak (h² z < 4 for every phenotype, no
+   thickness-change locus), so it is a poor positive control. What transfers
+   is its APOE rs429358 result (age-dependent effects on change rates,
+   including in development) and its finding that the genetics of change
+   overlap little with the genetics of level. (iii) Replicate the SCZ-PRS → thinning association in
    an independent longitudinal adolescent cohort (IMAGEN, Generation R). Of all
    items here, replication is what a reviewer will ask for first.
 8. **Other measures of the same process.** Thinning partly reflects
