@@ -1,0 +1,33 @@
+outcome	model	fit	brain	beta	se	p	n	n_cases	est	lo	hi	source
+pfactor	change	alone	global_slope	-0.043797	0.022026	0.046763	8162		-0.019757	-0.039231	-0.00028262	7.0 p/mh_p_cbcl.tsv + y/mh_{p,y}_ksads; single-LMM HCP phenotypes
+internal	change	alone	global_slope	-0.014893	0.0090809	0.10099	8189		-0.016648	-0.036544	0.0032477	7.0 p/mh_p_cbcl.tsv + y/mh_{p,y}_ksads; single-LMM HCP phenotypes
+external	change	alone	global_slope	-0.019391	0.0086845	0.025558	8185		-0.02224	-0.041763	-0.0027178	7.0 p/mh_p_cbcl.tsv + y/mh_{p,y}_ksads; single-LMM HCP phenotypes
+depress	change	alone	global_slope	-0.022753	0.0077532	0.0033397	8181		-0.032216	-0.053732	-0.010699	7.0 p/mh_p_cbcl.tsv + y/mh_{p,y}_ksads; single-LMM HCP phenotypes
+thought	change	alone	global_slope	-0.0050089	0.006617	0.44906	8183		-0.0083142	-0.029841	0.013213	7.0 p/mh_p_cbcl.tsv + y/mh_{p,y}_ksads; single-LMM HCP phenotypes
+mdd_youth_DX	ksads_logit	alone	global_slope	-0.058172	0.037139	0.11728	8716	1111	0.94349	0.87725	1.0147	7.0 p/mh_p_cbcl.tsv + y/mh_{p,y}_ksads; single-LMM HCP phenotypes
+mdd_parent_DX	ksads_logit	alone	global_slope	-0.12959	0.039744	0.0011121	8716	791	0.87846	0.81263	0.94963	7.0 p/mh_p_cbcl.tsv + y/mh_{p,y}_ksads; single-LMM HCP phenotypes
+psychosis_parent_DX	ksads_logit	alone	global_slope	-0.10144	0.0578	0.079251	8716	398	0.90353	0.80676	1.0119	7.0 p/mh_p_cbcl.tsv + y/mh_{p,y}_ksads; single-LMM HCP phenotypes
+pfactor	change	alone	baseline_thickness	0.030473	0.019587	0.11977	8162		0.013746	-0.003572	0.031065	7.0 p/mh_p_cbcl.tsv + y/mh_{p,y}_ksads; single-LMM HCP phenotypes
+internal	change	alone	baseline_thickness	0.01436	0.0083546	0.085657	8189		0.016052	-0.0022529	0.034356	7.0 p/mh_p_cbcl.tsv + y/mh_{p,y}_ksads; single-LMM HCP phenotypes
+external	change	alone	baseline_thickness	-0.0031399	0.0079711	0.69365	8185		-0.0036013	-0.02152	0.014318	7.0 p/mh_p_cbcl.tsv + y/mh_{p,y}_ksads; single-LMM HCP phenotypes
+depress	change	alone	baseline_thickness	0.0041021	0.00696	0.5556	8181		0.0058082	-0.013507	0.025124	7.0 p/mh_p_cbcl.tsv + y/mh_{p,y}_ksads; single-LMM HCP phenotypes
+thought	change	alone	baseline_thickness	0.0073046	0.0059259	0.2177	8183		0.012125	-0.0071542	0.031403	7.0 p/mh_p_cbcl.tsv + y/mh_{p,y}_ksads; single-LMM HCP phenotypes
+mdd_youth_DX	ksads_logit	alone	baseline_thickness	-0.073309	0.032626	0.024644	8716	1111	0.92931	0.87175	0.99068	7.0 p/mh_p_cbcl.tsv + y/mh_{p,y}_ksads; single-LMM HCP phenotypes
+mdd_parent_DX	ksads_logit	alone	baseline_thickness	0.0042436	0.037308	0.90944	8716	791	1.0043	0.93344	1.0804	7.0 p/mh_p_cbcl.tsv + y/mh_{p,y}_ksads; single-LMM HCP phenotypes
+psychosis_parent_DX	ksads_logit	alone	baseline_thickness	-0.11578	0.0505	0.021867	8716	398	0.89067	0.80674	0.98334	7.0 p/mh_p_cbcl.tsv + y/mh_{p,y}_ksads; single-LMM HCP phenotypes
+pfactor	change	joint	global_slope	-0.047461	0.022134	0.032009	8162		-0.02141	-0.040979	-0.0018402	7.0 p/mh_p_cbcl.tsv + y/mh_{p,y}_ksads; single-LMM HCP phenotypes
+pfactor	change	joint	baseline_thickness	0.034796	0.01971	0.077505	8162		0.015696	-0.0017307	0.033123	7.0 p/mh_p_cbcl.tsv + y/mh_{p,y}_ksads; single-LMM HCP phenotypes
+internal	change	joint	global_slope	-0.016541	0.0091336	0.070143	8189		-0.01849	-0.038501	0.0015214	7.0 p/mh_p_cbcl.tsv + y/mh_{p,y}_ksads; single-LMM HCP phenotypes
+internal	change	joint	baseline_thickness	0.015847	0.0084148	0.059666	8189		0.017714	-0.00072186	0.036151	7.0 p/mh_p_cbcl.tsv + y/mh_{p,y}_ksads; single-LMM HCP phenotypes
+external	change	joint	global_slope	-0.019244	0.0087162	0.027251	8185		-0.022072	-0.041666	-0.0024782	7.0 p/mh_p_cbcl.tsv + y/mh_{p,y}_ksads; single-LMM HCP phenotypes
+external	change	joint	baseline_thickness	-0.0014097	0.0079986	0.86011	8185		-0.0016168	-0.019598	0.016364	7.0 p/mh_p_cbcl.tsv + y/mh_{p,y}_ksads; single-LMM HCP phenotypes
+depress	change	joint	global_slope	-0.023409	0.0078052	0.002707	8181		-0.033145	-0.054806	-0.011485	7.0 p/mh_p_cbcl.tsv + y/mh_{p,y}_ksads; single-LMM HCP phenotypes
+depress	change	joint	baseline_thickness	0.0062348	0.0070199	0.37445	8181		0.008828	-0.010653	0.028309	7.0 p/mh_p_cbcl.tsv + y/mh_{p,y}_ksads; single-LMM HCP phenotypes
+thought	change	joint	global_slope	-0.0058278	0.0066434	0.38036	8183		-0.0096734	-0.031287	0.01194	7.0 p/mh_p_cbcl.tsv + y/mh_{p,y}_ksads; single-LMM HCP phenotypes
+thought	change	joint	baseline_thickness	0.0078315	0.0059556	0.18852	8183		0.012999	-0.0063765	0.032375	7.0 p/mh_p_cbcl.tsv + y/mh_{p,y}_ksads; single-LMM HCP phenotypes
+mdd_youth_DX	ksads_logit	joint	global_slope	-0.051374	0.037238	0.16771	8716	1111	0.94992	0.88306	1.0218	7.0 p/mh_p_cbcl.tsv + y/mh_{p,y}_ksads; single-LMM HCP phenotypes
+mdd_youth_DX	ksads_logit	joint	baseline_thickness	-0.069027	0.032861	0.03568	8716	1111	0.9333	0.87508	0.99539	7.0 p/mh_p_cbcl.tsv + y/mh_{p,y}_ksads; single-LMM HCP phenotypes
+mdd_parent_DX	ksads_logit	joint	global_slope	-0.13138	0.04011	0.0010545	8716	791	0.87688	0.81059	0.9486	7.0 p/mh_p_cbcl.tsv + y/mh_{p,y}_ksads; single-LMM HCP phenotypes
+mdd_parent_DX	ksads_logit	joint	baseline_thickness	0.016109	0.037575	0.66812	8716	791	1.0162	0.94409	1.0939	7.0 p/mh_p_cbcl.tsv + y/mh_{p,y}_ksads; single-LMM HCP phenotypes
+psychosis_parent_DX	ksads_logit	joint	global_slope	-0.089476	0.057438	0.11929	8716	398	0.91441	0.81705	1.0234	7.0 p/mh_p_cbcl.tsv + y/mh_{p,y}_ksads; single-LMM HCP phenotypes
+psychosis_parent_DX	ksads_logit	joint	baseline_thickness	-0.10751	0.050605	0.033635	8716	398	0.89807	0.81327	0.99171	7.0 p/mh_p_cbcl.tsv + y/mh_{p,y}_ksads; single-LMM HCP phenotypes

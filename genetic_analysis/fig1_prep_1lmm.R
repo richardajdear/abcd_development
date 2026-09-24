@@ -9,6 +9,7 @@
 #       sex=('sex','first'),site=('site','first'),n_visits=('n_visits','first')).reset_index()
 #       .to_csv('/tmp/hcp70_scan_means_cov.csv',index=False)"
 # Model: mean_ct ~ age_c + sex + (1 + age_c | subject) + (1 | site)  (the trait's LMM; age centre 12.797)
+# Also writes /tmp/hcp70_1lmm_blups.csv (per-child REs; never committed) for fig1_prep_cbcl.py.
 # Outputs (aggregates only, committed):
 #   fig1_inputs/hcp70_ct_at_age.csv                     model-implied child-level CT
 #       distribution at ages 9 and 17: mean = fixed part at the sample sex mix,
@@ -46,5 +47,8 @@ at <- rbindlist(lapply(c(9, 17), function(a) {
 }))
 print(at)
 fwrite(at, "genetic_analysis/fig1_inputs/hcp70_ct_at_age.csv")
+# per-child random effects for fig1_prep_cbcl.py -- individual-level, /tmp ONLY
+fwrite(data.table(subject = rownames(re), re_intercept = re[["(Intercept)"]],
+                  re_slope = re[["age_c"]]), "/tmp/hcp70_1lmm_blups.csv")
 fwrite(rs, "genetic_analysis/fig1_inputs/hcp70_global_slope_reliability_1lmm.csv")
 cat("slope sd (mm/yr):", sqrt(tau1), " r(int,slope):", c01 / sqrt(tau0 * tau1), "\n")
