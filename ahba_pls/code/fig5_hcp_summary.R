@@ -157,9 +157,11 @@ pd <- ggplot(d, aes(BETA_STD, v, alpha = sig)) +
   geom_point(size = 1.4, colour = "#b2182b") +
   geom_text(aes(label = lab), vjust = -0.75, size = 1.85, colour = "#b2182b") +
   scale_alpha_manual(values = c(`TRUE` = 1, `FALSE` = FADE), guide = "none") +
+  scale_x_continuous(breaks = pretty_breaks(3)) +
   facet_wrap(~g, nrow = 1) + labs(x = "MAGMA gene-property \u03b2 (standardised, 95% CI)", y = NULL,
     title = "e  Genetic risk") +
-  base_theme + theme(panel.grid.major.x = element_line(colour = "grey92", linewidth = 0.25))
+  base_theme + theme(panel.grid.major.x = element_line(colour = "grey92", linewidth = 0.25),
+                     panel.spacing.x = unit(10, "pt"))
 
 # ---------------------------------------------- e: cell classes and layers ----
 SET_ORD <- c("Neuro-Ex", "Neuro-In", "Astro", "Micro", "Oligo", "OPC", "Endo", "Per",
