@@ -850,7 +850,7 @@ written; only coefficient tables are committed (`results/cbcl_explore[_51]_{asso
 - **CBCL outcomes**: log1p raw sums of 3 broadband, 8 syndrome and 6 DSM scales, plus a p-factor (PC1 of the
   syndromes, loadings 0.31–0.38).
 - **Waves**: baseline, year 3, years 5–7 (mean of available waves, n = 8,163),
-  change (years 5–7 adjusted for baseline), and a per-child symptom slope over all waves with ≥ 4 observations.
+  change (years 5–7 adjusted for baseline), and a per-child symptom slope (OLS of the log1p score on age over the waves where that score is present, ≥ 4).
 - **Diagnoses**: logistic models for T ≥ 65 and for KSADS lifetime diagnoses — MDD by youth report
   (1,111 cases), MDD by parent report (791), and parent-reported psychosis
   spectrum (398: attenuated psychosis, schizophrenia, schizophreniform, other psychotic).
@@ -858,10 +858,10 @@ written; only coefficient tables are committed (`results/cbcl_explore[_51]_{asso
 - **Spin null**: PLS2 and C3 projections against 1,000 spin-rotated maps, after all covariates including global
   thinning.
 
-**Results (7.0):** 1,261 fits give 130 at p < 0.05 (about 63 expected by chance), 3 at BH q < 0.05;
+**Results (7.0):** 1,261 fits give 126 at p < 0.05 (about 63 expected by chance), 3 at BH q < 0.05;
 the spin null is significant in 0 of 54 tests (smallest p_spin 0.14). All effects are small (|β| ≤ 0.05 SD per SD).
 1. **Global thinning goes with more symptoms, most clearly depression.** Depressive problems change +0.030, p = 0.0057;
-   p-factor slope +0.024, p = 0.046; parent-reported MDD OR 1.11 per SD, p = 0.0072. Youth-reported MDD shows nothing.
+   p-factor slope +0.026, p = 0.027; parent-reported MDD OR 1.11 per SD, p = 0.0072. Youth-reported MDD shows nothing.
 2. **The PLS2 contrast, beyond global thinning, runs slightly the other way.** Internalising change: PLS2
    projection -0.020, p = 0.03, top-decile -0.043, p = 0.00038 (q = 0.053). The PLS2 contrasts are negative in
    147 of 162 late / change / trajectory fits. Outcomes are highly correlated, so this is

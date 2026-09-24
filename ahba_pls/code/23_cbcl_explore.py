@@ -159,12 +159,15 @@ D = B.copy()
 for k in W:
     D = D.join(W[k].add_suffix(f"_{k}"))
 if SRC == "70":                                                 # per-child symptom trajectory
-    def traj(g):
-        if g.age.notna().sum() < 4:
-            return pd.Series(np.nan, index=OUTP)
-        a = g.age - g.age.mean()
-        return (g[OUTP].mul(a, axis=0).sum() / (a ** 2).sum()).where(g[OUTP].notna().sum() >= 4)
-    TR = cb.groupby("subject")[["age", *OUTP]].apply(traj)
+    # per child and per score: OLS slope of the log1p score on age, using ONLY the
+    # waves where that score is present (>= 4), age centred within those waves
+    def slope_of(col):
+        d = cb[["subject", "age", col]].dropna()
+        d = d[d.groupby("subject")[col].transform("size") >= 4]
+        a = d.age - d.groupby("subject").age.transform("mean")
+        y = d[col] - d.groupby("subject")[col].transform("mean")
+        return (a * y).groupby(d.subject).sum() / (a ** 2).groupby(d.subject).sum()
+    TR = pd.DataFrame({c: slope_of(c) for c in OUTP})
     D = D.join(TR.add_suffix("_TRAJ"))
     # KSADS lifetime diagnoses (1 at any wave, present or past; 555 = not administered)
     def ever(path, cols):
