@@ -1038,6 +1038,49 @@ is about absolute rates.
 Outputs: `results/gradient_scores_assoc.tsv` (all scores × outcomes × adjustment sets × samples),
 `results/gradient_scores_bins.tsv` (group-level decile means), `figures/fig_gradient_scores.png`.
 
+### Mechanism slide — `code/27_tier_profile.py` → `code/fig5m_hcp_mechanism.R`
+
+`figures/fig_hcp_mechanism.png` is the base-AHBA summary slide (`hcp_base`: 177 parcels × 15,636 genes) with
+three changes:
+- Panel c shows only the matched pairs (PLS1–C1, PLS2–C3).
+- Text follows `genetic_analysis/fig1.R` (BASE = 7 pt: titles 7, axis text 6, in-panel text 5.5).
+- A mechanism row (f, g) links the symptom result to the transcriptomic axis.
+
+`27_tier_profile.py` takes the thirds of the **normative** thinning map (`results/gradient_tiers.csv`, from
+script 26). For each parcel it scores marker sets as the mean z-expression of their genes (Seidlitz 2020 cell
+classes, Maynard 2021 layers, and the top-N genes by MAGMA ZSTAT for SCZ 2025 multi-ancestry and MDD div). Each
+feature map is correlated with the thinning rate, with spin p (5,000 rotations). Output:
+`results/tier_profile.tsv`, `tier_profile_parcels.csv`.
+
+**What the slow-thinning third is** (mean z, slow / middle / fast; ρ with thinning rate, p_spin):
+- PLS2 -0.73 / +0.18 / +0.55 (ρ = 0.52, p < 0.001).
+- AHBA C3 -0.64 / +0.38 / +0.21 (ρ = 0.33, p = 0.033).
+- Excitatory neurons -0.35 (ρ = 0.18, p = 0.048); inhibitory -0.31 (ρ = 0.24, p = 0.004).
+- Layer 3 -0.38 (ρ = 0.26, p = 0.021); oligodendrocytes +0.27 (ρ = -0.13, p = 0.044).
+- Layer 2 and white matter point the same way but do not pass spin (ρ = 0.15, -0.11).
+
+The slow third is also mostly *non*-association cortex. By Glasser system, slow / middle / fast hold
+20 / 29 / 51 association parcels and 32 / 14 / 7 sensorimotor or auditory parcels. The slowest groups are
+premotor, somatosensory/motor, medial temporal, insular/opercular and auditory cortex.
+
+**Reading, and its limits:**
+1. **Gene-level risk is aligned with the fast-thinning, neuronal pole of the axis.** Genes whose expression
+   follows PLS2 / C3 carry more SCZ and MDD common-variant signal (panel e). This is a genome-wide shift:
+   - the effect is β_std ≈ 0.03–0.07 per SD of gene weight;
+   - the **top** risk genes are not detectably concentrated in fast cortex (SCZ top-500 ρ = 0.02, MDD 0.09; top 250 and 1,000 are similar);
+   - so it is not "risk genes are expressed in fast cortex".
+2. **The symptom-linked phenotype is at the other pole.** Children whose symptoms rise thin faster in normally
+   slow cortex, which is PLS2-low, less neuronal and less layer-3, and more oligodendrocyte. The joint slow − fast
+   contrast (with baseline CT and image quality) is +0.095 for total problems (p = 0.0008), +0.068 for p-factor
+   (p = 0.017) and +0.059 for internalising (p = 0.046).
+3. **But the symptom effect follows the thinning rate, not PLS2 itself.** Splitting parcels by PLS2 instead gives
+   no PLS2-low vs PLS2-high contrast (p = 0.17–0.74; `gradient_scores_pls2tiers.tsv`). PLS2 and the thinning
+   map agree at ρ = 0.52, so the transcriptomic description of slow cortex is correct on average, but it is not
+   shown to be the part that matters for symptoms.
+4. **A hypothesis this suggests, not a result:** slow-thinning cortex is oligodendrocyte / myelin-rich primary
+   and unimodal cortex. Faster *apparent* thinning there could reflect faster intracortical myelination shifting
+   the grey/white boundary. T1w/T2w or MT change would be the test.
+
 ## Reproducing
 
 Analysis (python, env `ahba-pls`): `code/01_*` → `code/22_*` in order. `11_` is the parcellation

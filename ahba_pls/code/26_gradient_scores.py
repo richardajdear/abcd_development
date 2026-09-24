@@ -29,7 +29,8 @@ Caveat: slope BLUPs are shrunk toward the fixed effects, which ARE the group
 gradient, so b_i is pulled toward 1 more for children with fewer / closer scans --
 hence n_visits and age_span as covariates and a >= 3-scan sensitivity check.
 Group-level outputs only: results/gradient_scores_assoc.tsv, gradient_scores_bins.tsv,
-gradient_scores_decomposition.tsv (fast / mid / slow thirds of normative thinning).
+gradient_scores_decomposition.tsv (fast / mid / slow thirds of normative thinning),
+gradient_tiers.csv (the parcel -> third assignment), gradient_scores_pls2tiers.tsv.
 """
 from __future__ import annotations
 import sys, warnings
@@ -159,6 +160,8 @@ pd.DataFrame(brows).to_csv(RES / "gradient_scores_bins.tsv", sep="\t", index=Fal
 # child's mean thinning in each third. No global-thinning covariate here: the
 # question is about absolute rates. (Group-level coefficients only.)
 tier = pd.qcut(g, 3, labels=["slow", "mid", "fast"])
+# group-level map of the split, so later scripts use exactly these thirds
+pd.DataFrame({"normative_thinning_um_yr": 1000 * g, "tier": tier}).rename_axis("label").to_csv(RES / "gradient_tiers.csv")
 for t in ("fast", "mid", "slow"):
     D[f"thin_{t}"] = thin.loc[D.index, tier.index[tier == t]].mean(axis=1)
     D[f"thin_{t}_z"] = (D[f"thin_{t}"] - D[f"thin_{t}"].mean()) / D[f"thin_{t}"].std()
