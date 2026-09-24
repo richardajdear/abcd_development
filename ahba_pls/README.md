@@ -829,39 +829,51 @@ weights, so the region comparisons with C1/C3 use their 137 parcels even when PL
 - **The astrocyte loading shrinks as filters are removed** (+5.3 → +2.9), moving toward C3's negative value.
 - **Global slope stays null** in all three versions.
 
-### CBCL exploration (exploratory; not on the slide) — `code/23_cbcl_explore.py`
+### CBCL and KSADS exploration (exploratory; not on the slide yet) — `code/23_cbcl_explore.py`
 
-Do children whose thinning follows the PLS2 pattern have more CBCL symptoms? Inputs: the per-child slope and
-intercept BLUPs of the HCP-MMP fit (`out/thickness_hcp_70_aa6e91efba82/fits/blups.parquet`, 8,716 children) and,
-until the 7.0 `mh_p_cbcl` table is local, the **5.1** CBCL (`core/mental-health/mh_p_cbcl.csv`, same child IDs,
-baseline to year 4). Individual-level data are read locally and never written; only
-`results/cbcl_explore_{assoc,spin}.tsv` (coefficients) are committed. Heatmap: `figures/fig_cbcl_explore.png`.
+Do children whose thinning follows the PLS2 pattern have more symptoms? The per-child slope and intercept
+BLUPs of the HCP-MMP fit (`out/thickness_hcp_70_aa6e91efba82/fits/blups.parquet`, 8,716 children) are tested
+against the **7.0** parent CBCL (`p/mh_p_cbcl.tsv`, ses-00A–07A, ages about 10–17, raw scale sums) and KSADS
+diagnoses (`y/mh_{p,y}_ksads__dep.tsv`, `y/mh_p_ksads__psych.tsv`). `python code/23_cbcl_explore.py 51` reruns
+it on the 5.1 CBCL (baseline–year 4) as a sensitivity check. Individual-level data are read locally and never
+written; only coefficient tables are committed (`results/cbcl_explore[_51]_{assoc,spin}.tsv`). Figures:
+`figures/fig_cbcl_explore.png` (7.0 heatmap), `fig_cbcl_explore_51.png`, and the draft slide panel
+`fig_cbcl_candidate.png`.
 
 - **Phenotypes** (higher = more thinning):
   - global mean thinning;
-  - PLS2 projection (thinning weighted by the z-scored PLS2 map, a mean-zero spatial contrast);
-  - PLS2 top-decile mean and top − bottom decile;
-  - C3 projection;
-  - PLS1 projections of thinning and of baseline thickness, as controls.
-- **Outcomes**: raw CBCL scores, log1p (the syndrome T-scores are floored at 50): 3 broadband, 8 syndrome and 6 DSM
-  scales, plus a p-factor (PC1 of the syndromes, all loadings 0.29–0.38).
-- **Models**: baseline, year 3 (n ≈ 7,991), year 3 adjusted for baseline, year 4 (40% complete in 5.1), and
-  logistic for T ≥ 65. All have site fixed effects, sex and age, with family-clustered SEs. Each spatial phenotype
-  is also fitted with global thinning as a covariate.
-- **Specificity**: a spin null of the PLS2 and C3 projections against 1,000 spin-rotated maps, after all covariates.
+  - the PLS2 projection (thinning weighted by the z-scored PLS2 map, a mean-zero spatial contrast);
+  - the PLS2 top-decile mean and top − bottom decile;
+  - the C3 projection;
+  - PLS1 projections of thinning and of baseline thickness.
+  Every spatial phenotype is also fitted with global thinning as a covariate.
+- **CBCL outcomes**: log1p raw sums of 3 broadband, 8 syndrome and 6 DSM scales, plus a p-factor (PC1 of the
+  syndromes, loadings 0.31–0.38).
+- **Waves**: baseline, year 3, years 5–7 (mean of available waves, n = 8,163),
+  change (years 5–7 adjusted for baseline), and a per-child symptom slope over all waves with ≥ 4 observations.
+- **Diagnoses**: logistic models for T ≥ 65 and for KSADS lifetime diagnoses — MDD by youth report
+  (1,111 cases), MDD by parent report (791), and parent-reported psychosis
+  spectrum (398: attenuated psychosis, schizophrenia, schizophreniform, other psychotic).
+- **Models**: site fixed effects, sex and age, family-clustered SEs.
+- **Spin null**: PLS2 and C3 projections against 1,000 spin-rotated maps, after all covariates including global
+  thinning.
 
-**Result: null.** 988 fits give 79 at p < 0.05 (about 49 expected by chance); the
-smallest BH q is 0.085, and every |β| ≤ 0.06 SD per SD. The spin null is significant in 0 of 36 tests
-(smallest p_spin 0.078). The largest nominal effects are off-target:
-- the PLS1 baseline-thickness contrast goes with baseline rule-breaking and conduct (β ≈ +0.04, the only q < 0.1 cells);
-- C3-pattern thinning goes with *fewer* year-4 anxiety symptoms (β ≈ −0.06, on the 40% wave).
+**Results (7.0):** 1,261 fits give 130 at p < 0.05 (about 63 expected by chance), 3 at BH q < 0.05;
+the spin null is significant in 0 of 54 tests (smallest p_spin 0.14). All effects are small (|β| ≤ 0.05 SD per SD).
+1. **Global thinning goes with more symptoms, most clearly depression.** Depressive problems change +0.030, p = 0.0057;
+   p-factor slope +0.024, p = 0.046; parent-reported MDD OR 1.11 per SD, p = 0.0072. Youth-reported MDD shows nothing.
+2. **The PLS2 contrast, beyond global thinning, runs slightly the other way.** Internalising change: PLS2
+   projection -0.020, p = 0.03, top-decile -0.043, p = 0.00038 (q = 0.053). The PLS2 contrasts are negative in
+   147 of 162 late / change / trajectory fits. Outcomes are highly correlated, so this is
+   one weak pattern rather than many, and the spin null shows the PLS2 map does no better than random maps with
+   the same spatial autocorrelation. Parent-reported psychosis: OR 0.92 per SD, p = 0.11.
+3. **The static PLS1 contrast** (relatively thin baseline cortex where PLS1 is high) goes with externalising:
+   clinical-range OR 1.22 per SD, p = 8.2e-05 (q = 0.035), and baseline rule-breaking / conduct. It also goes with
+   parent-reported psychosis spectrum, OR 1.16 per SD, p = 0.0027.
 
-With n ≈ 8,000 the 95% CI on a standardised β is about ±0.022, so child-level PLS2–CBCL associations larger than
-|β| ≈ 0.03 are unlikely in this window.
-
-**Caveats that argue for re-running on 7.0 before concluding:**
-- Year 3 is age ~13, before most adolescent-onset symptoms; the 7.0 CBCL adds the 5- and 6-year follow-ups.
-- Per-child slopes from 2–4 scans are noisy, and the BLUPs are shrunk, which attenuates associations.
+**Reading.** At the child level, the PLS2 thinning pattern does not carry the SCZ/MDD association that its gene
+weights carry. What predicts depression is the global rate of thinning, and the PLS2 pattern adds nothing
+specific beyond it. The 5.1 run (baseline–year 4, 988 fits, min q 0.085, 0 of 36 spin tests) agrees.
 
 ## Reproducing
 
