@@ -60,7 +60,9 @@ ct_c  <- fx[["(Intercept)"]] + fx[[3]] * (sx$sex == names(fx)[3] |> sub(pattern 
 sl_c  <- (fx[["age_c"]] + re[["age_c"]]) * 1000                  # um / yr
 dens1 <- function(v, name) { k <- density(v, n = 256); data.table(var = name, x = k$x, density = k$y) }
 # per-child CT / ΔCT for the Figure 1e scatter: individual-level -> gitignored
-fwrite(data.table(ct_mm = round(ct_c, 4), dct_um_per_yr = round(sl_c, 3)),
+# sid = 0-based rank in the codepoint-sorted subject list, the key hcp70_scans.csv uses
+sids <- match(rownames(re), sort(unique(rownames(re)), method = "radix")) - 1L
+fwrite(data.table(sid = sids, ct_mm = round(ct_c, 4), dct_um_per_yr = round(sl_c, 3)),
        "genetic_analysis/fig1_inputs/hcp70_child_traits.csv")
 # committed fallback: 2-D counts, cells with n < 10 suppressed
 bx <- cut(ct_c, seq(2.4, 3.1, 0.01), labels = FALSE); by <- cut(sl_c, seq(-32, -8, 0.4), labels = FALSE)
