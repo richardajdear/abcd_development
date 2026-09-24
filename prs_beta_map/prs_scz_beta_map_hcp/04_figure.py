@@ -92,7 +92,7 @@ def draw_map(ax, values: pd.Series, polys: pd.DataFrame, vlim: float, title: str
         cols.append(DIV(norm(v)) if np.isfinite(v) else (0.90, 0.90, 0.89, 1.0))
     pc = PolyCollection(verts, facecolors=cols, edgecolors="white", linewidths=0.25)
     ax.add_collection(pc)
-    ax.set_xlim(-0.02, 1.02); ax.set_ylim(-0.92, 0.66); ax.set_aspect("equal"); ax.axis("off")
+    ax.set_xlim(-0.02, 1.02); ax.set_ylim(-1.0, 0.66); ax.set_aspect("equal"); ax.axis("off")
     ax.set_title(title, fontsize=BASE, color=INK, pad=3, loc="left", x=0.04)
     ax.text(0.98, 0.64, "lateral", fontsize=TICK, color=INK3, ha="right", va="top")
     ax.text(0.98, -0.10, "medial", fontsize=TICK, color=INK3, ha="right", va="top")
@@ -102,7 +102,7 @@ def draw_map(ax, values: pd.Series, polys: pd.DataFrame, vlim: float, title: str
     cb.set_ticks([-vlim, 0, vlim]); cb.set_ticklabels([f"−{vlim:.2g}", "0", f"+{vlim:.2g}"])
     cb.set_label(cbar_label, fontsize=TICK, color=INK2, labelpad=1)
     if missing_note:
-        ax.text(0.98, -0.86, missing_note, fontsize=TICK, color=INK3, va="center", ha="right")
+        ax.text(0.52, -0.975, missing_note, fontsize=TICK, color=INK3, va="center", ha="left")
 
 
 # ----------------------------------------------------------------- scatter --
@@ -170,7 +170,7 @@ def main(argv=None) -> int:
     draw_map(axm[0], beta, polys, vb,
              f"SCZ score → thinning slope, per parcel\n({arm}, n = {int(cortex.n):,})",
              "β, SD slope per SD score", fig)
-    axm[0].text(0.56, -0.84, f"whole cortex β = {cortex.beta:+.3f}\n(SE {cortex.se:.3f}, p = {cortex.p:.2g})",
+    axm[0].text(0.56, -0.90, f"whole cortex β = {cortex.beta:+.3f}\n(SE {cortex.se:.3f}, p = {cortex.p:.2g})",
                 fontsize=TICK, color=INK2, va="center")
     c3 = refs["C3"].reindex(covered); lead = refs["PLS_lead"].reindex(covered)
     draw_map(axm[1], c3, polys, float(np.nanpercentile(np.abs(c3), 98)),

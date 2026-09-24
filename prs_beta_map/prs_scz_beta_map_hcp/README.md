@@ -7,18 +7,48 @@ individual-level genetics (`genetic_analysis/`) to the transcriptomic arm
 (`ahba_pls/`). HCP-MMP throughout: 358 parcels (H excluded), 179 left-hemisphere
 parcels rotated in the spin, 137 of them AHBA-covered.
 
-## Status — 2026-09-19
+## Status — 2026-09-19: run complete, both cells. **Null.**
 
-| step | where | state |
-|:--|:--|:--|
-| 1 per-child, per-parcel slopes exported (8,716 × 358; `work/`, gitignored) | laptop | **done** |
-| 2 per-parcel mixed-model association with the score | CSD3 | **scripted and smoke-tested, not run** — the per-subject scores live only on CSD3 (README_HPC rule 16) and the login needs an interactive MFA |
-| 3 spin tests (5,000 rotations, `ahba_pls/code/pls.py::spin_corr`, HCP centroids) | laptop | scripted, tested |
-| 4 figure + caption | laptop | scripted, rendered on a **synthetic** score to check the code path; no real figure yet |
+The β map of the SCZ score does not resemble C3 or the ahba_pls lead
+component. Figures `results/fig_prs_beta_map_<cell>.png`, captions alongside,
+all numbers in `results/spin_tests.tsv` (5,000 spins).
 
-The whole laptop→cluster→laptop loop was exercised end to end with a synthetic
-score against the DK export's covariates (same 8,716 children); nothing from that
-run is kept in this folder.
+| cell | whole-cortex β (reproduces table) | β vs C3 | β vs lead | β, cortex mean held fixed: vs C3 / vs lead | loading map vs C3 | lh–rh ρ |
+|:--|--:|--:|--:|--:|--:|--:|
+| pooled, `SCZ25_META_SBayesRC_zanc` (n 8,596) | −0.0276 (p 0.0079) ✓ | −0.08, p_spin 0.48 | +0.12, 0.33 | +0.02, 0.85 / +0.16, 0.16 | **+0.36, 0.021** | 0.29 |
+| EUR, `SCZ25_EUR_SBayesRC_raw` (n 4,308) | −0.0418 (p 0.0043) ✓ | +0.03, 0.80 | +0.20, 0.067 | +0.14, 0.12 / +0.26, **0.008** | **+0.36, 0.018** | 0.33 |
+
+Reading:
+
+- **The parcel β map is mostly noise at this n.** Homologous left and right
+  parcels agree at ρ ≈ 0.3, and 292–298 of 358 βs are negative: the score's
+  effect is a near-uniform shift of the whole cortex (the tabled global β),
+  with little reproducible spatial structure on top. 73 (pooled) / 50 (EUR)
+  parcels reach p < 0.05, against 18 expected.
+- **Raw β vs C3 and vs the lead component: null in both arms**, lh and
+  bilateral-mean variants alike (|ρ| ≤ 0.20, all p_spin ≥ 0.07).
+- **The one nominal hit** — EUR, parcel-specific β (cortex mean held fixed) vs
+  the lead component, ρ +0.26, p_spin 0.008 — is one of 36 tests, the lh-only
+  variant (bilateral mean ρ +0.15, p 0.22), and absent in the larger pooled arm
+  (+0.16, p 0.16). It is recorded, not led with.
+- **The loading map is C3-like** (each parcel's correlation with the
+  whole-cortex mean slope vs C3: ρ +0.36, p_spin ≈ 0.02, in both arms and in
+  the synthetic test). Any score that only shifts the whole cortex would
+  therefore draw a weakly C3-shaped β map; here even that is not visible in
+  the raw β (ρ −0.08), because the map's noise swamps it.
+
+What it licenses: the SCZ score → faster thinning association is a
+whole-cortex effect; the parcel-level genetics do not (yet) connect to the
+transcriptomic arm. The imaging→genes bridge stays the group-level one
+(thinning map vs C3, ρ −0.55 p_spin 0.002), and the individual-level bridge is
+the whole-cortex PRS β. A more powerful version of this test would project
+each child's 358 slopes onto C3 / the lead component (one phenotype per child,
+`ahba_pls/FOLLOWUP_GENETICS.md` H4) and regress that on the score, instead of
+358 noisy βs.
+
+Cluster run: CSD3 job 35810927 (two tasks, ~8 min each; log in
+`slurm/prs_beta_map_35810927_*.log`); first submission 35810839 failed because
+the GENESIS R's data.table cannot open .gz files (fixed with a gzip pipe).
 
 ## The cells
 
