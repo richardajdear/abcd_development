@@ -1,15 +1,15 @@
 #!/usr/bin/env Rscript
 # fig5s_c3_mechanism.R -- simplified mechanism slide, hcp_3d_ds5 fit only:
 #   a  CT / PLS1 / C1 and dCT / PLS2 / C3 maps
-#   b  the two strong pairs (PLS1 vs CT, PLS2 vs dCT)
-#   c  Spearman matrix of the six region maps, spin p   (29_c3_mechanism_inputs.py)
+#   b  Spearman matrix of the six region maps, spin p   (29_c3_mechanism_inputs.py)
+#   c  AHBA C1 vs baseline CT and AHBA C3 vs dCT (region scatters)
 #   d  MAGMA gene-property for C1 and C3 (SCZ, MDD, ASD, ALZ, EA, intelligence)
 #   e  the bottom / top 20% of the AHBA C3 region score (c3_q20.csv): schematic
 #      of their marker-gene expression (c3_q20_profile.tsv), the thinning rate of
 #      every parcel by group (spin-tested difference), and later CBCL vs each
 #      child's thinning in each group (gradient_scores_c3q20.tsv, 26)
 # Reads only saved tables and fits nothing. Faded (alpha 0.3) = not significant
-# (c: spin p; d, e: p). Writes figures/fig_hcp_c3_mechanism_3d_ds5.png
+# (b: spin p; d, g: p). Writes figures/fig_hcp_c3_mechanism_3d_ds5.png
 suppressMessages({library(ggplot2); library(dplyr); library(tidyr); library(patchwork); library(scales)})
 
 VARIANT <- "3d_ds5"
@@ -78,14 +78,16 @@ pa <- wrap_elements(full = pa + plot_annotation(title = "a  Maps: PLS1 resembles
                                                   theme = theme(plot.title = element_text(size = BASE, face = "bold"))))
 
 
-# --------------------------------------------- b: the two strong pairs only -------
-B2 <- tibble(xv = c("CT", "dCT"), yv = c("PLS1", "PLS2"), pair = c("PLS1 vs baseline CT", "PLS2 vs thinning rate"))
-bl <- bind_rows(maps |> filter(!is.na(PLS1)) |> transmute(pair = B2$pair[1], x = CT, y = PLS1),
-                maps |> filter(!is.na(PLS2)) |> transmute(pair = B2$pair[2], x = dCT, y = PLS2)) |>
+# ------------------------- c: what AHBA C1 and C3 track (region scatters) -------
+SMs <- read.delim(file.path(RES, "c3_score_matrix.tsv"))
+B2 <- tibble(xv = c("CT", "dCT"), yv = c("C1", "C3"), pair = c("AHBA C1 vs baseline CT", "AHBA C3 vs thinning rate"))
+bl <- bind_rows(maps |> filter(!is.na(C1)) |> transmute(pair = B2$pair[1], x = CT, y = C1),
+                maps |> filter(!is.na(C3)) |> transmute(pair = B2$pair[2], x = dCT, y = C3)) |>
   mutate(pair = factor(pair, B2$pair))
-blab <- B2 |> rowwise() |> mutate(txt = sprintf("rho = %.2f\n%s", mpair(xv, yv)$rho, sub("p ", "p_spin ", pf(mpair(xv, yv)$p_spin)))) |>
+spair <- function(x, y) { r <- SMs[SMs$x == x & SMs$y == y, ]; stopifnot(nrow(r) == 1); r }
+blab <- B2 |> rowwise() |> mutate(txt = sprintf("rho = %.2f\n%s", spair(xv, yv)$rho, sub("p ", "p_spin ", pf(spair(xv, yv)$p_spin)))) |>
   ungroup() |> mutate(pair = factor(pair, B2$pair))
-stopifnot(all(sapply(seq_len(2), function(i) mpair(B2$xv[i], B2$yv[i])$p_spin < 0.05)))
+stopifnot(all(sapply(seq_len(2), function(i) spair(B2$xv[i], B2$yv[i])$p_spin < 0.05)))
 pb <- ggplot(bl, aes(x, y)) +
   geom_point(size = 1.0, stroke = 0, colour = "grey20") +
   geom_smooth(method = "lm", formula = y ~ x, se = FALSE, colour = "grey10", linewidth = 0.4) +
@@ -93,10 +95,10 @@ pb <- ggplot(bl, aes(x, y)) +
             lineheight = 0.9, inherit.aes = FALSE) +
   scale_y_continuous(expand = expansion(mult = c(0.05, 0.3))) +
   facet_wrap(~pair, ncol = 1, scales = "free", strip.position = "top") +
-  labs(x = "imaging map (CT mm; dCT mm/yr)", y = "PLS score", title = "b  What each component tracks") +
-  base_theme + theme(panel.spacing = unit(8, "pt"))
+  labs(x = "imaging map (CT mm; dCT mm/yr)", y = "AHBA score", title = "c  What AHBA C1 and C3 track") +
+  base_theme + theme(panel.spacing = unit(8, "pt"), plot.title.position = "plot")
 
-# ------------------------------------------- c: region-score correlation matrix ----
+# ------------------------------------------- b: region-score correlation matrix ----
 SM <- read.delim(file.path(RES, "c3_score_matrix.tsv"))
 # ordered so the two clusters sit in diagonal blocks: static (CT, PLS1, C1) and thinning (dCT, PLS2, C3)
 MV <- c(CT = "CT", PLS1 = "PLS1", C1 = "AHBA C1", dCT = "dCT", PLS2 = "PLS2", C3 = "AHBA C3")
@@ -117,9 +119,8 @@ pc <- ggplot(cmx, aes(X, Y)) +
   annotate("text", x = 6.4, y = 3.25, label = "thinning", hjust = 1, vjust = 1, size = GT + 0.2, fontface = "italic", colour = "grey30") +
   scale_fill_distiller(palette = "RdBu", limits = c(-1, 1), breaks = c(-1, 0, 1), name = "Spearman \u03c1") +
   scale_alpha_manual(values = c(`TRUE` = 1, `FALSE` = FADE), guide = "none") +
-  # no fixed aspect: a fixed-aspect plot is centred in its wrapped cell, which moves the title off the edge
-  coord_cartesian(expand = FALSE) +
-  labs(x = NULL, y = NULL, title = "c  Regional maps: two clusters",
+  coord_fixed(expand = FALSE) +                       # square tiles
+  labs(x = NULL, y = NULL, title = "b  Regional maps: two clusters",
        subtitle = "C1, C3 = AHBA; bold = p_spin < 0.05") +
   theme_void(base_size = BASE) +
   theme(plot.title = element_text(size = BASE, face = "bold", margin = margin(b = 2)), plot.title.position = "plot",
@@ -279,11 +280,11 @@ sub_txt <- sprintf(paste0(
   else "The symptom-linked thinning differs between the two ends of C3.")
 
 # ------------------------------------------------------------- assemble -------
-row1 <- (pa | pb) + plot_layout(widths = c(2.55, 1))
+row1 <- (pa | pc) + plot_layout(widths = c(2.55, 1))
 W <- c(1, 0.92, 1.13)                                  # shared column widths of rows 2 and 3
 # wrap every cell so the widths apply to whole cells, axis labels included: c and d
 # then have identical widths and f starts exactly where e does
-row2 <- (wrap_elements(full = pc) | wrap_elements(full = pe1)) + plot_layout(widths = c(W[1], sum(W[2:3])))
+row2 <- (wrap_elements(full = pb) | wrap_elements(full = pe1)) + plot_layout(widths = c(W[1], sum(W[2:3])))
 row3 <- (wrap_elements(full = pd) | wrap_elements(full = pe2) | wrap_elements(full = pe3)) + plot_layout(widths = W)
 fig <- (wrap_elements(full = row1) / wrap_elements(full = row2) / wrap_elements(full = row3)) +
   plot_layout(heights = c(0.62, 0.62, 0.62))
