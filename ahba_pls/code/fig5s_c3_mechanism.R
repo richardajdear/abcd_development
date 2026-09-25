@@ -117,7 +117,8 @@ pc <- ggplot(cmx, aes(X, Y)) +
   annotate("text", x = 6.4, y = 3.25, label = "thinning", hjust = 1, vjust = 1, size = GT + 0.2, fontface = "italic", colour = "grey30") +
   scale_fill_distiller(palette = "RdBu", limits = c(-1, 1), breaks = c(-1, 0, 1), name = "Spearman \u03c1") +
   scale_alpha_manual(values = c(`TRUE` = 1, `FALSE` = FADE), guide = "none") +
-  coord_fixed(expand = FALSE) +
+  # no fixed aspect: a fixed-aspect plot is centred in its wrapped cell, which moves the title off the edge
+  coord_cartesian(expand = FALSE) +
   labs(x = NULL, y = NULL, title = "c  Regional maps: two clusters",
        subtitle = "C1, C3 = AHBA; bold = p_spin < 0.05") +
   theme_void(base_size = BASE) +
@@ -165,8 +166,12 @@ fb <- poly |> mutate(key = tolower(label)) |>
   left_join(Q |> transmute(key = tolower(label), tier), by = "key") |>
   mutate(X = 4.95 + (x - bx[1]) * sc, Y = 1.25 + (y - by[1]) * sc)
 stopifnot(length(unique(fb$key[!is.na(fb$tier)])) == 137)
-cen <- fb |> filter(view == "lateral", tier %in% c("C3-low", "C3-high")) |> group_by(tier) |>
-  summarise(X = mean(X), Y = mean(Y), .groups = "drop")
+# arrow targets: the largest parcel of each group (most polygon vertices) in the chosen view --
+# bottom 20% on the lateral surface (left box), top 20% on the medial surface (right box)
+cen <- fb |> filter((tier == "C3-low" & view == "lateral") | (tier == "C3-high" & view == "medial")) |>
+  group_by(tier, label) |> summarise(n = n(), X = mean(X), Y = mean(Y), .groups = "drop") |>
+  group_by(tier) |> slice_max(n, n = 1, with_ties = FALSE) |> ungroup()
+stopifnot(nrow(cen) == 2)
 lo <- setNames(PQ$C3.low, PQ$feature); hi <- setNames(PQ$C3.high, PQ$feature)
 thin_lo <- lo[["normative_thinning_um_yr"]]; thin_hi <- hi[["normative_thinning_um_yr"]]
 p_thin <- PQ$p_spin_high_minus_low[PQ$feature == "normative_thinning_um_yr"]
@@ -179,8 +184,7 @@ box <- function(x0, tier, vals, head) {
   v <- unname(vals[names(FEATS)])
   list(rect = data.frame(x0 = x0, x1 = x0 + 4.65, y0 = 0.1, y1 = 3.9, tier = tier),
        head = data.frame(x = x0 + 0.12, y = c(3.66, 3.36), tier = tier, face = c("bold", "plain"),
-                         lab = c(head, sprintf("thinning %.1f \u00b5m/yr \u00b7 CT %.2f mm",
-                                               vals[["normative_thinning_um_yr"]], vals[["CT"]]))),
+                         lab = c(head, sprintf("thinning %.1f \u00b5m/yr", vals[["normative_thinning_um_yr"]]))),
        lab  = data.frame(x = x0 + 0.12, y = yy, lab = unname(FEATS)),
        bar  = data.frame(xmin = pmin(z0, z0 + k * v), xmax = pmax(z0, z0 + k * v), y = yy, v = v, tx = x0 + 4.55),
        axis = data.frame(x = z0, y0 = 0.2, y1 = 3.15))
@@ -276,8 +280,11 @@ sub_txt <- sprintf(paste0(
 
 # ------------------------------------------------------------- assemble -------
 row1 <- (pa | pb) + plot_layout(widths = c(2.55, 1))
-row2 <- (pc | pe1) + plot_layout(widths = c(1, 2.05))
-row3 <- (pd | pe2 | pe3) + plot_layout(widths = c(1, 0.92, 1.13))
+W <- c(1, 0.92, 1.13)                                  # shared column widths of rows 2 and 3
+# wrap every cell so the widths apply to whole cells, axis labels included: c and d
+# then have identical widths and f starts exactly where e does
+row2 <- (wrap_elements(full = pc) | wrap_elements(full = pe1)) + plot_layout(widths = c(W[1], sum(W[2:3])))
+row3 <- (wrap_elements(full = pd) | wrap_elements(full = pe2) | wrap_elements(full = pe3)) + plot_layout(widths = W)
 fig <- (wrap_elements(full = row1) / wrap_elements(full = row2) / wrap_elements(full = row3)) +
   plot_layout(heights = c(0.62, 0.62, 0.62))
 fig <- fig + plot_annotation(
