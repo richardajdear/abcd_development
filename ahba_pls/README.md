@@ -1186,6 +1186,13 @@ Results (`results/prs_assoc_cortex_corr.tsv`): 7 of 192 tests pass both nulls.
 3. With 192 correlated tests, 7 passes is about the number expected by chance (≈ 9.6 at α = 0.05). Only the MDD
    EUR | CT cells are supported by agreement between the two scoring methods.
 
+**Combined figure** (`code/fig11_assoc_cortices_combined.R` → `figures/fig_assoc_cortices_combined.png`). This
+puts the two outcome sets of scripts 30 and 31 side by side: p-factor and total problems, and the SCZ 2025 and MDD
+pooled-arm SBayesRC scores, each with the same three panels as `fig_cbcl_assoc_cortices.png`. It shows 22-cortex
+maps (| global thinning + baseline CT) with the reference maps, per-cortex scatters against dCT / PLS2 / C3, and
+the parcel-vs-cortex comparison over all four model versions. It reads only the saved tables, and every count in
+its subtitle is computed from them.
+
 ## Reproducing
 
 Analysis (python, env `ahba-pls`): `code/01_*` → `code/22_*` in order. `11_` is the parcellation
