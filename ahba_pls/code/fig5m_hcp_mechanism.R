@@ -312,6 +312,7 @@ compo <- paste(c(if (length(fewer)) paste("fewer", paste(fewer, collapse = " / "
                  if (length(more)) paste("more", paste(more, collapse = " / "), "genes")), collapse = ", ")
 if (!nzchar(compo)) compo <- "no cell-class or layer map passes the spin test"
 risk_ns <- all(TP$p_spin[TP$kind == "risk genes"] >= 0.05)
+risk_hit <- TP[TP$kind == "risk genes" & TP$p_spin < 0.05, ]
 p2 <- TP[TP$feature == "PLS2", ]
 risk_hits <- MG |> filter(VARIABLE == "ABCD_PLS2_HCP", P < 0.05, BETA_STD > 0, gene_analysis %in% names(GA)) |> pull(gene_analysis)
 risk_txt <- if (length(risk_hits)) paste(GA_SHORT[risk_hits], collapse = ", ") else "none of the traits"
@@ -321,7 +322,10 @@ sub_txt <- sprintf(paste0(
   "%s"),
   VFILE[[VARIANT]], cm("PLS1", "n_parcels"), format(cm("PLS1", "n_genes"), big.mark = ","), risk_txt, p2$mean_slow, compo,
   if (risk_ns) "The MAGMA enrichment is a genome-wide shift across many genes: the top risk genes themselves are not concentrated in fast-thinning cortex (g, faded)."
-  else "The top SCZ / MDD risk genes are also spatially patterned with thinning rate (g).")
+  else sprintf("The MAGMA enrichment is mostly a genome-wide shift: of %d top-N risk-gene maps (SCZ / MDD \u00d7 250, 500, 1,000 genes) only %s %s thinning rate (p_spin < 0.05).",
+               sum(TP$kind == "risk genes"),
+               paste(sprintf("%s (\u03c1 = %+.2f)", risk_hit$feature, risk_hit$rho_with_thinning), collapse = " and "),
+               if (nrow(risk_hit) == 1) "tracks" else "track"))
 
 # ------------------------------------------------------------- assemble -------
 row1 <- (pa | pb) + plot_layout(widths = c(1.55, 1))
