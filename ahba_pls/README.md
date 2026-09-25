@@ -1156,8 +1156,9 @@ PLS2 β_std (p) by AHBA matrix, and AHBA C3 (the same in every version):
 
 The ABCD PLS2 carries SCZ, MDD, ADHD and intelligence signal in all four versions, and bipolar in `3d` and
 `base` (p = 0.06–0.08 with the DS5 filter). ASD, Alzheimer's and EA show nothing. C3 additionally carries
-bipolar and EA. Without the DS5 gene filter (`3d`, `base`) the βs for MDD, ADHD and intelligence are smaller, but with twice as many
-genes the p-values are similar or smaller.
+bipolar and EA. Without the DS5 gene filter (`3d`, `base`) the βs for MDD, ADHD and intelligence are smaller. With twice as many
+genes, MDD's p-values still get smaller (3d_ds5 0.0002 → 3d 2e-05), but ADHD's and intelligence's get larger
+(ADHD 0.0005 → 0.007; intelligence 1e-05 → 0.0003), so the filter matters most for those two traits.
 
 ### 1. 2026-09-14 — the tables were 6.0, not 7.0
 
