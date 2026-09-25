@@ -157,3 +157,5 @@ out/rerun_local.log
 genetic_analysis/fig1_inputs/hcp70_scans.csv
 genetic_analysis/fig1_inputs/hcp70_global_slope.csv
 genetic_analysis/fig1_inputs/hcp70_child_traits.csv
+# SNP/P/N files prepared from public GWAS by ahba_pls/code/28 (~1.3 GB, regenerable)
+ahba_pls/results/magma_runs/trait_prep/

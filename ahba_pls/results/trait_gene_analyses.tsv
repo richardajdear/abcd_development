@@ -1,0 +1,6 @@
+trait	source	n_snps_input	n_genes	n_genes_bonf	median_nsnps	log_note
+ADHD	ADHD2022_iPSYCH_deCODE_PGC.meta.gz	6774216	18220	60	163.0	"	WARNING: detected 133 synonymous SNP pairs in the data | 	         skipped all synonym entries involved, synonymous SNPs are kept in analysis"
+BIP	bip2024_eur_no23andMe.gz	6939126	18355	238	171.0	"	WARNING: detected 133 synonymous SNP pairs in the data | 	         skipped all synonym entries involved, synonymous SNPs are kept in analysis"
+EA	Okbay_27225129-EduYears_Main.txt.gz	8146840	18427	203	199.0	"	WARNING: detected 133 synonymous SNP pairs in the data | 	         skipped all synonym entries involved, synonymous SNPs are kept in analysis"
+INT	SavageJansen_2018_intelligence_metaanalysis.txt	9285776	19127	484	219.0	"	WARNING: detected 133 synonymous SNP pairs in the data | 	         skipped all synonym entries involved, synonymous SNPs are kept in analysis"
+ALZ	GCST90027158_buildGRCh38.tsv	21070464	18427	206	358.0	"	WARNING: detected 133 synonymous SNP pairs in the data | 	         skipped all synonym entries involved, synonymous SNPs are kept in analysis"

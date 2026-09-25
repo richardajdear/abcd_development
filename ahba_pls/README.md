@@ -1038,19 +1038,24 @@ is about absolute rates.
 Outputs: `results/gradient_scores_assoc.tsv` (all scores × outcomes × adjustment sets × samples),
 `results/gradient_scores_bins.tsv` (group-level decile means), `figures/fig_gradient_scores.png`.
 
-### Mechanism slide — `code/27_tier_profile.py` → `code/fig5m_hcp_mechanism.R`
+### Mechanism slide — `code/27_tier_profile.py` → `code/fig5m_hcp_mechanism.R` (four AHBA matrices)
 
-`figures/fig_hcp_mechanism.png` is the base-AHBA summary slide (`hcp_base`: 177 parcels × 15,636 genes) with
-three changes:
+`figures/fig_hcp_mechanism_<variant>.png`, one per AHBA matrix the PLS is fitted on (`3d_ds5`, `ds5`, `3d`, `base`;
+`Rscript code/fig5m_hcp_mechanism.R <variant>` after `22_hcp_summary.py <variant>` and `27_tier_profile.py <variant>`).
+Relative to the summary slide:
 - Panel c shows only the matched pairs (PLS1–C1, PLS2–C3).
 - Text follows `genetic_analysis/fig1.R` (BASE = 7 pt: titles 7, axis text 6, in-panel text 5.5).
-- A mechanism row (f, g) links the symptom result to the transcriptomic axis.
+- Panel d (cell classes / layers) is transposed: marker sets are rows, the four gene rankings columns.
+- Panel e (MAGMA) is transposed and extended: traits are rows, grouped psychiatric / neurodegenerative / cognitive.
+- f = the three thirds of normative thinning plus later total problems and p-factor by third (the two outcomes that
+  match Figure 1); g = what each third is made of. The thirds and panel f are the same in every version; only
+  PLS2 (and so the PLS2 row of g) changes with the matrix.
 
 `27_tier_profile.py` takes the thirds of the **normative** thinning map (`results/gradient_tiers.csv`, from
 script 26). For each parcel it scores marker sets as the mean z-expression of their genes (Seidlitz 2020 cell
 classes, Maynard 2021 layers, and the top-N genes by MAGMA ZSTAT for SCZ 2025 multi-ancestry and MDD div). Each
 feature map is correlated with the thinning rate, with spin p (5,000 rotations). Output:
-`results/tier_profile.tsv`, `tier_profile_parcels.csv`.
+`results/tier_profile_<variant>.tsv`, `tier_profile_<variant>_parcels.csv`.
 
 **What the slow-thinning third is** (mean z, slow / middle / fast; ρ with thinning rate, p_spin):
 - PLS2 -0.73 / +0.18 / +0.55 (ρ = 0.52, p < 0.001).
@@ -1122,6 +1127,37 @@ weight tables, spin nulls, MAGMA run directories).
 ## Data vintage — what this directory now runs on
 
 Two corrections landed after the first version of this analysis, and **neither changed a conclusion**.
+
+**Extra MAGMA traits** (`code/28_trait_gene_analyses.py` → `genetic_analysis/inputs/magma/<TRAIT>.genes.raw`,
+provenance `results/trait_gene_analyses.tsv`). Gene analyses run locally on 1000G EUR with the NCBI37 35/10 kb
+window, from public European-ancestry summary statistics downloaded to `~/Git/AHBA/magma/gwas/`:
+- BIP: O'Connell 2025, `bip2024_eur_no23andMe` (238 Bonferroni genes)
+- ADHD: Demontis 2023 (60)
+- ALZ: Bellenguez 2022, GCST90027158, re-run with N = cases + controls (206)
+- EA: Okbay 2016 (EA2), EduYears_Main excluding 23andMe, N = 328,917 for every SNP (203). EA3's
+  public link did not resolve here and EA4 needs an SSGAC agreement.
+- INT: Savage, Jansen 2018 intelligence (484)
+
+Height (Yengo 2022) was intended as a non-brain negative control, but its gene analysis had not finished after
+1.5 h (p down to 1e-300 at N ≈ 1.6M) and was stopped; it is not on the slides.
+
+PLS2 β_std (p) by AHBA matrix, and AHBA C3 (the same in every version):
+
+| trait | PLS2 `3d_ds5` | PLS2 `ds5` | PLS2 `3d` | PLS2 `base` | AHBA C3 |
+|:--|--:|--:|--:|--:|--:|
+| SCZ25_META | +0.036 (0.02) | +0.036 (0.02) | +0.035 (0.0002) | +0.033 (0.0006) | +0.060 (9e-05) |
+| MDD_div | +0.055 (0.0002) | +0.054 (0.0003) | +0.043 (2e-05) | +0.040 (7e-05) | +0.072 (2e-06) |
+| BIP | +0.026 (0.06) | +0.025 (0.08) | +0.028 (0.003) | +0.027 (0.003) | +0.047 (0.0009) |
+| ADHD | +0.045 (0.0005) | +0.048 (0.0002) | +0.024 (0.007) | +0.030 (0.0006) | +0.049 (0.0002) |
+| ASD | +0.017 (0.1) | +0.021 (0.07) | +0.003 (0.7) | +0.006 (0.5) | +0.014 (0.2) |
+| ALZ | -0.017 (0.2) | -0.015 (0.2) | -0.012 (0.2) | -0.014 (0.09) | -0.010 (0.4) |
+| EA | +0.016 (0.3) | +0.017 (0.2) | +0.002 (0.8) | +0.006 (0.5) | +0.042 (0.004) |
+| INT | +0.064 (1e-05) | +0.060 (4e-05) | +0.034 (0.0003) | +0.036 (0.0002) | +0.069 (3e-06) |
+
+The ABCD PLS2 carries SCZ, MDD, ADHD and intelligence signal in all four versions, and bipolar in `3d` and
+`base` (p = 0.06–0.08 with the DS5 filter). ASD, Alzheimer's and EA show nothing. C3 additionally carries
+bipolar and EA. Without the DS5 gene filter (`3d`, `base`) the βs for MDD, ADHD and intelligence are smaller, but with twice as many
+genes the p-values are similar or smaller.
 
 ### 1. 2026-09-14 — the tables were 6.0, not 7.0
 

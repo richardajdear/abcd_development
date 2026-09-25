@@ -7,6 +7,7 @@ AHBA C1 and C3.  Run once per AHBA matrix:
                                            #   (137 parcels x 7,973 genes; the matrix C1-C3 were fit on)
     python code/22_hcp_summary.py ds5      # hcp_ds5.csv: no region filter, DS5 gene filter
                                            #   (177 parcels x 7,973 genes, its own DS5 set)
+    python code/22_hcp_summary.py 3d       # hcp_3d.csv: >=3-donor region filter, no gene filter
     python code/22_hcp_summary.py base     # hcp_base.csv: neither filter (177 parcels x 15,637 genes)
 
 Components are fitted from scratch for every matrix (spin test of the singular
@@ -38,7 +39,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import pls, magma_utils                                 # noqa: E402
 
-VARIANTS = {"3d_ds5": "hcp_3d_ds5.csv", "ds5": "hcp_ds5.csv", "base": "hcp_base.csv"}
+VARIANTS = {"3d_ds5": "hcp_3d_ds5.csv", "ds5": "hcp_ds5.csv", "3d": "hcp_3d.csv", "base": "hcp_base.csv"}
 VARIANT = sys.argv[1] if len(sys.argv) > 1 else "3d_ds5"
 assert VARIANT in VARIANTS, f"variant must be one of {list(VARIANTS)}"
 ROOT = HERE.parent; REPO = ROOT.parent
@@ -155,7 +156,7 @@ for v, g in ST.groupby("vector"):                      # BH within vector, acros
 ST.to_csv(out("sets.tsv"), sep="\t", index=False, float_format="%.4g")
 
 # ---- MAGMA -------------------------------------------------------------------
-GA = ["SCZ25_META", "MDD", "ASD", "global_slope_1lmm_hcp", "global_slope_1lmm_dk",
+GA = ["SCZ25_META", "MDD", "ASD", "BIP", "ADHD", "ALZ", "EA", "INT", "HEIGHT", "global_slope_1lmm_hcp", "global_slope_1lmm_dk",
       "global_slope_perregion_hcp", "global_slope_perregion_dk"]
 NAME = {"MDD": "MDD_div"}                               # MDD.genes.raw = MDD2025 div (multi-ancestry)
 VEC = {"ABCD_PLS1_HCP": Z1, "ABCD_PLS2_HCP": Z2, "AHBA_C1": c123w["C1"], "AHBA_C3": c123w["C3"]}
