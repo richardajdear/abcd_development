@@ -121,7 +121,7 @@ pc <- ggplot(cmx, aes(X, Y)) +
   labs(x = NULL, y = NULL, title = "c  Regional maps: two clusters",
        subtitle = "C1, C3 = AHBA; bold = p_spin < 0.05") +
   theme_void(base_size = BASE) +
-  theme(plot.title = element_text(size = BASE, face = "bold", margin = margin(b = 2)),
+  theme(plot.title = element_text(size = BASE, face = "bold", margin = margin(b = 2)), plot.title.position = "plot",
         plot.subtitle = element_text(size = BASE - 1.5, colour = "grey35", margin = margin(b = 4)),
         legend.position = "bottom", legend.title = element_text(size = BASE - 1, vjust = 0.8),
         legend.text = element_text(size = BASE - 1.5),
@@ -147,11 +147,10 @@ pd <- ggplot(dm, aes(BETA_STD, g, alpha = sig)) +
   geom_text(aes(label = lab), vjust = -0.7, size = GT - 0.2, colour = "#b2182b") +
   scale_alpha_manual(values = c(`TRUE` = 1, `FALSE` = FADE), guide = "none") +
   scale_x_continuous(breaks = c(0, 0.05, 0.1)) +
-  facet_grid(grp ~ v, scales = "free_y", space = "free_y", switch = "y") +
+  facet_wrap(~v, nrow = 1) +
   labs(x = "MAGMA gene-property \u03b2 (std., 95% CI)", y = NULL, title = "d  Gene-level genetic risk (MAGMA)") +
   base_theme + theme(panel.grid.major.x = element_line(colour = "grey92", linewidth = 0.25),
-                     strip.placement = "outside", strip.text.y.left = element_text(angle = 0, hjust = 1, size = BASE - 1),
-                     panel.spacing.x = unit(8, "pt"), panel.spacing.y = unit(3, "pt"))
+                     plot.title.position = "plot", panel.spacing.x = unit(8, "pt"))
 
 # ------------------------- e: the two ends of AHBA C3 (bottom / top 20%) ----------
 # groups: bottom 20% / middle 60% / top 20% of the C3 region score (c3_q20.csv,
@@ -209,7 +208,9 @@ pe1 <- ggplot() +
   annotate("text", x = 7.25, y = 0.55, size = GT, colour = "grey30", lineheight = 0.95,
            label = "bars: mean z-expression of marker genes\n(descriptive: C3 is built from the same expression)") +
   coord_fixed(xlim = c(-0.05, 14.6), ylim = c(0.05, 3.95), expand = FALSE, clip = "off") +
-  theme_void(base_size = BASE) + theme(plot.margin = margin(2, 2, 6, 2))
+  labs(title = sprintf("e  The two ends of AHBA C3: bottom and top 20%% of parcels (%d each)", nlo)) +
+  theme_void(base_size = BASE) + theme(plot.title = element_text(size = BASE, face = "bold", margin = margin(b = 4)),
+                                       plot.margin = margin(2, 2, 6, 2))
 
 # e2: normative thinning of every parcel, by C3 group
 Qp <- Q |> mutate(tier = factor(tier, names(GRPLAB)))
@@ -228,8 +229,8 @@ pe2 <- ggplot(Qp, aes(tier, normative_thinning_um_yr, colour = tier)) +
   scale_colour_manual(values = GRPCOL, guide = "none") +
   scale_x_discrete(labels = sub(" of C3", "\nof C3", GRPLAB)) +
   scale_y_continuous(expand = expansion(mult = c(0.04, 0.18))) +
-  labs(x = NULL, y = "normative thinning (\u00b5m/yr)", subtitle = "Thinning rate of each parcel") +
-  base_theme + theme(plot.subtitle = element_text(size = BASE, face = "bold"))
+  labs(x = NULL, y = "normative thinning (\u00b5m/yr)", title = "f  Thinning rate of each parcel") +
+  base_theme + theme(plot.title.position = "plot")
 
 # e3: later symptoms vs each child's thinning in each C3 group
 CG <- read.delim(file.path(RES, "gradient_scores_c3q20.tsv"))
@@ -253,26 +254,21 @@ pe3 <- ggplot(g3, aes(y_sd_beta, o, colour = tier, alpha = sig)) +
   scale_x_continuous(breaks = c(0, 0.02, 0.04)) +
   coord_cartesian(xlim = c(min(g3$lo), XR * 1.75), clip = "off") +
   labs(x = "\u03b2 per SD of the child's thinning rate in that group\n(SD of CBCL at 15\u201317 | baseline CBCL)", y = NULL,
-       subtitle = "Later symptoms vs thinning in each group") +
+       title = "g  Later symptoms vs each child's thinning in each group") +
   guides(colour = guide_legend(nrow = 1, override.aes = list(alpha = 1))) +
   base_theme + theme(axis.line.y = element_blank(), axis.ticks.y = element_blank(),
-                     plot.subtitle = element_text(size = BASE, face = "bold"),
+                     plot.title.position = "plot",
                      legend.position = "bottom", legend.key.size = unit(9, "pt"), legend.margin = margin(0, 0, 0, 0))
 
 spec_ns <- all(jt$p >= 0.05)
-pE <- (pe1 / (pe2 | pe3)) + plot_layout(heights = c(0.85, 1)) +
-  plot_annotation(title = sprintf("e  The two ends of AHBA C3: the bottom 20%% thins %.0f%% slower, but symptom-linked thinning %s",
-                                  100 * (1 - thin_lo / thin_hi),
-                                  if (spec_ns) "is not specific to either end" else "differs between the ends"),
-                  theme = theme(plot.title = element_text(size = BASE, face = "bold")))
-pE <- wrap_elements(full = pE)
+
 
 # -------------------------------------------- claims for the figure subtitle ----
 e3 <- dm |> filter(v == "AHBA C3", sig, BETA_STD > 0) |> pull(gene_analysis)
 SH <- c(SCZ25_META = "SCZ", MDD_div = "MDD", ASD = "ASD", ALZ = "Alzheimer's", EA = "EA", INT = "intelligence")
 sub_txt <- sprintf(paste0(
   "a\u2013c: PLS of AHBA expression (hcp_3d_ds5: %d parcels \u00d7 %s genes) against ABCD thickness and thinning:\nPLS1 = AHBA C1 tracks baseline thickness, PLS2 = AHBA C3 tracks thinning rate (a\u2013c). C3 genes carry %s signal (d).\n",
-  "e: the bottom 20%% of C3 is glia- and white-matter-rich and thins %.0f%% slower than the neuron- and upper-layer-rich top 20%% (p_spin = %.3f).\n%s"),
+  "e\u2013g: the bottom 20%% of C3 is glia- and white-matter-rich and thins %.0f%% slower than the neuron- and upper-layer-rich top 20%% (p_spin = %.3f).\n%s"),
   cm("PLS1", "n_parcels"), format(cm("PLS1", "n_genes"), big.mark = ","), paste(SH[e3], collapse = ", "),
   100 * (1 - thin_lo / thin_hi), p_thin,
   if (spec_ns) "Children whose symptoms rise thin faster at both ends alike: the symptom link is not specific to either end of C3."
@@ -280,14 +276,15 @@ sub_txt <- sprintf(paste0(
 
 # ------------------------------------------------------------- assemble -------
 row1 <- (pa | pb) + plot_layout(widths = c(2.55, 1))
-left <- (pc / pd) + plot_layout(heights = c(1.15, 1))
-row2 <- (wrap_elements(full = left) | pE) + plot_layout(widths = c(1.05, 1.7))
-fig <- (wrap_elements(full = row1) / row2) + plot_layout(heights = c(0.62, 1.2))
+row2 <- (pc | pe1) + plot_layout(widths = c(1, 2.05))
+row3 <- (pd | pe2 | pe3) + plot_layout(widths = c(1, 0.92, 1.13))
+fig <- (wrap_elements(full = row1) / wrap_elements(full = row2) / wrap_elements(full = row3)) +
+  plot_layout(heights = c(0.62, 0.62, 0.62))
 fig <- fig + plot_annotation(
     title = "AHBA C3 separates fast-thinning, neuron-rich cortex from slow-thinning, glia-rich cortex, and carries psychiatric gene-level risk",
     subtitle = sub_txt,
     theme = theme(plot.title = element_text(size = BASE + 3, face = "bold"),
                   plot.subtitle = element_text(size = BASE - 0.5, colour = "grey25", lineheight = 1.15, margin = margin(b = 4))))
 OUT <- file.path(FIG, "fig_hcp_c3_mechanism_3d_ds5.png")
-ggsave(OUT, fig, width = 12.5, height = 12.5, dpi = 300, bg = "white")
+ggsave(OUT, fig, width = 12.5, height = 12, dpi = 300, bg = "white")
 cat("wrote", OUT, "\n")
