@@ -1086,6 +1086,33 @@ premotor, somatosensory/motor, medial temporal, insular/opercular and auditory c
    and unimodal cortex. Faster *apparent* thinning there could reflect faster intracortical myelination shifting
    the grey/white boundary. T1w/T2w or MT change would be the test.
 
+### Simplified C3 mechanism slide (hcp_3d_ds5) — `code/29_c3_mechanism_inputs.py` → `code/fig5s_c3_mechanism.R`
+
+`figures/fig_hcp_c3_mechanism_3d_ds5.png`, requested as a simpler version of the mechanism slide built around
+AHBA C3 rather than the normative thinning map. Changes from `fig5m`:
+- b shows only the two strong pairs (PLS1 vs CT, PLS2 vs dCT).
+- c is a Spearman matrix of the six region maps (CT, dCT, PLS1, PLS2, C1, C3) with spin p (`results/c3_score_matrix.tsv`);
+  the gene-weight scatters are dropped.
+- d (cell classes / layers) and e (MAGMA) show only AHBA C1 and C3; e drops bipolar and ADHD.
+- f is a schematic of the **thirds of the AHBA C3 region score** (`results/c3_tiers.csv`, 46 / 45 / 46 of the 137
+  parcels with donor coverage): normative thinning, baseline CT and mean marker-gene z-expression in the top and
+  bottom thirds (`results/c3_tier_profile.tsv`).
+- g asks whether later symptoms go with faster thinning specifically in the top or bottom C3 third
+  (`results/gradient_scores_c3tiers.tsv`, from `26_gradient_scores.py`).
+
+**Results:**
+1. The bottom third of C3 thins at 17.1 µm/yr against 22.4 for the top third
+   (24% slower; C3 vs dCT ρ = -0.33, p_spin = 0.033) at a similar baseline thickness
+   (2.70 vs 2.76 mm). It expresses more white-matter, L1 and oligodendrocyte marker genes and fewer
+   excitatory-neuron and L2/L3 genes. The marker profile is descriptive: C3 is a weighted sum of the same
+   expression, so this restates panel d rather than adding an independent test.
+2. **Symptom-linked thinning is not specific to either pole of C3.** Each third alone: p-factor, bottom
+   +0.021, p = 0.027, top +0.020, p = 0.039; total problems, bottom
+   +0.014, p = 0.13, top +0.013, p = 0.15. Jointly (with baseline CT and image
+   quality), bottom − top = +0.007, p = 0.81 (p-factor) and +0.005, p = 0.87 (total problems).
+   This contrasts with the split by **normative thinning rate** (slow − fast +0.095, p < .001 for total problems):
+   the symptom link follows where cortex normally thins slowly, which C3 captures only partly (ρ = -0.33).
+
 ## Reproducing
 
 Analysis (python, env `ahba-pls`): `code/01_*` → `code/22_*` in order. `11_` is the parcellation

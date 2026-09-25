@@ -30,7 +30,8 @@ gradient, so b_i is pulled toward 1 more for children with fewer / closer scans 
 hence n_visits and age_span as covariates and a >= 3-scan sensitivity check.
 Group-level outputs only: results/gradient_scores_assoc.tsv, gradient_scores_bins.tsv,
 gradient_scores_decomposition.tsv (fast / mid / slow thirds of normative thinning),
-gradient_tiers.csv (the parcel -> third assignment), gradient_scores_pls2tiers.tsv.
+gradient_tiers.csv (the parcel -> third assignment), gradient_scores_pls2tiers.tsv,
+c3_tiers.csv and gradient_scores_c3tiers.tsv (the same split by AHBA C3 score).
 """
 from __future__ import annotations
 import sys, warnings
@@ -230,6 +231,47 @@ PT = pd.DataFrame(prow)
 PT.to_csv(RES / "gradient_scores_pls2tiers.tsv", sep="\t", index=False, float_format="%.5g")
 PT["c"] = PT.apply(lambda r: f"{r.y_sd_beta:+.3f} ({r.p:.2g})", axis=1)
 print(PT[PT.outcome.isin(["totprob", "pfactor", "internal", "anxdisord", "rulebreak"])]
+      .pivot_table(index=["outcome", "spec"], columns="term", values="c", aggfunc="first").to_string(), file=sys.stderr)
+
+# ------------------------------------------- the same split, by AHBA C3
+# Thirds of the AHBA C3 region score (hcp_summary_maps.csv = the hcp_3d_ds5 fit's
+# table, 137 parcels with donor coverage). C3-high = neuronal / L2-3 genes,
+# C3-low = glial / white-matter genes. Written for the mechanism slide:
+# does symptom-linked extra thinning sit in the C3-low or the C3-high third?
+cm3 = pd.read_csv(RES / "hcp_summary_maps.csv", index_col=0)
+cm3.index = [lab[l.lower()] for l in cm3.index]
+c3 = cm3.C3.dropna()
+ctier = pd.qcut(c3, 3, labels=["C3-low", "C3-mid", "C3-high"])
+pd.DataFrame({"C3": c3, "tier": ctier, "normative_thinning_um_yr": 1000 * g.loc[c3.index]}).rename_axis("label") \
+    .to_csv(RES / "c3_tiers.csv", float_format="%.5g")
+for t in ctier.cat.categories:
+    k = t.replace("-", "_")
+    D[f"thin_{k}"] = thin.loc[D.index, ctier.index[ctier == t]].mean(axis=1)
+    D[f"thin_{k}_z"] = (D[f"thin_{k}"] - D[f"thin_{k}"].mean()) / D[f"thin_{k}"].std()
+print("C3 thirds: n", ctier.value_counts().to_dict(), "| normative thinning um/yr",
+      {t: round(1000 * g.loc[ctier.index[ctier == t]].mean(), 1) for t in ctier.cat.categories}, file=sys.stderr)
+crow = []
+T3c = ["thin_C3_low_z", "thin_C3_mid_z", "thin_C3_high_z"]
+for o in OUT:
+    d = D.dropna(subset=[f"{o}_late", f"{o}_base", "age_late"])
+    for spec, terms, extra in ([(f"{t.split('_')[2]} alone", [t], []) for t in T3c]
+                               + [("low + high", [T3c[0], T3c[2]], []),
+                                  ("low + high | CT, QC", [T3c[0], T3c[2]], ["glob_ct_z", "ct_grad_slope_z", "qc_defects_z"])]):
+        m = smf.ols(f"{o}_late ~ {' + '.join(terms)} + {o}_base + {BASE}" + "".join(f" + {e}" for e in extra), d
+                    ).fit(cov_type="cluster", cov_kwds={"groups": d.family})
+        for tt_ in terms:
+            crow.append(dict(outcome=o, spec=spec, term=tt_.replace("thin_", "").replace("_z", "").replace("_", "-"),
+                             beta=m.params[tt_], se=m.bse[tt_], p=m.pvalues[tt_], y_sd_beta=m.params[tt_] / d[f"{o}_late"].std(), n=int(m.nobs)))
+        if spec.startswith("low + high"):
+            c = m.params[T3c[0]] - m.params[T3c[2]]
+            v = m.cov_params().loc[T3c[0], T3c[0]] + m.cov_params().loc[T3c[2], T3c[2]] - 2 * m.cov_params().loc[T3c[0], T3c[2]]
+            from scipy.stats import norm
+            crow.append(dict(outcome=o, spec=spec, term="low - high", beta=c, se=np.sqrt(v), p=2 * norm.sf(abs(c) / np.sqrt(v)),
+                             y_sd_beta=c / d[f"{o}_late"].std(), n=int(m.nobs)))
+CT3 = pd.DataFrame(crow)
+CT3.to_csv(RES / "gradient_scores_c3tiers.tsv", sep="\t", index=False, float_format="%.5g")
+CT3["c"] = CT3.apply(lambda r: f"{r.y_sd_beta:+.3f} ({r.p:.2g})", axis=1)
+print(CT3[CT3.outcome.isin(["totprob", "pfactor", "internal", "anxdisord", "rulebreak"])]
       .pivot_table(index=["outcome", "spec"], columns="term", values="c", aggfunc="first").to_string(), file=sys.stderr)
 
 pd.set_option("display.width", 220)

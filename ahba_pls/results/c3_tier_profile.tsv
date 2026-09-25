@@ -1,0 +1,16 @@
+feature	kind	C3-low	C3-mid	C3-high	high_minus_low
+normative_thinning_um_yr	thinning	17.11	20.7	22.38	5.275
+CT	thickness	2.704	2.818	2.758	0.05368
+Neuro-Ex	cell class	-0.7952	0.1475	0.6509	1.446
+Neuro-In	cell class	-0.6426	0.1365	0.5091	1.152
+Astro	cell class	0.1267	0.2973	-0.4176	-0.5442
+Micro	cell class	0.24	0.1906	-0.4264	-0.6664
+Oligo	cell class	0.3886	0.03849	-0.4264	-0.815
+OPC	cell class	0.02852	0.3488	-0.3697	-0.3982
+L1	layer	0.3322	0.2092	-0.5368	-0.869
+L2	layer	-0.7214	0.386	0.3439	1.065
+L3	layer	-0.9666	0.408	0.5675	1.534
+L4	layer	-0.1375	-0.2191	0.3519	0.4894
+L5	layer	-0.584	0.1999	0.3885	0.9726
+L6	layer	-0.2876	0.2427	0.05027	0.3379
+WM	layer	0.5301	0.1504	-0.6772	-1.207
