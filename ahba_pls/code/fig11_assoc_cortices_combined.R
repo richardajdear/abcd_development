@@ -68,55 +68,68 @@ dct_scale <- scale_fill_gradientn(colours = c("#67000d", "#cb181d", "#fb6a4a", "
 ar <- list(brain(RC |> transmute(cortex_id, v = dCT), "Normative dCT (mm/yr)", dct_scale),
            brain(RC |> transmute(cortex_id, v = PLS2), "PLS2", div(RC$PLS2)),
            brain(RC |> transmute(cortex_id, v = C3), "AHBA C3", div(RC$C3)))
-pa <- wrap_elements(full = wrap_plots(c(am, ar), nrow = 1) +
-  plot_annotation(title = sprintf("a  Association maps on the 22 cortices (%s) and the reference maps averaged the same way", MLAB[[MAPV]]),
-                  theme = theme(plot.title = element_text(size = BASE, face = "bold"))))
+SYM <- c("pfactor", "totprob"); PRS <- c("SBayesRC_SCZ25_META", "SBayesRC_MDD_pooled")
+names(am) <- names(OUT)
+hdr <- function(txt) ggplot() + annotate("text", 0, 0, label = txt, hjust = 0, size = (BASE + 0.5) / .pt, fontface = "bold") +
+  xlim(0, 1) + theme_void() + theme(plot.margin = margin(2, 0, 0, 2))
+brow <- function(ps, title) wrap_elements(full = wrap_plots(ps, nrow = 1) + plot_annotation(title = title,
+  theme = theme(plot.title = element_text(size = BASE, face = "bold"))))
 
-# ------------------------------------------------ b: cortex map vs reference ----
-sb <- M |> filter(map == MAPV, outcome %in% names(OUT)) |> select(outcome, cortex_id, r) |>
-  inner_join(RC |> pivot_longer(-cortex_id, names_to = "reference", values_to = "x"), by = "cortex_id",
-             relationship = "many-to-many") |>
-  mutate(outcome = factor(OUT[outcome], OUT), reference = factor(REFS[reference], REFS))
-lb <- CR |> filter(level == "cortex", map == MAPV, outcome %in% names(OUT)) |>
-  mutate(outcome = factor(OUT[outcome], OUT), reference = factor(REFS[reference], REFS),
-         sig = p_spin < 0.05 & p_perm < 0.05,
-         txt = sprintf("rho = %.2f\np_spin %.3f, p_perm %.3f", rho, p_spin, p_perm))
-stopifnot(nrow(lb) == length(OUT) * length(REFS))
-sb <- sb |> left_join(lb |> select(outcome, reference, sig), by = c("outcome", "reference"))
-pb <- ggplot(sb, aes(x, r, alpha = sig)) +
-  geom_hline(yintercept = 0, colour = "grey75", linewidth = 0.3) +
-  geom_point(size = 1.9, colour = "grey15", stroke = 0) +
-  geom_smooth(data = \(z) filter(z, sig), method = "lm", formula = y ~ x, se = FALSE, colour = "grey10", linewidth = 0.5) +
-  geom_smooth(data = \(z) filter(z, !sig), method = "lm", formula = y ~ x, se = FALSE, colour = alpha("grey10", FADE), linewidth = 0.5) +
-  geom_text(data = lb, aes(-Inf, Inf, label = txt), hjust = -0.05, vjust = 1.15, size = GT, fontface = "bold", lineheight = 0.9) +
-  scale_alpha_manual(values = c(`TRUE` = 1, `FALSE` = FADE), guide = "none") +
-  scale_y_continuous(expand = expansion(mult = c(0.05, 0.38))) +
-  facet_grid(outcome ~ reference, scales = "free", switch = "y") +
-  labs(x = "reference map, cortex mean", y = "partial r with thinning (symptoms at 15\u201317 | baseline; PRS)",
-       title = "b  22 cortices: each association map against the three reference maps (faded = not both p < 0.05)") +
-  base_theme + theme(strip.placement = "outside", panel.spacing = unit(8, "pt"), plot.title.position = "plot",
-                     axis.title.y = element_text(margin = margin(r = -2)))
+# ------------------------------------------------ scatters vs reference -------
+scat <- function(os, title, ylab) {
+  sb <- M |> filter(map == MAPV, outcome %in% os) |> select(outcome, cortex_id, r) |>
+    inner_join(RC |> pivot_longer(-cortex_id, names_to = "reference", values_to = "x"), by = "cortex_id",
+               relationship = "many-to-many") |>
+    mutate(outcome = factor(OUT[outcome], OUT[os]), reference = factor(REFS[reference], REFS))
+  lb <- CR |> filter(level == "cortex", map == MAPV, outcome %in% os) |>
+    mutate(outcome = factor(OUT[outcome], OUT[os]), reference = factor(REFS[reference], REFS),
+           sig = p_spin < 0.05 & p_perm < 0.05,
+           txt = sprintf("rho = %.2f\np_spin %.3f, p_perm %.3f", rho, p_spin, p_perm))
+  stopifnot(nrow(lb) == length(os) * length(REFS))
+  sb <- sb |> left_join(lb |> select(outcome, reference, sig), by = c("outcome", "reference"))
+  ggplot(sb, aes(x, r, alpha = sig)) +
+    geom_hline(yintercept = 0, colour = "grey75", linewidth = 0.3) +
+    geom_point(size = 1.7, colour = "grey15", stroke = 0) +
+    geom_smooth(data = \(z) filter(z, sig), method = "lm", formula = y ~ x, se = FALSE, colour = "grey10", linewidth = 0.5) +
+    geom_smooth(data = \(z) filter(z, !sig), method = "lm", formula = y ~ x, se = FALSE, colour = alpha("grey10", FADE), linewidth = 0.5) +
+    geom_text(data = lb, aes(-Inf, Inf, label = txt), hjust = -0.05, vjust = 1.15, size = GT - 0.2, fontface = "bold", lineheight = 0.9) +
+    scale_alpha_manual(values = c(`TRUE` = 1, `FALSE` = FADE), guide = "none") +
+    scale_y_continuous(expand = expansion(mult = c(0.05, 0.42))) +
+    scale_x_continuous(breaks = scales::pretty_breaks(3)) +
+    facet_grid(outcome ~ reference, scales = "free", switch = "y") +
+    labs(x = "reference map, cortex mean", y = ylab, title = title) +
+    base_theme + theme(strip.placement = "outside", panel.spacing = unit(7, "pt"), plot.title.position = "plot")
+}
 
-# ---------------------------------------- c: parcel vs cortex, all variants ----
-cc <- CR |> filter(outcome %in% names(OUT)) |>
-  mutate(outcome = factor(OUT[outcome], OUT), reference = factor(sub("\n.*", "", REFS[reference]), sub("\n.*", "", REFS)),
-         map = factor(MLAB[map], rev(MLAB)), level = factor(level, c("parcel", "cortex"),
-                                                             c("179 parcels", "22 cortices")),
-         sig = p_spin < 0.05 & p_perm < 0.05)
-pc <- ggplot(cc, aes(rho, map, colour = level, shape = sig)) +
-  geom_vline(xintercept = 0, colour = "grey70", linewidth = 0.3) +
-  geom_line(aes(group = map), colour = "grey75", linewidth = 0.4) +
-  geom_point(size = 2.3, stroke = 0.8) +
-  scale_shape_manual(values = c(`TRUE` = 16, `FALSE` = 1), labels = c(`TRUE` = "p_spin and p_perm < 0.05", `FALSE` = "n.s."), name = NULL) +
-  scale_colour_manual(values = c("179 parcels" = "grey55", "22 cortices" = "#b2182b"), name = NULL) +
-  facet_grid(outcome ~ reference) +
-  labs(x = "Spearman \u03c1 of the association map with the reference map", y = NULL,
-       title = "c  Does averaging into 22 cortices sharpen the pattern? (all four model variants)") +
-  base_theme + theme(legend.position = "bottom", panel.spacing = unit(8, "pt"),
-                     panel.grid.major.x = element_line(colour = "grey93", linewidth = 0.25))
+# ---------------------------------------- parcel vs cortex, all variants ------
+dumb <- function(os, title) {
+  cc <- CR |> filter(outcome %in% os) |>
+    mutate(outcome = factor(OUT[outcome], OUT[os]), reference = factor(sub("\n.*", "", REFS[reference]), sub("\n.*", "", REFS)),
+           map = factor(MLAB[map], rev(MLAB)), level = factor(level, c("parcel", "cortex"), c("179 parcels", "22 cortices")),
+           sig = p_spin < 0.05 & p_perm < 0.05)
+  ggplot(cc, aes(rho, map, colour = level, shape = sig)) +
+    geom_vline(xintercept = 0, colour = "grey70", linewidth = 0.3) +
+    geom_line(aes(group = map), colour = "grey75", linewidth = 0.4) +
+    geom_point(size = 2.1, stroke = 0.8) +
+    scale_shape_manual(values = c(`TRUE` = 16, `FALSE` = 1), labels = c(`TRUE` = "p_spin and p_perm < 0.05", `FALSE` = "n.s."), name = NULL, drop = FALSE) +
+    scale_colour_manual(values = c("179 parcels" = "grey55", "22 cortices" = "#b2182b"), name = NULL) +
+    scale_x_continuous(limits = c(-0.6, 0.6), breaks = c(-0.5, 0, 0.5)) +
+    facet_grid(outcome ~ reference) +
+    labs(x = "Spearman \u03c1 with the reference map", y = NULL, title = title) +
+    base_theme + theme(legend.position = "bottom", panel.spacing = unit(7, "pt"), plot.title.position = "plot",
+                       panel.grid.major.x = element_line(colour = "grey93", linewidth = 0.25))
+}
 
-# -------------------------------------------------------------- assemble ------
-g <- function(o, lev, ref, m = MAPV) CR[CR$outcome == o & CR$level == lev & CR$reference == ref & CR$map == m, ]
+pa  <- (plot_spacer() | brow(ar, "a  Reference maps, averaged into the 22 Glasser cortices") | plot_spacer()) + plot_layout(widths = c(0.5, 3, 0.5))
+pbL <- brow(am[SYM], sprintf("b  Thinning vs later symptoms (%s)", MLAB[[MAPV]]))
+pbR <- brow(am[PRS], sprintf("c  Thinning vs polygenic scores (%s)", MLAB[[MAPV]]))
+pdL <- scat(SYM, "d  Symptom maps vs the reference maps (22 cortices)", "partial r: symptoms at 15\u201317 | baseline")
+pdR <- scat(PRS, "e  PRS maps vs the reference maps (22 cortices)", "partial r: SBayesRC score, pooled arm")
+pfL <- dumb(SYM, "f  Symptoms: 179 parcels vs 22 cortices, all four models")
+pfR <- dumb(PRS, "g  PRS: 179 parcels vs 22 cortices, all four models")
+colL <- (hdr("Symptoms at 15\u201317 given baseline (CBCL)") / pbL / pdL / pfL) + plot_layout(heights = c(0.06, 0.42, 1, 0.95))
+colR <- (hdr("SCZ 2025 and MDD polygenic scores (SBayesRC, pooled arm)") / pbR / pdR / pfR) + plot_layout(heights = c(0.06, 0.42, 1, 0.95))
+
 hit <- CR |> filter(p_spin < 0.05, p_perm < 0.05) |>
   mutate(txt = sprintf("%s %s vs %s at %s (\u03c1 = %.2f)", OUT[outcome], MLAB[map], reference,
                        ifelse(level == "cortex", "22 cortices", "179 parcels"), rho))
@@ -129,10 +142,11 @@ sub_txt <- paste0(
           sum(sh$sym), nrow(CR) / 2, min(hit$rho[hit$sym]), max(hit$rho[hit$sym])),
   sprintf("PRS %d of %d: %s.", sum(!hit$sym), nrow(CR) / 2, paste(hit$txt[!hit$sym], collapse = "; ")))
 
-fig <- (pa / pb / pc) + plot_layout(heights = c(0.42, 1.5, 1.35)) +
-  plot_annotation(title = "Regional thinning linked to later symptoms follows normative thinning; thinning linked to SCZ / MDD polygenic scores does not clearly follow dCT, PLS2 or AHBA C3",
+fig <- (wrap_elements(full = pa) / ((colL | colR) + plot_layout(guides = "collect"))) + plot_layout(heights = c(0.18, 1)) &
+  theme(legend.position = "bottom")
+fig <- fig + plot_annotation(title = "Regional thinning linked to later symptoms follows normative thinning; thinning linked to SCZ / MDD polygenic scores does not clearly follow dCT, PLS2 or AHBA C3",
                   subtitle = sub_txt,
                   theme = theme(plot.title = element_text(size = BASE + 2, face = "bold"),
                                 plot.subtitle = element_text(size = BASE - 1, colour = "grey25", lineheight = 1.15)))
-ggsave(file.path(ROOT, "figures", "fig_assoc_cortices_combined.png"), fig, width = 15, height = 15, dpi = 300, bg = "white")
+ggsave(file.path(ROOT, "figures", "fig_assoc_cortices_combined.png"), fig, width = 15, height = 14, dpi = 300, bg = "white")
 cat("wrote fig_assoc_cortices_combined.png\n")
