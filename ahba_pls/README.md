@@ -1113,6 +1113,18 @@ AHBA C3 rather than the normative thinning map. Changes from `fig5m`:
    This contrasts with the split by **normative thinning rate** (slow − fast +0.095, p < .001 for total problems):
    the symptom link follows where cortex normally thins slowly, which C3 captures only partly (ρ = -0.33).
 
+**Revision (top / bottom 20%).** At the user's request the slide now has larger text (BASE 9 pt), panel c
+reordered into its two clusters (CT / PLS1 / C1 = static; dCT / PLS2 / C3 = thinning), no cell-class panel,
+MAGMA under the matrix (d), and one compound panel e built on the **bottom 20% / middle 60% / top 20%** of the C3
+region score (`results/c3_q20.csv`, 28 / 81 / 28 parcels; profile `results/c3_q20_profile.tsv`; symptom models
+`results/gradient_scores_c3q20.tsv`).
+- The bottom 20% thins at 15.6 µm/yr against 22.5 for the top 20% (31% slower), with
+  p_spin = 0.006 for the difference (the C3 map is rotated and its extremes re-selected on
+  every rotation, 5,000 spins).
+- Symptoms are still not specific to either end. p-factor: bottom +0.022, p = 0.02, top
+  +0.022, p = 0.023; jointly bottom − top +0.006, p = 0.8. Total problems: bottom
+  +0.015, p = 0.098, top +0.014, p = 0.12; jointly +0.007, p = 0.75.
+
 ## Reproducing
 
 Analysis (python, env `ahba-pls`): `code/01_*` → `code/22_*` in order. `11_` is the parcellation

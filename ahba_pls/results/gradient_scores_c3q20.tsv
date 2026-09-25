@@ -1,0 +1,82 @@
+outcome	spec	term	beta	se	p	y_sd_beta	n
+totprob	low alone	C3-low	0.016485	0.0099523	0.097636	0.015372	8187
+totprob	mid alone	C3-mid	0.011535	0.010157	0.2561	0.010756	8187
+totprob	high alone	C3-high	0.015494	0.010085	0.12446	0.014448	8187
+totprob	low + high	C3-low	0.011193	0.01326	0.39863	0.010437	8187
+totprob	low + high	C3-high	0.00803	0.013441	0.55022	0.0074877	8187
+totprob	low + high	low - high	0.0031628	0.024331	0.89658	0.0029492	8187
+totprob	low + high | CT, QC	C3-low	0.0083684	0.013453	0.5339	0.0078033	8187
+totprob	low + high | CT, QC	C3-high	0.00045486	0.015517	0.97661	0.00042414	8187
+totprob	low + high | CT, QC	low - high	0.0079136	0.024944	0.75105	0.0073791	8187
+internal	low alone	C3-low	0.017846	0.0088277	0.043219	0.019947	8189
+internal	mid alone	C3-mid	0.016011	0.0090916	0.078233	0.017896	8189
+internal	high alone	C3-high	0.019655	0.0089245	0.027643	0.021969	8189
+internal	low + high	C3-low	0.0087474	0.011538	0.44838	0.0097774	8189
+internal	low + high	C3-high	0.013814	0.011665	0.2363	0.015441	8189
+internal	low + high	low - high	-0.0050671	0.021037	0.80966	-0.0056638	8189
+internal	low + high | CT, QC	C3-low	0.0064157	0.011718	0.58404	0.0071713	8189
+internal	low + high | CT, QC	C3-high	0.0065298	0.013482	0.62816	0.0072987	8189
+internal	low + high | CT, QC	low - high	-0.00011406	0.021576	0.99578	-0.00012749	8189
+external	low alone	C3-low	0.014927	0.0085237	0.079913	0.01712	8185
+external	mid alone	C3-mid	0.01034	0.0085403	0.22598	0.01186	8185
+external	high alone	C3-high	0.014286	0.0084357	0.090366	0.016385	8185
+external	low + high	C3-low	0.0098344	0.011357	0.38654	0.01128	8185
+external	low + high	C3-high	0.0077243	0.011243	0.49207	0.0088595	8185
+external	low + high	low - high	0.0021101	0.020594	0.91839	0.0024202	8185
+external	low + high | CT, QC	C3-low	0.012423	0.011487	0.27947	0.014249	8185
+external	low + high | CT, QC	C3-high	0.014966	0.01317	0.25581	0.017166	8185
+external	low + high | CT, QC	low - high	-0.0025429	0.021166	0.90437	-0.0029166	8185
+depress	low alone	C3-low	0.017278	0.0074263	0.019983	0.024464	8181
+depress	mid alone	C3-mid	0.020599	0.007644	0.0070433	0.029165	8181
+depress	high alone	C3-high	0.019066	0.0077559	0.013961	0.026995	8181
+depress	low + high	C3-low	0.0084082	0.0097269	0.38736	0.011905	8181
+depress	low + high	C3-high	0.013463	0.010167	0.18544	0.019061	8181
+depress	low + high	low - high	-0.0050548	0.018052	0.77947	-0.0071568	8181
+depress	low + high | CT, QC	C3-low	0.009515	0.0099095	0.33696	0.013472	8181
+depress	low + high | CT, QC	C3-high	0.016987	0.011708	0.1468	0.024052	8181
+depress	low + high | CT, QC	low - high	-0.0074725	0.018502	0.6863	-0.01058	8181
+anxdisord	low alone	C3-low	0.015165	0.0065901	0.021381	0.023358	8185
+anxdisord	mid alone	C3-mid	0.014462	0.0068173	0.033886	0.022276	8185
+anxdisord	high alone	C3-high	0.01529	0.0067144	0.022777	0.02355	8185
+anxdisord	low + high	C3-low	0.0091122	0.0086999	0.29492	0.014035	8185
+anxdisord	low + high	C3-high	0.0092035	0.0088665	0.29926	0.014176	8185
+anxdisord	low + high	low - high	-9.1371e-05	0.015971	0.99544	-0.00014073	8185
+anxdisord	low + high | CT, QC	C3-low	0.0054277	0.0087825	0.53657	0.0083598	8185
+anxdisord	low + high | CT, QC	C3-high	-0.0017577	0.010238	0.86369	-0.0027072	8185
+anxdisord	low + high | CT, QC	low - high	0.0071853	0.016409	0.66147	0.011067	8185
+anxdep	low alone	C3-low	0.013147	0.0072735	0.070689	0.018162	8184
+anxdep	mid alone	C3-mid	0.012947	0.0074415	0.081897	0.017886	8184
+anxdep	high alone	C3-high	0.013517	0.0072937	0.063855	0.018673	8184
+anxdep	low + high	C3-low	0.0075801	0.00961	0.43025	0.010472	8184
+anxdep	low + high	C3-high	0.0084566	0.0096361	0.38017	0.011683	8184
+anxdep	low + high	low - high	-0.00087648	0.0175	0.96006	-0.0012109	8184
+anxdep	low + high | CT, QC	C3-low	0.002617	0.0097224	0.78779	0.0036154	8184
+anxdep	low + high | CT, QC	C3-high	-0.0048635	0.011064	0.66024	-0.0067189	8184
+anxdep	low + high | CT, QC	low - high	0.0074805	0.017906	0.67611	0.010334	8184
+withdep	low alone	C3-low	0.017067	0.0069775	0.014444	0.02585	8189
+withdep	mid alone	C3-mid	0.020568	0.0071598	0.0040704	0.031152	8189
+withdep	high alone	C3-high	0.020779	0.007175	0.0037788	0.031473	8189
+withdep	low + high	C3-low	0.0060334	0.009206	0.51223	0.0091383	8189
+withdep	low + high	C3-high	0.016753	0.0094693	0.076853	0.025375	8189
+withdep	low + high	low - high	-0.01072	0.016976	0.52773	-0.016237	8189
+withdep	low + high | CT, QC	C3-low	0.0064822	0.0093626	0.48871	0.0098182	8189
+withdep	low + high | CT, QC	C3-high	0.015976	0.010973	0.1454	0.024198	8189
+withdep	low + high | CT, QC	low - high	-0.0094937	0.017414	0.58563	-0.01438	8189
+rulebreak	low alone	C3-low	0.017222	0.0067594	0.010838	0.027521	8182
+rulebreak	mid alone	C3-mid	0.017351	0.0067416	0.010062	0.027727	8182
+rulebreak	high alone	C3-high	0.016776	0.0065698	0.010666	0.026808	8182
+rulebreak	low + high	C3-low	0.010999	0.0088451	0.21369	0.017576	8182
+rulebreak	low + high	C3-high	0.0094413	0.0085869	0.27155	0.015087	8182
+rulebreak	low + high	low - high	0.0015575	0.015809	0.92152	0.002489	8182
+rulebreak	low + high | CT, QC	C3-low	0.01527	0.0089825	0.089131	0.024402	8182
+rulebreak	low + high | CT, QC	C3-high	0.021923	0.010054	0.029218	0.035034	8182
+rulebreak	low + high | CT, QC	low - high	-0.0066531	0.016214	0.68156	-0.010632	8182
+pfactor	low alone	C3-low	0.049277	0.02111	0.019583	0.02224	8162
+pfactor	mid alone	C3-mid	0.040135	0.021657	0.06385	0.018114	8162
+pfactor	high alone	C3-high	0.048811	0.021511	0.023263	0.02203	8162
+pfactor	low + high	C3-low	0.030553	0.027635	0.2689	0.01379	8162
+pfactor	low + high	C3-high	0.028421	0.028188	0.31333	0.012828	8162
+pfactor	low + high	low - high	0.0021317	0.050637	0.96642	0.00096212	8162
+pfactor	low + high | CT, QC	C3-low	0.024953	0.028039	0.3735	0.011262	8162
+pfactor	low + high | CT, QC	C3-high	0.011905	0.032875	0.71725	0.0053733	8162
+pfactor	low + high | CT, QC	low - high	0.013048	0.052044	0.80204	0.0058889	8162
