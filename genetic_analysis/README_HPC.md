@@ -421,3 +421,108 @@ commit message, not in this file. A result that changes a conclusion in §2.1
 goes at the top of that section. Record dead ends in §3 with their diagnosis
 in one line: several past defects produced plausible numbers rather than
 errors, and the diagnosis is what stops the next agent repeating them.
+
+### 2026-09-25 — Step 15: new discovery GWAS through the PRS layer (bipolar, ADHD, intelligence)
+
+**What and why.** `origin/main` at b64f334 added MAGMA gene analyses for five
+traits (ahba_pls `28_trait_gene_analyses.py`: BIP, ADHD, ALZ-Bellenguez, EA2,
+intelligence) and pre-wired Figure 1f for bipolar and ADHD PRS
+(`fig1_prep_prs.py` globs `results_70tab_hcp/prs_*/table_order_of_operations_*.tsv`
+for trait arms starting `BIP` or `ADHD`). Of those five, three are traits new
+to the PRS panel and are scored here: **bipolar** (PGC bip2024, O'Connell 2025),
+**ADHD** (Demontis 2023), **intelligence** (Savage & Jansen 2018). EA2 (Okbay
+2016) is already the panel's EA arm. **Bellenguez 2022 Alzheimer's is not
+scored**: the panel already carries two ALZ releases (Wightman, Kunkle) each
+with and without APOE; a third is a sensitivity analysis, not a new trait
+(its file, `magma/gwas/GCST90027158_buildGRCh38.tsv`, is on disk). Height,
+dropped from the MAGMA set, is not added.
+
+**Files.** Downloaded 2026-09-25 to `~/rds/hpc-work/magma/gwas/{BIP_2024,
+ADHD_2023,INT_2018}/` with READMEs; bip2024 cksums and the Savage md5 verified.
+The ADHD and bipolar data-use terms prohibit reposting, so nothing per-SNP from
+them enters the repo (rule 16 already covers it).
+
+**Ancestry design (rule 4).** bip2024 ships a European and a multi-ancestry
+(EUR+AFR+EAS+LAT) meta-analysis, so bipolar gets the SCZ/MDD two-arm design:
+`BIP_eur` → 4,308 EUR anchor (raw score); `BIP_pooled` → 8,596 pooled, score
+standardised within ancestry cluster, with per-cluster fits and the PRS ×
+stratum LRT (`R/09_prs_ancestry_strata.R`). ADHD and intelligence are European
+→ EUR anchor. PRS-CSx is not run: the bip2024 AFR/EAS arms are far smaller
+than the SCZ 2025 ones, whose AFR/EAS weights already predicted nothing
+(step 9).
+
+**Normalisation** (`step15_newgwas_normalise.py` → `work/scores_newgwas/gwas/`):
+b = ln(OR) (daner) or stdBeta (Savage); freq = discovery A1 frequency (EUR HRC
+for both bipolar files, consistent with the EUR LD every Bayesian method uses);
+N = effective N — bipolar 2 × Neff_half (PGC convention); intelligence
+N_analyzed; **ADHD has only Nca/Nco**, and the pooled-ratio 4/(1/Nca + 1/Nco)
+overstates Neff when cohorts differ in case fraction, so it is rescaled to the
+summary-statistic estimate Neff ≈ 4 / (2p(1−p)·SE²) (median over common,
+well-imputed SNPs). The same estimator is reported for bipolar against its own
+Neff_half as the check on the method (`newgwas_summary.tsv`).
+
+**Everything downstream is step 6/9 unchanged**: the four methods at
+`prs_final.sbatch` settings; `prs_assoc.R`, `06_prs_family.R`, the strata script
+via `step9_scz2025_assoc.sbatch` / `step9_scz2025_assoc_1lmm.sbatch` (now
+parameterised by `SCZ25_ROOT`, `PRS_TAG`, `ARM_GLOB`; defaults are step 9);
+C+T min-p permutation via `step6_minp_permutation.run()`. Outputs per atlas:
+`prs_newgwas/` (per-region phenotypes) and `prs_newgwas_1lmm/` (single LMM);
+`step15_newgwas_collect.py` writes `table_newgwas_{main,family,strata}.tsv` and
+`table_order_of_operations_newgwas.tsv` (the column set Figure 1f reads), then
+runs `fig1_prep_prs.py`. Chain: `run_newgwas.sh` → jobs 36317005–16.
+
+**ADHD effective N, checked against the paper.** The first normalisation
+(36317005) used the raw summary-statistic estimator for ADHD (90,414). The same
+estimator on bipolar came out 13 % below bipolar's own 2 × Neff_half
+(142,785 vs 163,367) while reproducing intelligence's N exactly, so for PGC
+case-control SEs it runs low; the ADHD estimate is now calibrated by that
+bipolar ratio (1.144) → **103,447**. Demontis et al. 2023 report neff_half =
+51,568, i.e. **Neff = 103,136**: the calibrated value is 0.3 % high. The
+downstream chain was cancelled before any scoring finished and resubmitted on
+the calibrated file (36317329–37). Recorded because the uncorrected estimator
+would have under-weighted ADHD by 13 % in PRS-CS and the SBayes pair.
+
+**Step 15 COMPLETE** (36317329–37: 100 scoring cells, association on both
+atlases × both constructions, min-p, collect; zero failures). PRS-CS kept
+1.04–1.08 M SNPs per arm; C+T 8 thresholds each. Tables per root:
+`prs_newgwas/table_newgwas_{main,family,strata}.tsv`,
+`table_minp_permutation.tsv`, `table_order_of_operations_newgwas.tsv`;
+`fig1_inputs/hcp70_prs_key_arms.tsv` rebuilt (88 rows, +24 BIP/ADHD).
+
+`global_slope`, matched cells, p_adj per-region → single LMM (count < 0.05 of
+4 methods):
+
+| arm | DK | HCP | direction |
+|:--|:--|:--|:--|
+| BIP_eur | 1/4 → 0/4 (C+T only: 0.032 → 0.28) | 1/4 → 0/4 (C+T 0.0067 → 0.105) | − |
+| BIP_pooled (zanc) | 0/4 → 0/4 | 0/4 → 0/4 | − (β ≤ 0.02) |
+| ADHD | 0/4 → 0/4 | 0/4 → 0/4 | mixed |
+| INT | 0/4 → 0/4 | 0/4 → 0/4 | mixed |
+
+`baseline_thickness`: null except ADHD on HCP (SBayesR −0.030, p 0.050 /
+0.047; SBayesRC −0.032, p 0.037 / 0.033; DK the same sign at p 0.16–0.22).
+
+Readings. (1) **The one bipolar signal is C+T-specific.** BIP_eur C+T at the
+middle thresholds (p < 0.01–0.1, 20–90 k SNPs) gives β −0.035 to −0.050 on the
+slope, survives the family-block min-p permutation (p_perm **0.014 DK, 0.0035
+HCP**), and is the same size within families (β_W −0.037 ± 0.05, p_diff 0.8–0.9;
+uninformative, as always). But PRS-CS, SBayesR and SBayesRC are null (β −0.011
+to −0.017, p 0.26–0.46), the multi-ancestry arm is null under every method
+(pooled-FE C+T −0.016, p 0.11–0.12; PRS × stratum p ≥ 0.33), and the single-LMM
+slope attenuates it below significance. For SCZ every method agreed; here they
+do not, so this is **not** a robust bipolar → thinning association — report it
+as a method-sensitive C+T result. (2) **ADHD and intelligence show nothing on
+the thinning rate** under any method, construction or atlas. ADHD's only
+nominal cells are negative on baseline thickness on HCP (Bayesian methods,
+p 0.03–0.05), not on DK. (3) Intelligence is the natural companion to EA as a
+cognitive control; EA's slope association (positive, 3/4 on the single LMM)
+is not mirrored by intelligence, which argues against a generic cognition
+channel for EA's signal.
+
+**Figure 1** reads the rebuilt `hcp70_prs_key_arms.tsv`; `fig1.R` needs the
+gitignored per-child inputs (`hcp70_scans.csv`, `hcp70_child_traits.csv`) and
+the `patchwork` package, neither present on CSD3, so it is rendered where
+those live:
+`python genetic_analysis/fig1_prep_prs.py && LC_ALL=en_US.UTF-8 Rscript genetic_analysis/fig1.R`.
+Intelligence is in the tables but not in Figure 1f (its prep script selects
+BIP/ADHD only).

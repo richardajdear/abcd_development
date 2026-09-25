@@ -25,7 +25,9 @@ REPO=/home/rajd2/rds/hpc-work/abcd_development
 source "$REPO/genetic_analysis/config.sh"
 echo "PARC=$PARC  PHENO_DIR=$PHENO_DIR  OUT_V2=$OUT_V2"
 ROOT="${SCZ25_ROOT:-$ABCD_HPC_ROOT/scores_scz2025}"
-FINAL="$OUT_V2/prs_scz2025"
+# Reused by step 15 (new GWAS traits): PRS_TAG names the output dir, ARM_GLOB the
+# score-directory pattern; the defaults are step 9 exactly.
+FINAL="$OUT_V2/${PRS_TAG:-prs_scz2025}"; ARM_GLOB="${ARM_GLOB:-SCZ25_*}"
 ASSOC_R="$REPO/tools/prs_assoc.R"
 FAM_R="$REPO/genetic_analysis/R/06_prs_family.R"
 STRATA_R="$REPO/genetic_analysis/R/09_prs_ancestry_strata.R"
@@ -36,7 +38,7 @@ require_paths PHENO COVQ COVC MANIF EUR_IDS RSCRIPT ASSOC_R FAM_R STRATA_R STRAT
 ensure_dirs "$FINAL"
 
 n_dirs=0
-for d in "$ROOT"/{CT,PRSCS,SBayesR,SBayesRC,PRSCSX}/SCZ25_*; do
+for d in "$ROOT"/{CT,PRSCS,SBayesR,SBayesRC,PRSCSX}/$ARM_GLOB; do
   [[ -d "$d" ]] || continue
   METH="$(basename "$(dirname "$d")")"; TRAIT="$(basename "$d")"
   n_prof=$(ls "$d"/score_*.profile 2>/dev/null | wc -l); (( n_prof > 0 )) || continue

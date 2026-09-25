@@ -25,11 +25,12 @@ R=/home/rajd2/rds/hpc-work/envs/genesis/bin/Rscript
 PY="$REPO/legacy/hpc/work/envs/abcd/bin/python"
 SUF=""; [[ "${SLURM_ARRAY_TASK_ID:-1}" == 2 ]] && SUF="_hcp"
 ROOT="$REPO/genetic_analysis/work/results_70tab$SUF"
-PH="$ROOT/prs_final_1lmm/pheno"; OUT="$ROOT/prs_scz2025_1lmm"; mkdir -p "$OUT"
-SC="$REPO/genetic_analysis/work/scores_scz2025"; EUR="$REPO/legacy/hpc/work/results/ancestry/eur_anchor.keep"
+PH="$ROOT/prs_final_1lmm/pheno"; OUT="$ROOT/${PRS_TAG:-prs_scz2025}_1lmm"; mkdir -p "$OUT"
+ARM_GLOB="${ARM_GLOB:-SCZ25_*}"   # step 15 reuse; defaults are step 9
+SC="${SCZ25_ROOT:-$REPO/genetic_analysis/work/scores_scz2025}"; EUR="$REPO/legacy/hpc/work/results/ancestry/eur_anchor.keep"
 [[ -s "$PH/phenotypes_gcta.txt" ]] || { echo "FATAL: $PH/phenotypes_gcta.txt missing (run the order-of-operations fit first)" >&2; exit 2; }
 n=0
-for d in "$SC"/{CT,PRSCS,SBayesR,SBayesRC,PRSCSX}/SCZ25_*; do
+for d in "$SC"/{CT,PRSCS,SBayesR,SBayesRC,PRSCSX}/$ARM_GLOB; do
   [[ -d "$d" ]] || continue; ls "$d"/score_*.profile >/dev/null 2>&1 || continue
   M="$(basename "$(dirname "$d")")"; T="$(basename "$d")"
   for z in "" _zanc; do
@@ -41,4 +42,4 @@ for d in "$SC"/{CT,PRSCS,SBayesR,SBayesRC,PRSCSX}/SCZ25_*; do
   done
 done
 echo "=== $n association tables in $OUT  $(date +%T)"
-"$PY" genetic_analysis/step9_scz2025_orderops.py
+[[ -z "${PRS_TAG:-}" ]] && "$PY" genetic_analysis/step9_scz2025_orderops.py || true
