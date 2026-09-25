@@ -1151,6 +1151,41 @@ Results (model with global thinning and baseline CT; figure panels a–b):
 noise attenuating ρ, but it adds no evidence. PLS2 and C3 remain null at both resolutions, so coarsening does not
 reveal a hidden PLS2/C3 pattern in the symptom maps.
 
+### PRS maps of adolescent thinning on the 22 cortices (exploratory) — `code/31_prs_assoc_cortices.py` → `code/fig10_prs_assoc_cortices.R`
+
+Regional maps of the SCZ and MDD polygenic-score association with thinning rate, for PRS-CS and SBayesRC, in the
+Figure 1f arms: SCZ 2025 pooled (META, `_zanc`) and EUR (raw), and MDD pooled (`_zanc`) and EUR (raw). Per-child
+scores were copied from CSD3 into gitignored paths: `genetic_analysis/work/scores_scz2025/` for SCZ 2025, and
+`legacy/hpc_v2/work/results_v2/prs_final/` for MDD, the tree the Figure 1 cluster jobs read. The EUR subset comes
+from `legacy/hpc/work/results/ancestry/eur_anchor.keep` (n = 4,308 of 8,596).
+
+Per region (22 cortices and 179 parcels): thinning ~ score + sex + baseline age + PC1–10 [+ global thinning]
+[+ that region's baseline CT]. This is the fixed part of `tools/prs_assoc.R`, fitted by OLS without the family
+random effect, which affects only per-region SEs. The same model on `global_slope_1lmm` reproduces every cluster
+β within 0.002 (`results/prs_assoc_global_check.tsv`). The nulls are as in script 30: a parcel-level spin
+re-averaged into cortices, plus a permutation of the residualised score.
+
+Results (`results/prs_assoc_cortex_corr.tsv`): 7 of 192 tests pass both nulls.
+  - PRSCS_MDD_pooled relative, cortex, vs PLS2: ρ = -0.53 (p_spin 0.018, p_perm 0.029)
+  - PRSCS_MDD_eur absolute_ct, parcel, vs dCT: ρ = -0.33 (p_spin 0.010, p_perm 0.006)
+  - PRSCS_MDD_eur relative_ct, parcel, vs dCT: ρ = -0.31 (p_spin 0.016, p_perm 0.015)
+  - SBayesRC_SCZ25_META absolute_ct, cortex, vs PLS2: ρ = +0.51 (p_spin 0.032, p_perm 0.040)
+  - SBayesRC_SCZ25_META absolute_ct, cortex, vs C3: ρ = +0.56 (p_spin 0.017, p_perm 0.034)
+  - SBayesRC_MDD_eur absolute_ct, parcel, vs dCT: ρ = -0.39 (p_spin 0.003, p_perm 0.003)
+  - SBayesRC_MDD_eur relative_ct, parcel, vs dCT: ρ = -0.36 (p_spin 0.009, p_perm 0.004)
+
+**Reading.**
+1. **No robust PLS2 or AHBA C3 alignment.** The two hits each appear under one method only: MDD pooled PRS-CS vs
+   PLS2, and SCZ 2025 pooled SBayesRC | CT vs PLS2/C3. For SCZ the direction is consistently positive with C3,
+   i.e. a higher score goes with faster thinning in C3-high cortex; the unadjusted ρ ranges from +0.18 to +0.35
+   across methods and arms at 22 cortices, but only one cell survives both nulls.
+2. **MDD (EUR) replicates across methods**, but only with baseline CT adjusted and only at parcel level: PRS-CS
+   ρ = -0.33 (p_spin 0.010, p_perm 0.006); SBayesRC ρ = -0.39 (p_spin 0.003, p_perm 0.003).
+   Negative ρ with dCT (mm/yr, negative) means a higher MDD score accelerates thinning where cortex normally thins
+   fastest. That is the opposite spatial sense to the symptom maps, which aligned positively with dCT.
+3. With 192 correlated tests, 7 passes is about the number expected by chance (≈ 9.6 at α = 0.05). Only the MDD
+   EUR | CT cells are supported by agreement between the two scoring methods.
+
 ## Reproducing
 
 Analysis (python, env `ahba-pls`): `code/01_*` → `code/22_*` in order. `11_` is the parcellation
