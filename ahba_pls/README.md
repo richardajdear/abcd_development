@@ -1125,6 +1125,32 @@ region score (`results/c3_q20.csv`, 28 / 81 / 28 parcels; profile `results/c3_q2
   +0.022, p = 0.023; jointly bottom − top +0.006, p = 0.8. Total problems: bottom
   +0.015, p = 0.098, top +0.014, p = 0.12; jointly +0.007, p = 0.75.
 
+### Association maps on the 22 Glasser cortices (exploratory) — `code/30_cbcl_assoc_cortices.py` → `code/fig9_cbcl_assoc_cortices.R`
+
+The user asked whether averaging the thinning–symptom association maps of script 25 into the 22 cortices of
+Glasser 2016 (`Cortex_ID` in `HCP-MMP1_UniqueRegionList.csv`, lookup `data/reference/hcp_cortices/hcp_parcel_systems.csv`)
+reduces noise, for p-factor and total problems. Each child's thinning (and baseline CT) is averaged over the
+parcels of each cortex, and the per-region model of script 25 is refitted on the 22 regions. Reference maps are
+averaged the same way: PLS2 and C3 over AHBA-covered parcels only (1–15 per cortex; primary visual has one).
+The spin null rotates the **parcel-level** reference map and re-averages it into cortices on every rotation.
+Rotating 22 cortex centroids would be far too coarse. The Freedman–Lane permutation is as in script 25. The
+parcel-level maps are recomputed in the same script: their ρ values reproduce `cbcl_assoc_map_corr.tsv`
+exactly for p-factor. Their spin p differs slightly because here the reference map, not the association map,
+is rotated.
+
+Results (model with global thinning and baseline CT; figure panels a–b):
+- **dCT:** p-factor at 179 parcels ρ = +0.32 (p_spin 0.002, p_perm 0.014); at 22 cortices ρ = +0.54 (p_spin 0.020, p_perm 0.022).
+  Total problems: ρ = +0.34 (p_spin 0.004, p_perm 0.009) and ρ = +0.54 (p_spin 0.025, p_perm 0.020).
+- **PLS2:** p-factor at 22 cortices ρ = -0.31 (p_spin 0.199, p_perm 0.254); total problems ρ = -0.22 (p_spin 0.377, p_perm 0.379).
+- **AHBA C3:** p-factor at 22 cortices ρ = -0.06 (p_spin 0.804, p_perm 0.798); total problems ρ = -0.06 (p_spin 0.850, p_perm 0.825).
+- Tests passing both nulls, across all 4 model variants: 5 of 24 at parcel level, 4 of 24 at
+  cortex level (pfactor relative vs dCT; pfactor relative_ct vs dCT; totprob relative vs dCT; totprob relative_ct vs dCT).
+
+**Reading.** Averaging into cortices makes the alignment with normative thinning *larger* (ρ ≈ 0.3 → 0.5) but not
+*more significant*: 22 regions leave far fewer degrees of freedom, so p rises. This is consistent with parcel-level
+noise attenuating ρ, but it adds no evidence. PLS2 and C3 remain null at both resolutions, so coarsening does not
+reveal a hidden PLS2/C3 pattern in the symptom maps.
+
 ## Reproducing
 
 Analysis (python, env `ahba-pls`): `code/01_*` → `code/22_*` in order. `11_` is the parcellation
