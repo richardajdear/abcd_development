@@ -16,157 +16,95 @@ not resemble that of a static measure. Almost all published brain-imaging GWAS
 use cross-sectional phenotypes, which average over exactly the variation of
 interest.
 
-## Status — 2026-09-15: the 7.0 re-run is complete, on two parcellations
+## Current state — 2026-09-28
 
-> **Genetics numbers below are dated 2026-09-15.** The current state (HCP-MMP,
-> single-LMM slope, 2025 SCZ GWAS, full control panel) is
-> [`genetic_analysis/README_HPC.md`](genetic_analysis/README_HPC.md) §2; where
-> they differ, that file wins.
+ABCD release 7.0, 8,716 children with 2–4 QC-passing scans (26,946 scans), 8,596 genotyped
+(European-ancestry arm 4,308). Primary specification: HCP-MMP parcellation, one mixed model
+on the per-scan cortical mean (`global_slope`), 2025 SCZ GWAS. Every genetics number is a
+row of [`genetic_analysis/current_results.tsv`](genetic_analysis/current_results.tsv) and is
+explained in [`genetic_analysis/README_HPC.md`](genetic_analysis/README_HPC.md) §2; where this
+summary and that file differ, that file wins. Figure 1: [`docs/figures/fig1.png`](docs/figures/fig1.png)
+(caption `docs/figures/fig1_caption.md`).
 
-**What happened.** Every result in this repo dated before 2026-09-14 was
-computed from the ABCD **6.0** tabulated tables, which sat in a directory
-labelled 7.0 (column-identical; only the six-year row count tells them apart,
-4,086 vs 7,607 thickness rows). The FreeSurfer surfaces and the genotypes were
-7.0 throughout. On 2026-09-14 the 7.0 tables were installed and every local
-analysis re-run; on 2026-09-14/15 the **cluster genetics were re-run end to
-end** — every step of [`genetic_analysis/README_HPC.md`](genetic_analysis/README_HPC.md)
-§3, on both the Desikan–Killiany (DK, 68 regions) and the HCP-MMP (Glasser, 358
-parcels) parcellations of the same children. The dated run log in that file's
-§8 (job ids, failures, diagnoses) is the authoritative record; its closing
-statement (§7 item 5) is the one-paragraph verdict.
+## Key findings
 
-**What the 7.0 tables buy** (settled specification, `ct_70_noglobal_mv2_genetic`;
-full table in [`docs/RERUN_7.0_TABULATED.md`](docs/RERUN_7.0_TABULATED.md)):
+**Phenotype**
 
-| | 6.0 tables | 7.0 tables |
-|:--|--:|--:|
-| six-year scans in the model | 3,539 | 6,510 |
-| children with ≥2 QC-passing scans | 8,192 | **8,716** |
-| … with all four scans | 1,830 | **3,005** |
-| … phenotyped and genotyped | 8,082 | **8,596** (EUR arm 4,308) |
-| median slope reliability | 0.157 | **0.211** |
-| effective N for the slope | 1,361 | **1,752** |
-| group thinning map, old vs new (Spearman) | | 0.996 |
+- **Slope reliability, not sample size, is the limit.** Median regional slope reliability is
+  0.21 at ≥ 2 visits (0.24 at ≥ 3, 0.26 at 4). The single LMM on the cortical mean is more reliable
+  and less shrunk than averaging per-parcel BLUPs, so it is the primary trait.
+- **Design rules for genetic phenotypes:** `min_visits: 2` (≥ 3 loses 25 % of children for no
+  gain), no family random effect (it removes the between-family variance relatedness explains),
+  no global covariate. Site explains 2.9 % of global-slope variance, scanner manufacturer 0.1 %.
+- **The group thinning map is transcriptionally patterned**: thinning rate vs AHBA C3
+  ρ = −0.55, p_spin = 0.002 (DK), reproduced across releases and tabulations.
 
-The map did not change; the per-child slopes did (r = 0.92 on shared children),
-and that is exactly where the re-run found its gains: subject-level precision.
+**Genetics** (`genetic_analysis/`)
 
-**Genetics on the 7.0 phenotype — what changed against the 6.0 benchmark.**
-Tables (6.0-vs-7.0 comparison, now legacy): `legacy/genetic_analysis/tables/summary_70tab_{dk,hcp}.tsv`;
-side by side in `…/results_70tab_hcp/compare/table_dk_vs_hcp.tsv`.
+- **Heritable, but no locus at this n.** GREML h² = 0.18 ± 0.05 (DK 0.21). No genome-wide hit in
+  any scan (λ_GC 0.99–1.03). LDSC h² z is ~0.4, so rg with any disorder is uninformative, not null.
+- **Higher schizophrenia polygenic risk predicts faster thinning, not thinner cortex.** β ≈ −0.03
+  to −0.04 SD/SD under C+T, PRS-CS and SBayesRC, in both arms and on both atlases, one DK cell borderline (e.g. pooled
+  SBayesRC −0.034, p = 0.001). The same scores are null for baseline thickness.
+- **It is not specific to schizophrenia.** Depression (−0.025 to −0.043), Alzheimer's with APOE
+  (−0.03 to −0.045; gone without APOE) and, in the opposite direction, educational attainment
+  (+0.03 to +0.04) have effects of the same size; autism, ADHD and intelligence are null, bipolar
+  is significant only under C+T.
+- **No robust gene-level signal.** The one enriched set (SCZ locus genes, MAGMA p = 0.005)
+  does not survive swapping the 1000G LD panel for ABCD's own (p = 0.15). AHBA C1–C3 as gene
+  properties are null. Imputed C4A expression is null (β −0.011, 95 % CI −0.039 to +0.017).
+- **The transcriptomic link is group-level only.** No individual-level genetic readout connects
+  to C3: the regional SCZ/MDD PRS maps do not resemble C3 or PLS2 (7 of 192 tests pass both
+  nulls, about chance), and see *Between-child variation* below.
 
-- **Every matched SCZ/MDD polygenic-score SE tightened**, no sign flipped.
-  **SCZ PRS → faster thinning is robust in the pooled arm under all four
-  methods** (β −0.022 to −0.035 SD/SD, p_adj 0.004–0.037; min-p permutation
-  0.0065), on **both** parcellations.
-- **MDD PRS → faster thinning crossed into significance under three of four
-  methods** in the pooled arm on DK (PRS-CS, SBayesR, SBayesRC), where 6.0 had
-  one. On HCP it is one of four.
-- **SCZ in the EUR arm attenuated to borderline on DK** (0/4 methods, p_adj
-  0.065–0.074) and is 3/4 on HCP. A one-input-at-a-time decomposition showed
-  the DK attenuation is the phenotype values themselves, not a pipeline
-  difference. Effects of 0.02–0.03 SD/SD sit either side of 0.05 depending on
-  the whole-cortex average taken; **only the atlas-invariant claims are
-  licensed**, and the marginal cells are reported side by side.
-- **SNP heritability of `global_slope` (GCTA GREML, dense imputed GRM, 6,011
-  PC-AiR-unrelated children): 0.137 → 0.166 ± 0.045** with the SE unchanged —
-  the signature of a de-attenuated phenotype. It is atlas-invariant (HCP
-  0.156). Baseline thickness 0.223 (positive control holds).
-- **No genome-wide hit on `global_slope`** in any of four scans (two atlases
-  × two arms; λ_GC 0.99–1.05 everywhere). LDSC h² z is 0.57 (DK) / 1.78
-  (HCP), far below the ≈4 needed, so **rg with SCZ/MDD is uninformative, not
-  null**. The `SCZ_locus_pool` gene-set enrichment of the thinning GWAS
-  strengthened (p 0.0074 → 0.0030 → 0.0005 on HCP) and is the most consistent
-  gene-level result. AHBA C1–C3 gene-property and the ahba_pls H3 signature
-  test are null in both directions on both atlases.
-- The controls behave as documented: ASD null, ALZ associated at ~80 % of
-  SCZ's magnitude, EA in the opposite direction.
+**Symptoms** (exploratory; `ahba_pls/` scripts 23–25, 30; Figure 1g)
 
-**HCP-MMP.** The backfill is complete (33,795 of 33,825 sessions), and the
-genetics pipeline is parcellation-agnostic: `PARC=hcp` in
-`genetic_analysis/config.local.sh` runs every step unchanged on the HCP
-export (`configs/ct_70_hcp_noglobal_mv2.yaml`, hippocampal parcel excluded
-because it is thickness 0 in ~7,800 sessions). Whole-cortex readouts agree
-across atlases; the slope PCs are atlas-specific decompositions except PC2
-(`docs/figures/pc_loadings_dk_vs_hcp.html`), and structural-covariance PCs
-are the same components by algebra. One candidate locus, chr7:35.5 Mb for
-HCP's PC3 in the EUR arm, is recorded and not led with.
+- Faster global thinning goes with more depressive symptoms by ages 15–17, given baseline
+  (CBCL depressive problems +0.030 SD/SD, p = 0.006; parent-reported MDD OR 1.11 per SD). All effects
+  are small (|β| ≤ 0.05).
+- The spatial pattern of symptom-linked thinning follows the normative thinning map (with
+  baseline CT adjusted, ρ = 0.25–0.41 for anxiety, internalising and p-factor), not PLS2 or C3.
 
-**What stands from the earlier work**, re-checked on the new tables:
+**Imaging transcriptomics** (`ahba_pls/`)
 
-- The design decisions — no global covariate, no family random effect, ≥2
-  visits, the coded QC stack — hold (§Key findings; `docs/reliability_grid.csv`,
-  `docs/h2_family_effect_contrast.csv`).
-- **Absolute thinning rate vs AHBA C3: ρ = −0.546, p_spin = 0.002**, identical
-  to before; the slope-component couplings (PC3–C2 +0.854, PC2–C1 −0.812)
-  too, and both replicate on HCP-MMP (+0.72, −0.78).
-- The imaging-transcriptomics arm (`ahba_pls/`) re-derives the NSPN-PLS2 /
-  AHBA-C3 signature from the new maps — see the dated section at the end of
-  [`ahba_pls/README.md`](ahba_pls/README.md).
+- The NSPN-PLS2 / AHBA-C3 "signature of adolescent thinning" re-derives from the ABCD maps: PLS of
+  AHBA expression on thinning rate and baseline thickness recovers a component matching both prior
+  signatures in regional scores and gene weights, with the same neuronal-up / glial-down profile.
+- Its gene weights carry SCZ and MDD GWAS signal at about half C3's effect and add nothing once C3
+  is in the model: a developmental warrant for C3, not a better gene list. The HCP-MMP version
+  carries more MDD signal than DK.
 
-**What is superseded.** All cluster genetics numbers computed before
-2026-09-14 (h², GWAS, LDSC, MAGMA, PRS) were on 6.0-vintage phenotypes and
-live under [`legacy/`](legacy/README.md). Do not quote them as current; the
-7.0 tables above carry the 6.0 value alongside every row for the comparison.
+**Between-child variation in thinning** (exploratory, 2026-09-28; `genetic_analysis/c3axis/`,
+README_HPC §8)
+
+- Children's regional thinning rates covary as a global factor (PC1, 13 % of variance) plus the
+  AHBA C1 axis (PC2; on DK it is also the T1w/T2w myelin axis) and the C2 axis (PC3). C3 appears only
+  once each child's mean is removed, as a small left-hemisphere component (5th, ρ = 0.52 with C3,
+  p_spin = 0.002; diffusion maps give the same) that is distinct from the normative dCT/PLS2 map.
+- These components add no genetic or clinical signal: SCZ and MDD scores are null on the C3, C1
+  and C2 axes (SCZ → C3 axis β −0.007 to −0.013); the SCZ effect is a uniform whole-cortex shift.
+  Puberty relates to the global factor and the C1 axis (|β| ≤ 0.08), not to C3, and no component
+  predicts CBCL beyond chance.
+- The one open C3 test is at the gene level: whether the C3-gene partition of the SCZ score
+  carries its global-slope effect (README_HPC §8.3, C3-D).
 
 ## Where to look
 
 | you want | go to |
 |:---|:---|
-| **what changed with the 7.0 tables, old vs new** | [`docs/RERUN_7.0_TABULATED.md`](docs/RERUN_7.0_TABULATED.md), `docs/vintage_comparison.csv` |
 | **the cluster genetics: current results, what has been tried, next analyses, the steps to run** | [`genetic_analysis/README_HPC.md`](genetic_analysis/README_HPC.md); every number in [`genetic_analysis/current_results.tsv`](genetic_analysis/current_results.tsv) |
-| the PRS results on one slide (4 methods × 2 parcellations, controls, all caveats) | [`docs/figures/slide_prs_methods.png`](docs/figures/slide_prs_methods.png), generator (legacy, PGC3-era) [`legacy/genetic_analysis/slide_prs_methods.py`](legacy/genetic_analysis/slide_prs_methods.py) |
-| whether the slope construction matters (mean-of-BLUPs vs one LMM on the per-scan mean) | [`docs/figures/slide_prs_orderops.png`](docs/figures/slide_prs_orderops.png), generator (legacy) [`legacy/genetic_analysis/slide_prs_orderops.py`](legacy/genetic_analysis/slide_prs_orderops.py) |
-| the findings, their caveats and the corrections (prose numbers are 6.0-vintage; tables and figures are current) | [`docs/REPORT_7.0.md`](docs/REPORT_7.0.md) |
+| Figure 1 (phenotype, PRS, symptoms) | [`docs/figures/fig1.png`](docs/figures/fig1.png), generator [`genetic_analysis/fig1.R`](genetic_analysis/fig1.R) |
+| the PRS results on one slide (methods × parcellations, controls) | [`docs/figures/slide_prs_methods_1lmm.png`](docs/figures/slide_prs_methods_1lmm.png) |
+| the imaging-transcriptomics PLS study and the symptom / PRS maps | [`ahba_pls/README.md`](ahba_pls/README.md), notebook [`ahba_pls/imaging_transcriptomics.qmd`](ahba_pls/imaging_transcriptomics.qmd) |
+| slope components, the C3 axis, puberty and CBCL checks | [`genetic_analysis/c3axis/`](genetic_analysis/c3axis/), README_HPC §8 |
+| the C4A (complement) test | [`c4_imputation/README.md`](c4_imputation/README.md) |
 | how the mixed model works and why | [`notebooks/01_longitudinal_model.qmd`](notebooks/01_longitudinal_model.qmd) |
 | spatial nulls and the map-to-gene tests | [`notebooks/02_maps_and_genes.qmd`](notebooks/02_maps_and_genes.qmd) |
 | heritability and phenotype choice | [`notebooks/04_heritability.qmd`](notebooks/04_heritability.qmd) |
-| the imaging-transcriptomics PLS study (NSPN-PLS2 / AHBA-C3 re-derivation, SCZ & MDD enrichment) | [`ahba_pls/README.md`](ahba_pls/README.md), notebook [`ahba_pls/imaging_transcriptomics.qmd`](ahba_pls/imaging_transcriptomics.qmd) |
-| the C4A (complement) test: imputed C4A expression vs the thinning rate — plan, local validation, cluster runbook | [`c4_imputation/README.md`](c4_imputation/README.md) |
+| the phenotype report (prose numbers are 6.0-vintage; tables and figures are current) | [`docs/REPORT_7.0.md`](docs/REPORT_7.0.md) |
 | HCP-MMP thickness: where it comes from, coverage, how to regenerate | [`docs/PLAN_HCP_thickness.md`](docs/PLAN_HCP_thickness.md) and §HCP-MMP below |
-| superseded pipelines and the 5.1 draft | [`legacy/README.md`](legacy/README.md), [`docs/REPORT_5.1_legacy.md`](docs/REPORT_5.1_legacy.md) |
-
-## Key findings so far
-
-**Phenotype and modelling** (7.0 tables, 2026-09-14)
-
-- **Slope reliability, not sample size, binds.** Median regional slope
-  reliability is 0.211 at ≥2 visits, 0.242 at ≥3, 0.262 at 4. Effective N is
-  1,752 at ≥2 visits — 2.1× release 5.1 at the same filter
-  (`docs/handoff_release_comparison.csv`).
-- **Use `min_visits: 2`, not 3.** The ≥3 filter discards 25 % of subjects and
-  effective N falls (1,752 → 1,504); the group map is unchanged.
-- **The family random effect must be omitted for genetic phenotypes.** It
-  centres each family at zero, so the subject-level BLUPs lose the
-  between-family variance that relatedness explains; the h² of the
-  baseline-thickness control becomes impossible while the group map is
-  untouched (`docs/h2_family_effect_contrast.csv`).
-- **The developmental map is transcriptionally patterned.** Absolute thinning
-  rate vs AHBA C3: ρ = −0.546, p_spin = 0.002, now reproduced across two
-  releases, two tabulations and a pipeline rewrite. The strongest couplings are
-  on the slope components (PC3–C2 ρ = +0.854, PC2–C1 ρ = −0.812).
-- **Site explains 2.9 % of global-slope variance, scanner manufacturer 0.1 %**
-  (`docs/site_scanner_icc.csv`); the model carries a site random effect.
-
-**Imaging transcriptomics** (`ahba_pls/`; DK arm re-run on the 7.0 maps
-2026-09-14, HCP-MMP arm likewise — numbers in its README)
-
-- The NSPN-PLS2 / AHBA-C3 "signature of adolescent thinning" re-derives from
-  the ABCD maps: PLS of AHBA expression on thinning rate plus baseline
-  thickness recovers a component matching both prior signatures in regional
-  scores and gene weights, with the same neuronal-up / glial-down cell-class
-  profile.
-- It carries SCZ and MDD GWAS signal at about half C3's effect size and adds
-  nothing once C3 is in the model: a developmental warrant for C3, not a
-  better gene list.
-- Parcellation matters for MDD, not SCZ: the HCP-MMP version of the signature
-  carries more MDD signal than the DK version. Whether the finer atlas' astrocyte
-  sign flip is biology or parcel size is open.
-
-**Genetics** — see the Status section: the legacy result is a benchmark, the
-re-run is pending. The reasoning that governs it (PRS as the primary
-disorder test, why rg is uninformative at this h², why controls are mandatory,
-why region selection is not a lever) is in `genetic_analysis/README_HPC.md` §3 and §6.
+| data-vintage history (the 6.0 tables once labelled 7.0, fixed 2026-09-14) | [`docs/RERUN_7.0_TABULATED.md`](docs/RERUN_7.0_TABULATED.md) |
+| superseded pipelines, the 6.0-vintage genetics, the 5.1 draft | [`legacy/README.md`](legacy/README.md), [`docs/REPORT_5.1_legacy.md`](docs/REPORT_5.1_legacy.md) |
 
 ## HCP-MMP (Glasser) thickness
 
@@ -194,7 +132,7 @@ as a **derived** table at `abcd-data-release-7.0/processed/hcp/`, so
   the area-weighted mean of the 34 regions, not FreeSurfer's vertex-weighted
   `Cortex MeanThickness` (verified 2026-09-14; see `docs/hcp_census/`).
 - **Parcel `H`** (hippocampus) lies on the medial wall and has thickness 0 in
-  ~6,350 sessions; exclude it or treat 0 as missing.
+  7,792 sessions (left; 8,668 in either hemisphere); it is excluded from the fits.
 - **DK from the same surfaces, as a check on the release.** `src/abcd/dk_stats.py`
   (`sbatch tools/dk_extract.sbatch`) parses FreeSurfer's own `aparc.stats` for
   every session into `processed/dsk_local/` with the release column names.
@@ -257,7 +195,9 @@ docs/              # REPORT_7.0.md, RERUN_7.0_TABULATED.md + every table and fig
 tools/             # regenerators for every table and figure; rerun_local.sh; compare_vintage.py;
                    # CSD3 jobs: hcp_extract / hcp_backfill / dk_extract .sbatch; validate_local_vs_release.py;
                    # prs_assoc.R (used by genetic_analysis/)
-genetic_analysis/  # the cluster genetics re-run: README_HPC.md, config, GENESIS + PRS scripts
+genetic_analysis/  # the cluster genetics: README_HPC.md, config, GENESIS + PRS scripts;
+                   # c3axis/ = slope components and the C3-axis phenotypes (exploratory)
+c4_imputation/     # imputed C4A expression vs the thinning rate
 ahba_pls/          # imaging transcriptomics: PLS of AHBA expression on the ABCD thinning maps,
                    # and its SCZ/MDD enrichment -- self-contained, see ahba_pls/README.md
 notebooks/         # explanatory documents, not analysis scripts

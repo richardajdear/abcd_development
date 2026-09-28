@@ -1,5 +1,6 @@
+# Run from the repo root: Rscript genetic_analysis/c3axis/fig_components_puberty_cbcl.R   (reads the tables written by 01/04)
 suppressMessages({library(ggplot2); library(dplyr); library(patchwork); library(scales)})
-AS <- read.delim("pcs/table_components_puberty_cbcl.tsv"); SH <- read.delim("pcs/table_component_split_half.tsv")
+AS <- read.delim("genetic_analysis/c3axis/table_components_puberty_cbcl.tsv"); SH <- read.delim("genetic_analysis/c3axis/table_component_split_half.tsv")
 TXT <- 8
 lvl <- unique(AS$label)
 OL <- c(pds_p_timing_mean="timing (parent, mean)", pds_p_timing_base="timing (parent, baseline)", pds_p_tempo="tempo (parent)",
@@ -29,7 +30,9 @@ pd <- ggplot(SH, aes(factor(comp), same_index_median, colour = decomposition, gr
   scale_y_continuous(limits = c(0, 1)) + scale_colour_manual(values = c("#636363", "#4292c6", "#d95f02"), name = NULL) +
   labs(x = "component", y = "split-half |r| of loadings (median; line to 5th pct)",
        title = "d   Split-half reliability of the component maps (100 random halves); numbers = % variance explained",
-       subtitle = "Row-centred 4 and 5 swap order in 39% of splits (eigenvalues 2.25% vs 2.17%); their shared plane and its C3-aligned direction are stable") +
+       subtitle = with(SH[SH$decomposition == "LH only, row-centred PCA (= DME)" & SH$comp %in% 4:5, ],
+                       sprintf("Row-centred 4 and 5 swap order in %.0f%% of splits (%.2f%% vs %.2f%% variance); their shared plane and its C3-aligned direction are stable",
+                               100 * (1 - index_stable_frac[1]), var_explained_pct[1], var_explained_pct[2]))) +
   theme_bw(base_size = TXT) + theme(panel.grid.minor = element_blank(), plot.title = element_text(face = "bold"), legend.position = "bottom")
 cap <- paste(
   "\u2022 Components: plain PCA of standardised HCP-MMP slope BLUPs (358 parcels, PC1-5) and PCA of LEFT-hemisphere row-centred slopes (rc1-7, identical to DME); child scores standardised. n = 8,716.",
@@ -41,4 +44,4 @@ fig <- (pa | pb) / (pc | pd) + plot_layout(heights = c(1, 1)) + plot_annotation(
   title = "Slope components vs puberty and CBCL: puberty tracks the C1 axis and the global factor; the C3 axis is unrelated to either",
   subtitle = "Effects are small (|\u03b2| \u2264 0.10). The C3 component (rc5) shows no FDR-surviving association with puberty or symptoms; the global factor (PC1) leans towards internalising onset.",
   caption = cap, theme = theme(plot.title = element_text(size = TXT + 3, face = "bold"), plot.caption = element_text(hjust = 0, lineheight = 1.4, size = TXT - 0.8)))
-ggsave("pcs/fig_components_puberty_cbcl.png", fig, width = 15, height = 11, dpi = 160, bg = "white")
+ggsave("genetic_analysis/c3axis/fig_components_puberty_cbcl.png", fig, width = 15, height = 11, dpi = 160, bg = "white")

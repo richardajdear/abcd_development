@@ -50,7 +50,16 @@ def test_every_figure_has_a_generator():
     import regen_brain_maps
     import regen_report_figures
 
-    generated = set(regen_report_figures.FIGURES) | set(regen_brain_maps.FIGURES)
+    # figures drawn by the genetics arm; the generator must exist and must name the output
+    external = {"fig1": "genetic_analysis/fig1.R",
+                "fig_genetics_panel_1lmm": "genetic_analysis/fig_genetics_panel_1lmm.py",
+                "slide_prs_methods": "legacy/genetic_analysis/slide_prs_methods.py",
+                "slide_prs_methods_1lmm": "legacy/genetic_analysis/slide_prs_methods.py",
+                "slide_prs_orderops": "legacy/genetic_analysis/slide_prs_orderops.py"}
+    for stem, script in external.items():
+        src = (ROOT / script).read_text()
+        assert stem in src, f"{script} does not name {stem}"
+    generated = set(regen_report_figures.FIGURES) | set(regen_brain_maps.FIGURES) | set(external)
     on_disk = {p.stem for p in (DOCS / "figures").glob("*.png")}
     assert not (on_disk - generated), \
         f"figures with no generator: {sorted(on_disk - generated)}"

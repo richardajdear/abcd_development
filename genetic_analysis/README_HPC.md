@@ -707,6 +707,17 @@ and rg only if h² z ≥ 4 (rule 13); expect not.
 
 ### 8.4 Recording
 
+Laptop scripts that produce every §8 table, run from the repo root in this order
+(each writes only summary tables to `c3axis/`; per-child data stay in gitignored
+paths): `c3axis/01_decompose_lh.py` (decompositions, spin tests, split-half),
+`c3axis/build_c3axis_model_table.py`, then `R/fit_lmm.R --run-dir out/<run>_c3axis`,
+`c3axis/02_c3axis_1lmm_summary.py`, `c3axis/build_c3axis_pheno.py`,
+`c3axis/03_prs_screen_local.sh` with `c3axis/03_prs_screen_collect.py`,
+`c3axis/04_puberty_cbcl.py`. Figures: `Rscript c3axis/fig_lh_pca_dme.R` and
+`c3axis/fig_components_puberty_cbcl.R`. Shared inputs are in `c3axis/common.py`. Re-running
+them reproduces the committed tables exactly (checked 2026-09-28).
+
+
 Tables go under `$C3/` as named above and are committed (summary only). Extend
 `build_current_results.py` with a `c3axis` block, then add a §2 subsection. If
 C3-C or C3-D gives a C3 link, it replaces §2.1 item 6. Laptop provenance for
