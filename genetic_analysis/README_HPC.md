@@ -224,7 +224,7 @@ Closed means do not repeat without a new reason; the reason is given.
 | within-family (Fulker) | uninformative, ~15 % power | current, reported with its power |
 | slope construction: mean of parcel BLUPs vs single LMM | single LMM less shrunk, more heritable, all PRS signals stronger | **single LMM adopted** |
 | parcellation DK vs HCP-MMP | whole-cortex results agree; marginal cells move across p = 0.05 | HCP primary, DK sensitivity |
-| region-subset phenotypes (top-ΔCT, top-C3 regions, projections; v3) | share 80–90 % of variance with the global slope, less heritable, C3 set weaker than 80 % of random sets | closed |
+| region-subset phenotypes (top-ΔCT, top-C3 regions, projections; v3) | share 80–90 % of variance with the global slope, less heritable, C3 set weaker than 80 % of random sets | closed for un-centred subsets; the row-centred C3 axis (§8) is a different phenotype (r 0.18 with the global slope) and is open |
 | slope PCs as GWAS phenotypes | atlas-specific; one candidate locus (chr7, HCP PC3) | secondary only |
 | LDSC h² and rg (EUR GWAS files only, full disorder panel) | slope h² z < 2; rg uninformative | closed until n grows |
 | LAVA local rg | anti-conservative (11 % of tests p < 0.05 genome-wide) | closed unless permutation-calibrated |
@@ -292,6 +292,10 @@ genes. Ranked by information per unit of effort:
    child's 358 slopes onto C3 and the PLS lead component (one phenotype per
    child) and regress on the SCZ score. Averages out the parcel noise that
    sank the β-map test; `ahba_pls/FOLLOWUP_GENETICS.md` H4 has the design.
+   **Superseded by §8** (2026-09-28): the projections must be row-centred
+   (each child's cortex-wide mean removed) or they reduce to the global slope,
+   which is why the v3 projections in §3 failed. §8 defines the phenotypes, builds
+   them, and gives the analysis order.
 7. **External positive controls and replication.** (i) A score for adult
    cortical thickness (e.g. Warrier et al. 2023 or ENIGMA) should predict
    `baseline_thickness`; whether it predicts the rate tells us how much of the
@@ -526,3 +530,178 @@ those live:
 `python genetic_analysis/fig1_prep_prs.py && LC_ALL=en_US.UTF-8 Rscript genetic_analysis/fig1.R`.
 Intelligence is in the tables but not in Figure 1f (its prep script selects
 BIP/ADHD only).
+
+## 8. Next: a C3-axis thinning phenotype (instructions, 2026-09-28)
+
+**Goal.** Find a slope phenotype that can be genetically linked to AHBA C3 (or
+PLS2). §2.1 item 6 says the C3 link is group-level only. The reason is now
+understood, and it gives a phenotype that targets C3 at the level of the
+individual child.
+
+### 8.1 What the decomposition shows (laptop, map-level; tables in `c3axis/`)
+
+Input: standardised child × parcel slope BLUPs, HCP run
+`thickness_hcp_70_aa6e91efba82`, 8,716 children, left hemisphere only (179
+parcels; AHBA C1–C3 are left-hemisphere maps). Spearman ρ against the maps,
+with spin p from 5,000 rotations (`c3axis/lh_components_vs_refs.tsv`,
+`c3axis/lh_method_comparison.tsv`; figure `c3axis/fig_lh_pca_dme.png`).
+
+- **Plain PCA.** PC1 is a global factor: 98 % of parcel pairs have positive
+  slope correlations. Its loading map carries C1 (0.50) and C3 (0.37)
+  together. C1 = PC2 (0.77) and C2 = PC3 (−0.79). No leading PC is C3; the best
+  C3 match is PC8 (−0.42).
+- **Row-centred PCA** (each child's cortex-wide mean subtracted uniformly).
+  Component 1 = C1 (0.80), component 2 = C2 (−0.80), and **component 5 = C3
+  (0.52, p_spin 0.002)**, with no C1, C2, PLS2 or dCT in it (|ρ| ≤ 0.23).
+  Diffusion map embedding (DME, the settings used to derive AHBA C1–C3) is
+  numerically the same decomposition (|r| ≥ 0.996 for components 1–7, any
+  α). Its C3 component is 0.54 (p_spin < 0.001) and replicates when each
+  hemisphere is fitted alone (LH 0.54, RH 0.52; the LH and RH maps correlate
+  at 0.87).
+- **Row-centre; do not regress out the global slope.** Regressing each parcel
+  on the child's mean slope with a per-parcel β removes the whole PC1,
+  including its C3-weighted part. C3 then weakens to 0.43 and moves to
+  component 7. Row-centring removes only the constant.
+- **The dCT-aligned components (row-centred 4 and 7; dCT −0.40 / −0.53, PLS2
+  0.27 / 0.44)** measure how strongly a child expresses the normative regional
+  thinning contrast. Child scores on them correlate −0.45 / −0.46 with the
+  child's own projection on the dCT map. They do not correlate with age at
+  first scan (0.10 / 0.00), follow-up span or number of visits, and only weakly
+  with sex (−0.13 / −0.06) (`c3axis/lh_child_score_correlations.tsv`). They
+  are not an age-window artefact. Puberty timing is untested and is the
+  obvious candidate.
+- **The C3 axis is not the normative map.** The C3 component has no mean
+  change with age (fixed age slope −0.003 SD/yr, against −0.138 for the
+  projection on C3), so it is pure between-child variation. Children who thin
+  faster overall carry more of it: child-level r 0.31 on the BLUPs, 0.18 on the
+  single-LMM slope (`c3axis/lh_child_global_coupling.tsv`,
+  `c3axis/c3axis_1lmm_summary.tsv`).
+- **DK cannot be used for this.** At DK resolution the C3 component also
+  carries C2 (DME D2: C2 0.73, C3 0.71, PLS2 0.87). HCP-MMP only.
+
+### 8.2 Phenotypes (single LMM, the primary-trait construction)
+
+`c3axis/build_c3axis_model_table.py` takes the per-parcel slope BLUPs and fits
+the LH row-centred PCA. It converts each weight vector into per-scan weights on
+raw thickness (mean-centred weight / slope SD, the same weight on each lh/rh
+homologue). It writes one per-scan score per phenotype to
+`out/<run>_c3axis/model_table.parquet`, fitted by `R/fit_lmm.R` with the
+primary formula (`value ~ sex + age_c + (1 + age_c | subject) + (1 | site)`).
+The per-scan route is used for the same reason the single LMM beat averaging
+BLUPs (§1). On the laptop fit (`c3axis/c3axis_1lmm_summary.tsv`, 8,716
+children, 0/7 singular):
+
+| phenotype | role | slope reliability | r with global slope |
+|:--|:--|--:|--:|
+| `c3axis_rc` | **primary**: the C3 component (rc5) | 0.22 | 0.18 |
+| `proj_C3` | row-centred projection on the C3 map | 0.17 | 0.14 |
+| `proj_dCT` | amplitude of the normative contrast (the dCT-aligned axis) | 0.18 | 0.12 |
+| `proj_PLS2` | row-centred projection on PLS2 | 0.10 | 0.01 |
+| `c1axis_rc`, `c2axis_rc` | specificity controls (rc1, rc2) | 0.19 / 0.18 | 0.17 / 0.25 |
+| `global_slope_c3axis` | check: must reproduce `global_slope_1lmm` (r > 0.99) | 0.30 | 1 |
+
+The reliability is the regional-slope level (§2.2 context: median regional
+0.21), so a detectable h² is capped at roughly half the global slope's. Set
+expectations accordingly. The PRS and partition tests (C3-C, C3-D) are
+powered by the discovery GWAS, not by ABCD, and are the realistic route to a
+C3 link.
+
+### 8.3 Analysis order for the HPC agent
+
+Run from the repo root on CSD3, HCP atlas only. Write all outputs under
+`genetic_analysis/work/results_70tab_hcp/c3axis/` (call it `$C3`). Rules 1–19
+apply; rule 16 in particular: the `pheno*/` directories are per-subject and
+must never be committed.
+
+**C3-A. Build (≈ 15 min).** `sbatch genetic_analysis/c3axis/run_c3axis_build.sbatch`.
+It builds the model table and fits the seven LMMs. It exports
+`$C3/pheno/` (FID = family id), `$C3/pheno_fidiid/` (FID = IID, rule 2) and
+`$C3/pheno_adjG/` (the same phenotypes; `covar_quant.txt` adds
+`gcov_global_slope`). It stops unless `global_slope_c3axis` reproduces
+`global_slope_1lmm` at r > 0.99, and it warns if
+`c3axis/c3axis_weights_check.tsv` differs from the committed laptop build
+(expect rc5, ρ_C3 0.524). Done when: 7 fits, 0 errors, the check passes, n =
+8,596 in the export.
+
+**C3-B. GREML h² (≈ 1 h, array of 7).**
+`PHENO_DIR=$C3/pheno REML_DIR=$C3/reml sbatch --export=ALL --array=1-7 genetic_analysis/step5_reml.sbatch`
+(the script reads the FID = IID export from `${PHENO_DIR}_fidiid`, which C3-A writes). Also
+run a bivariate GREML (`gcta64 --reml-bivar`) of `c3axis_rc` with
+`global_slope_c3axis`, and of `c3axis_rc` with `c1axis_rc`. These say whether
+the C3 axis has genetic variance of its own or shares that of the global
+factor. Output `$C3/reml/table_reml_c3axis.tsv`. Report h² ± SE; with SE ≈
+0.045, h² < 0.09 is not distinguishable from 0.
+
+**C3-C. PRS screen (≈ 3 h; the main test).** Score every existing matched arm
+on the new phenotypes; no new scoring is needed.
+- SCZ 2025, all methods: `PHENO_1LMM=$C3/pheno OUT_1LMM=$C3/prs_scz2025 PRS_TAG=c3axis sbatch --array=2 genetic_analysis/step9_scz2025_assoc_1lmm.sbatch`,
+  then again with `PHENO_1LMM=$C3/pheno_adjG OUT_1LMM=$C3/prs_scz2025_adjG EXTRA_COVAR=gcov_global_slope`
+  (`tools/prs_assoc.R --extra-covar` is new; it adds the column to the model).
+  Both parameters were added for this section; defaults are unchanged.
+- The PGC-era panel (MDD, ASD, ALZ ± APOE, Kunkle, EA; rule 7): copy the loop
+  of `orderops/prs_1lmm.sbatch` into `c3axis/prs_panel.sbatch` with
+  `PH=$C3/pheno` (and `_adjG`), task 2 (HCP) only.
+- Bipolar, ADHD, intelligence: step 15 via the same script with
+  `SCZ25_ROOT=genetic_analysis/work/scores_newgwas ARM_GLOB='BIP_*' …` as in
+  `run_newgwas.sh`.
+- Readout, pre-specified. Primary = SCZ 2025 → `c3axis_rc`, matched cells,
+  three methods (C+T min-p, PRS-CS, SBayesRC), both arms: the §2.3 robustness
+  criterion (agreement across methods). Specificity = paired Δβ of
+  `c3axis_rc` against `c1axis_rc` and `c2axis_rc` for the same score
+  (family-resampled bootstrap, `setup/prs_paired_delta.py`). A C3 link means
+  SCZ predicts `c3axis_rc`, survives `gcov_global_slope`, and exceeds the C1
+  and C2 controls. Everything else is secondary. Report the controls alongside
+  (rule 7).
+- Direction to expect: C3+ genes are enriched for SCZ gene-level signal (the C3+ pole,
+  z 3.6 on the PGC3 gene results; 2026-08 check), and faster global thinning carries more C3-axis expression (§8.1).
+  Record the sign; do not flip phenotypes to match a hypothesis.
+- Output `$C3/table_c3axis_prs.tsv` (arm, method, phenotype, adjG, β, SE, p,
+  p_adj, n).
+
+**C3-D. C3-partitioned SCZ score (≈ 1 day; the most direct genetic link).**
+Split the SCZ 2025 score by gene set and test each part on `c3axis_rc`,
+`proj_C3`, `global_slope_c3axis`, `c1axis_rc` and `c2axis_rc`:
+- Partitions: AHBA C3 top and bottom deciles of `data/weights.csv` (C3 column,
+  7,973 genes), C1 and C2 top/bottom deciles as controls, and the PLS2 poles
+  from `ahba_pls/results/hcp_summary_gene_weights.tsv`. Map genes to SNPs with
+  the step-7 MAGMA gene annotation (±35 kb upstream / 10 kb downstream,
+  GRCh37). Remove the MHC region (chr6 25–34 Mb) from every partition, as it
+  would dominate.
+- Scores: PRSet (PRSice-2 ≥ 2.3) if available on CSD3. Otherwise subset the
+  existing SBayesRC and PRS-CS posterior weights to each partition's SNPs and
+  score with PLINK 1.9 `--score`; subsetting posterior weights is a valid
+  partitioned score. Do the same for C+T at the step-9 thresholds.
+- Null: 1,000 random gene sets matched on gene count, total gene length and
+  SNP count, drawn from the same 7,973-gene universe (not the genome). This
+  matters because AHBA genes are brain-expressed and longer than average.
+- Link criterion: the C3+ partition predicts `c3axis_rc` beyond ≥ 95 % of
+  matched random partitions, and more strongly than it predicts `c1axis_rc` or
+  `c2axis_rc`. The C1 and C2 partitions acting on their own axes are the
+  positive-control pattern. Output `$C3/partition/table_partition_prs.tsv`.
+
+**C3-E. GWAS and gene-level tests (≈ 1 day; exploratory, low power).** Run
+GENESIS steps 3–4 on `c3axis_rc`, `proj_C3` and `proj_dCT`, EUR and pooled:
+`PHENO_DIR=$C3/pheno MANIFEST=$C3/pheno/phenotype_manifest.tsv NULL_DIR=$C3/nullmodel ASSOC_DIR=$C3/assoc genetic_analysis/run_all.sh 03 04`
+(restrict the manifest to the three rows first). Report λ_GC (rule 8). Then run
+MAGMA gene analysis with ABCD LD (step 15a EUR, step 14 pooled). The AHBA C1,
+C2, C3 and PLS2 gene weights go into **one** `--gene-covar` model; never
+difference separate runs when the vectors are correlated (§2.5 convention).
+Run the same test on the `c1axis_rc` GWAS as the specificity control. LDSC h²
+and rg only if h² z ≥ 4 (rule 13); expect not.
+
+**C3-F. Sensitivities (cheap; after C3-C).**
+- DME weights in place of PCA weights (expect identical).
+- Weights from the RH-only fit (expect ρ ≈ 0.87).
+- Puberty (ABCD PDS) as a covariate on `proj_dCT` and `c3axis_rc`, to test the
+  tempo reading of the dCT-aligned axis.
+- Per-scan Euler number as a covariate in the LMM (§4 item 3), which also
+  applies here.
+
+### 8.4 Recording
+
+Tables go under `$C3/` as named above and are committed (summary only). Extend
+`build_current_results.py` with a `c3axis` block, then add a §2 subsection. If
+C3-C or C3-D gives a C3 link, it replaces §2.1 item 6. Laptop provenance for
+§8.1–8.2: the tables in `genetic_analysis/c3axis/` were produced on 2026-09-28
+from the local copy of the same run; the build script reproduces the component
+choice from the BLUPs.

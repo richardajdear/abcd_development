@@ -47,8 +47,11 @@ opt <- parse_args(OptionParser(option_list = list(
   make_option("--eur-ids",     type = "character", default = NULL,
               help = "optional file of IIDs defining the EUR subset; overrides the PC-based cut"),
   make_option("--eur-sd",      type = "double", default = 3,
-              help = "PC-space cut for the EUR subset, in SDs [default 3]")
+              help = "PC-space cut for the EUR subset, in SDs [default 3]"),
+  make_option("--extra-covar", type = "character", default = NULL,
+              help = "comma-separated extra covariate columns of --covar-quant to add to the model (e.g. gcov_global_slope); default none")
 )))
+extra_cov <- if (is.null(opt$`extra-covar`)) character(0) else strsplit(opt$`extra-covar`, ",")[[1]]
 
 stopifnot(!is.null(opt$`prs-dir`), !is.null(opt$out))
 
@@ -155,7 +158,8 @@ for (f in prof) {
                 paste(dropped, collapse = ", "))
         .warned_dropped <- TRUE
       }
-      terms <- c("scale(PRS)", "sex", "age_c", pc_cols)
+      stopifnot(all(extra_cov %in% names(sub)))
+      terms <- c("scale(PRS)", "sex", "age_c", pc_cols, extra_cov)
       terms <- terms[terms %in% names(sub) | terms == "scale(PRS)"]
       fml <- as.formula(sprintf("scale(%s) ~ %s + (1 | family_id)",
                                 p, paste(terms, collapse = " + ")))

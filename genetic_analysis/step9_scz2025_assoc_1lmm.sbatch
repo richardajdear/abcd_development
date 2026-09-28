@@ -25,7 +25,7 @@ R=/home/rajd2/rds/hpc-work/envs/genesis/bin/Rscript
 PY="$REPO/legacy/hpc/work/envs/abcd/bin/python"
 SUF=""; [[ "${SLURM_ARRAY_TASK_ID:-1}" == 2 ]] && SUF="_hcp"
 ROOT="$REPO/genetic_analysis/work/results_70tab$SUF"
-PH="$ROOT/prs_final_1lmm/pheno"; OUT="$ROOT/${PRS_TAG:-prs_scz2025}_1lmm"; mkdir -p "$OUT"
+PH="${PHENO_1LMM:-$ROOT/prs_final_1lmm/pheno}"; OUT="${OUT_1LMM:-$ROOT/${PRS_TAG:-prs_scz2025}_1lmm}"; mkdir -p "$OUT"   # PHENO_1LMM/OUT_1LMM: c3axis reuse (README section 8)
 ARM_GLOB="${ARM_GLOB:-SCZ25_*}"   # step 15 reuse; defaults are step 9
 SC="${SCZ25_ROOT:-$REPO/genetic_analysis/work/scores_scz2025}"; EUR="$REPO/legacy/hpc/work/results/ancestry/eur_anchor.keep"
 [[ -s "$PH/phenotypes_gcta.txt" ]] || { echo "FATAL: $PH/phenotypes_gcta.txt missing (run the order-of-operations fit first)" >&2; exit 2; }
@@ -37,7 +37,7 @@ for d in "$SC"/{CT,PRSCS,SBayesR,SBayesRC,PRSCSX}/$ARM_GLOB; do
     dd="$d${z:+/_zanc}"; [[ -d "$dd" ]] || continue
     echo "=== $M/$T$z  $(date +%T)"
     "$R" tools/prs_assoc.R --prs-dir "$dd" --pheno "$PH/phenotypes_gcta.txt" --covar-quant "$PH/covar_quant.txt" \
-      --covar-cat "$PH/covar_categorical.txt" --manifest "$PH/phenotype_manifest.tsv" --eur-ids "$EUR" \
+      --covar-cat "$PH/covar_categorical.txt" --manifest "$PH/phenotype_manifest.tsv" --eur-ids "$EUR" ${EXTRA_COVAR:+--extra-covar "$EXTRA_COVAR"} \
       --out "$OUT/assoc_${M}_${T}${z}.tsv" >/dev/null 2>&1 && n=$((n+1)) || echo "  (failed: $M/$T$z)"
   done
 done
