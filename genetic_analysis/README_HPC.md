@@ -692,8 +692,16 @@ and rg only if h² z ≥ 4 (rule 13); expect not.
 **C3-F. Sensitivities (cheap; after C3-C).**
 - DME weights in place of PCA weights (expect identical).
 - Weights from the RH-only fit (expect ρ ≈ 0.87).
-- Puberty (ABCD PDS) as a covariate on `proj_dCT` and `c3axis_rc`, to test the
-  tempo reading of the dCT-aligned axis.
+- Puberty as a covariate on `proj_dCT` and `c3axis_rc`, to test the tempo
+  reading of the dCT-aligned axis. The source is the Pubertal Development Scale
+  (PDS; Petersen et al. 1988), 7.0 tables `p/pds/ph_p_pds.tsv` (parent
+  report, the usual choice at these ages) and `y/pds/ph_y_pds.tsv` (youth).
+  Use the sex-specific summary `ph_p_pds__{f,m}_mean` (1-4) or the
+  approximate Tanner stage `ph_p_pds__{f,m}_categ`, and the collection age
+  `ph_p_pds_age`. Timing = the within-sex residual of PDS on age at a fixed
+  visit. Tempo = each child's PDS slope over age. Salivary DHEA, testosterone
+  and oestradiol (`y/phs/ph_y_phs.tsv`) are a biological cross-check. These
+  are not in the local release copy yet.
 - Per-scan Euler number as a covariate in the LMM (§4 item 3), which also
   applies here.
 
