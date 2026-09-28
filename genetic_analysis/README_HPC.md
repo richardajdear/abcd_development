@@ -632,7 +632,7 @@ the C3 axis has genetic variance of its own or shares that of the global
 factor. Output `$C3/reml/table_reml_c3axis.tsv`. Report h² ± SE; with SE ≈
 0.045, h² < 0.09 is not distinguishable from 0.
 
-**C3-C. PRS screen (≈ 3 h; the main test).** Score every existing matched arm
+**C3-C. PRS screen (≈ 3 h; the main test). PRS-CS and SBayesRC for SCZ 2025, PGC3 and MDD were run on the laptop, 2026-09-28: null (§8.5). The cluster run still needs C+T with min-p, SBayesR and the control panel.** Score every existing matched arm
 on the new phenotypes; no new scoring is needed.
 - SCZ 2025, all methods: `PHENO_1LMM=$C3/pheno OUT_1LMM=$C3/prs_scz2025 PRS_TAG=c3axis sbatch --array=2 genetic_analysis/step9_scz2025_assoc_1lmm.sbatch`,
   then again with `PHENO_1LMM=$C3/pheno_adjG OUT_1LMM=$C3/prs_scz2025_adjG EXTRA_COVAR=gcov_global_slope`
@@ -705,3 +705,43 @@ C3-C or C3-D gives a C3 link, it replaces §2.1 item 6. Laptop provenance for
 §8.1–8.2: the tables in `genetic_analysis/c3axis/` were produced on 2026-09-28
 from the local copy of the same run; the build script reproduces the component
 choice from the BLUPs.
+
+### 8.5 Local PRS screen, 2026-09-28 (C3-C, partial)
+
+Same model, same analysis set and same score files as the cluster:
+`tools/prs_assoc.R` on the 8,596-child export (built by
+`c3axis/build_c3axis_pheno.py` from `prs_final_1lmm/pheno`), with rule-4
+matched cells. It is exact, not approximate. `global_slope_c3axis`
+reproduces the primary trait at r = 1.000, and its PRS β reproduce §2.3 to the
+third decimal (e.g. SCZ 2025 pooled SBayesRC −0.034 (0.010), p 0.0010). What is
+missing locally is coverage, not precision. The C+T scores (and so min-p),
+SBayesR and the control panel (ASD, ALZ ± APOE, EA, BIP, ADHD, INT) were never
+copied from CSD3. Tables: `c3axis/table_c3axis_prs_local.tsv` (lmer, as
+prs_assoc.R) and `c3axis/table_c3axis_prs_delta_local.tsv` (OLS with
+family-clustered SE; paired Δβ as the PRS coefficient on the difference score).
+
+- **SCZ does not act on the C3 axis.** SCZ 2025 → `c3axis_rc`: β −0.007 to
+  −0.013 in all four matched cells, p 0.23–0.54. Pooled SBayesRC: −0.013,
+  95 % CI −0.035 to +0.008, against −0.035 on the global slope in the same
+  children. Adjusting for the global slope moves it towards zero (−0.002 to
+  −0.007). `proj_C3`, `proj_PLS2` and `proj_dCT` are null for SCZ too. So are
+  the C1 and C2 axes (β −0.013 to −0.021, all p ≥ 0.057).
+- **Specificity contrasts are all null.** Δβ (`c3axis_rc` − `c1axis_rc`)
+  and (`c3axis_rc` − `c2axis_rc`) range from +0.000 to +0.016, all p ≥ 0.33.
+- **Across 120 axis-phenotype tests** (SCZ 2025, PGC3 and MDD × arms ×
+  methods × ± global covariate), one has p < 0.05: MDD EUR SBayesRC →
+  `proj_dCT` +0.034, p 0.031. Its PRS-CS counterpart gives p 0.085 and the
+  pooled arm is null. That is fewer than chance (6 expected).
+- **Reading.** The polygenic effect of SCZ on thinning is a shift of the whole
+  cortex. Once each child's mean is removed, nothing regional is left along
+  C1, C2 or C3. This agrees with the regional β-map result (§3, "uniform shift
+  plus noise"). The screen does not exclude a C3-axis effect as large as the
+  global one: the CI reaches −0.035, and the lower reliability (0.22 against
+  0.30) attenuates a true effect by about 15 %. The point estimate is about a
+  third of the global β.
+- **Consequence for C3-D.** Test each C3 partition of the SCZ score on
+  `global_slope_c3axis` as well as on the axis phenotypes. The effect to
+  explain lives in the global slope, and the question becomes whether the
+  C3-gene part of SCZ risk carries it. PC1's loading map does carry C3 (§8.1),
+  so a C3-gene partition acting on the global slope is a coherent C3 link,
+  though a weaker claim than an axis-specific one.
