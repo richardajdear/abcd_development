@@ -753,3 +753,48 @@ family-clustered SE; paired Δβ as the PRS coefficient on the difference score)
   C3-gene part of SCZ risk carries it. PC1's loading map does carry C3 (§8.1),
   so a C3-gene partition acting on the global slope is a coherent C3 link,
   though a weaker claim than an axis-specific one.
+
+### 8.6 Puberty, CBCL and split-half checks (laptop, 2026-09-28)
+
+Tables: `c3axis/table_components_puberty_cbcl.tsv`,
+`c3axis/table_component_split_half.tsv`, `c3axis/table_rc45_plane_stability.tsv`;
+figure `c3axis/fig_components_puberty_cbcl.png`. The PDS tables sit at the root
+of the local release copy (`abcd-data-release-7.0/ph_{p,y}_pds.tsv`), not under
+`p/pds/`. Components: plain HCP PCA PC1–5 and LH row-centred rc1–7. Models:
+outcome ~ component + sex + site + age at first scan + span + n visits,
+family-clustered SE, FDR within each family of tests.
+
+- **Puberty** (29 of 60 tests survive FDR, all |β| ≤ 0.10):
+  - Earlier timing goes with a lower C1-axis score (rc1 β −0.072 parent,
+    −0.075 youth; tempo −0.034) and faster global thinning (PC1 +0.044 /
+    +0.049).
+  - The dCT-contrast components are weak and inconsistent in sign (rc4 timing
+    −0.049; rc7 tempo +0.034). The tempo reading of §8.1 is not supported as
+    stated.
+  - **The C3 component rc5 is unrelated to puberty** (|β| ≤ 0.019; nothing
+    survives FDR).
+- **CBCL at baseline:** 5 of 72 tests p < 0.05, none after FDR, which is chance
+  level.
+- **CBCL onset** (below threshold at baseline, at or above it at 05A–07A):
+  13 of 120 p < 0.05, none after FDR. The global factor PC1 leans towards
+  internalising onset (withdrawn/depressed OR 1.12 per SD, p 0.0055;
+  DSM depression 1.09, anxiety 1.11, p ≈ 0.018). rc5 → rule-breaking onset
+  (OR 0.85, p 0.014) is isolated.
+- **Split-half** (100 random halves of children; median |r| of loadings,
+  % variance explained):
+
+  | decomposition | component 1–5 |r| | component 1–5 % variance |
+  |:--|:--|:--|
+  | HCP both hemispheres, plain | 0.998, 0.88, 0.88, 0.93, 0.91 | 13.2, 2.6, 2.5, 1.8, 1.6 |
+  | LH, plain | 0.999, 0.98, 0.97, 0.94, 0.91 | 15.0, 3.1, 2.7, 2.2, 1.9 |
+  | LH, row-centred (= DME) | 0.98, 0.97, 0.94, 0.71, 0.71 | 3.9, 3.2, 2.6, 2.3, 2.2 |
+
+  HCP PC2/PC3 exchange in 22 % of splits. So do row-centred rc4 and rc5 (the
+  dCT-contrast and C3 components) in 39 % of splits, because their eigenvalues
+  are 2.25 % and 2.17 %. The plane they span is stable (principal cosines
+  0.97 / 0.90), and **the C3-aligned direction within it is stable (half vs
+  half |r| 0.94, ρ with C3 0.52 in each half)**. `build_c3axis_model_table.py`
+  picks rc5 by its C3 match, so on the full sample it is the right component.
+  A C3 phenotype defined as the C3-aligned direction within the rc4–rc5 plane
+  would be more robust to sampling, and is the recommended refinement if
+  C3-C/D are re-run.

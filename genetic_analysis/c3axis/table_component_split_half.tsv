@@ -1,0 +1,22 @@
+decomposition	comp	same_index_median	same_index_p05	matched_median	index_stable_frac	var_explained_pct
+HCP both hemispheres, plain PCA	1	0.9983	0.998	0.9983	1	13.18
+HCP both hemispheres, plain PCA	2	0.8758	0.5485	0.8896	0.78	2.637
+HCP both hemispheres, plain PCA	3	0.8752	0.5448	0.8885	0.78	2.524
+HCP both hemispheres, plain PCA	4	0.9338	0.8085	0.9338	0.99	1.754
+HCP both hemispheres, plain PCA	5	0.9056	0.7542	0.9056	0.99	1.607
+HCP both hemispheres, plain PCA	6	0.8956	0.7274	0.8956	1	1.435
+HCP both hemispheres, plain PCA	7	0.8805	0.7425	0.8805	1	1.288
+LH only, plain PCA	1	0.9985	0.9981	0.9985	1	15.03
+LH only, plain PCA	2	0.9771	0.94	0.9771	1	3.104
+LH only, plain PCA	3	0.9659	0.9312	0.9659	1	2.679
+LH only, plain PCA	4	0.9353	0.7663	0.9353	0.98	2.174
+LH only, plain PCA	5	0.9108	0.6788	0.9108	0.97	1.937
+LH only, plain PCA	6	0.9257	0.8237	0.9257	0.98	1.7
+LH only, plain PCA	7	0.9135	0.814	0.9135	1	1.488
+LH only, row-centred PCA (= DME)	1	0.9822	0.9636	0.9822	1	3.941
+LH only, row-centred PCA (= DME)	2	0.9722	0.9457	0.9722	1	3.2
+LH only, row-centred PCA (= DME)	3	0.9385	0.8322	0.9385	1	2.606
+LH only, row-centred PCA (= DME)	4	0.7124	0.05869	0.8276	0.61	2.255
+LH only, row-centred PCA (= DME)	5	0.7121	0.09018	0.8464	0.61	2.166
+LH only, row-centred PCA (= DME)	6	0.929	0.8578	0.929	1	1.853
+LH only, row-centred PCA (= DME)	7	0.9184	0.8707	0.9184	1	1.614
