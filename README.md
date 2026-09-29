@@ -93,6 +93,7 @@ README_HPC §8)
 | you want | go to |
 |:---|:---|
 | **the cluster genetics: current results, what has been tried, next analyses, the steps to run** | [`genetic_analysis/README_HPC.md`](genetic_analysis/README_HPC.md); every number in [`genetic_analysis/current_results.tsv`](genetic_analysis/current_results.tsv) |
+| what mechanism we are proposing, what would falsify it, and the ranked next directions | [`docs/DIRECTIONS.md`](docs/DIRECTIONS.md) |
 | Figure 1 (phenotype, PRS, symptoms) | [`docs/figures/fig1.png`](docs/figures/fig1.png), generator [`genetic_analysis/fig1.R`](genetic_analysis/fig1.R) |
 | the PRS results on one slide (methods × parcellations, controls) | [`docs/figures/slide_prs_methods_1lmm.png`](docs/figures/slide_prs_methods_1lmm.png) |
 | the imaging-transcriptomics PLS study and the symptom / PRS maps | [`ahba_pls/README.md`](ahba_pls/README.md), notebook [`ahba_pls/imaging_transcriptomics.qmd`](ahba_pls/imaging_transcriptomics.qmd) |
