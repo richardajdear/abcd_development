@@ -245,6 +245,16 @@ vendored), plus CBCL at every wave (vendored). Cross-lagged model: baseline
 symptoms → slope vs slope → later symptoms. Also the sensible covariate check
 for D2/D3: the EA effect with SES in the model. **Local once fetched.**
 
+*Status 2026-09-30 — run except the EA step:*
+[`directions/d5_adversity_direction/`](../directions/d5_adversity_direction/README.md).
+SES/ADI relate to the rate only between sites, and within site SES predicts
+thickness level, not rate. Parent-reported life events predict faster thinning
+(−0.034, robust to site and scan quality). SES + adversity explain 4 % of the SCZ
+polygenic effect, and there is no PRS × environment term. Between children,
+thinning predicts later symptoms and baseline symptoms do not predict thinning.
+Within-child cross-lags are small in both directions and need an LCM-SR check. The
+EA-with-SES test awaits the CSD3 EA score file.
+
 ### D6. Make fig 3 temporal: which cell-type programmes move between ~8 and ~18?
 
 *Buys:* a cell-type-resolved prediction for §2.2 (oligodendrocyte-dominated

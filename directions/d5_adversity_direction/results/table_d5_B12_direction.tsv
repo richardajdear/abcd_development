@@ -1,0 +1,17 @@
+outcome	model	term	beta	se	p	n	direction
+pfactor	base	pfactor_base	-0.00129957337756896	0.0102743430873357	0.899349344209009	8595	baseline symptoms -> subsequent slope
+pfactor	+ses+adversity	pfactor_base	0.0103731388177311	0.010945835498561	0.343320346102295	8543	baseline symptoms -> subsequent slope
+internal	base	internal_base	0.00582249456293958	0.010196490169657	0.567995096887711	8595	baseline symptoms -> subsequent slope
+internal	+ses+adversity	internal_base	0.0134711122273168	0.0105188832057269	0.200348458557648	8543	baseline symptoms -> subsequent slope
+external	base	external_base	-0.0108687634581733	0.0102736589812966	0.290119985491415	8595	baseline symptoms -> subsequent slope
+external	+ses+adversity	external_base	-0.00123208608717432	0.0109625307937993	0.910516318414832	8543	baseline symptoms -> subsequent slope
+depress	base	depress_base	-0.00456034016057246	0.0101272986148043	0.652504311019499	8595	baseline symptoms -> subsequent slope
+depress	+ses+adversity	depress_base	0.00272512345057155	0.0104929712824701	0.795094201647678	8543	baseline symptoms -> subsequent slope
+pfactor	base	global_slope_1lmm	-0.0211934769451114	0.0100429305725435	0.0348643922789859	8053	slope -> symptoms at 15-17 | baseline
+pfactor	+ses+adversity	global_slope_1lmm	-0.0226067085890061	0.00995775874260241	0.0232183141316803	8005	slope -> symptoms at 15-17 | baseline
+internal	base	global_slope_1lmm	-0.0180702064794878	0.0102455810799992	0.0778191603530123	8080	slope -> symptoms at 15-17 | baseline
+internal	+ses+adversity	global_slope_1lmm	-0.0196743596492166	0.010116125867347	0.0518278521863766	8032	slope -> symptoms at 15-17 | baseline
+external	base	global_slope_1lmm	-0.0227337090182175	0.0100501124638188	0.0237217642378559	8076	slope -> symptoms at 15-17 | baseline
+external	+ses+adversity	global_slope_1lmm	-0.0230216180190177	0.00994871139530875	0.0206912694576712	8028	slope -> symptoms at 15-17 | baseline
+depress	base	global_slope_1lmm	-0.0328415627632345	0.0110786494493607	0.00304161448486116	8072	slope -> symptoms at 15-17 | baseline
+depress	+ses+adversity	global_slope_1lmm	-0.0331814679255306	0.0109577677375029	0.00246862378053751	8024	slope -> symptoms at 15-17 | baseline

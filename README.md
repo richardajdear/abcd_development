@@ -66,6 +66,18 @@ summary and that file differ, that file wins. Figure 1: [`docs/figures/fig1.png`
   beyond ~1 month per SD. Pubertal stage at the scan does not carry the effect; MDD risk does predict
   earlier puberty, and earlier puberty faster thinning, but adjusting for puberty leaves PRS → slope unchanged.
 
+**Environment and direction of effect** (`directions/d5_adversity_direction/`, 2026-09-30)
+
+- **Adversity and polygenic risk act on the rate largely separately.** SES and area deprivation relate to
+  the rate only between sites (the slope keeps between-site rate differences); within site, SES predicts
+  thickness *level* (+0.062) but not rate. Parent-reported negative life events predict faster thinning
+  (−0.034, p = 0.003, robust to site and scan quality). SES + adversity explain 4 % of the SCZ polygenic
+  effect, and 0 of 8 PRS × environment terms reach p < 0.05.
+- **Thinning precedes symptoms, not the reverse, between children.** Faster thinning predicts later
+  depressive symptoms (−0.033, p = 0.003, unchanged with environment adjusted); baseline symptoms predict
+  the thinning rate for 0 of 4 scales. Within-child cross-lags are small in both directions and need a
+  latent-curve check. The EA-with-SES test awaits the CSD3 EA score file.
+
 **Symptoms** (exploratory; `ahba_pls/` scripts 23–25, 30; Figure 1g)
 
 - Faster global thinning goes with more depressive symptoms by ages 15–17, given baseline
@@ -105,6 +117,7 @@ README_HPC §8)
 | what mechanism we are proposing, what would falsify it, and the ranked next directions | [`docs/DIRECTIONS.md`](docs/DIRECTIONS.md) |
 | D2: one-stage PRS × age / PRS × puberty models (timing vs rate) | [`directions/d2_prs_age_puberty/`](directions/d2_prs_age_puberty/README.md) |
 | D4: thinning rate vs cognitive gain, ages 10–16 (NIH Toolbox) | [`directions/d4_cognitive_gain/`](directions/d4_cognitive_gain/README.md) |
+| D5: adversity/SES × polygenic risk on the thinning rate; direction of the thinning–symptom link | [`directions/d5_adversity_direction/`](directions/d5_adversity_direction/README.md) |
 | Figure 1 (phenotype, PRS, symptoms) | [`docs/figures/fig1.png`](docs/figures/fig1.png), generator [`genetic_analysis/fig1.R`](genetic_analysis/fig1.R) |
 | the PRS results on one slide (methods × parcellations, controls) | [`docs/figures/slide_prs_methods_1lmm.png`](docs/figures/slide_prs_methods_1lmm.png) |
 | the imaging-transcriptomics PLS study and the symptom / PRS maps | [`ahba_pls/README.md`](ahba_pls/README.md), notebook [`ahba_pls/imaging_transcriptomics.qmd`](ahba_pls/imaging_transcriptomics.qmd) |
