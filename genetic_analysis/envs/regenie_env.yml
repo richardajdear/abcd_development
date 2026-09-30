@@ -1,0 +1,12 @@
+# REGENIE for step 16 (genetic_analysis/mostest/).  Build once on CSD3:
+#   conda env create -p ~/rds/hpc-work/envs/regenie -f genetic_analysis/envs/regenie_env.yml
+#   ~/rds/hpc-work/envs/regenie/bin/regenie --version     # expect v3.x or v4.x
+# Fallback if conda cannot solve: the static Linux binary from
+# https://github.com/rgcgithub/regenie/releases (regenie_v*.gz_x86_64_Linux.zip),
+# unzipped to ~/rds/hpc-work/envs/regenie/bin/regenie.  paths.sh reads REGENIE.
+name: regenie
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - regenie>=3.4

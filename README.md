@@ -233,7 +233,7 @@ python tools/regen_report_figures.py    # table-based figures
 python tools/regen_brain_maps.py        # DK surface maps
 python tools/compare_vintage.py --old out/legacy_6.0_tabulated/thickness_dsk_70_139406217085 \
                                 --new out/thickness_dsk_70_139406217085
-python -m pytest tests/ -q              # 170 tests
+python -m pytest tests/ -q              # 175 tests
 ```
 
 The README test count check spawns pytest via `PYTEST_PY` (default `python`);

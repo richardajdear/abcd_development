@@ -228,7 +228,7 @@ Closed means do not repeat without a new reason; the reason is given.
 | slope PCs as GWAS phenotypes | atlas-specific; one candidate locus (chr7, HCP PC3) | secondary only |
 | LDSC h² and rg (EUR GWAS files only, full disorder panel) | slope h² z < 2; rg uninformative | closed until n grows |
 | LAVA local rg | anti-conservative (11 % of tests p < 0.05 genome-wide) | closed unless permutation-calibrated |
-| MOSTest / JAGWAS multivariate GWAS | output is unsigned, so no disorder direction; only useful for locus discovery | closed for the disorder question (`legacy/hpc_v3/SETUP_CONTEXT.md`) |
+| MOSTest / JAGWAS multivariate GWAS | output is unsigned, so no disorder direction; only useful for locus discovery | closed for the disorder question (`legacy/hpc_v3/SETUP_CONTEXT.md`); reopened as a locus/gene **discovery** arm in §9 (step 16) |
 | MTAG / genomic SEM across regional slopes | needs LDSC h² z ≳ 4 per trait; slope is at 0.4 | gated |
 | MAGMA gene-property and gene sets, SCZ/MDD/ASD/ALZ/EA, both directions | §2.5 | **current** |
 | AHBA C1–C3 and ahba_pls signature as MAGMA gene properties (H3) | null, both atlases | closed |
@@ -362,6 +362,7 @@ Run from the repo root on CSD3. Each step writes a summary table under
 | 10 | MAGMA on the 2025 SCZ GWAS, per ancestry + `--meta` | `run_scz2025_magma.sh`, `step10_scz2025_magma_*`, `setup/build_scz2025_genesets.py` | `magma_scz2025/` |
 | 11–13 | disorder-side MAGMA, LDSC panel, MAGMA panel on both constructions | `step11_magma_disorders.sbatch`, `step12_ldsc_panel.{sbatch,_collect.py}`, `step13_magma_panel.{sbatch,_collect.py}` | `ldsc_1lmm/`, `magma_panel/` |
 | 14 | pooled-arm MAGMA with in-sample LD | `step14_magma_pooled_{prep,genes,tests}.sbatch` | `magma_pooled/` |
+| 16 | MOSTest discovery on DK regional slopes / CT: REGENIE per region (real + permuted), z′R⁻¹z, clump, MAGMA (§9) | `mostest/run_step16.sh` → `mostest/01–06_*` | `mostest/table_mostest_*.tsv` |
 | — | tables, comparison, figures (laptop) | `build_current_results.py`, `compare_parcellations.py`, `fig1.R` (R, ggplot2 + patchwork; `LC_ALL=en_US.UTF-8 Rscript`, env ahba-pls-r; reads `fig1_inputs/`), `fig_genetics_panel_1lmm.py` | `current_results.tsv`, `results_70tab_hcp/compare/`, `docs/figures/` |
 
 Unused R entry points kept for §4: `R/07_prs_conditional.R` (joint model with
@@ -809,3 +810,32 @@ family-clustered SE, FDR within each family of tests.
   A C3 phenotype defined as the C3-aligned direction within the rc4–rc5 plane
   would be more robust to sampling, and is the recommended refinement if
   C3-C/D are re-run.
+
+## 9. Multivariate discovery on regional thinning: step 16 (instructions, 2026-09-30)
+
+**Status: scripted and tested locally on synthetic data; not yet run.** The CSD3
+handoff is [`BRIEF_step16.md`](BRIEF_step16.md), which holds the design table,
+run commands, gates G0–G4 and decision rules. Code is in `mostest/`;
+`tests/test_mostest_core.py` checks null calibration and the
+distributed-effect property.
+
+**Question.** Which loci and genes shape the *regional pattern* of adolescent
+thinning, beyond what the whole-cortex mean can see? The route to single-cell
+data is the MAGMA gene z from these scans, tested on the laptop against
+developmental snRNA-seq properties.
+
+**Construction.** DK 68 regions × {slope BLUP, CT BLUP (positive control), OLS
+slope (shrinkage sensitivity)}, 8,596 children with relatives kept. REGENIE
+runs per region with RINT, once on real data and once with rows permuted. The
+MOSTest statistic z′R⁻¹z uses R from the permuted z and a gamma null fitted
+to the permuted statistic; minP is the comparator. Clumping and MAGMA use the
+step-14 ABCD LD reference. REGENIE replaces GENESIS here only because it scans
+all 68 measures in one pass; gate G1 checks it against the GENESIS
+`global_slope_1lmm` scan.
+
+**Expectations, stated before running.** Effective N per regional slope is
+about 1,700 (reliability about 0.2), so few or no slope loci are expected.
+The `ct` family must yield at least one locus (G4) for a slope null to be
+read as anything other than "not assessed at this power". Output is unsigned:
+it gives no rg, no LAVA and no disorder direction (§3).
+
