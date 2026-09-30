@@ -89,8 +89,9 @@ Sample: 8,716 imaging children; 6,157 with crystallised and
   26,946 scans), as in `genetic_analysis/fig1_prep_1lmm.R`. Random slope = ΔCT, random
   intercept = CT, each z-scored over 8,716 children.
 - **Outcomes:** NIH Toolbox uncorrected standard scores (`nc_y_nihtb`). The fluid and total
-  composites exist only at baseline and year 6, because Card Sort and List Sorting were not
-  given at years 2 and 4. So baseline → year 6 is the primary interval for every measure.
+  composites exist only at baseline and year 6, because Card Sort was not given at years 2
+  or 4 and List Sorting was not given at year 2. So baseline → year 6 is the primary
+  interval for every measure.
 - **Models** (OLS, site fixed effects, SE clustered on family; β divided by SD of the
   outcome):
   - M1: `y_y6 ~ brain + y_base + age_base + age_y6 + sex + site`

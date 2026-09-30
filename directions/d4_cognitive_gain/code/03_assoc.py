@@ -8,8 +8,8 @@ mean, 02_fit_1lmm.R), z-scored over the 8,716 imaging children:
 So T5 predicts beta > 0 for global_slope: slower thinning, larger gain.
 
 Outcomes -- NIH Toolbox uncorrected standard scores (nc_y_nihtb). The fluid and total
-composites exist only at baseline (ses-00A) and year 6 (ses-06A): Card Sort and List
-Sorting were not administered at years 2/4. Primary interval is therefore baseline ->
+composites exist only at baseline (ses-00A) and year 6 (ses-06A): Card Sort was not
+administered at years 2 or 4, List Sorting not at year 2. Primary interval is therefore baseline ->
 year 6 for every measure; year 4 is a secondary interval for the tasks given then.
 
 Models (OLS, site fixed effects, family-clustered SE; beta in SD of y_late per SD brain):
