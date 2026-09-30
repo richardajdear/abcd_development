@@ -57,6 +57,15 @@ summary and that file differ, that file wins. Figure 1: [`docs/figures/fig1.png`
   to C3: the regional SCZ/MDD PRS maps do not resemble C3 or PLS2 (7 of 192 tests pass both
   nulls, about chance), and see *Between-child variation* below.
 
+**Timing versus rate** (`directions/d2_prs_age_puberty/`, 2026-09-30)
+
+- **Polygenic risk scales the thinning rate uniformly from 9 to 17; it does not shift its timing.**
+  In a one-stage LMM on 26,597 scans the SCZ score changes the rate by −0.28 µm/yr per SD (p = 7 × 10⁻⁴;
+  MDD −0.17, p = 0.04) with no thickness difference at 12.8. The normative rate peaks at 12–14, but the PRS
+  effect is the same before and after (change after 13: p = 0.57 / 0.86), which rules out a phase advance
+  beyond ~1 month per SD. Pubertal stage at the scan does not carry the effect; MDD risk does predict
+  earlier puberty, and earlier puberty faster thinning, but adjusting for puberty leaves PRS → slope unchanged.
+
 **Symptoms** (exploratory; `ahba_pls/` scripts 23–25, 30; Figure 1g)
 
 - Faster global thinning goes with more depressive symptoms by ages 15–17, given baseline
@@ -94,6 +103,7 @@ README_HPC §8)
 |:---|:---|
 | **the cluster genetics: current results, what has been tried, next analyses, the steps to run** | [`genetic_analysis/README_HPC.md`](genetic_analysis/README_HPC.md); every number in [`genetic_analysis/current_results.tsv`](genetic_analysis/current_results.tsv) |
 | what mechanism we are proposing, what would falsify it, and the ranked next directions | [`docs/DIRECTIONS.md`](docs/DIRECTIONS.md) |
+| D2: one-stage PRS × age / PRS × puberty models (timing vs rate) | [`directions/d2_prs_age_puberty/`](directions/d2_prs_age_puberty/README.md) |
 | D4: thinning rate vs cognitive gain, ages 10–16 (NIH Toolbox) | [`directions/d4_cognitive_gain/`](directions/d4_cognitive_gain/README.md) |
 | Figure 1 (phenotype, PRS, symptoms) | [`docs/figures/fig1.png`](docs/figures/fig1.png), generator [`genetic_analysis/fig1.R`](genetic_analysis/fig1.R) |
 | the PRS results on one slide (methods × parcellations, controls) | [`docs/figures/slide_prs_methods_1lmm.png`](docs/figures/slide_prs_methods_1lmm.png) |
@@ -202,6 +212,7 @@ genetic_analysis/  # the cluster genetics: README_HPC.md, config, GENESIS + PRS 
 c4_imputation/     # imputed C4A expression vs the thinning rate
 ahba_pls/          # imaging transcriptomics: PLS of AHBA expression on the ABCD thinning maps,
                    # and its SCZ/MDD enrichment -- self-contained, see ahba_pls/README.md
+directions/        # one sub-directory per direction in docs/DIRECTIONS.md (d2_prs_age_puberty, ...); code, tables, figure, README each
 notebooks/         # explanatory documents, not analysis scripts
 tests/             # pytest suite, incl. provenance and README checks
 legacy/            # superseded: hpc/, hpc_v2/, hpc_v3/ (6.0-vintage genetics), handoff tables

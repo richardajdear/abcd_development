@@ -50,7 +50,7 @@ outside the thickness measure that generated it. Each is a test that can fail:
 
 | # | Prediction | Falsified if |
 |:--|:--|:--|
-| T1 | The PRS effect on the thinning slope depends on age/puberty (a phase advance shifts a curved trajectory, so the effect at 10 differs from the effect at 15; a pure rate scaling gives the same multiple at every age) | PRS × age and PRS × puberty are flat **and** T2 fails |
+| T1 | The PRS effect on the thinning slope depends on age/puberty (a phase advance shifts a curved trajectory, so the effect at 10 differs from the effect at 15; a pure rate scaling gives the same multiple at every age) | PRS × age and PRS × puberty are flat **and** T2 fails. **Tested 2026-09-30, D2: flat.** The normative rate peaks at 12–14, yet the PRS rate effect is same-signed before and after (change after 13: SCZ +0.16 µm/yr/SD, p 0.57; MDD +0.05, p 0.86), there is no level effect at 12.8 (bounds a phase advance to < ~1 month per SD), and PRS × pubertal stage is null given PRS × age. Rate scaling, not a timing shift — see [`directions/d2_prs_age_puberty/`](../directions/d2_prs_age_puberty/README.md). |
 | T2 | The same scores shift other maturational slopes from the same scans in the "more mature" direction: T1w/T2w rising faster, WM FA rising faster, surface area falling faster, puberty earlier | the effect is thickness-specific |
 | T3 | EA is opposite in sign on every index in T2, as it is for thickness | EA is opposite for thickness only |
 | T4 | PRS-related extra thinning is proportional to the normative map (it happens where maturation is happening) | the PRS β map is a flat offset unrelated to dCT under a spin null. *Current evidence leans this way (uniform shift), but the per-parcel maps are noisy; test with the projected phenotype* |
@@ -59,7 +59,7 @@ outside the thickness measure that generated it. Each is a test that can fail:
 | T7 | The SCZ and MDD effects are carried by their *shared* genetic component (transdiagnostic liability): both attenuate in a joint model, the shared/subtracted scores carry the effect, and the EA effect is carried by its cognitive (Cog) rather than non-cognitive (NonCog) part | SCZ-not-MDD and MDD-not-SCZ scores each carry an independent effect, or EA acts through NonCog — then the slope indexes something other than one cognitive-neurodevelopmental axis, and the tempo claim must be stated per disorder |
 | T8 | Faster thinning predicts the age-appropriate SCZ-spectrum phenotype, psychotic-like experiences (PQ-BC), as it predicts depressive symptoms | the slope predicts depressive symptoms only — then the SCZ PRS result is a genetic correlate with no SCZ-relevant phenotypic readout in this window |
 
-If T1–T3 fail the effect is thickness-specific and the tempo reading is wrong;
+T1 has failed on its own: within 9–17 the polygenic effect is a uniform scaling of the rate, so the *phase-advance* version of tempo is out and what remains to test is the *amplitude* version (more cortex lost per year across the whole window) via T2–T3. If T2–T3 also fail the effect is thickness-specific and the tempo reading is wrong;
 if T5–T6 fail the thinning is a marker without consequence; T7 decides whether
 the claim is written as transdiagnostic or disorder-specific. Either outcome of
 each is publishable, which is the point.
@@ -183,6 +183,15 @@ should exceed the thickness slope's (~0.2), which raises every downstream β
 `ph_y_pds`. `tools/age_prs_interaction.R` is the template (README_HPC §4.2).
 Add puberty tempo (PDS slope, or age at PDS stage) as an outcome. **Runs
 locally now.**
+
+**Done 2026-09-30 — [`directions/d2_prs_age_puberty/`](../directions/d2_prs_age_puberty/README.md).**
+One-stage LMM on 26,597 scans / 8,596 children: SCZ PRS −0.28 µm/yr per SD
+(p 7 × 10⁻⁴), MDD −0.17 (p 0.04), no level effect at 12.8; no age dependence
+(hinge-at-13 and quadratic terms null; segment effects same-signed at <12 and
+≥14); PRS × pubertal stage null given PRS × age. MDD PRS predicts earlier
+puberty (+0.055 SD stage at 12.8, p 8 × 10⁻⁷) and earlier puberty predicts faster
+thinning (−0.068 SD/SD), but adjusting for puberty leaves the PRS → slope effect
+unchanged. EA/ALZ/ASD scores were not local; the README gives the rsync.
 
 ### D3. Twin and sibling designs
 

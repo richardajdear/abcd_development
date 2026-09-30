@@ -1,0 +1,150 @@
+disorder	method	arm	model	grp	var1	var2	vcov	sdcor
+MDD	prscs	eur	linear	subject	(Intercept)		0.00186852271663476	0.0432264122572618
+MDD	prscs	eur	linear	subject	age_c		1.39462934990842e-05	0.00373447365756999
+MDD	prscs	eur	linear	subject	(Intercept)	age_c	1.29595101276362e-05	0.0802804861944478
+MDD	prscs	eur	linear	family_id	(Intercept)		0.00268588210213308	0.0518254966414513
+MDD	prscs	eur	linear	site	(Intercept)		0.000168020420697844	0.0129622691184007
+MDD	prscs	eur	linear	Residual			0.000568240026601585	0.0238377856899836
+MDD	prscs	eur	hinge13	subject	(Intercept)		0.00186903283571985	0.0432323124031071
+MDD	prscs	eur	hinge13	subject	age_c		1.39744835696193e-05	0.00373824605525363
+MDD	prscs	eur	hinge13	subject	(Intercept)	age_c	1.34322890132175e-05	0.0831139032309124
+MDD	prscs	eur	hinge13	family_id	(Intercept)		0.00268600907974178	0.0518267216765809
+MDD	prscs	eur	hinge13	site	(Intercept)		0.000168797242449379	0.0129921992922437
+MDD	prscs	eur	hinge13	Residual			0.000567631659442027	0.0238250217091617
+MDD	prscs	eur	puberty	subject	(Intercept)		0.00184214818313821	0.0429202537636744
+MDD	prscs	eur	puberty	subject	age_c		1.13656204316098e-05	0.00337129358431
+MDD	prscs	eur	puberty	subject	(Intercept)	age_c	1.09268692777524e-05	0.075515637379456
+MDD	prscs	eur	puberty	family_id	(Intercept)		0.00270941763677283	0.0520520665946399
+MDD	prscs	eur	puberty	site	(Intercept)		0.000163258831216801	0.0127772779267261
+MDD	prscs	eur	puberty	Residual			0.00057062691402363	0.0238877984340046
+MDD	prscs	pooled	linear	subject	(Intercept)		0.00212804812326251	0.0461307719777429
+MDD	prscs	pooled	linear	subject	age_c		1.73669514978388e-05	0.00416736745414162
+MDD	prscs	pooled	linear	subject	(Intercept)	age_c	1.18616517112043e-05	0.0617010635060092
+MDD	prscs	pooled	linear	family_id	(Intercept)		0.00243504423557498	0.0493461673848637
+MDD	prscs	pooled	linear	site	(Intercept)		0.000170486375876907	0.0130570431521423
+MDD	prscs	pooled	linear	Residual			0.000595735098193288	0.0244076852280852
+MDD	prscs	pooled	hinge13	subject	(Intercept)		0.00212769497756378	0.0461269441602604
+MDD	prscs	pooled	hinge13	subject	age_c		1.73476992825677e-05	0.00416505693629363
+MDD	prscs	pooled	hinge13	subject	(Intercept)	age_c	1.15173660252175e-05	0.0599483925220616
+MDD	prscs	pooled	hinge13	family_id	(Intercept)		0.00243511748429614	0.0493469095718885
+MDD	prscs	pooled	hinge13	site	(Intercept)		0.000170423800411288	0.0130546466980646
+MDD	prscs	pooled	hinge13	Residual			0.000595762690232773	0.0244082504541553
+MDD	prscs	pooled	puberty	subject	(Intercept)		0.00208615622845458	0.0456744592573856
+MDD	prscs	pooled	puberty	subject	age_c		1.50060388912924e-05	0.00387376288526962
+MDD	prscs	pooled	puberty	subject	(Intercept)	age_c	9.42169502851846e-06	0.05325036563884
+MDD	prscs	pooled	puberty	family_id	(Intercept)		0.00248300685945501	0.0498297788421242
+MDD	prscs	pooled	puberty	site	(Intercept)		0.000168392846704733	0.0129766269386437
+MDD	prscs	pooled	puberty	Residual			0.000593620727668675	0.0243643331053545
+MDD	sbrc	eur	linear	subject	(Intercept)		0.00187017788104385	0.043245553309489
+MDD	sbrc	eur	linear	subject	age_c		1.3932032670128e-05	0.00373256381996718
+MDD	sbrc	eur	linear	subject	(Intercept)	age_c	1.3040221022782e-05	0.0807860273520892
+MDD	sbrc	eur	linear	family_id	(Intercept)		0.00268549565044078	0.0518217681138031
+MDD	sbrc	eur	linear	site	(Intercept)		0.000168252864568867	0.012971232191618
+MDD	sbrc	eur	linear	Residual			0.000568265836585345	0.0238383270508932
+MDD	sbrc	eur	hinge13	subject	(Intercept)		0.00187073994064725	0.0432520512883175
+MDD	sbrc	eur	hinge13	subject	age_c		1.39604650445451e-05	0.00373637057109504
+MDD	sbrc	eur	hinge13	subject	(Intercept)	age_c	1.35867361296452e-05	0.0840733763605978
+MDD	sbrc	eur	hinge13	family_id	(Intercept)		0.00268582952451514	0.0518249893826823
+MDD	sbrc	eur	hinge13	site	(Intercept)		0.000169205335282572	0.0130078951134521
+MDD	sbrc	eur	hinge13	Residual			0.000567559393523316	0.0238235050637667
+MDD	sbrc	eur	puberty	subject	(Intercept)		0.00184316415959518	0.0429320877618964
+MDD	sbrc	eur	puberty	subject	age_c		1.1325475670869e-05	0.00336533440698974
+MDD	sbrc	eur	puberty	subject	(Intercept)	age_c	1.09868479160862e-05	0.0760436367628091
+MDD	sbrc	eur	puberty	family_id	(Intercept)		0.00270945888629311	0.0520524628263938
+MDD	sbrc	eur	puberty	site	(Intercept)		0.000163547303234025	0.0127885614215996
+MDD	sbrc	eur	puberty	Residual			0.000570749423523243	0.0238903625657553
+MDD	sbrc	pooled	linear	subject	(Intercept)		0.00212856807628914	0.0461364072754819
+MDD	sbrc	pooled	linear	subject	age_c		1.7357392973821e-05	0.00416622046630048
+MDD	sbrc	pooled	linear	subject	(Intercept)	age_c	1.19725028869428e-05	0.0622872174603558
+MDD	sbrc	pooled	linear	family_id	(Intercept)		0.00243510731471216	0.0493468065300295
+MDD	sbrc	pooled	linear	site	(Intercept)		0.000170402193650515	0.0130538191212578
+MDD	sbrc	pooled	linear	Residual			0.00059573918450579	0.0244077689374877
+MDD	sbrc	pooled	hinge13	subject	(Intercept)		0.00212825329878964	0.0461329957708107
+MDD	sbrc	pooled	hinge13	subject	age_c		1.73377244892154e-05	0.00416385932629999
+MDD	sbrc	pooled	hinge13	subject	(Intercept)	age_c	1.16802150335378e-05	0.0608055375143618
+MDD	sbrc	pooled	hinge13	family_id	(Intercept)		0.00243523406669401	0.0493480908110335
+MDD	sbrc	pooled	hinge13	site	(Intercept)		0.000170414056756219	0.0130542735054931
+MDD	sbrc	pooled	hinge13	Residual			0.000595786017411129	0.0244087283038492
+MDD	sbrc	pooled	puberty	subject	(Intercept)		0.00208644683944887	0.0456776404759361
+MDD	sbrc	pooled	puberty	subject	age_c		1.49975584206979e-05	0.00387266812684716
+MDD	sbrc	pooled	puberty	subject	(Intercept)	age_c	9.54815122569292e-06	0.053976577753639
+MDD	sbrc	pooled	puberty	family_id	(Intercept)		0.00248332683959572	0.0498329894707885
+MDD	sbrc	pooled	puberty	site	(Intercept)		0.000168332978630894	0.0129743199679557
+MDD	sbrc	pooled	puberty	Residual			0.00059360739803482	0.0243640595557231
+SCZ	prscs	eur	linear	subject	(Intercept)		0.00186863656651849	0.0432277291390433
+SCZ	prscs	eur	linear	subject	age_c		1.38789723833648e-05	0.00372544928610829
+SCZ	prscs	eur	linear	subject	(Intercept)	age_c	1.36300480916753e-05	0.0846362301432156
+SCZ	prscs	eur	linear	family_id	(Intercept)		0.0026885698308578	0.0518514207216909
+SCZ	prscs	eur	linear	site	(Intercept)		0.000168924785651362	0.0129971068184947
+SCZ	prscs	eur	linear	Residual			0.000568309024215203	0.0238392328780773
+SCZ	prscs	eur	hinge13	subject	(Intercept)		0.00186903525502624	0.0432323403834009
+SCZ	prscs	eur	hinge13	subject	age_c		1.39105928661798e-05	0.0037296907199096
+SCZ	prscs	eur	hinge13	subject	(Intercept)	age_c	1.39945719341451e-05	0.0867916714444314
+SCZ	prscs	eur	hinge13	family_id	(Intercept)		0.00268861023949451	0.0518518103781778
+SCZ	prscs	eur	hinge13	site	(Intercept)		0.00016948901941431	0.0130187948526087
+SCZ	prscs	eur	hinge13	Residual			0.000567679627816482	0.0238260283684982
+SCZ	prscs	eur	puberty	subject	(Intercept)		0.0018431400841568	0.0429318073711881
+SCZ	prscs	eur	puberty	subject	age_c		1.13255637887917e-05	0.00336534749896525
+SCZ	prscs	eur	puberty	subject	(Intercept)	age_c	1.13561064824218e-05	0.0785996059549576
+SCZ	prscs	eur	puberty	family_id	(Intercept)		0.00271027747858416	0.0520603253791614
+SCZ	prscs	eur	puberty	site	(Intercept)		0.000163855637297963	0.0128006108173776
+SCZ	prscs	eur	puberty	Residual			0.000570691778802968	0.0238891560923145
+SCZ	prscs	pooled	linear	subject	(Intercept)		0.00212740733371407	0.0461238260957834
+SCZ	prscs	pooled	linear	subject	age_c		1.73330865874386e-05	0.00416330236560337
+SCZ	prscs	pooled	linear	subject	(Intercept)	age_c	1.17878722629961e-05	0.0613863967211665
+SCZ	prscs	pooled	linear	family_id	(Intercept)		0.0024356902079795	0.049352712265685
+SCZ	prscs	pooled	linear	site	(Intercept)		0.000170462882744097	0.013056143486654
+SCZ	prscs	pooled	linear	Residual			0.000595725475914508	0.0244074881115306
+SCZ	prscs	pooled	hinge13	subject	(Intercept)		0.00212706115315269	0.0461200732127855
+SCZ	prscs	pooled	hinge13	subject	age_c		1.73099137508298e-05	0.00416051844736083
+SCZ	prscs	pooled	hinge13	subject	(Intercept)	age_c	1.15194874962969e-05	0.0600337839127891
+SCZ	prscs	pooled	hinge13	family_id	(Intercept)		0.00243588683157183	0.0493547042496643
+SCZ	prscs	pooled	hinge13	site	(Intercept)		0.000170506818679602	0.0130578259553267
+SCZ	prscs	pooled	hinge13	Residual			0.000595785521459389	0.0244087181445358
+SCZ	prscs	pooled	puberty	subject	(Intercept)		0.00208545638813888	0.0456667974368565
+SCZ	prscs	pooled	puberty	subject	age_c		1.50650162052602e-05	0.00388136782658643
+SCZ	prscs	pooled	puberty	subject	(Intercept)	age_c	9.24331445981918e-06	0.0521485659869749
+SCZ	prscs	pooled	puberty	family_id	(Intercept)		0.00248339236471431	0.0498336469136497
+SCZ	prscs	pooled	puberty	site	(Intercept)		0.000168258027568749	0.0129714312074169
+SCZ	prscs	pooled	puberty	Residual			0.000593341593366136	0.0243586040931359
+SCZ	sbrc	eur	linear	subject	(Intercept)		0.00186916885214368	0.0432338854620271
+SCZ	sbrc	eur	linear	subject	age_c		1.39226132969679e-05	0.00373130182335441
+SCZ	sbrc	eur	linear	subject	(Intercept)	age_c	1.36980681765651e-05	0.0849130959012256
+SCZ	sbrc	eur	linear	family_id	(Intercept)		0.00268652653579802	0.0518317136104724
+SCZ	sbrc	eur	linear	site	(Intercept)		0.000168682256534253	0.0129877733478165
+SCZ	sbrc	eur	linear	Residual			0.000568166071152676	0.0238362344163812
+SCZ	sbrc	eur	hinge13	subject	(Intercept)		0.00186954968254574	0.0432382895423228
+SCZ	sbrc	eur	hinge13	subject	age_c		1.39482422041493e-05	0.00373473455604937
+SCZ	sbrc	eur	hinge13	subject	(Intercept)	age_c	1.40840798822193e-05	0.0872168172493442
+SCZ	sbrc	eur	hinge13	family_id	(Intercept)		0.00268665299849844	0.0518329335316692
+SCZ	sbrc	eur	hinge13	site	(Intercept)		0.000169274251308851	0.0130105438513865
+SCZ	sbrc	eur	hinge13	Residual			0.000567608747611489	0.0238245408688497
+SCZ	sbrc	eur	puberty	subject	(Intercept)		0.00184368329664374	0.0429381333623592
+SCZ	sbrc	eur	puberty	subject	age_c		1.13542630218774e-05	0.00336960873424162
+SCZ	sbrc	eur	puberty	subject	(Intercept)	age_c	1.13940911973227e-05	0.0787511773673178
+SCZ	sbrc	eur	puberty	family_id	(Intercept)		0.0027083283370755	0.0520416019841386
+SCZ	sbrc	eur	puberty	site	(Intercept)		0.000163663859759099	0.0127931176715881
+SCZ	sbrc	eur	puberty	Residual			0.000570641346195098	0.0238881005145888
+SCZ	sbrc	pooled	linear	subject	(Intercept)		0.00212716112633205	0.0461211570359207
+SCZ	sbrc	pooled	linear	subject	age_c		1.732753143739e-05	0.00416263515545021
+SCZ	sbrc	pooled	linear	subject	(Intercept)	age_c	1.18350269859041e-05	0.0616454051107078
+SCZ	sbrc	pooled	linear	family_id	(Intercept)		0.00243594403190301	0.0493552837283204
+SCZ	sbrc	pooled	linear	site	(Intercept)		0.000170160899725441	0.0130445735739211
+SCZ	sbrc	pooled	linear	Residual			0.000595686293298259	0.0244066854222006
+SCZ	sbrc	pooled	hinge13	subject	(Intercept)		0.00212679791154557	0.0461172192520925
+SCZ	sbrc	pooled	hinge13	subject	age_c		1.73036714176384e-05	0.0041597681927769
+SCZ	sbrc	pooled	hinge13	subject	(Intercept)	age_c	1.15803840281906e-05	0.0603657664706688
+SCZ	sbrc	pooled	hinge13	family_id	(Intercept)		0.0024361501710551	0.0493573720031273
+SCZ	sbrc	pooled	hinge13	site	(Intercept)		0.00017016546921827	0.0130447487219291
+SCZ	sbrc	pooled	hinge13	Residual			0.000595741554546185	0.0244078174883824
+SCZ	sbrc	pooled	puberty	subject	(Intercept)		0.00208504559059495	0.0456622994448916
+SCZ	sbrc	pooled	puberty	subject	age_c		1.50747660322149e-05	0.00388262360166613
+SCZ	sbrc	pooled	puberty	subject	(Intercept)	age_c	9.24198826751583e-06	0.0521293542207203
+SCZ	sbrc	pooled	puberty	family_id	(Intercept)		0.00248386408307415	0.0498383796192668
+SCZ	sbrc	pooled	puberty	site	(Intercept)		0.000167981927909032	0.0129607842320221
+SCZ	sbrc	pooled	puberty	Residual			0.000593273978689784	0.0243572161522984
+none	none	all	pds_tempo_lmm	subject	(Intercept)		0.0903942297113052	0.300656331566966
+none	none	all	pds_tempo_lmm	subject	age_c		0.00477132865642981	0.0690748047874897
+none	none	all	pds_tempo_lmm	subject	(Intercept)	age_c	-0.00859663499716024	-0.413941021563577
+none	none	all	pds_tempo_lmm	site	(Intercept)		0.00118409520910874	0.0344106845196188
+none	none	all	pds_tempo_lmm	Residual			0.138682654424014	0.372401200889596
