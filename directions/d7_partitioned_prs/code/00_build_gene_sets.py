@@ -26,7 +26,9 @@ Sets, with the roles DIRECTIONS.md D7 pre-registered (README.md "Pre-registratio
                S1  snRNA-seq maturation PC1 top | bottom decile (Herring V3;
                    top = neuronal/synaptic pole, bottom = oligodendrocyte pole)
                S2  AHBA C3 top | bottom decile
-               S3  AHBA C1 and C2 top | bottom deciles (controls for S2)
+               S3  AHBA C1 and C2 top | bottom deciles (comparison axes, NOT negative
+                   controls: C1-C3 are all hypothesised mediators and several
+                   poles are themselves SCZ-enriched)
                S4  ABCD PLS2 (HCP-MMP, base AHBA) top | bottom decile
                S5  brain cell-type marker genes (union of Seidlitz classes), the
                    background that K2 is drawn from

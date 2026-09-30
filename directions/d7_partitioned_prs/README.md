@@ -74,7 +74,7 @@ DIRECTIONS.md D7.
 | K4 | adolescent-window maturation genes from D6 | slot | primary once D6 exists; append rows to `gene_sets/d7_gene_sets.tsv` and rerun steps 3 and 5 |
 | S0 | SCZ locus pool (Trubetskoy 2022 ST12) | 398 | secondary; also a mechanical check that f_enrich ≫ 1 for the SCZ score |
 | S1 | snRNA-seq maturation PC1 top vs bottom decile (top = neuronal/synaptic, bottom = oligodendrocyte), snRNA-seq universe | 1,729 each | secondary |
-| S2–S4 | AHBA C3, C1, C2 and ABCD PLS2 (HCP base) top vs bottom deciles, AHBA universe | 663 / 650 | secondary (the former C3-D) |
+| S2–S4 | AHBA C3, C1, C2 and ABCD PLS2 (HCP base) top vs bottom deciles, AHBA universe | 663 / 650 | secondary (the former C3-D). C1 and C2 are comparison axes, **not negative controls**: all three AHBA components are hypothesised mediators, and several poles are themselves SCZ-enriched. The null is the matched random sets. |
 | S5 | union of Seidlitz cell-type markers | 4,591 | secondary; the background of K2 |
 
 - **Primary readout.** HCP-MMP `global_slope_1lmm`, matched cells (rule 4):
