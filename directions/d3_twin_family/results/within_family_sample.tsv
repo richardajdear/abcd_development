@@ -1,0 +1,4 @@
+set	n_children	n_families	size_2	size_3plus
+pooled arm, genotyped + imaged	8596			
+after dropping MZ co-twins	8325			
+families with >= 2 children	2214	1087.0	1049.0	38.0

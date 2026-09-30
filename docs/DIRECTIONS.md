@@ -221,6 +221,15 @@ Three things become possible:
    confounding is removed. No PRS design can do this; it is the closest thing
    to a causal test of slope → symptom that observational data allow.
 
+**Status (2026-09-30): run.** Code and tables in
+[`directions/d3_twin_family/`](../directions/d3_twin_family/README.md). In brief: twin
+h² of the thinning rate 0.46 [0.37, 0.54] with C = 0 (vs SNP h² 0.18). Its genetic
+correlation with puberty timing is rA = −0.24 [−0.33, −0.15] (earlier puberty, faster
+thinning; first support for T2), and it shares no detectable genetics with symptom change.
+The slope–symptom association does not shrink within 250 MZ pairs (T6 not falsified,
+wide CIs). Within-family PRS is not assessable at 1,087 families (MDE ≈ 3–4× the
+population effect).
+
 ### D4. Thinning rate → longitudinal cognitive gain
 
 *Buys:* T5. *Needs:* NIH Toolbox tables (`nc_y_nihtb`; in the release, not

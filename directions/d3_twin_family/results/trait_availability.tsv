@@ -1,0 +1,14 @@
+trait	n_children	MZ_pairs	DZ_pairs	SIB_pairs
+dCT_r	8716	271	432	579
+dCT_rq	8716	271	432	579
+CT0_r	8716	271	432	579
+dT1T2_r	8505	265	410	557
+pub_timing_r	8713	271	432	579
+pub_tempo_r	8503	266	427	559
+depress_chg_r	8181	250	418	546
+internal_chg_r	8189	250	418	546
+external_chg_r	8185	250	418	546
+pfactor_chg_r	8162	249	418	546
+fluid_gain_r	5931	206	341	314
+cryst_gain_r	6156	211	349	335
+total_gain_r	5891	206	340	308

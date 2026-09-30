@@ -1,0 +1,15 @@
+scenario	param	truth	estimate	sd
+n = 20,000 + 20,000 pairs, 5 reps	h2_1	0.5	0.5061	0.007036
+n = 20,000 + 20,000 pairs, 5 reps	h2_2	0.3	0.2992	0.006651
+n = 20,000 + 20,000 pairs, 5 reps	c2_1	0.2	0.1939	0.007296
+n = 20,000 + 20,000 pairs, 5 reps	c2_2	0.1	0.09861	0.00566
+n = 20,000 + 20,000 pairs, 5 reps	rA	0.6	0.6098	0.01899
+n = 20,000 + 20,000 pairs, 5 reps	rC	0	-0.03223	0.03441
+n = 20,000 + 20,000 pairs, 5 reps	rE	0.2	0.2014	0.007617
+ABCD size (271 MZ, 432 DZ, 10% missing), 50 reps	h2_1	0.5	0.5022	0.08724
+ABCD size (271 MZ, 432 DZ, 10% missing), 50 reps	h2_2	0.3	0.3082	0.09626
+ABCD size (271 MZ, 432 DZ, 10% missing), 50 reps	c2_1	0.2	0.1958	0.07555
+ABCD size (271 MZ, 432 DZ, 10% missing), 50 reps	c2_2	0.1	0.09362	0.07476
+ABCD size (271 MZ, 432 DZ, 10% missing), 50 reps	rA	0.6	0.6225	0.2299
+ABCD size (271 MZ, 432 DZ, 10% missing), 50 reps	rC	0	0.2681	0.6082
+ABCD size (271 MZ, 432 DZ, 10% missing), 50 reps	rE	0.2	0.2052	0.07041

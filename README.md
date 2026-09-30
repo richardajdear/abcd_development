@@ -115,6 +115,7 @@ README_HPC §8)
 |:---|:---|
 | **the cluster genetics: current results, what has been tried, next analyses, the steps to run** | [`genetic_analysis/README_HPC.md`](genetic_analysis/README_HPC.md); every number in [`genetic_analysis/current_results.tsv`](genetic_analysis/current_results.tsv) |
 | what mechanism we are proposing, what would falsify it, and the ranked next directions | [`docs/DIRECTIONS.md`](docs/DIRECTIONS.md) |
+| twin and family designs (D3): twin h², genetic correlations, within-family PRS, co-twin control | [`directions/d3_twin_family/README.md`](directions/d3_twin_family/README.md) |
 | D2: one-stage PRS × age / PRS × puberty models (timing vs rate) | [`directions/d2_prs_age_puberty/`](directions/d2_prs_age_puberty/README.md) |
 | D4: thinning rate vs cognitive gain, ages 10–16 (NIH Toolbox) | [`directions/d4_cognitive_gain/`](directions/d4_cognitive_gain/README.md) |
 | D5: adversity/SES × polygenic risk on the thinning rate; direction of the thinning–symptom link | [`directions/d5_adversity_direction/`](directions/d5_adversity_direction/README.md) |

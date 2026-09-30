@@ -1,0 +1,4 @@
+pair_type	n_pairs	r_dCT_raw	r_dCT_resid	r_dCT_resid_quality	n_scan_pairs	r_scan_resid	r_logtopo	age_gap_days	mean_blup_reliability
+MZ	271	0.5528	0.4306	0.4246	720	0.1493	0.3045	0	0.3029
+DZ	432	0.2966	0.1917	0.1963	1009	0.176	0.163	0	0.3029
+SIB	579	0.1305	0.1074	0.1092	1218	-0.001417	0.2152	476.1	0.3029

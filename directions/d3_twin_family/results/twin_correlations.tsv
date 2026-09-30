@@ -1,0 +1,14 @@
+trait	label	rMZ	nMZ	rDZ	nDZ	rSIB	nSIB	h2_falconer
+dCT_r	thinning rate (dCT; higher = slower)	0.4306	271	0.1917	432	0.1074	579	0.4777
+dCT_rq	thinning rate, scan-quality adjusted	0.4246	271	0.1963	432	0.1092	579	0.4565
+CT0_r	cortical thickness (CT0)	0.8905	271	0.5016	432	0.4408	579	0.7778
+dT1T2_r	T1w/T2w slope	0.5315	265	0.111	410	0.1278	557	0.841
+pub_timing_r	puberty timing	0.9254	271	0.5442	432	0.4591	579	0.7623
+pub_tempo_r	puberty tempo	0.8077	266	0.4929	427	0.2046	559	0.6297
+depress_chg_r	CBCL depressive change	0.5699	250	0.2347	418	0.2655	546	0.6704
+internal_chg_r	CBCL internalising change	0.5627	250	0.3279	418	0.343	546	0.4695
+external_chg_r	CBCL externalising change	0.5582	250	0.3289	418	0.3437	546	0.4586
+pfactor_chg_r	CBCL p-factor change	0.5547	249	0.3504	418	0.3501	546	0.4086
+fluid_gain_r	fluid cognition gain	0.125	206	0.2739	341	0.1489	314	-0.2977
+cryst_gain_r	crystallised cognition gain	0.3421	211	0.1724	349	0.1038	335	0.3393
+total_gain_r	total cognition gain	0.1778	206	0.2096	340	0.1626	308	-0.06356
