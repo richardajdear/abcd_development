@@ -1,6 +1,6 @@
 # Directions memo — what mechanism are we proposing, and what would test it?
 
-*2026-09-28. A planning document, not a results document. Every number quoted
+*2026-09-28, revised 2026-09-30 (§§2.3–2.4, T7–T8, D7–D8, §6). A planning document, not a results document. Every number quoted
 here is from `README.md` / `genetic_analysis/current_results.tsv` as of this
 date; nothing below has been run.*
 
@@ -56,10 +56,13 @@ outside the thickness measure that generated it. Each is a test that can fail:
 | T4 | PRS-related extra thinning is proportional to the normative map (it happens where maturation is happening) | the PRS β map is a flat offset unrelated to dCT under a spin null. *Current evidence leans this way (uniform shift), but the per-parcel maps are noisy; test with the projected phenotype* |
 | T5 | Faster thinners show smaller longitudinal cognitive gains, given baseline (premature closure of plasticity) | gains are unrelated or larger |
 | T6 | Within MZ pairs, the faster-thinning twin has more later symptoms (slope → symptom is not explained by shared genes/environment) | the MZ-difference association is zero |
+| T7 | The SCZ and MDD effects are carried by their *shared* genetic component (transdiagnostic liability): both attenuate in a joint model, the shared/subtracted scores carry the effect, and the EA effect is carried by its cognitive (Cog) rather than non-cognitive (NonCog) part | SCZ-not-MDD and MDD-not-SCZ scores each carry an independent effect, or EA acts through NonCog — then the slope indexes something other than one cognitive-neurodevelopmental axis, and the tempo claim must be stated per disorder |
+| T8 | Faster thinning predicts the age-appropriate SCZ-spectrum phenotype, psychotic-like experiences (PQ-BC), as it predicts depressive symptoms | the slope predicts depressive symptoms only — then the SCZ PRS result is a genetic correlate with no SCZ-relevant phenotypic readout in this window |
 
 If T1–T3 fail the effect is thickness-specific and the tempo reading is wrong;
-if T5–T6 fail the thinning is a marker without consequence. Either outcome is
-publishable, which is the point.
+if T5–T6 fail the thinning is a marker without consequence; T7 decides whether
+the claim is written as transdiagnostic or disorder-specific. Either outcome of
+each is publishable, which is the point.
 
 ### 2.2 Pruning or myelination — the two accounts and their imaging signatures
 
@@ -83,6 +86,61 @@ centring. The question becomes: on which axis does the PRS act, and which
 co-changes accompany the risk-related thinning? C4A imputation being null is a
 mild strike against complement-mediated pruning as the risk-carrying route;
 it says nothing about myelination.
+
+### 2.3 The critical-period account of schizophrenia: how established is each link?
+
+Larsen & Luna (2018, *Neurosci Biobehav Rev*, §"Schizophrenia") synthesise the
+pruning and thinning literatures as: persistently immature cortical molecular
+state → reduced perineuronal nets (PNNs) → prolonged plasticity → excess
+pruning → excess thinning → connectivity and cognitive deficits. The links are
+not equally supported, and the paper should lean only on the ones that are.
+
+| link | evidence | status |
+|:--|:--|:--|
+| "Persistently immature" molecular state (D1/D2, NR1/NR3A, PV, GABA-A α1/α2 ratios at pre-adolescent levels; Catts et al. 2013) | adult, chronic, medicated post-mortem tissue; the "immature" reading is one interpretation of marker ratios that also have activity-dependent explanations (e.g. PV downregulation) | hypothesis |
+| PNN reduction in SCZ (Mauney 2013; Enwright 2016; Berretta 2015) | small post-mortem series (~10–20 per group; amygdala, PFC, entorhinal) from two labs | replicated, low n; cause vs consequence unknown |
+| PNN → plasticity (Pizzorusso 2002; Carulli 2010) | causal rodent work: chondroitinase reopens the visual-cortex critical period | established in rodent sensory cortex; PFC/human by analogy |
+| prolonged plasticity → *more* pruning | largely conceptual (Feinberg 1982 lineage). Plasticity is not pruning: adolescent pruning is activity-dependent and microglia/complement-mediated. Genetic support for a pruning route is C4 (Sekar 2016) and SCZ-iPSC microglia eliminating more synapses (Sellgren 2019), neither of which involves PNNs | weakest link |
+| fewer synapses in SCZ | post-mortem L3 DLPFC spine loss replicated (Glantz & Lewis 2000; Konopaske 2014); in vivo SV2A PET reduced in frontal/ACC with d ≈ 0.8–0.9 in chronic patients (Onwordi 2020) and in antipsychotic-naïve first-episode patients (Onwordi 2023) | established for adult patients; whether via excess *adolescent* pruning has never been measured — no human developmental synaptic-density series exists |
+| synapse loss → MRI thinning | the gap Howes & Onwordi (2023) name. Mouse: spine density tracked the VBM signal but cortical thickness did not change (Keifer 2015); cellular parameters explain ~36 % of GMV variance and spine plasticity did not thicken cortex (Asan 2021); spines are a fraction of a percent of GM volume. Human: developmental thinning tracks myelination (Natu 2019) and the expression profiles of CA1-pyramidal, astrocyte and microglia marker genes, with the sign reversed in ageing (Vidal-Piñeiro 2020; Parker 2020) | not established; the imaging–histology bridge is the weak point |
+| excess thinning at psychosis onset (Cannon 2015, NAPLS; ENIGMA case-control maps) | steeper PFC thinning in converters, correlated with pro-inflammatory cytokines | established as MRI phenomenon; cellular basis inferred |
+
+The solid parts are the two ends — adult patients have fewer synaptic markers;
+PNNs gate plasticity in rodents — and the developmental middle is inference.
+That is where a longitudinal multimodal design (D1) can contribute and thickness
+alone cannot. Two further consequences: (i) the PNN/GABA-immaturity part of the
+account is SCZ-specific and our data do not speak to it; the synaptic-pace part
+is shared with depression (SV2A is reduced in MDD too, Holmes 2019; stress-
+induced dendritic atrophy is a core MDD model) and our data do; (ii) the
+imaging–histology bridge is not made by swapping thickness for another
+morphometric — see §2.4.
+
+### 2.4 Should we measure grey-matter "density" rather than thickness?
+
+Howes & Onwordi note that Keifer et al. saw spine-density change in VBM signal
+but not in thickness, and suggest density is the closer proxy. Two cautions.
+VBM "density" is a modulated tissue-probability map, not a histological
+density: it mixes thickness, folding and partial-volume/intensity effects at the
+GM/WM boundary, and Keifer's VBM was post-mortem mouse tissue at ~1 mm cortical
+thickness. Whatever it indexed there is plausibly the *intensity* component —
+which T1w/T2w and grey/white contrast measure more directly. And it inherits
+the same interpretive ambiguity as thickness (Asan 2021).
+
+FreeSurfer does not produce VBM. What it produces, and what is nearly free:
+
+- **volume** per parcel (= thickness × area): DK volume is a release table;
+  HCP-MMP volume is already extracted on CSD3 by `hcp_stats.py`, not yet
+  copied. Volume and area slopes decompose thinning into a boundary shift vs
+  a surface change;
+- **grey/white contrast** (`?h.w-g.pct.mgh`): a FreeSurfer output, parcellated
+  with `mri_segstats` in one CSD3 pass over the existing tree;
+- **T1 and T2 GM intensity** per DK parcel: vendored now.
+
+True VBM (CAT12/SPM on ~34k raw T1s) is feasible on CSD3 but is a new pipeline
+with its own scanner-harmonisation problems and answers a less specific
+question than the intensity measures. Decision: volume + GWC + T1w/T2w slopes
+first (D1); VBM only if those are suggestive or a reviewer asks for the
+Keifer-style measure.
 
 ## 3. Directions, with what each buys, what it needs, and where it runs
 
@@ -110,10 +168,14 @@ it says nothing about myelination.
   `mri_segstats` in the same job. Do the DK version first; only build HCP-MMP
   if the DK result needs the resolution.
 
-*Analysis:* (i) fit slopes per modality with the settled specification;
-(ii) within-child, across parcels, partial correlation of dCT with dT1w/T2w
-and dGWC; (iii) PRS panel (SCZ, MDD, EA, ALZ±APOE) → each modality slope;
-(iv) common-factor model across modality slopes, PRS → factor vs residual.
+*Analysis:* (i) fit slopes per modality with the settled specification,
+including volume and area so thinning decomposes into boundary shift vs
+surface change (§2.4); (ii) within-child, across parcels, partial correlation
+of dCT with dT1w/T2w and dGWC; (iii) PRS panel (SCZ, MDD, EA, ALZ±APOE) → each
+modality slope; (iv) common-factor model across modality slopes, PRS → factor
+vs residual. The factor score is also the **tempo composite**: its reliability
+should exceed the thickness slope's (~0.2), which raises every downstream β
+(D2–D5, D7) more than any change on the genetic side can.
 
 ### D2. Timing versus rate: one-stage PRS × age, PRS × puberty
 
@@ -188,13 +250,91 @@ the window across the two datasets (Herring, Velmeshev/U01), and borrow the
 window definition from bulk time-courses with far more donors (BrainSpan,
 PsychENCODE developmental) before trusting it in the snRNA-seq.
 
-### D7. Partitioned polygenic scores
+### D7. Partitioned polygenic scores from the single-cell programme
 
-Already planned (README_HPC §4.4, §8.3 C3-D). Run as a *directional* check on
-D1 and D6 — synaptic vs oligodendrocyte vs C3-pole partitions against random
-partitions of equal SNP count — not as the route to the mechanism. With
-β_total ≈ −0.03 each partition carries ~−0.01; only the contrast is testable.
-HPC.
+*Buys:* the one test that closes the single-cell → genetics → imaging triangle
+at the individual level. The informative result is a partition whose
+association with the slope (or symptoms) is *stronger* than the full score's,
+relative to size-matched random partitions — that would say we have found the
+molecular pathways that are actually predictive, not just enriched.
+
+*Power arithmetic, so the design is honest about it.* The SE of a PRS → slope
+β depends on n and the outcome, not on the score: ≈ 0.011 in the pooled arm
+for any partition. If the thinning-relevant genetic signal is a component of
+disorder liability, and a partition captures a share *s* of that signal while
+carrying a fraction *f* of the disorder's SNP variance, then
+β_partition ≈ β_full × s/√f:
+
+| s (share of thinning signal) | f (share of disorder h²) | β_partition / β_full | detectable vs full score? |
+|:--|:--|:--|:--|
+| 1.0 | 0.25 | 2.0 (0.03 → 0.06) | yes |
+| 0.75 | 0.25 | 1.5 (0.03 → 0.045) | marginal (~1.5 SE; the scores are correlated) |
+| 0.5 | 0.25 | 1.0 | no gain |
+
+So only **coarse partitions with strong enrichment** are testable: most of the
+thinning signal has to sit in a minority of the genome. Fine-grained pathway
+scans will return noise and must not be run as discovery.
+
+*Design:*
+
+1. Pre-specify three or four contrasts: brain-expressed vs not (positive
+   control; must enrich); neuronal vs glial; the adolescent-window maturation
+   genes from D6 vs the rest of the axis; synaptic (SynGO) vs
+   oligodendrocyte/myelin (the §2.2 discrimination). The ST12 locus genes and
+   the C3 poles (README_HPC §4.4, §8.3 C3-D) stay as secondary contrasts.
+2. Partition scores with PRS-CS or SBayesRC weights restricted to each
+   partition and its complement (PRSet, or SBayesRC annotation-partitioned
+   weights).
+3. Null: random partitions matched on SNP count **and** on share of disorder
+   h². Report the enrichment ratio β_partition / β_expected with a CI — one
+   interpretable number per contrast, not a p-value sweep.
+4. Run the same partitions against **symptoms** in the full ~11k (no imaging
+   needed; the MDD-score → depressive-symptom effect is somewhat larger than
+   the slope effect), and against the D1 tempo composite once it exists.
+
+*Where the power actually is.* The single-cell → genetics link is powered by
+the disorder GWAS (n ≈ 10⁵): are adolescent-window, cell-type-resolved
+programme genes enriched for SCZ/MDD heritability (S-LDSC / MAGMA)? That is
+already partly done with C3 weights (`ahba_pls/`, disorder panel) and should be
+redone with the D6 gene sets. The defensible architecture is then: single-cell
+names the programme; the disorder GWAS shows the programme carries risk; ABCD
+shows polygenic risk shifts the tempo of the process the programme executes;
+the partitioned PRS is the one individual-level check, pre-registered, and
+reported as underpowered if that is what it is. HPC.
+
+### D8. Specificity: schizophrenia, depression, and the direction of EA
+
+*Buys:* T7 and T8 — whether the paper is written as transdiagnostic or
+disorder-specific. SCZ–MDD rg ≈ 0.3–0.35 and individual PRS correlation
+≈ 0.1–0.15, so equal βs are consistent with a shared component *or* two
+separate routes. *Needs:* existing scores; public summary statistics for the
+derived GWAS; PQ-BC (in the release, not vendored). **Local**, apart from
+scoring the new summary statistics, which follows the existing PRS pipeline.
+
+1. **Joint model** (README_HPC §4.1): SCZ + MDD + EA + ALZ-noAPOE + APOE ε4 in
+   one regression on the slope. Mutual attenuation → shared; independence →
+   separate.
+2. **Subtracted and shared scores.** GWAS-by-subtraction (Demange 2021) or
+   mtCOJO for SCZ-conditional-on-MDD and MDD-conditional-on-SCZ; a shared
+   score from a cross-disorder GWAS (PGC-CDG2 2019) or a genomic-SEM factor
+   GWAS (Grotzinger 2022: psychotic vs internalising factors). Score each and
+   test on the slope and the tempo composite. This directly asks "is it the
+   shared part".
+3. **EA split into Cog and NonCog** (Demange 2021; summary statistics public).
+   Cog is negatively genetically correlated with SCZ, NonCog positively. If
+   slower thinning tracks Cog, the triad SCZ/MDD/EA collapses onto one
+   cognitive-neurodevelopmental axis; if NonCog, it is something else
+   (personality/SES-like), and the SES analysis in D5 becomes the priority.
+4. **Psychotic-like experiences** (PQ-BC, yearly) as the age-appropriate
+   SCZ-spectrum outcome: slope → PLEs at 15–17 given baseline, alongside the
+   depressive-symptom result (T8).
+
+*Framing.* SCZ+, MDD+, ALZ/APOE+, EA− with nothing on baseline thickness is the
+pattern of a **transdiagnostic liability**, not a disorder mechanism. It agrees
+with ENIGMA's shared pyramidal-cell/dendritic thinning signature across six
+disorders (Patel et al. 2021), and synaptic loss is itself not SCZ-specific
+(§2.3). Write the paper that way, and let items 1–3 say how much, if anything,
+is disorder-specific.
 
 ### Not recommended
 
@@ -204,26 +344,53 @@ at this n; further attempts to make the regional PRS map resemble C3.
 ## 4. Suggested order
 
 1. D2 (days, local, nothing to fetch) — establishes whether we are looking at
-   timing or rate before anything else is built.
+   timing or rate before anything else is built. D8 item 1 (joint model) runs
+   in the same session on the same export.
 2. D1 on DK with the vendored T1/T2 tables (days, local) — the first
-   myelination-vs-neuropil readout; decide from it whether HCP-MMP T1w/T2w
-   and RSI are worth a CSD3 job.
-3. Fetch NIH Toolbox, area/volume, DTI/RSI, adversity tables in one pass
-   (needs release access) → D4, D5, remainder of D1.
-4. D3 twin models on whatever slopes exist by then (local, R).
-5. D6 in the snRNA-seq repo, in parallel.
-6. D7 on HPC when the C3-axis pipeline (§8) is otherwise finished.
+   myelination-vs-neuropil readout; decide from it whether HCP-MMP T1w/T2w,
+   GWC and RSI are worth a CSD3 job.
+3. Fetch NIH Toolbox, area/volume, DTI/RSI, adversity, PQ-BC tables in one
+   pass (needs release access) → D4, D5, D8 item 4, remainder of D1 including
+   the tempo composite.
+4. D8 items 2–3: obtain Cog/NonCog, subtracted and cross-disorder summary
+   statistics, score with the existing PRS pipeline (HPC), test locally.
+5. D3 twin models on whatever slopes exist by then (local, R).
+6. D6 in the snRNA-seq repo, in parallel; its gene sets feed D7.
+7. D7 on HPC, pre-registered contrasts only, once D6 gene sets and the tempo
+   composite exist.
 
 ## 5. Revised arc if the tempo reading holds
 
 - **Fig 1** (unchanged): individual thinning rate tracks polygenic risk in
   both directions (SCZ/MDD faster, EA slower), not baseline thickness, and
   tracks later symptoms.
-- **Fig 2 — tempo:** PRS × age/puberty, multimodal slopes, twin genetic
-  correlations; the process is mostly myelin / mostly neuropil / both.
+- **Fig 2 — tempo:** PRS × age/puberty, multimodal slopes and the tempo
+  composite, twin genetic correlations; the process is mostly myelin / mostly
+  neuropil / both.
 - **Fig 3 — programme:** the maturation programme across adolescence
   (snRNA-seq, cell-type resolved), its adult spatial footprint (C3), its match
-  to the normative thinning map, its disorder enrichment — stated as
-  group-level, with the null individual-level C3 tests reported.
-- **Fig 4 — consequence:** faster thinning → smaller cognitive gain, more
-  depressive symptoms; MZ-difference test.
+  to the normative thinning map, its disorder enrichment in the disorder
+  GWAS, and the pre-registered partitioned-PRS check — stated as group-level
+  where it is, with the null individual-level C3 tests reported.
+- **Fig 4 — consequence and specificity:** faster thinning → smaller
+  cognitive gain, more depressive symptoms and PLEs; MZ-difference test;
+  shared vs disorder-specific scores and Cog/NonCog.
+
+## 6. References cited in this memo
+
+Asan 2021 *Sci Rep* 11:4234 · Berretta 2015 *Neural Plast* · Cannon 2015
+*Biol Psychiatry* 77:147 · Carulli 2010 *Brain* 133:2331 · Catts 2013 *Front
+Cell Neurosci* 7:60 · Demange 2021 *Nat Genet* 53:35 · Enwright 2016
+*Neuropsychopharmacology* 41:2206 · Feinberg 1982 *J Psychiatr Res* 17:319 ·
+Glantz & Lewis 2000 *Arch Gen Psychiatry* 57:65 · Grotzinger 2022 *Nat Genet*
+54:548 · Holmes 2019 *Nat Commun* 10:1529 · Howes & Onwordi 2023 *Mol
+Psychiatry* 28:1843 · Keifer 2015 *Nat Commun* 6:7582 · Konopaske 2014 *JAMA
+Psychiatry* 71:1323 · Larsen & Luna 2018 *Neurosci Biobehav Rev* 94:179 ·
+Mauney 2013 *Biol Psychiatry* 74:427 · Natu 2019 *PNAS* 116:20750 · Onwordi
+2020 *Nat Commun* 11:246 · Onwordi 2023 *Biol Psychiatry* 95:639 · Parker 2020
+*JAMA Psychiatry* 77:1127 · Patel 2021 *JAMA Psychiatry* 78:47 · PGC-CDG2 2019
+*Cell* 179:1469 · Pizzorusso 2002 *Science* 298:1248 · Sekar 2016 *Nature*
+530:177 · Sellgren 2019 *Nat Neurosci* 22:374 · Shaw 2006 *Nature* 440:676 ·
+Tooley 2021 *Nat Rev Neurosci* 22:372 · Vidal-Piñeiro 2020 *Sci Rep* 10:21803
+· Whitaker 2016 *PNAS* 113:9105. Volume/page numbers are from memory and
+should be checked before any of these enter a manuscript.
