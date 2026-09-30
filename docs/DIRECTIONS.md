@@ -378,19 +378,34 @@ at this n; further attempts to make the regional PRS map resemble C3.
 
 ## 6. References cited in this memo
 
-Asan 2021 *Sci Rep* 11:4234 · Berretta 2015 *Neural Plast* · Cannon 2015
-*Biol Psychiatry* 77:147 · Carulli 2010 *Brain* 133:2331 · Catts 2013 *Front
-Cell Neurosci* 7:60 · Demange 2021 *Nat Genet* 53:35 · Enwright 2016
-*Neuropsychopharmacology* 41:2206 · Feinberg 1982 *J Psychiatr Res* 17:319 ·
-Glantz & Lewis 2000 *Arch Gen Psychiatry* 57:65 · Grotzinger 2022 *Nat Genet*
-54:548 · Holmes 2019 *Nat Commun* 10:1529 · Howes & Onwordi 2023 *Mol
-Psychiatry* 28:1843 · Keifer 2015 *Nat Commun* 6:7582 · Konopaske 2014 *JAMA
-Psychiatry* 71:1323 · Larsen & Luna 2018 *Neurosci Biobehav Rev* 94:179 ·
-Mauney 2013 *Biol Psychiatry* 74:427 · Natu 2019 *PNAS* 116:20750 · Onwordi
-2020 *Nat Commun* 11:246 · Onwordi 2023 *Biol Psychiatry* 95:639 · Parker 2020
-*JAMA Psychiatry* 77:1127 · Patel 2021 *JAMA Psychiatry* 78:47 · PGC-CDG2 2019
-*Cell* 179:1469 · Pizzorusso 2002 *Science* 298:1248 · Sekar 2016 *Nature*
-530:177 · Sellgren 2019 *Nat Neurosci* 22:374 · Shaw 2006 *Nature* 440:676 ·
-Tooley 2021 *Nat Rev Neurosci* 22:372 · Vidal-Piñeiro 2020 *Sci Rep* 10:21803
-· Whitaker 2016 *PNAS* 113:9105. Volume/page numbers are from memory and
-should be checked before any of these enter a manuscript.
+Resolved against CrossRef on 2026-09-30 (title match confirmed for every entry); the DOI is the identifier to use.
+
+- Asan 2021 — *Scientific Reports* 11 (2021). doi:10.1038/s41598-021-83491-8
+- Berretta 2015 — *Schizophrenia Research* 167:18 (2015). doi:10.1016/j.schres.2014.12.040
+- Cannon 2015 — *Biological Psychiatry* 77:147 (2015). doi:10.1016/j.biopsych.2014.05.023
+- Carulli 2010 — *Brain* 133:2331 (2010). doi:10.1093/brain/awq145
+- Catts 2013 — *Frontiers in Cellular Neuroscience* 7 (2013). doi:10.3389/fncel.2013.00060
+- Demange 2021 — *Nature Genetics* 53:35 (2021). doi:10.1038/s41588-020-00754-2
+- Enwright 2016 — *Neuropsychopharmacology* 41:2206 (2016). doi:10.1038/npp.2016.24
+- Feinberg 1982 — *Journal of Psychiatric Research* 17:319 (1982). doi:10.1016/0022-3956(82)90038-3
+- Glantz & Lewis 2000 — *Archives of General Psychiatry* 57:65 (2000). doi:10.1001/archpsyc.57.1.65
+- Grotzinger 2022 — *Nature Genetics* 54:548 (2022). doi:10.1038/s41588-022-01057-4
+- Holmes 2019 — *Nature Communications* 10 (2019). doi:10.1038/s41467-019-09562-7
+- Howes & Onwordi 2023 — *Molecular Psychiatry* 28:1843 (2023). doi:10.1038/s41380-023-02043-w
+- Keifer 2015 — *Nature Communications* 6 (2015). doi:10.1038/ncomms8582
+- Konopaske 2014 — *JAMA Psychiatry* 71:1323 (2014). doi:10.1001/jamapsychiatry.2014.1582
+- Larsen & Luna 2018 — *Neuroscience & Biobehavioral Reviews* 94:179 (2018). doi:10.1016/j.neubiorev.2018.09.005
+- Mauney 2013 — *Biological Psychiatry* 74:427 (2013). doi:10.1016/j.biopsych.2013.05.007
+- Natu 2019 — *PNAS* 116:20750 (2019). doi:10.1073/pnas.1904931116
+- Onwordi 2020 — *Nature Communications* 11 (2020). doi:10.1038/s41467-019-14122-0
+- Onwordi 2023 — *Biological Psychiatry* 95:639 (2024). doi:10.1016/j.biopsych.2023.05.022
+- Parker 2020 — *JAMA Psychiatry* 77:1127 (2020). doi:10.1001/jamapsychiatry.2020.1495
+- Patel 2021 — *JAMA Psychiatry* 78:47 (2021). doi:10.1001/jamapsychiatry.2020.2694
+- PGC-CDG2 2019 — *Cell* 179:1469 (2019). doi:10.1016/j.cell.2019.11.020
+- Pizzorusso 2002 — *Science* 298:1248 (2002). doi:10.1126/science.1072699
+- Sekar 2016 — *Nature* 530:177 (2016). doi:10.1038/nature16549
+- Sellgren 2019 — *Nature Neuroscience* 22:374 (2019). doi:10.1038/s41593-018-0334-7
+- Shaw 2006 — *Nature* 440:676 (2006). doi:10.1038/nature04513
+- Tooley 2021 — *Nature Reviews Neuroscience* 22:372 (2021). doi:10.1038/s41583-021-00457-5
+- Vidal-Piñeiro 2020 — *Scientific Reports* 10 (2020). doi:10.1038/s41598-020-78471-3
+- Whitaker 2016 — *PNAS* 113:9105 (2016). doi:10.1073/pnas.1601745113
