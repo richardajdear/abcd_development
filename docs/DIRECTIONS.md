@@ -278,6 +278,8 @@ PsychENCODE developmental) before trusting it in the snRNA-seq.
 
 ### D7. Partitioned polygenic scores from the single-cell programme
 
+*Implemented as a CSD3 pipeline in [`directions/d7_partitioned_prs/`](../directions/d7_partitioned_prs/README.md) (SBayesRC posterior partitioned by gene; pre-registered sets and readout there). Not yet run.*
+
 *Buys:* the one test that closes the single-cell → genetics → imaging triangle
 at the individual level. The informative result is a partition whose
 association with the slope (or symptoms) is *stronger* than the full score's,

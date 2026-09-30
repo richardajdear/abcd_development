@@ -272,7 +272,7 @@ genes. Ranked by information per unit of effort:
    is shrunk depends on how many scans they have, so a score that predicts
    attrition or scan failure can shift the phenotype without acting on the
    cortex; an inverse-probability-weighted sensitivity closes this.
-4. **Partitioned polygenic scores: which genes carry the SCZ signal.** Split
+4. **Partitioned polygenic scores: which genes carry the SCZ signal.** *(Pipeline: [`directions/d7_partitioned_prs/`](../directions/d7_partitioned_prs/README.md).)* Split
    the SCZ 2025 score into gene-set partitions and test each against the
    thinning rate, with size- and LD-matched random sets as the null (PRSet, or
    SBayesRC annotation-partitioned weights). Candidate partitions:
@@ -660,6 +660,7 @@ on the new phenotypes; no new scoring is needed.
   p_adj, n).
 
 **C3-D. C3-partitioned SCZ score (≈ 1 day; the most direct genetic link).**
+**Superseded (2026-09-30) by [`directions/d7_partitioned_prs/`](../directions/d7_partitioned_prs/README.md)**, which runs these partitions (the C3, C1, C2 and PLS2 deciles are its secondary sets S2–S4) alongside the cell-type and SynGO sets, from the SBayesRC posterior, with matched random-set nulls. Run that instead of the steps below; they are kept for the design record.
 Split the SCZ 2025 score by gene set and test each part on `c3axis_rc`,
 `proj_C3`, `global_slope_c3axis`, `c1axis_rc` and `c2axis_rc`:
 - Partitions: AHBA C3 top and bottom deciles of `data/weights.csv` (C3 column,

@@ -1,0 +1,19 @@
+set	tier	contrast	universe	n_genes	source
+K1_brain_expressed	primary	K1	genome	17293	positive control (must enrich): genes passing the developmental-cortex snRNA-seq expression filter, velmeshev_PC1_gene_loadings.csv
+K2_neuronal	primary	K2	genome	1484	Seidlitz neuronal classes, minus 303 symbols also glial markers
+K2_glial	primary	K2	genome	2033	Seidlitz astro/oligo/OPC/micro, minus symbols also neuronal markers
+K3_syngo	primary	K3	genome	1696	SynGO 1.3 (Koopmans 2019) annotated genes, minus 93 also oligodendrocyte markers
+K3_oligodendrocyte	primary	K3	genome	694	Seidlitz Oligo class, minus genes also in SynGO
+K4_adolescent_window	primary	K4	snrna	0	D6 (transcriptional_maturation): not built; append its rows to d7_gene_sets.tsv, then re-run 03 and 05
+S1_snrna_pc1_top	secondary	S1	snrna	1729	PC1_herringV3 top decile of 17293 genes (neuronal/synaptic pole)
+S1_snrna_pc1_bottom	secondary	S1	snrna	1729	PC1_herringV3 bottom decile of 17293 genes (oligodendrocyte pole)
+S0_scz_locus_pool	secondary	S0	genome	398	Trubetskoy 2022 ST12, ahba_pls/data/reference/gene_sets/SCZ_locus_pool.txt
+S5_brain_celltype_markers	secondary	S5	genome	4591	Seidlitz 2020 marker compilation, union of all classes
+S2_c3_top	secondary	S2	ahba	663	C3 top decile of 6626 AHBA genes
+S2_c3_bottom	secondary	S2	ahba	663	C3 bottom decile of 6626 AHBA genes
+S3_c1_top	secondary	S3	ahba	663	C1 top decile of 6626 AHBA genes
+S3_c1_bottom	secondary	S3	ahba	663	C1 bottom decile of 6626 AHBA genes
+S3_c2_top	secondary	S3	ahba	663	C2 top decile of 6626 AHBA genes
+S3_c2_bottom	secondary	S3	ahba	663	C2 bottom decile of 6626 AHBA genes
+S4_pls2_top	secondary	S4	ahba	650	PLS2 top decile of 6505 AHBA genes
+S4_pls2_bottom	secondary	S4	ahba	650	PLS2 bottom decile of 6505 AHBA genes

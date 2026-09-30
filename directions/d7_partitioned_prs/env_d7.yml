@@ -1,0 +1,14 @@
+# D7 python env on CSD3:  conda env create -p ~/rds/hpc-work/envs/d7 -f directions/d7_partitioned_prs/env_d7.yml
+# (bed-reader reads PLINK .bed without a PLINK round-trip; tested with 1.0.x)
+name: d7
+channels: [conda-forge]
+dependencies:
+  - python=3.11
+  - numpy>=1.26
+  - pandas>=2.1
+  - scipy>=1.11
+  - pyarrow
+  - pytest
+  - pip
+  - pip:
+      - bed-reader>=1.0

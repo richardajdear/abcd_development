@@ -118,6 +118,7 @@ README_HPC §8)
 | D2: one-stage PRS × age / PRS × puberty models (timing vs rate) | [`directions/d2_prs_age_puberty/`](directions/d2_prs_age_puberty/README.md) |
 | D4: thinning rate vs cognitive gain, ages 10–16 (NIH Toolbox) | [`directions/d4_cognitive_gain/`](directions/d4_cognitive_gain/README.md) |
 | D5: adversity/SES × polygenic risk on the thinning rate; direction of the thinning–symptom link | [`directions/d5_adversity_direction/`](directions/d5_adversity_direction/README.md) |
+| D7: partitioned SBayesRC scores (SynGO, neuronal/glial, snRNA-seq, AHBA C3 gene sets) — CSD3 pipeline, pre-registered, not yet run | [`directions/d7_partitioned_prs/`](directions/d7_partitioned_prs/README.md) |
 | Figure 1 (phenotype, PRS, symptoms) | [`docs/figures/fig1.png`](docs/figures/fig1.png), generator [`genetic_analysis/fig1.R`](genetic_analysis/fig1.R) |
 | the PRS results on one slide (methods × parcellations, controls) | [`docs/figures/slide_prs_methods_1lmm.png`](docs/figures/slide_prs_methods_1lmm.png) |
 | the imaging-transcriptomics PLS study and the symptom / PRS maps | [`ahba_pls/README.md`](ahba_pls/README.md), notebook [`ahba_pls/imaging_transcriptomics.qmd`](ahba_pls/imaging_transcriptomics.qmd) |
