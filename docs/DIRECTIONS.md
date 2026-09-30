@@ -219,6 +219,13 @@ vendored; full battery at baseline and year 2, reduced at year 4). Model: gain
 ~ slope + baseline score + age + sex + site + SES. **Runs locally once the
 table is fetched.** Cheap, and it is the claim a reader will remember.
 
+*Status 2026-09-30 — done, [`directions/d4_cognitive_gain/`](../directions/d4_cognitive_gain/README.md).*
+Sign consistent with T5, but only for crystallised measures (SES-adjusted β +0.024 SD per SD
+slower thinning, driven by picture vocabulary); fluid composite and all executive tasks null.
+Robust to SES, image quality, scoring and interval. Baseline thickness's association with gain,
+unlike the slope's, is mostly SES. Leading alternative reading: a shared EA-type influence on
+both thinning rate and vocabulary growth. Needs the EA score and the D3 MZ-difference test.
+
 ### D5. Gene × environment and direction of effect
 
 *Buys:* whether PRS and adversity act on the same pace variable (additive or

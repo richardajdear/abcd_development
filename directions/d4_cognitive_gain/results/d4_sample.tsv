@@ -1,0 +1,17 @@
+	value
+n_imaging	8716
+n_fluid_both	5932
+n_cryst_both	6157
+age_base_mean	9.957
+age_late_mean	16.05
+interval_mean	6.101
+fluid_gain_mean	22.78
+fluid_gain_sd	10.26
+cryst_gain_mean	12.04
+cryst_gain_sd	5.113
+r_fluid_base_late	0.5911
+r_cryst_base_late	0.775
+slope_reliability_median	0.3585
+r_slope_fluid_gain	0.002892
+r_slope_topo	0.1338
+r_slope_adi	-0.07024
