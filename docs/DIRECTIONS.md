@@ -397,12 +397,12 @@ is disorder-specific.
 More region-selection phenotypes (closed, README_HPC §3); more GWAS-side work
 at this n; further attempts to make the regional PRS map resemble C3.
 
-## 3b. Scorecard and synthesis after D2–D5 (2026-10-01)
+## 3b. Scorecard and synthesis after D2–D5, D7 and the MOSTest arm (2026-10-01)
 
-D2, D3, D4 and D5 are run (laptop, ABCD 7.0, HCP-MMP single-LMM trait); D7 is
-run on CSD3 (2026-10-01; null on the thinning side, see its README) and the
-MOSTest discovery arm is in progress; D1, D6 and D8 are not
-started. Every number here is a row of a `directions/*/results|tables/*.tsv`.
+D2, D3, D4 and D5 are run (laptop, ABCD 7.0, HCP-MMP single-LMM trait); D7 and
+the MOSTest discovery arm (README_HPC §9) are run on CSD3; D1, D6 and D8 are
+not started. Every number here is a row of a `directions/*/results|tables/*.tsv`
+or `genetic_analysis/work/results_70tab/mostest/table_mostest_*.tsv`.
 
 ### 3b.1 Predictions
 
@@ -416,6 +416,8 @@ started. Every number here is a row of a `directions/*/results|tables/*.tsv`.
 | T6 | slope → symptom survives within MZ pairs | within-MZ β same sign, 2.4–5.5× population, 2/4 CIs exclude 0; ACE: rA(ΔCT, symptom change) ≈ 0, covariance in E (D3); between children thinning precedes symptoms and baseline symptoms do not predict thinning (D5) | **holds** |
 | T7 | SCZ/MDD effects are one shared component; EA acts via Cog | not run (D8) | open |
 | T8 | slope predicts psychotic-like experiences | not run (D8; `mh_y_pps` fetched) | open |
+| D7 | a named gene programme carries more of the PRS → thinning effect than its share of the score (closes the single-cell → genetics → imaging triangle) | disorder side: neuronal and SynGO genes carry 1.25–1.35× their size-expected share of every score, EA included; thinning side: no set in any arm (SCZ pooled SynGO ER 0.98 [−0.66, 2.60]; all p_bonf = 1), only ER_rel ≳ 3 detectable | **null at the individual level**, as the §D7 power table predicted |
+| MOSTest | multivariate GWAS of 68 regional slopes finds loci/genes the global slope cannot | no slope locus at 5e-8 (best 6.6e-8); CT positive control gives 4 loci and MOSTest > minP; two of seven gates fail for the slope families (permutation tail and MAGMA gene λ), so slope gene-level results are held | **no discovery; gene level not yet readable** |
 
 ### 3b.2 What the four studies say together
 
@@ -482,6 +484,21 @@ Consequences for the memo's claims:
    it; the bivariate twin model cannot (cognitive gain is too noisy to
    decompose: rMZ < rDZ).
 
+7. **The gene-level link stays group-level, now with the direct test done.**
+   D7 is the one analysis that could have tied the single-cell programme to
+   the individual PRS → thinning effect, and it returns the result the power
+   arithmetic (§D7) said a non-enriched partition would: neuronal and
+   synaptic genes are over-represented in every brain-trait score (a property
+   of the scores, not of SCZ), but no partition carries more of the thinning
+   association than its share. The AHBA C3/C1/C2 and PLS2 deciles (the former
+   C3-D) are null too. Together with the uniform-shift PRS maps and the null
+   C3-axis PRS screen, every individual-level route from gene programme to
+   thinning is now closed at this n; the programme-level claim rests on the
+   group map and the disorder GWAS. MOSTest adds that there is no regional
+   slope locus to find either (CT, the positive control, gives four), so the
+   genetic architecture of the rate is diffuse at n ≈ 8,600 and the PRS
+   remains the only usable genetic readout.
+
 Caveats carried forward: the pubertal-timing rA could be shared body-size/BMI
 genetics rather than a maturational clock (test with BMI as a third trait);
 the twin sample is small and 86 % same-sex DZ; D4 is concurrent development,
@@ -509,13 +526,19 @@ not prediction; the life-events result is one informant and one wave; D5's
   adversity and SES, not only in β on the slope.
 - **Add BMI** (`ph_y_anthr`, vendored) as a third trait to the D3 bivariate
   models to test whether the ΔCT–puberty rA is body-size genetics.
+- **D7 follow-ups are cheap but low-yield**: K4 (the D6 adolescent-window
+  genes) when they exist, and the symptom and tempo-composite outcomes; do
+  not refit annotated SBayesRC (step 4) — the thinning-side null is a power
+  ceiling, not a weight-quality problem. **MOSTest**: a second permutation to
+  calibrate the slope tail and gene Z before any slope gene-level reading; the
+  CT arm can be used as is.
 - **Write-up:** fig 2 becomes a two-component figure (heritable, PRS-scaled,
   puberty-linked rate vs environment-linked, symptom-predictive rate), and the
   fig 1 → fig 2 text should stop implying a PRS → thinning → symptom chain.
 
 ## 4. Suggested order (revised 2026-10-01; original order in git history)
 
-Done: D2, D3, D4, D5 (laptop), D7 (CSD3, 2026-10-01). Running on CSD3: MOSTest discovery arm.
+Done: D2, D3, D4, D5 (laptop), D7 and MOSTest (CSD3, 2026-10-01; MOSTest slope gene level held).
 
 1. **Pull the EA / ALZ ± APOE / ASD score profiles from CSD3** (rsync in the D2
    and D5 READMEs) and re-run D2 `01–03`, D4 with EA as covariate and PRS
@@ -532,8 +555,8 @@ Done: D2, D3, D4, D5 (laptop), D7 (CSD3, 2026-10-01). Running on CSD3: MOSTest d
    (`mh_y_pps`) locally. Test the point-5 hypothesis (MDD vs SCZ routes).
 5. **LCM-SR** replacement for the D5 RI-CLPM before any within-child claim.
 6. D6 in the snRNA-seq repo; its gene sets become D7's K4 slot.
-7. D7 and MOSTest results when CSD3 returns them; read D7 against the
-   pre-registration only.
+7. D7 is read (null on the thinning side); MOSTest needs a second permutation
+   before its slope gene level is read. Neither is a priority.
 
 ## 5. Revised arc (2026-10-01)
 
@@ -548,8 +571,8 @@ Done: D2, D3, D4, D5 (laptop), D7 (CSD3, 2026-10-01). Running on CSD3: MOSTest d
 - **Fig 3 — tissue and programme.** D1 multimodal slopes and their twin
   genetics (myelin vs neuropil), the snRNA-seq maturation programme and its
   adult footprint (C3) against the normative map, disorder-GWAS enrichment of
-  the D6 gene sets, the pre-registered D7 check — group-level where it is,
-  individual-level nulls reported.
+  the D6 gene sets, the pre-registered D7 check (null) — group-level where it
+  is, individual-level nulls reported.
 - **Fig 4 — consequences and specificity.** Cognitive gain (EA axis vs
   plasticity), PLEs and depressive symptoms, shared vs disorder-specific
   scores, MDD's puberty/adversity route vs SCZ's direct one.
