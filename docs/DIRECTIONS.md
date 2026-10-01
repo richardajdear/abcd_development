@@ -1,6 +1,6 @@
 # Directions memo — what mechanism are we proposing, and what would test it?
 
-*2026-09-28, revised 2026-09-30 (§§2.3–2.4, T7–T8, D7–D8, §6). A planning document, not a results document. Every number quoted
+*2026-09-28; revised 2026-09-30 (§§2.3–2.4, T7–T8, D7–D8, §6) and 2026-10-01 (§3b scorecard after D2–D5, §§4–5). A planning document, not a results document. Every number quoted
 here is from `README.md` / `genetic_analysis/current_results.tsv` as of this
 date; nothing below has been run.*
 
@@ -184,6 +184,15 @@ should exceed the thickness slope's (~0.2), which raises every downstream β
 Add puberty tempo (PDS slope, or age at PDS stage) as an outcome. **Runs
 locally now.**
 
+*Status 2026-09-30 — done, [`directions/d2_prs_age_puberty/`](../directions/d2_prs_age_puberty/README.md).*
+**T1 fails.** One-stage LMM on 26,597 scans: SCZ PRS × age −0.28 µm/yr per SD
+(p 7e-4), MDD −0.17 (p 0.04); no level effect at 12.8 (bounds any phase advance
+to < 1.1 months per SD); the rate effect is the same before and after the 12–14
+peak; PRS × puberty is null once age is in the model. MDD PRS predicts earlier
+puberty (+0.055 SD), and earlier puberty faster thinning (−0.068), but adjusting
+for puberty leaves PRS → slope unchanged. Reading: uniform rate scaling across
+9–17, not a timing shift. EA/ALZ/ASD scores (T3) not on the laptop.
+
 **Done 2026-09-30 — [`directions/d2_prs_age_puberty/`](../directions/d2_prs_age_puberty/README.md).**
 One-stage LMM on 26,597 scans / 8,596 children: SCZ PRS −0.28 µm/yr per SD
 (p 7 × 10⁻⁴), MDD −0.17 (p 0.04), no level effect at 12.8; no age dependence
@@ -199,6 +208,16 @@ unchanged. EA/ALZ/ASD scores were not local; the README gives the rsync.
 *Needs:* `gn_y_genrel` (vendored; zygosity codes 1/2/3, ~840 / ~1,290 / ~1,550
 children — confirm code meanings against the data dictionary), the slope
 phenotypes, and the outcomes. **Runs locally** (OpenMx or umx in R).
+
+*Status 2026-09-30 — done, [`directions/d3_twin_family/`](../directions/d3_twin_family/README.md)
+(271 MZ / 432 DZ / 579 sibling pairs imaged; FIML twin models in `ace.py`, OpenMx
+check pending on CSD3).* ΔCT twin A = 0.46 [0.37, 0.54], C = 0 (SNP h² 0.18).
+Bivariate AE: rA with puberty timing −0.24 [−0.33, −0.15] (first support for
+T2); with the T1w/T2w slope 0.08 [−0.12, 0.25]; with CBCL change 0.04–0.11, none
+excluding 0, while the ΔCT–symptom covariance sits in E (internalising rE −0.16
+[−0.27, −0.03]). **T6 holds:** within 250 MZ pairs the slope → symptom βs keep
+the population sign and are 2.4–5.5× larger (2 of 4 CIs exclude 0). Within-family
+PRS is not assessable (MDE 2.9–4.2× the population effect).
 
 Why this is different from what has been done: GREML/LDSC/GWAS all estimate
 *SNP-based* quantities and are power-limited by h²_SNP ≈ 0.18 at n ≈ 4,300
@@ -378,40 +397,161 @@ is disorder-specific.
 More region-selection phenotypes (closed, README_HPC §3); more GWAS-side work
 at this n; further attempts to make the regional PRS map resemble C3.
 
-## 4. Suggested order
+## 3b. Scorecard and synthesis after D2–D5 (2026-10-01)
 
-1. D2 (days, local, nothing to fetch) — establishes whether we are looking at
-   timing or rate before anything else is built. D8 item 1 (joint model) runs
-   in the same session on the same export.
-2. D1 on DK with the vendored T1/T2 tables (days, local) — the first
-   myelination-vs-neuropil readout; decide from it whether HCP-MMP T1w/T2w,
-   GWC and RSI are worth a CSD3 job.
-3. Fetch NIH Toolbox, area/volume, DTI/RSI, adversity, PQ-BC tables in one
-   pass (needs release access) → D4, D5, D8 item 4, remainder of D1 including
-   the tempo composite.
-4. D8 items 2–3: obtain Cog/NonCog, subtracted and cross-disorder summary
-   statistics, score with the existing PRS pipeline (HPC), test locally.
-5. D3 twin models on whatever slopes exist by then (local, R).
-6. D6 in the snRNA-seq repo, in parallel; its gene sets feed D7.
-7. D7 on HPC, pre-registered contrasts only, once D6 gene sets and the tempo
-   composite exist.
+D2, D3, D4 and D5 are run (laptop, ABCD 7.0, HCP-MMP single-LMM trait); D7 and
+the MOSTest discovery arm are in progress on CSD3; D1, D6 and D8 are not
+started. Every number here is a row of a `directions/*/results|tables/*.tsv`.
 
-## 5. Revised arc if the tempo reading holds
+### 3b.1 Predictions
+
+| # | prediction | result | verdict |
+|:--|:--|:--|:--|
+| T1 | PRS effect on the slope depends on age/puberty (phase advance) | rate effect identical across the 12–14 rate peak; no level effect at 12.8 (phase advance < 1.1 months/SD); PRS × PDS null given age (D2) | **fails** — uniform rate scaling |
+| T2 | the same liability shifts other maturational clocks | genetic correlation ΔCT–puberty timing rA −0.24 [−0.33, −0.15]; MDD PRS → earlier puberty +0.055 SD (p 8e-7), SCZ PRS weaker (+0.015, n.s.); but ΔCT–T1w/T2w-slope rA 0.08 [−0.12, 0.25] (D3, D2) | **partly holds** — shared with the pubertal clock, not with the myelin readout |
+| T3 | EA opposite in sign on every readout | not run: EA/ALZ/ASD score profiles are on CSD3 only | **blocked** (D2, D3, D4, D5 all name it) |
+| T4 | PRS-related thinning follows the normative map | not re-tested; prior evidence is a uniform shift | open |
+| T5 | faster thinners gain less cognitively | sign as predicted but small (crystallised +0.024 SD per SD, vocabulary +0.031, both FDR < 0.05); fluid/executive null; robust to SES, quality, interval (D4) | **weakly holds, wrong domain** — looks like a shared EA-type influence, not plasticity closure |
+| T6 | slope → symptom survives within MZ pairs | within-MZ β same sign, 2.4–5.5× population, 2/4 CIs exclude 0; ACE: rA(ΔCT, symptom change) ≈ 0, covariance in E (D3); between children thinning precedes symptoms and baseline symptoms do not predict thinning (D5) | **holds** |
+| T7 | SCZ/MDD effects are one shared component; EA acts via Cog | not run (D8) | open |
+| T8 | slope predicts psychotic-like experiences | not run (D8; `mh_y_pps` fetched) | open |
+
+### 3b.2 What the four studies say together
+
+The results separate the thinning rate into **two components with different
+causes and different consequences**.
+
+**A heritable rate component, scaled by polygenic risk, that does not reach
+symptoms.** Twin h² of the rate is 0.46 with no shared-environment term (D3);
+SCZ and MDD scores scale it uniformly across 9–17 with no timing shift (D2);
+the effect is independent of SES and adversity (4 % attenuation for SCZ, no
+PRS × environment term; D5). Its genetics overlap with pubertal timing (rA
+−0.24) and not detectably with the T1w/T2w slope (rA 0.08) or with symptom
+change (rA 0.04–0.11, all CIs spanning 0). Puberty is a parallel correlate,
+not the mediator: adjusting for pubertal stage leaves PRS → slope unchanged
+(D2).
+
+**A non-shared-environmental component that does reach symptoms.** The
+slope–symptom covariance sits in E in the bivariate model and the association
+does not shrink within MZ pairs (D3); between children it runs forward
+(thinning → later symptoms; D5); parent-reported negative life events predict
+faster thinning (−0.034, robust to site and scan quality; D5). Within children,
+a small symptoms → later thinning lag also appears (RI-CLPM, −0.03 to −0.04),
+to be re-tested with LCM-SR before it is called a finding.
+
+Consequences for the memo's claims:
+
+1. **The tempo hypothesis survives only in its amplitude form.** Risk carriers
+   lose more cortex per year across the whole window (≈ 2 µm per SD of score
+   over eight years); they are not further along the same trajectory. The
+   "critical-period closure brought forward" reading of §2 is not what the
+   data show within 9–17. Whether the extra loss is thinning that would
+   otherwise occur after 17 is a question for the 8-year follow-up.
+2. **The genetic–symptom chain is broken for a structural reason, not for lack
+   of power.** The part of the rate that polygenic risk scales and the part
+   that tracks symptoms are different parts of its variance. So the PRS →
+   thinning → symptom mediation that fig 1 implies should not be claimed;
+   what can be claimed is that genetic liability and adverse experience both
+   accelerate thinning, additively, and that the symptom-linked acceleration is
+   the experience-dependent one. This matches adversity-accelerated maturation
+   (Tooley 2021) and the stress-driven synapse-loss model of depression
+   (§2.3) better than the pruning-genetics model of schizophrenia.
+3. **Pruning versus myelination: a first, weak lean toward neuropil.** The
+   rate's genetics are not the T1w/T2w slope's genetics (rA 0.08). If the
+   T1w/T2w slope is an adequate myelination readout (DK only, no bias-field
+   correction, reliability 0.27–0.37), the heritable thinning component is not
+   myelination. D1's intensity and diffusion slopes decide this; the D3
+   pipeline gives each new modality its twin h² and rA with ΔCT for free.
+4. **SES acts on level, polygenic risk on rate.** SES predicts thickness at
+   12.8 (+0.062) and not the rate within site (D5); C for the rate is 0 while C
+   for thickness is 0.08 (D3). The level and the rate have different inputs,
+   which is why fig 1's "rate not level" result for the scores is informative
+   rather than incidental.
+5. **MDD and SCZ already look different (relevant to D8).** The MDD score
+   carries gene–environment correlation with adversity (+0.093) and lower SES,
+   predicts earlier puberty strongly, and attenuates 18 % with the environment
+   in the model; the SCZ score does none of these. MDD's thinning effect may
+   run partly through correlated environment and the pubertal clock; SCZ's
+   looks like a direct polygenic effect on rate.
+6. **The cognitive consequence is the EA axis, not plasticity.** T5's effect
+   is on vocabulary, the most education-loaded measure and the one EA predicts
+   best, and slower thinners already score higher at 10. With EA predicting
+   slower thinning, the parsimonious reading is a shared EA-type influence on
+   both. The EA score (T3) and an MZ-difference test of vocabulary gain decide
+   it; the bivariate twin model cannot (cognitive gain is too noisy to
+   decompose: rMZ < rDZ).
+
+Caveats carried forward: the pubertal-timing rA could be shared body-size/BMI
+genetics rather than a maturational clock (test with BMI as a third trait);
+the twin sample is small and 86 % same-sex DZ; D4 is concurrent development,
+not prediction; the life-events result is one informant and one wave; D5's
+170 coefficients are uncorrected.
+
+### 3b.3 What this changes in the plan
+
+- **One rsync unblocks four directions.** The EA, ALZ ± APOE and ASD
+  `score_*.profile` files from CSD3 (`results_70tab_hcp/prs_final_1lmm/` and
+  `legacy/hpc_v2/.../PRSCS/EA/`; commands in the D2 and D5 READMEs) give T3 in
+  D2, the EA triangle in D4, the EA-with-SES step in D5 and within-family EA in
+  D3. This is the highest-value step and costs no compute.
+- **D1 rises in priority.** With T1 failed, the amplitude claim needs a tissue
+  process, and D3 has already produced a prior (rA with T1w/T2w ≈ 0). Run the
+  diffusion/intensity slopes (fetch list in `abcd70_fetch_list.csv`), and put
+  every new slope through the D3 twin pipeline for h² and rA with ΔCT.
+- **New test T9 (links D3 to D5):** within MZ pairs, does the twin with more
+  negative life events thin faster, and does that difference carry the
+  symptom difference? This is the E-component test the co-twin result asks
+  for, it is cheap (same pairs, `mh_p_ple` by child), and it is the only design
+  here that can show adversity → thinning without genetic confounding.
+- **D8 gains a concrete hypothesis** from point 5: MDD-specific and
+  SCZ-specific (subtracted) scores should differ in their relation to puberty,
+  adversity and SES, not only in β on the slope.
+- **Add BMI** (`ph_y_anthr`, vendored) as a third trait to the D3 bivariate
+  models to test whether the ΔCT–puberty rA is body-size genetics.
+- **Write-up:** fig 2 becomes a two-component figure (heritable, PRS-scaled,
+  puberty-linked rate vs environment-linked, symptom-predictive rate), and the
+  fig 1 → fig 2 text should stop implying a PRS → thinning → symptom chain.
+
+## 4. Suggested order (revised 2026-10-01; original order in git history)
+
+Done: D2, D3, D4, D5 (laptop). Running on CSD3: D7, MOSTest discovery arm.
+
+1. **Pull the EA / ALZ ± APOE / ASD score profiles from CSD3** (rsync in the D2
+   and D5 READMEs) and re-run D2 `01–03`, D4 with EA as covariate and PRS
+   triangle, D5's EA step, D3 `05` with EA. Closes T3 and the D4 reading in a
+   day, no compute.
+2. **D1 on the fetched tables** — diffusion (`is` DTI, RSI in cortical GM and
+   superficial WM), volume, area, GWC, T1w/T2w slopes with the settled
+   specification; each through the D3 twin pipeline (h², rA with ΔCT) and the
+   PRS panel; then the cross-modal tempo composite.
+3. **T9 and BMI in D3**: MZ-discordant life events → ΔCT → symptoms; BMI as a
+   third trait against the ΔCT–puberty rA.
+4. **D8**: joint model now (scores exist); Cog/NonCog, subtracted and
+   cross-disorder scores via the existing PRS pipeline on CSD3; PQ-BC outcome
+   (`mh_y_pps`) locally. Test the point-5 hypothesis (MDD vs SCZ routes).
+5. **LCM-SR** replacement for the D5 RI-CLPM before any within-child claim.
+6. D6 in the snRNA-seq repo; its gene sets become D7's K4 slot.
+7. D7 and MOSTest results when CSD3 returns them; read D7 against the
+   pre-registration only.
+
+## 5. Revised arc (2026-10-01)
 
 - **Fig 1** (unchanged): individual thinning rate tracks polygenic risk in
   both directions (SCZ/MDD faster, EA slower), not baseline thickness, and
   tracks later symptoms.
-- **Fig 2 — tempo:** PRS × age/puberty, multimodal slopes and the tempo
-  composite, twin genetic correlations; the process is mostly myelin / mostly
-  neuropil / both.
-- **Fig 3 — programme:** the maturation programme across adolescence
-  (snRNA-seq, cell-type resolved), its adult spatial footprint (C3), its match
-  to the normative thinning map, its disorder enrichment in the disorder
-  GWAS, and the pre-registered partitioned-PRS check — stated as group-level
-  where it is, with the null individual-level C3 tests reported.
-- **Fig 4 — consequence and specificity:** faster thinning → smaller
-  cognitive gain, more depressive symptoms and PLEs; MZ-difference test;
-  shared vs disorder-specific scores and Cog/NonCog.
+- **Fig 2 — two components of the rate.** (a) heritable (twin 0.46, C 0),
+  scaled uniformly by polygenic risk across 9–17 with no timing shift, shares
+  genes with pubertal timing, independent of SES/adversity; (b) non-shared
+  environmental, tracks life events and later symptoms, survives the MZ
+  co-twin control. The PRS → thinning → symptom chain is not claimed.
+- **Fig 3 — tissue and programme.** D1 multimodal slopes and their twin
+  genetics (myelin vs neuropil), the snRNA-seq maturation programme and its
+  adult footprint (C3) against the normative map, disorder-GWAS enrichment of
+  the D6 gene sets, the pre-registered D7 check — group-level where it is,
+  individual-level nulls reported.
+- **Fig 4 — consequences and specificity.** Cognitive gain (EA axis vs
+  plasticity), PLEs and depressive symptoms, shared vs disorder-specific
+  scores, MDD's puberty/adversity route vs SCZ's direct one.
 
 ## 6. References cited in this memo
 
