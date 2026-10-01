@@ -1,0 +1,10 @@
+item	value
+n_children	8596.0
+n_analysis_set	8596.0
+n_step1_array_snps	373703.0
+r_mean_slope_blup_vs_global_slope_1lmm	0.9311
+r_mean_ct_blup_vs_baseline_thickness_1lmm	0.9995
+median_pheno_r_slope	0.1946
+median_pheno_r_ct	0.2887
+median_pheno_r_slopeols	0.1927
+median_pheno_r_global	0.0473

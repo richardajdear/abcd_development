@@ -1,0 +1,16 @@
+gate	value	threshold	passed
+G0_sample	8596.0	>= 8500	True
+G1_engine_|r_z|_min	0.9296	>= 0.90 and |dlambda| <= 0.05	True
+G2a_perm_lambda_slope	1.003	0.95-1.05	True
+G2b_perm_loci_slope	1.0	<= 1	True
+G3_R_real_vs_perm_slope	0.0416	<= 0.05	True
+G2c_perm_gene_lambda_slope	1.1365	0.90-1.10	False
+G2a_perm_lambda_ct	1.0024	0.95-1.05	True
+G2b_perm_loci_ct	0.0	<= 1	True
+G3_R_real_vs_perm_ct	0.0688	<= 0.05	False
+G2c_perm_gene_lambda_ct	1.0751	0.90-1.10	True
+G2a_perm_lambda_slopeols	1.0033	0.95-1.05	True
+G2b_perm_loci_slopeols	2.0	<= 1	False
+G3_R_real_vs_perm_slopeols	0.0373	<= 0.05	True
+G2c_perm_gene_lambda_slopeols	1.1528	0.90-1.10	False
+G4_positive_control_ct_loci	4.0	>= 1	True

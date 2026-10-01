@@ -814,7 +814,7 @@ family-clustered SE, FDR within each family of tests.
 
 ## 9. Multivariate discovery on regional thinning: step 16 (instructions, 2026-09-30)
 
-**Status: scripted and tested locally on synthetic data; not yet run.** The CSD3
+**Status: run on CSD3 2026-09-30/10-01 (§9.1). G0, G1, G2a and G4 pass; G2b (slopeols), G2c (slope, slopeols) and G3 (ct) fail, so per the brief the slope results are NOT read as findings yet.** The CSD3
 handoff is [`BRIEF_step16.md`](BRIEF_step16.md), which holds the design table,
 run commands, gates G0–G4 and decision rules. Code is in `mostest/`;
 `tests/test_mostest_core.py` checks null calibration and the
@@ -839,4 +839,114 @@ about 1,700 (reliability about 0.2), so few or no slope loci are expected.
 The `ct` family must yield at least one locus (G4) for a slope null to be
 read as anything other than "not assessed at this power". Output is unsigned:
 it gives no rg, no LAVA and no disorder direction (§3).
+
+### 9.1 Run record, 2026-10-01 (CSD3)
+
+**Jobs.** Final chain 36958391 (build) → 36958392 (REGENIE step 1) → 36958393
+(step 2, 154 tasks) → 36958394 (MOSTest + engine check) → 36958395 (clump +
+MAGMA) → 36958396 (collect); the real-run REGENIE outputs it reused came from
+36934506/36935063/36937022 (step 1) and 36935067/36937038/36944028 (step 2).
+G2c diagnostic 37010581. REGENIE v4.1.3 (bioconda, `~/rds/hpc-work/envs/regenie`;
+the GitHub static binary needs glibc 2.29+, CSD3 has 2.28). n = 8,596;
+373,703 step-1 array SNPs; 6,805,075 step-2 SNPs (MAF >= 1 %).
+
+**Pipeline fixes made during the run (all in `mostest/`, committed).**
+1. *Permutation design (substantive).* The brief shuffled phenotype + ALL
+   covariate rows, PC1-10 included. The PCs are functions of the genotypes,
+   so this left ancestry structure uncorrected in the genotypes; REGENIE's
+   LOCO predictions absorbed it and the "null" scan was badly inflated
+   (per-measure lambda up to 5, rising with MAF from 1.05 at 1-2 % to 1.81 at
+   20-50 %; hundreds of perm loci). `01_build_pheno.py` now permutes the
+   phenotype jointly with sex, site, baseline_age and n_visits only; the PCs
+   stay with the genotype rows, which is what a genotype permutation does.
+   Permuted MOSTest lambda went from 0.85-0.88 to 1.00.
+2. `02_regenie_step1.sbatch`: the level-0 temp prefix `l0_slope` matched
+   `l0_slope_perm_*`, so the real run's cleanup deleted its permuted twin's
+   files mid-run. Each run now has its own temp directory, and a step 1 counts
+   as done only if all k `.loco` files are non-empty. REGENIE exits 0 after a
+   failed `.loco` write; one 0-byte file was seen.
+3. `02_to_zmat.py`: under pandas 3, string columns are `StringDtype`, not
+   `object`, so SNP/allele arrays were pickled and `np.load` refused them. The
+   string test is now `is_numeric_dtype`; the existing npz were rewritten.
+4. `05_clump_magma.sbatch`: PLINK writes no `.clumped` file when nothing
+   passes p1. That is now an empty file (0 loci), not a missing one, which
+   `06_collect` read as NaN and so as a gate failure.
+
+**Storage.** hpc-work hit its 1.1 TB quota mid-run and truncated outputs
+(one npz rebuilt). `regenie/`, `zmat/` and `sumstats/` (SNP-level only, ~50 GB)
+now live in `/rds/project/rds-Pb9UGUlrwWc/rajd2_abcd_mostest16/` and are
+symlinked into `work/results_70tab/mostest/`. Per-subject `pheno/` and `geno/`
+stay in hpc-work.
+
+**Gates** (`table_mostest_gates.tsv`):
+
+| gate | slope | ct | slopeols | threshold |
+|:--|:--|:--|:--|:--|
+| G0 n; r(mean regional slope, global_slope_1lmm) | 8,596; 0.931 | | | >= 8,500; >= 0.7 |
+| G1 REGENIE vs GENESIS: r(z); lambda R / G | 0.930; 0.993 / 1.001 (global_slope) | 0.941; 1.040 / 1.033 (baseline CT) | | >= 0.90; d <= 0.05 |
+| G2a perm MOSTest lambda | 1.003 | 1.002 | 1.003 | 0.95-1.05 |
+| G2b perm loci p < 5e-8 | 1 | 0 | **2** | <= 1 |
+| G2c perm MAGMA gene lambda | **1.137** | 1.075 | **1.153** | 0.90-1.10 |
+| G3 max abs dR (real vs perm) | 0.042 | **0.069** | 0.037 | <= 0.05 |
+| G4 ct loci p < 5e-8 | | 4 | | >= 1 |
+
+R: no eigenvalue floored (condition number 82 / 146 / 77; participation-ratio
+dimension 16.3 / 8.8 / 16.2). Gamma null shape about 34, scale about 2.0
+(chi2(68) is shape 34, scale 2), so the analytic and gamma p agree.
+
+**Reading of the failures (diagnosis, not a waiver).**
+- *G3 ct:* mean abs dR is 0.015 against a max of 0.069, and ct is the one
+  family with real polygenic signal (real MOSTest lambda 1.146). Permuted
+  lambda is 1.00, so this is genetic correlation between regions entering
+  the real-z R, not structure. MOSTest uses the permuted R, so the statistic
+  is unaffected.
+- *G2b slopeols:* two perm loci (chr2:198.1 Mb, p 9.6e-9, 44 SNPs; chr3:121.4
+  Mb, p 3.7e-8), plus one slope perm locus just under the threshold
+  (chr2:172.7 Mb, 4.5e-8). Perm tail counts are 1.3x expected at 1e-4 (slope)
+  and 1.8x at 1e-6 (slopeols), against 1.0x for ct. The gamma fitted to the
+  bulk is mildly anti-conservative in the extreme tail for the noisy slope
+  families. A tail-calibrated null needs a SECOND permutation; calibrating on
+  this one and testing on it is circular.
+- *G2c:* diagnostic 37010581 ran MAGMA on the same reference and annotation.
+  A univariate permuted region (slope_lh_bankssts) has SNP lambda 1.002 and
+  gene lambda 1.044. The GENESIS global_slope scan has gene lambda 1.001.
+  The extra inflation on permuted MOSTest p (1.08-1.15) is therefore largely
+  specific to MOSTest statistics: MAGMA's SNP-correlation model does not
+  match z'R^-1 z statistics. Gene-level p is not usable at face value.
+  Options: calibrate gene Z against the permuted scan's genes.raw, use the
+  permuted scans as the comparator in the laptop gene-property tests (as
+  the brief already plans), or a second permutation.
+
+**Results, held until the gates are resolved** (`table_mostest_summary.tsv`,
+real scans):
+
+| family | MOSTest lambda | minP lambda | loci 5e-8 / 1e-6 | gene lambda (perm) | Bonferroni genes |
+|:--|:--|:--|:--|:--|:--|
+| slope | 1.009 | 1.009 | 0 / 4 | 1.113 (1.137) | 0 |
+| ct | 1.146 | 1.075 | 4 / 13 | 1.626 (1.075) | 0 |
+| slopeols | 0.956 | 0.994 | 0 / 4 | 1.020 (1.153) | 0 |
+
+- ct loci at 5e-8 (positive control): chr15:39.35 Mb rs4924345 p 1.5e-22;
+  chr1:47.5 Mb rs6658111 3.2e-10; chr16:87.2 Mb rs56023709 2.4e-9;
+  chr14:99.9 Mb rs8013762 3.8e-8. MOSTest beats minP on ct: 29 vs 15 SNPs
+  at 5e-8 and 62 vs 35 at 1e-6, so decision rule 4's distributed-effect
+  premise holds for CT.
+- slope: no genome-wide locus; the best is chr13:71.1 Mb rs113033276
+  p 6.6e-8. Its real-scan gene lambda (1.11) is no higher than its
+  permuted one (1.14). slopeols has no locus and a deflated MOSTest lambda.
+  The slope null is assessed at this power (G4 passes), but G2b/G2c mean the
+  slope tail and gene levels are not yet trusted.
+- Gene-z Spearman (`table_mostest_gene_z_corr.tsv`): slope-slopeols 0.516,
+  slope-ct 0.148, slopeols-ct 0.017, slope-slope_perm -0.010,
+  ct-ct_perm -0.015. Caveat: slope and slopeols come from the same children's
+  measurements, so their correlation includes shared noise, and the perm rows
+  are not the right floor for it. slope-ct 0.148 against slopeols-ct 0.017
+  suggests that the BLUP slope's link to ct is partly shrinkage coupling
+  (slope BLUP borrowing from the intercept).
+- Set tests (direction greater, p): SCZ_locus_pool slope 0.51 / ct 0.33;
+  MDD_highconf 0.77 / 0.44; SCZ_WES 0.48 / 0.67; MDD_WES 0.036 / 0.75
+  (slopeols 0.39, slope_perm 0.43). Null apart from one uncorrected nominal
+  cell.
+- HCP-MMP extension (decision rule 3): not triggered. slope has no loci, and
+  any gene-level enrichment awaits the laptop test with a calibrated gene Z.
 

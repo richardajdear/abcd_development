@@ -12,8 +12,9 @@ verifies REGENIE against the existing GENESIS scan on global_slope_1lmm.
 The recipe, as in MOSTest:
   1. One univariate GWAS per measure on rank-inverse-normalised phenotypes,
      run twice: on the real data, and once with the genotype-to-child link
-     permuted (here: phenotype+covariate rows shuffled jointly, which is
-     equivalent and preserves the between-measure correlation).
+     permuted (here: phenotype + non-genetic covariate rows shuffled jointly,
+     ancestry PCs left with the genotypes, which is equivalent and preserves
+     the between-measure correlation).
   2. R = correlation of the PERMUTED z-scores across measures (the null
      correlation of z; for fully overlapping samples it equals the residual
      phenotypic correlation).

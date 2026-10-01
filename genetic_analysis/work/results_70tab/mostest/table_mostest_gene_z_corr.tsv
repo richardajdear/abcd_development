@@ -1,0 +1,6 @@
+scan_a	scan_b	n_genes	spearman
+slope	slopeols	17896	0.5157
+slope	ct	17896	0.148
+slopeols	ct	17896	0.0169
+slope	slope_perm	17896	-0.0104
+ct	ct_perm	17896	-0.0152

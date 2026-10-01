@@ -1,0 +1,3 @@
+trait	n_common	r_z	r_abs_z	lambda_regenie	lambda_genesis	pass
+baseline_thickness_1lmm	6805075	0.9411	0.8623	1.0399	1.0334	True
+global_slope_1lmm	6805075	0.9296	0.8381	0.993	1.0009	True

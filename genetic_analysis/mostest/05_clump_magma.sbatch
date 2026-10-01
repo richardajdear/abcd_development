@@ -34,6 +34,12 @@ for thr in 5e-8 1e-6; do
     --clump-snp-field SNP --clump-field P --clump-p1 "$thr" --clump-p2 1e-4 \
     --clump-r2 0.1 --clump-kb 500 --threads 8 --memory 50000 \
     --out "$M16/clump/${SC}_p${thr}" > /dev/null || true
+  # PLINK writes no .clumped when nothing passes p1; record that as an empty
+  # file (0 loci) so 06_collect does not read a missing file as NaN (gate fail).
+  if [[ ! -e "$M16/clump/${SC}_p${thr}.clumped" ]] \
+     && grep -q "No significant --clump results" "$M16/clump/${SC}_p${thr}.log"; then
+    : > "$M16/clump/${SC}_p${thr}.clumped"
+  fi
   n=0; [[ -s "$M16/clump/${SC}_p${thr}.clumped" ]] && n=$(awk 'NF>0 && NR>1' "$M16/clump/${SC}_p${thr}.clumped" | wc -l)
   echo "  loci at p < $thr: $n"
 done

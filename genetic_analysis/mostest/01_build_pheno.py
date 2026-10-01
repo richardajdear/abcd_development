@@ -24,8 +24,14 @@ Families (DK, 68 regions each):
             existing GENESIS scan; not a MOSTest family)
 
 Permutation.  MOSTest permutes genotypes across individuals once and re-runs
-every univariate GWAS.  Shuffling the phenotype AND covariate rows jointly
-against the genotype IDs is the same operation.  One permutation (seed 16) is
+every univariate GWAS.  The equivalent here shuffles the phenotype rows
+jointly with the NON-GENETIC covariates (sex, site, baseline_age, n_visits)
+against the genotype IDs; the ancestry PCs are functions of the genotypes and
+stay on their own rows, exactly as a genotype permutation would carry them.
+(Shuffling the PCs too -- the first design -- leaves the genotypes' ancestry
+structure uncorrected; REGENIE's LOCO predictions then absorb it and the
+"null" scan is inflated, lambda up to 5 rising with MAF, 2026-09-30.)
+One permutation (seed 16) is
 shared by all families.  The real-data and permuted files have identical ID
 columns in identical order, so REGENIE sees the same sample either way.
 
@@ -154,8 +160,10 @@ def main() -> None:
     cov = base.set_index("_t").loc[ids._t, covcols].reset_index(drop=True)
     head = ids[["FID", "IID"]]
     pd.concat([head, cov], axis=1).to_csv(out / "covar.txt", sep=" ", index=False)
-    pd.concat([head, cov.iloc[perm].reset_index(drop=True)], axis=1) \
-      .to_csv(out / "covar_perm.txt", sep=" ", index=False)
+    nongen = ["sex", "site", "baseline_age", "n_visits"]
+    cov_perm = cov.copy()
+    cov_perm[nongen] = cov[nongen].iloc[perm].to_numpy()   # PCs stay with the genotypes
+    pd.concat([head, cov_perm], axis=1).to_csv(out / "covar_perm.txt", sep=" ", index=False)
 
     summ = dict(n=n, n_analysis_set=len(base), seed=a.seed, run=str(run), families={})
     for name, w in fam.items():

@@ -22,17 +22,30 @@ RUN="${RUNS[$(( ${SLURM_ARRAY_TASK_ID:-1} - 1 ))]}"; FAM="$(run_family "$RUN")"
 SUF=""; run_is_perm "$RUN" && SUF="_perm"
 PHENO="$PH/pheno_${FAM}${SUF}.txt"; COVAR="$PH/covar${SUF}.txt"
 [[ -s "$PHENO" && -s "$COVAR" && -s "$GENO_DIR/step1_array.bed" ]] || { echo "FATAL: run 01_build first" >&2; exit 2; }
-if [[ -s "$RG/step1_${RUN}_pred.list" ]]; then echo "exists: $RG/step1_${RUN}_pred.list"; exit 0; fi
+# Skip only a COMPLETE step 1: REGENIE writes pred.list before the last .loco,
+# so a crashed run leaves a list that points at missing files.
+k_exp=$(wc -l < "$PH/traits_${FAM}.txt")
+if [[ -s "$RG/step1_${RUN}_pred.list" ]] && (( $(wc -l < "$RG/step1_${RUN}_pred.list") == k_exp )) \
+   && awk '{print $2}' "$RG/step1_${RUN}_pred.list" | while read -r f; do [[ -s "$f" ]] || exit 1; done; then
+  echo "exists: $RG/step1_${RUN}_pred.list"; exit 0
+fi
+rm -f "$RG/step1_${RUN}_pred.list" "$RG/step1_${RUN}"_*.loco
 echo "=== 16.2 step 1  run=$RUN  $(date -u +%T)"
+# Per-run level-0 directory: a shared prefix let run "slope" delete
+# "slope_perm"'s files (l0_slope* matches l0_slope_perm_*) while it ran.
+L0="$TMPDIR/l0_${RUN}"; rm -rf "$L0"; mkdir -p "$L0"
 "$REGENIE" --step 1 \
   --bed "$GENO_DIR/step1_array" --keep "$PH/keep_imp.txt" \
   --phenoFile "$PHENO" --covarFile "$COVAR" \
   --catCovarList sex,site --maxCatLevels 30 \
   --qt --apply-rint --bsize 1000 \
-  --lowmem --lowmem-prefix "$TMPDIR/l0_${RUN}" \
+  --lowmem --lowmem-prefix "$L0/l0" \
   --threads "${SLURM_CPUS_PER_TASK:-16}" \
   --out "$RG/step1_${RUN}"
-k_exp=$(wc -l < "$PH/traits_${FAM}.txt"); k_got=$(wc -l < "$RG/step1_${RUN}_pred.list")
+k_got=$(wc -l < "$RG/step1_${RUN}_pred.list")
 (( k_got == k_exp )) || { echo "FATAL: pred.list has $k_got of $k_exp traits" >&2; exit 4; }
-rm -f "$TMPDIR/l0_${RUN}"*
+# REGENIE exits 0 even when a .loco write hits the quota (0-byte file seen 2026-09-30)
+awk '{print $2}' "$RG/step1_${RUN}_pred.list" | while read -r f; do
+  [[ -s "$f" ]] || { echo "FATAL: empty $f" >&2; exit 4; }; done
+rm -rf "$L0"
 echo "=== done  $(date -u +%T)"

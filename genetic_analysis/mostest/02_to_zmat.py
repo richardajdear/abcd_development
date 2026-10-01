@@ -50,9 +50,11 @@ def main():
     z = np.column_stack(zs)
     keep = (np.minimum(ref.freq, 1 - ref.freq) >= MAF).to_numpy() & np.isfinite(z).all(axis=1)
     ref = ref[keep]
-    np.savez(a.out, z=z[keep], traits=np.array(traits),
-             **{c: (ref[c].astype(str).to_numpy(dtype="U") if ref[c].dtype == object
-                    else ref[c].to_numpy()) for c in ref.columns})   # no pickled objects
+    # no pickled objects: every non-numeric column (object under pandas 2,
+    # StringDtype under pandas 3) is stored as fixed-width unicode
+    np.savez(a.out, z=z[keep], traits=np.array(traits, dtype="U"),
+             **{c: (ref[c].to_numpy() if pd.api.types.is_numeric_dtype(ref[c])
+                    else ref[c].astype(str).to_numpy(dtype="U")) for c in ref.columns})
     print(f"chr{a.chr}: {keep.sum()} of {keep.size} variants kept (MAF >= {MAF}), k = {len(traits)}")
 
 
