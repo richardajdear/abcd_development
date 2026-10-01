@@ -1,9 +1,57 @@
 # D7 — partitioned SBayesRC polygenic scores from cell-type and synaptic gene programmes
 
-*Implements `docs/DIRECTIONS.md` D7. 2026-09-30. **Pipeline written and tested
-on synthetic data; not yet run on ABCD.** The CSD3 agent runs it (below). It
-absorbs README_HPC §8.3 **C3-D** (the C3-partitioned SCZ score): the C3, C1, C2
-and PLS2 deciles are its secondary sets.*
+*Implements `docs/DIRECTIONS.md` D7. Written 2026-09-30; **run on ABCD
+2026-10-01 (CSD3; result below).** It absorbs README_HPC §8.3 **C3-D** (the
+C3-partitioned SCZ score): the C3, C1, C2 and PLS2 deciles are its secondary
+sets.*
+
+## Result (2026-10-01)
+
+**Disorder side, yes; thinning side, no detectable enrichment.** Neuronal and
+SynGO genes carry 1.25–1.35× their size-expected share of every score, but on
+the HCP single-LMM global slope no set carries more of the PRS–thinning
+association than its share of the score predicts. The gene-level link stays
+group-level (DIRECTIONS §1), with the power caveat below: only ER_rel ≳ 3
+was detectable.
+
+- **Gates pass.** Step 2: row sums reproduce every Figure-1 `.profile` at
+  r = 1.000000 (mean-imputed; 1,129,989 of 1,154,522 weighted SNPs matched,
+  n = 11,670). Step 3: |Δβ| vs the step-9 lmer β ≤ 0.0016 on `global_slope_1lmm`
+  for all four primary arms (worst cell anywhere: EA baseline, −0.0047).
+- **K1c positive control (non-brain-expressed genes) depletes** on the
+  disorder side in all four SCZ and MDD arms (f_enrich 0.75–0.86, p_f
+  0.96–0.99 for enrichment), but not for EA (1.07, p_f 0.23). On the thinning side ER_rel is 0.0–0.56, the predicted
+  direction, but not significant (p_ER 0.27–0.66).
+- **Disorder side (`p_f`, null A).** K2 neuronal f_enrich 1.25–1.35 and K3
+  SynGO 1.26–1.31, p_f ≤ 0.003 in all five arms, EA included: a property of
+  brain-trait scores, not of SCZ. Glial and oligodendrocyte genes are not
+  enriched (0.86–1.18). The S0 mechanical check holds: the ST12 SCZ locus pool
+  carries 3.8× (SCZ25_META) and 3.4× (SCZ25_EUR) its share.
+- **Thinning side (primary, 7 tests per arm, Bonferroni within arm).** Nothing
+  survives in any arm. SCZ25_META (full β −0.035, p 4.7e-4, n 8,596):
+  SynGO ER 0.98 (95 % CI −0.66 to 2.60; ER_rel 1.19), neuronal 0.31, glial
+  0.14, oligodendrocyte 0.51; SynGO − oligodendrocyte ΔER 0.47 (−2.7 to 4.0).
+  SCZ25_EUR (n 4,308): SynGO ER 1.47, every p ≥ 0.19. The nearest cell is
+  MDD_eur oligodendrocyte genes, ER −3.8 (−27.9 to 0.83), p 0.011,
+  p_bonf 0.078. No K2 or K3 contrast is nominal in any arm (p ≥ 0.11).
+- **Secondary.** AHBA C3/C1/C2 and PLS2 deciles: no ER signal for SCZ. On the
+  disorder side C3-bottom is depleted (f_enrich 0.67–0.71) and C1-top is
+  nominally enriched for SCZ25_META only (1.33, p_f 0.013). The scattered
+  nominal p_ER on symptom and baseline outcomes (e.g. MDD_eur glial on
+  internalising, p 4e-4) sit in cells where ER is unstable (|ER| up to 57);
+  they are not read.
+
+Tables: `results/table_d7_{primary,partition,pairs,score_gate}.tsv`,
+`results/SUMMARY.md`; rows in `genetic_analysis/current_results.tsv`
+(section `d7_partition`). Step 4 (annotated SBayesRC refits) and K4 (D6 sets)
+are not run.
+
+**Run notes.** Steps 1–2 took 24 min, not 3–6 h. `config.sh` now reads the
+MDD/EA weights from `legacy/hpc_v2/work/results_v2/prs_final/SBayesRC`, the
+scores Figure 1 used. The old `$RES/prs_final` holds only association tables,
+so those three arms would have been skipped with only a warning. `env_d7.yml`
+pins `pandas<3`: copy-on-write and the new str dtype in pandas 3 are untested
+against this code.
 
 ## Question
 
@@ -107,7 +155,7 @@ SNP-level and per-subject files and is gitignored. Commit only `results/`.
 
 ```bash
 cd /home/rajd2/rds/hpc-work/abcd_development && git pull --ff-only origin main
-conda env create -p ~/rds/hpc-work/envs/d7 -f directions/d7_partitioned_prs/env_d7.yml
+conda env create -p ~/rds/hpc-work/envs/d7 -f directions/d7_partitioned_prs/env_d7.yml   # or legacy/hpc/work/bin/micromamba create -y -p ... (system conda is 4.7)
 ~/rds/hpc-work/envs/d7/bin/python -m pytest -q directions/d7_partitioned_prs/code/test_partition_core.py   # 5 pass
 # laptop step L1 (the CBCL outcomes), then copy the file up: see below
 bash directions/d7_partitioned_prs/run_d7.sh        # steps 1-2 -> 3 (15 tasks) -> 5
@@ -145,9 +193,8 @@ SCZ25_META, SCZ25_EUR, MDD_pooled and MDD_eur on `global_slope_1lmm`; K1c
 behaving as the positive control. If K1c does not deplete, stop and diagnose
 before reading K2/K3.
 
-**Recording.** Once step 5 has run, add a D7 block to
-`genetic_analysis/build_current_results.py` and a line to README_HPC §2, then
-replace the "not yet run" line at the top of this file with the result.
+**Recording.** Done 2026-10-01: D7 block in
+`genetic_analysis/build_current_results.py`, README_HPC §2.6, result above.
 
 ## Validation done on the laptop
 

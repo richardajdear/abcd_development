@@ -77,6 +77,9 @@ sensitivity analysis):
    individual-level genetic readout connects to it: AHBA C1–C3 and the
    ahba_pls signature are null as MAGMA gene properties, and the per-parcel
    SCZ-PRS β map does not resemble C3 or the PLS lead (`prs_beta_map/`).
+   Partitioning the scores by gene programme (D7, §2.6) does not change this:
+   synaptic and neuronal genes carry no more of the PRS–thinning association
+   than their share of the score.
 
 ### 2.2 Heritability and GWAS
 
@@ -208,6 +211,29 @@ gene-level-significant MDD set on the slope (MDD_genesig p 0.0044 HCP, 0.0021 DK
 top-250 0.003 / 0.006; pooled 0.013), same direction in all three versions.
 Nothing survives Bonferroni over 31 sets (0.0016). Run order: step14 prep → 15a
 (4 × 1.5 h) → 15b (9 min).
+
+### 2.6 Partitioned SBayesRC scores by gene programme (D7, 2026-10-01)
+
+Each Figure-1 SBayesRC score is split into per-gene partial scores (MAGMA
+35/10 kb windows, one gene per SNP, MHC excluded). For each pre-registered set,
+`f` is the set's share of the score's variance and `ER` is its share of the
+score–slope association divided by `f`. Both are read against 5,000 matched
+random gene sets. HCP single-LMM `global_slope`; SCZ/MDD pooled n 8,596, EUR
+n 4,308. Detail and gates: `directions/d7_partitioned_prs/README.md`.
+
+| arm | SynGO f_enrich | SynGO ER (95 % CI) | neuronal ER | oligodendrocyte ER | glial ER | min p_bonf (7 tests) |
+|:--|--:|--:|--:|--:|--:|--:|
+| SCZ25_META | 1.29 | 0.98 (−0.66, 2.60) | 0.31 | 0.51 | 0.14 | 1 |
+| SCZ25_EUR | 1.29 | 1.47 (−1.93, 5.76) | −0.30 | 1.76 | 1.61 | 1 |
+| MDD_pooled | 1.31 | −0.71 (−6.85, 1.23) | 0.20 | −1.70 | 0.52 | 0.98 |
+| MDD_eur | 1.28 | −0.11 (−6.12, 2.42) | 1.30 | −3.84 | −0.91 | 0.078 |
+
+On the disorder side, neuronal and SynGO genes carry 1.25–1.35× their expected
+share of every score, EA included (p_f ≤ 0.003). Glial and oligodendrocyte
+genes do not. Non-brain-expressed genes are depleted for SCZ and MDD
+(f_enrich 0.75–0.86), as the positive control requires. On the thinning side
+no set and no contrast survives correction. ER CIs span about ±2–10, so only
+ER_rel ≳ 3 was detectable: "not assessed at this power", not "absent".
 
 ## 3. What has been tried
 

@@ -11,6 +11,7 @@ was read from, so any row can be traced back to the cluster job that wrote it.
 """
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import pandas as pd
@@ -27,7 +28,7 @@ def add(section, readout, atlas, construction, trait, method, est, se, p, n,
     rows.append(dict(section=section, readout=readout, atlas=atlas,
                      construction=construction, trait=trait, method=method,
                      estimate=est, se=se, p=p, n=n, note=note,
-                     source=str(Path(source).relative_to(HERE))))
+                     source=os.path.relpath(source, HERE)))
 
 
 for atlas, root in ROOTS.items():
@@ -130,6 +131,21 @@ for atlas, root in ROOTS.items():
         add("ahba_h3", f"MAGMA gene-property ({r.model}): {r.variable}", atlas,
             "perregion", r.phenotype, "MAGMA", r.beta, r.se, r.p, r.n_genes, f,
             note="n = genes")
+
+# --- D7: partitioned SBayesRC scores (directions/d7_partitioned_prs), HCP single-LMM
+# global slope, matched cells.  estimate = ER (share of the PRS-slope association
+# carried by the set / its share of score variance); for contrast rows, dER.
+f = HERE.parent / "directions/d7_partitioned_prs/results/table_d7_primary.tsv"
+t = pd.read_csv(f, sep="\t")
+for r in t.itertuples():
+    contrast = pd.isna(r.ER)
+    add("d7_partition", f"{'dER' if contrast else 'ER'}: {r.test} ({r.cell})", "hcp", "1lmm",
+        "global_slope", f"SBayesRC {r.arm}", r.dER if contrast else r.ER, None, r.p_test,
+        None if pd.isna(r.n) else int(r.n), f,
+        note=(f"CI {r.dER_lo:.2f}..{r.dER_hi:.2f}" if contrast else
+              f"CI {r.ER_lo:.2f}..{r.ER_hi:.2f}; ER_rel={r.ER_rel:.2f}; "
+              f"f_enrich={r.f_enrich:.2f} (p_f {r.p_f:.2g})")
+             + f"; p_bonf={r.p_bonf:.2g} ({int(r.n_tests)} tests/arm)")
 
 out = pd.DataFrame(rows)
 out.to_csv(OUT, sep="\t", index=False, float_format="%.5g")

@@ -399,8 +399,9 @@ at this n; further attempts to make the regional PRS map resemble C3.
 
 ## 3b. Scorecard and synthesis after D2–D5 (2026-10-01)
 
-D2, D3, D4 and D5 are run (laptop, ABCD 7.0, HCP-MMP single-LMM trait); D7 and
-the MOSTest discovery arm are in progress on CSD3; D1, D6 and D8 are not
+D2, D3, D4 and D5 are run (laptop, ABCD 7.0, HCP-MMP single-LMM trait); D7 is
+run on CSD3 (2026-10-01; null on the thinning side, see its README) and the
+MOSTest discovery arm is in progress; D1, D6 and D8 are not
 started. Every number here is a row of a `directions/*/results|tables/*.tsv`.
 
 ### 3b.1 Predictions
@@ -514,7 +515,7 @@ not prediction; the life-events result is one informant and one wave; D5's
 
 ## 4. Suggested order (revised 2026-10-01; original order in git history)
 
-Done: D2, D3, D4, D5 (laptop). Running on CSD3: D7, MOSTest discovery arm.
+Done: D2, D3, D4, D5 (laptop), D7 (CSD3, 2026-10-01). Running on CSD3: MOSTest discovery arm.
 
 1. **Pull the EA / ALZ ± APOE / ASD score profiles from CSD3** (rsync in the D2
    and D5 READMEs) and re-run D2 `01–03`, D4 with EA as covariate and PRS

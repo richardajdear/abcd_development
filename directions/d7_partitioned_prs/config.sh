@@ -23,7 +23,9 @@ EUR_KEEP="$REPO/legacy/hpc/work/results/ancestry/eur_anchor.keep"
 # cell = pooled (multi-ancestry GWAS -> full sample, within-cluster standardised; rule 4)
 #      | EUR    (European GWAS -> EUR arm, raw score)
 SCZ25="$REPO/genetic_analysis/work/scores_scz2025/SBayesRC"
-PRSF="$RES/prs_final/SBayesRC"               # $RES = work/results_70tab (paths.sh)
+# MDD/EA: the v2 scores Figure 1 used (step6_prs_assoc.sbatch SCORE_ROOT=$V2_LEGACY/prs_final);
+# $RES/prs_final holds only the 7.0 association tables, not the weights.
+PRSF="${D7_PRSF:-$REPO/legacy/hpc_v2/work/results_v2/prs_final/SBayesRC}"
 ARMS=(
   "SCZ25_META|$SCZ25/SCZ25_META/SCZ25META_sbrc.weights|$SCZ25/SCZ25_META/score_SCZ25META_sbrc.profile|pooled"
   "SCZ25_EUR|$SCZ25/SCZ25_EUR/SCZ25EUR_sbrc.weights|$SCZ25/SCZ25_EUR/score_SCZ25EUR_sbrc.profile|EUR"
