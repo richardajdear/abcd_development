@@ -46,8 +46,8 @@ for (model in c("susie", "top1")) {
   res <- merge(res, gs[, .(gene, n_cs, s_rss, w_flag)], by = "gene", all.x = TRUE)
   for (t in TRAITS) {
     o <- res[trait == t, .(gene, n_model_snps, z, p, n_cs, s_rss, w_flag)][order(p)]
-    fwrite(o, file.path(W, "assoc", sprintf("%s.%s.%s.tsv.gz", t, tag, model)), sep = "\t")
     if (model == "top1") o[, w_flag := FALSE]
+    fwrite(o, file.path(W, "assoc", sprintf("%s.%s.%s.tsv.gz", t, tag, model)), sep = "\t")
     k <- !o$w_flag
     cat(sprintf("%s %s %s: %d genes, lambda %.3f, p<2.5e-6: %d | unflagged %d genes, lambda %.3f, p<2.5e-6: %d\n", t, tag, model,
                 nrow(o), median(o$z^2) / 0.455, sum(o$p < 2.5e-6), sum(k), median(o$z[k]^2) / 0.455, sum(o$p[k] < 2.5e-6)))
