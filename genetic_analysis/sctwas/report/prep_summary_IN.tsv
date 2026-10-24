@@ -1,0 +1,2 @@
+ct	features_tested	egenes	full_rows	egene_rows	egene_rows_kept_snps	dropped_untested	dropped_chr_mismatch	dropped_allele_mismatch	final_rows	genes_with_snps	median_snps_per_gene
+IN	12226	11165	94567716	87760597	45287330	10733854	0	12	34553464	11162	3121.0

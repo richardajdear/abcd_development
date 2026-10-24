@@ -1,0 +1,16 @@
+step	n
+panel_bim	22665064
+autosomal_rsid_snv_unique	22132657
+minus_MHC_hg19_chr6_25_34Mb	22014842
+panel_MAF_ge_0.01	8481533
+minus_strand_ambiguous	7163983
+gwas_ABCD_thin_EUR_rows	7470569
+gwas_ABCD_thin_EUR_allele_matched_in_filtered_panel	6070820
+gwas_ABCD_base_EUR_rows	7470569
+gwas_ABCD_base_EUR_allele_matched_in_filtered_panel	6070820
+gwas_SCZ25_EUR_rows	10616643
+gwas_SCZ25_EUR_allele_matched_in_filtered_panel	6816051
+gwas_MDD_EUR_rows	7363302
+gwas_MDD_EUR_allele_matched_in_filtered_panel	5979194
+KEPT_intersection_4_gwas	5539140
+optional_PGC3_EUR_in_kept_set	5475799
