@@ -172,3 +172,51 @@ thinning:
     WM FA rise, and a faster rise of grey/white MD/FA/RND contrast.
   - Twenty score × arm tests on the PCs, so p 0.003 roughly meets Bonferroni (0.0025) only in the thinning-adjusted
     EUR fit. Treat it as the lead candidate for the twin pipeline and for HCP-MMP regional maps, not a finding.
+
+## Step 6: is there one process behind thinning and diffusion PC4? (`08_single_factor.py`; `tables/single_factor_*.tsv`)
+**The four predictions.** If one latent process drives both measures:
+1. the child slopes correlate;
+2. a composite is more reliable than either part;
+3. PRS effects are proportional across scores (the tetrad = 0);
+4. the twin rA is high.
+
+Models: OLS with family-clustered SE and the Figure-1 covariates + site; PRS-CS.
+
+| test | thinning × dPC4 | thinning × dPC2 (grey-matter MD / free water) |
+|---|---|---|
+| phenotypic r of child slopes | −0.07 (−0.10 in the twin sample) | +0.34 |
+| twin h² (AE) of the diffusion axis | 0.67 [0.56, 0.80] | 0.50 [0.41, 0.59] |
+| twin rA with faster thinning | **−0.09 [−0.25, +0.05]** | **+0.47 [+0.32, +0.61]** |
+| dPC/thinning PRS ratio, SCZ vs MDD | EUR 0.86 vs 0.41; pooled 0.63 vs −0.34 | — |
+| tetrad = 0? | EUR p 0.63; pooled p 0.12. Not rejected, but the bootstrap CIs are wide. | — |
+
+**Composites, z(thinning) + w · z(dPC4)** (PRS β, z):
+
+| score / arm | w = 0 (thinning) | 0.25 | 0.5 | 1 | 2 | dPC4 alone |
+|---|---|---|---|---|---|---|
+| SCZ EUR | +0.040 (2.9) | +0.049 (3.5) | +0.054 (3.8) | +0.056 (3.8) | +0.051 (3.3) | +0.035 (2.1) |
+| SCZ pooled | +0.030 (3.0) | +0.034 (3.4) | +0.036 (3.5) | +0.036 (3.4) | +0.031 (2.8) | +0.019 (1.7) |
+| SCZ non-EUR | +0.023 (1.6) | +0.025 (1.7) | +0.025 (1.7) | +0.023 (1.5) | +0.019 (1.2) | +0.009 (0.6) |
+| MDD EUR | +0.027 (1.8) | +0.030 (2.0) | +0.030 (2.0) | +0.028 (1.9) | +0.023 (1.5) | +0.011 (0.7) |
+| MDD pooled | +0.024 (2.2) | +0.021 (2.0) | +0.018 (1.7) | +0.011 (1.1) | +0.003 (0.3) | −0.008 (−0.7) |
+
+**Reading.**
+- **Thinning and dPC4 are not one process.** They are uncorrelated phenotypically and genetically. Measurement error
+  goes to E in the twin model, so it cannot explain the near-zero rA.
+- **Why the SCZ composite still gains z (2.9 → 3.8 in EUR).** It adds two independent signals; that is aggregation, not
+  reliability.
+- **The gain is also optimistic.** dPC4 was singled out partly for its SCZ association in these same EUR / pooled
+  children. In the only held-out subsample (non-EUR, n ≈ 4,000), dPC4 alone is z 0.6 and the composite gain is 1.6 → 1.7.
+- **The composite does not help MDD.** dPC4 carries no MDD signal, so adding it dilutes the MDD effect.
+- **dPC2 is the axis that does share genetics with thinning** (rA 0.47). Its PRS association disappears once thinning
+  is adjusted (step 5), and adding it to thickness lowers reliability (PLS composite). Together with the intercept
+  pattern (thicker cortex ↔ lower grey-matter MD and free water), this fits dPC2 being the same cortical geometry
+  seen through diffusion (partial volume), not a second proxy of a common biological process.
+- **So at whole-cortex resolution, no measure tried so far shares genetic liability with thinning other than through
+  thickness itself.**
+  - T1w/T2w: rA 0.08 (D3).
+  - dPC4: rA −0.09.
+  - dPC2 (partial volume): rA 0.47.
+
+  Either the disease-relevant process is specific to thinning, or a shared process is regional and diluted in
+  whole-cortex means. The regional HCP-MMP measures from CSD3 test the second possibility.
