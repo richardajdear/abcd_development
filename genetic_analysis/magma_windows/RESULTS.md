@@ -1,20 +1,33 @@
-# MAGMA windows: CSD3 report (2026-10-26)
+# MAGMA windows: CSD3 report (final, 2026-10-27)
 
-**Status.** All 20 main window × trait gene analyses completed. `w35_10` reproduces the existing annotation byte for byte,
-and the ABCD_thin, ABCD_base and MDD gene results exactly (r = 1, max |ΔZ| = 0).
+**Status: complete.** All 20 window × trait gene analyses and all 4 `w35_10_multi` runs have finished. The SCZ and MDD
+multi runs needed 5.5–8 h, so they were resubmitted with a 12 h limit after the first 4 h attempt timed out.
 
-**Open items**
-1. **SCZ25_EUR does not reproduce exactly** (Pearson 0.9999, Spearman 1.0000, max |ΔZ| 1.19). Inputs, annotation, SNP
-   counts, NPARAM and N are identical, and the two MAGMA logs differ only in paths. Only 25 of 18,546 genes differ, all
-   with old Z > 3.5 (22 of them Z > 4.4). Many have rounded P values (2e-9, 5e-10), which suggests MAGMA's sampling
-   fallback for very small P. That fallback is stochastic, so it would explain the gap. SCZ has many more such genes than
-   MDD (61 vs 6 with P < 1e-6). Rerun job 39250552 (`check_rerun/SCZ25_EUR`) tests this: if the rerun's Z values move
-   for the same genes, the gap is sampling noise. The rank-based uses (Spearman, top-1,000 sets) are unaffected
-   (Spearman = 1).
-2. **`w35_10_multi` for SCZ25_EUR and MDD_EUR timed out** at 4 h. They were resubmitted with 12 h (job 39250551). The
-   two ABCD multi runs are complete.
+**Reproduction.** The `w35_10` annotation is byte-identical to the existing one. The ABCD_thin, ABCD_base and MDD gene
+results reproduce exactly (r = 1, max |ΔZ| = 0).
 
-Gene files (`genes/<window>/<trait>.genes.{out,raw}` and `.log`) are on CSD3 at
+**SCZ25_EUR differs slightly between runs, which is expected MAGMA behaviour, not an input difference.**
+- Inputs and annotation are identical, and the MAGMA logs differ only in file paths.
+- A third run (`check_rerun/SCZ25_EUR`, job 39250552) differs from both earlier runs in the same 25 genes. All of them
+  are strongly significant (Z > 3.5). MAGMA estimates P by random sampling for genes with very small P, so these values
+  change from run to run. SCZ is affected more than MDD because it has many more such genes (61 vs 6 with P < 1e-6).
+
+| comparison | genes with \|ΔZ\| > 1e-3 | max \|ΔZ\| | Pearson | Spearman |
+| --- | --- | --- | --- | --- |
+| existing vs windows run | 25 | 1.19 | 0.99993 | 0.999999 |
+| existing vs rerun | 18 | 0.18 | 0.999999 | 1.0000000 |
+| windows run vs rerun | 25 | 1.13 | 0.99993 | — |
+
+- The windows-run `w35_10` result is the low outlier: it is the lowest of the three for 22 of the 25 genes. The rerun
+  and the existing result agree closely.
+- The top-1,000 SCZ gene set (Z cut-off ≈ 4.2) is **identical in all three runs**, and the top 100 is too. At top 500,
+  491–499 of 500 are shared.
+- So set-based and rank-based uses of SCZ gene Z are unaffected. Only analyses that use the exact Z of the strongest
+  genes would see a small difference.
+- The windows-run `w35_10` result is kept as the reference in the tables below, so all five windows came from the same
+  batch.
+
+Gene files (`genes/<window>/<trait>.genes.{out,raw}` and `.log`, plus `check_rerun/`) are on CSD3 at
 `abcd_development/genetic_analysis/work/magma_windows/`, which git ignores. Fetch them with the rsync command at the
 end of this report. Scripts: `abcd_development/genetic_analysis/magma_windows/`.
 
@@ -74,6 +87,8 @@ MAGMA: `MAGMA version: v1.10 (linux/s)`. LD ref g1000_eur, NCBI37.3 gene loc, un
 | w100_100 | MDD_EUR | 19266 | 5.889 | 704 | 0.8591 | 742 |
 | w35_10_multi | ABCD_thin_EUR | 18283 | 1.007 | 0 | 0.8599 | 675 |
 | w35_10_multi | ABCD_base_EUR | 18283 | 1.206 | 0 | 0.8601 | 709 |
+| w35_10_multi | SCZ25_EUR | 18546 | 5.267 | 1246 | 0.9187 | 868 |
+| w35_10_multi | MDD_EUR | 19132 | 4.943 | 826 | 0.9214 | 828 |
 
 ### Top 10 genes by ZSTAT
 
@@ -101,6 +116,8 @@ MAGMA: `MAGMA version: v1.10 (linux/s)`. LD ref g1000_eur, NCBI37.3 gene loc, un
 | w100_100 | MDD_EUR | DCC (10.29), SGCZ (10.05), ASTN2 (9.45), TCF4 (9.36), NCAM1 (9.26), SORCS3 (9.12), TTC12 (8.90), SDK1 (8.70), SOX5 (8.69), DRD2 (8.53) |
 | w35_10_multi | ABCD_thin_EUR | BAMBI (4.55), MYO10 (3.92), TRIM6 (3.87), PPIP5K2 (3.73), TRIM6-TRIM34 (3.69), PAM (3.67), UBR2 (3.66), WDR26 (3.47), C5orf30 (3.46), CSN1S1 (3.45) |
 | w35_10_multi | ABCD_base_EUR | RPL27 (3.90), PTGES3L (3.90), EPB41L2 (3.82), PTGES3L-AARSD1 (3.80), ZNF345 (3.79), ZNF790 (3.78), IFI35 (3.73), CPOX (3.72), NASP (3.71), MIR205HG (3.69) |
+| w35_10_multi | SCZ25_EUR | ZSCAN12 (12.79), HIST1H2AJ (12.70), ZNF184 (12.68), OR2J2 (12.67), ZNF391 (12.63), HIST1H4J (12.60), HIST1H2BM (12.52), HIST1H2BN (12.50), HIST1H2BL (12.50), HIST1H2AI (12.48) |
+| w35_10_multi | MDD_EUR | DCC (12.19), DRD2 (11.25), SGCZ (11.22), ESR1 (10.98), SOX5 (10.14), TCF4 (10.11), CCDC36 (9.93), SDK1 (9.73), ASTN2 (9.63), TENM2 (9.58) |
 
 ## Files
 
