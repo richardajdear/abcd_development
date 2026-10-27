@@ -35,6 +35,9 @@ BLUPS = Path("/tmp/hcp70_1lmm_blups.csv")
 OUT = REPO / "genetic_analysis/fig1_inputs/hcp70_cbcl_assoc.tsv"
 
 CBCL = ["pfactor", "internal", "external", "depress", "thought"]
+# PQ-BC: number of psychotic-like experiences endorsed (0-21) and distress score
+# (sum of distress ratings over endorsed items); youth report, all waves
+PPS = {"ple_count": "mh_y_pps_count", "ple_distress": "mh_y_pps__severity_score"}
 DXS = ["mdd_youth_DX", "mdd_parent_DX", "psychosis_parent_DX"]
 
 
@@ -69,12 +72,25 @@ def main() -> None:
             **({"disp": 0} if kind == "logit" else {}))
         return m, d
 
+    # PQ-BC (youth self-report psychotic-like experiences, 7.0 mh_y_pps.tsv), built
+    # like the CBCL scores: log1p, BASE = ses-00A, LATE = mean of ses-05A..07A
+    pps = pd.read_csv(ns["R70"] / "mh_y_pps.tsv", sep="\t",
+                      usecols=["participant_id", "session_id", "mh_y_pps_age", *PPS.values()])
+    pps["subject"] = "sub-NDARINV" + pps.participant_id.str.replace("sub-", "", regex=False)
+    pps["wave"] = pps.session_id.str.slice(4, 6).astype(int)
+    pps = pps[pps.subject.isin(D.index)].drop_duplicates(["subject", "wave"])
+    for k, c in PPS.items():
+        pps[k] = np.log1p(pd.to_numeric(pps[c], errors="coerce"))
+    for name, waves in ns["WAVES"].items():
+        g = pps[pps.wave.isin(waves)].groupby("subject")[list(PPS)].mean()
+        D = D.join(g.add_suffix(f"_{name}"))
+
     FU = ns["FU"]
     rows = []
     for model_set, xs_list in (("alone", [["global_slope"], ["baseline_thickness"]]),
                                ("joint", [["global_slope", "baseline_thickness"]])):
         for xs in xs_list:
-            for o in CBCL:
+            for o in CBCL + list(PPS):
                 y = f"{o}_{FU}"
                 m, d = fit(y, xs, [f"age_{FU}", f"{o}_BASE"])
                 for x in xs:
@@ -87,6 +103,40 @@ def main() -> None:
                     rows.append(dict(outcome=o, model="ksads_logit", fit=model_set, brain=x,
                                      beta=m.params[x], se=m.bse[x], p=m.pvalues[x],
                                      n=int(m.nobs), n_cases=int(d[o].sum()), y_sd=np.nan))
+    # ---- panel h: depressive symptoms at 15-17 y beyond baseline vs ΔCT ----
+    # y = residual of log1p DSM-depressive (LATE) on baseline score + age_LATE +
+    # sex + site, in SD of y_LATE (so its OLS slope on z(ΔCT) reproduces panel g's
+    # estimate up to the Frisch-Waugh step on the covariates); x = ΔCT in µm/yr
+    # from hcp70_child_traits.csv via the same sid key fig1_prep_1lmm.R writes.
+    yv = f"depress_{FU}"
+    d = D.dropna(subset=[yv, "depress_BASE", f"age_{FU}", "global_slope"]).copy()
+    r = smf.ols(f"{yv} ~ depress_BASE + age_{FU} + C(sex) + C(site)", d).fit()
+    d["dep_resid_sd"] = r.resid / D[yv].std()
+    order = sorted(b.index)                                   # codepoint sort, as sids in R
+    sid = pd.Series(range(len(order)), index=order)
+    tr = pd.read_csv(OUT.parent / "hcp70_child_traits.csv").set_index("sid")
+    d["dct_um_per_yr"] = tr.dct_um_per_yr.reindex(sid.reindex(d.index).values).values
+    assert d.dct_um_per_yr.notna().all()
+    assert abs(np.corrcoef(d.dct_um_per_yr, d.global_slope)[0, 1] - 1) < 1e-6
+    # equal-width 1 µm/yr bins centred on the mean ΔCT (edges mean ± 4.5); the few
+    # children beyond the outer edges (~3-4%) are left out of the bin means but kept
+    # in the fit, so the fastest-thinning bin still holds ~250+ children
+    W_BIN = 1.0
+    c0 = np.round(d.dct_um_per_yr.mean())
+    edges = c0 + W_BIN * np.arange(-4.5, 4.5 + 1e-9, 1.0)
+    q = pd.cut(d.dct_um_per_yr, edges, right=False, labels=False)
+    bins = d.groupby(q).agg(x=("dct_um_per_yr", "mean"), y=("dep_resid_sd", "mean"),
+                            se=("dep_resid_sd", "sem"), n=("dep_resid_sd", "size"))
+    lf = smf.ols("dep_resid_sd ~ dct_um_per_yr", d).fit(cov_type="cluster", cov_kwds={"groups": d.family})
+    bins["fit_slope_per_um"] = lf.params["dct_um_per_yr"]; bins["fit_intercept"] = lf.params["Intercept"]
+    bins["fit_p"] = lf.pvalues["dct_um_per_yr"]; bins["n_total"] = len(d)
+    bins["lo_edge"] = edges[bins.index.astype(int)]; bins["width"] = W_BIN
+    bins["n_outside"] = int(q.isna().sum())
+    print("bin n:", bins.n.tolist(), "outside:", int(q.isna().sum()))
+    bins.to_csv(OUT.parent / "hcp70_dep_bins.csv", index=False, float_format="%.5g")   # aggregate: committed
+    print("panel h: n", len(d), "slope per SD ΔCT", round(lf.params["dct_um_per_yr"] * d.dct_um_per_yr.std(), 4),
+          "p", round(lf.pvalues["dct_um_per_yr"], 4))
+
     A = pd.DataFrame(rows)
     A["est"] = np.where(A.model == "change", A.beta / A.y_sd, np.exp(A.beta))
     A["lo"] = np.where(A.model == "change", (A.beta - 1.96 * A.se) / A.y_sd,
