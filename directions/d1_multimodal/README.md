@@ -7,11 +7,12 @@ Figure 1 PRS model, the D3 twin pipeline and, eventually, a cross-modal composit
 | step | file | status |
 |---|---|---|
 | 1 | `01_t1t2_prs.R`: PRS → T1w/T2w slope, plus the quality of the measure (DK; HCP-MMP T1w/T2w does not exist yet) | done 2026-10-27 |
-| — | `CSD3_INSTRUCTIONS.md`: HCP-MMP and DK GWC, T1/T2 intensity at GM mid-depth and in superficial WM, T1w/T2w ratio, and DTI/RSI if processed maps exist | brief written |
+| — | `CSD3_INSTRUCTIONS.md`: HCP-MMP and DK GWC, T1/T2 intensity at GM mid-depth and in superficial WM, T1w/T2w ratio, and DTI/RSI if processed maps exist | GWC, T1 gm50, T1 wm1 done on CSD3 2026-10-27 (`CSD3_REPORT.md`); T2, T1w/T2w, DTI held for a decision |
 | 2 | `02_dmri_scan_means.py`: per-scan whole-cortex means for 45 DK DTI/RSI release tables | done 2026-10-27 |
 | 3 | `03_fit_compare.R`: single-LMM slopes, quality, coupling with thinning / T1w/T2w, PRS | done 2026-10-27 |
 | 4 | `04_followups.R`: PRS adjusted for the thinning slope; PCA of the 47 slopes | done 2026-10-27 |
-| — | area, volume, GWC (CSD3) → same pipeline; twin h² / rA for the lead diffusion measures; composite via multivariate LMM | to do |
+| 5–6 | `05`–`08`: PLS composite, diffusion PCs × PRS, single-factor test (twin rA, tetrad) | done 2026-10-27 |
+| — | area, volume, GWC and T1 gm50/wm1 (CSD3 tables, rsync pending) → same pipeline; twin h² / rA for every new slope | to do |
 
 ## Step 1 result (`tables/t1t2_*.tsv`)
 **Gate.** The base model reproduces `genetic_analysis/fig1_inputs/hcp70_prs_key_arms.tsv` for ΔCT in all 8 cells
@@ -220,3 +221,64 @@ Models: OLS with family-clustered SE and the Figure-1 covariates + site; PRS-CS.
 
   Either the disease-relevant process is specific to thinning, or a shared process is regional and diluted in
   whole-cortex means. The regional HCP-MMP measures from CSD3 test the second possibility.
+
+## Step 7: scanner terms, and the HCP-MMP structural measures (`09`–`11`; `tables/scanner_terms_*.tsv`, `twin_smri.tsv`)
+**Scanner changes within child.** In the Figure-1 sample, 27 % of children change scanner unit and 63.5 % change
+software version between visits; there are 66 unit × software epochs. Epochs are partly confounded with age
+(within-epoch age SD 0.88 y vs 2.45 y), so an epoch term can absorb real change.
+
+Models:
+- M0: Figure 1.
+- M1: M0 + (1 | scanner unit).
+- M2: M0 + (1 | unit × software epoch).
+
+The structural measures use exactly the Figure-1 scans (26,946 scans, 8,716 children; same DAIRC surfaces). y is
+z-scored by measure, and PRS models are Figure-1 + site.
+
+| measure | reliability M0 → M2 | site R² of slopes M0 → M2 | r with faster thinning (within site) | twin h² (M0) | rA with faster thinning (M0) |
+|---|---|---|---|---|---|
+| thickness | 0.303 → 0.298 | 0.030 → 0.013 | — | 0.45 | — |
+| area | 0.357 → 0.416 | 0.081 → 0.040 | −0.20 | 0.73 | **−0.36 [−0.51, −0.20]** |
+| GM volume | 0.449 → 0.485 | 0.030 → 0.026 | −0.74 | 0.69 | −0.72 [−0.77, −0.66] |
+| GWC | 0.180 → 0.194 | 0.104 → 0.015 | −0.32 | 0.56 | **−0.27 [−0.40, −0.13]** |
+| T1 GM mid-depth | 0.198 → 0.119 | 0.198 → 0.056 | +0.10 | 0.48 | +0.09 [−0.07, +0.25] |
+| T1 WM 1 mm | 0.179 → 0.086 | 0.153 → 0.030 | −0.19 | 0.32 | −0.08 [−0.30, +0.25] |
+| T1w/T2w (DK) | 0.408 → 0.254 | 0.260 → 0.060 | 0.01 | 0.51 | −0.07 [−0.25, +0.10] |
+| MD contrast (`is__md__gwc`) | 0.321 → 0.319 | 0.067 → 0.006 | −0.30 | 0.61 | −0.44 [−0.56, −0.32] |
+| GM MD (`is__md__gm`) | 0.319 → 0.317 | 0.161 → 0.009 | +0.35 | 0.59 | +0.42 [+0.28, +0.55] |
+
+Negative rA means children genetically inclined to faster thinning also tend to lose area / volume / GWC faster.
+
+- **Thickness is robust to scanner.** The epoch term leaves its reliability and its PRS effects unchanged: SCZ EUR
+  z 2.6 → 2.8, pooled 2.8 → 2.8; MDD z 2.1–2.9 throughout.
+- **For the intensity and diffusion measures, much of the apparently reliable slope variance was scanner drift.**
+  The epoch term cuts site R² of slopes to ≤ 0.06 and reliability falls: T1 wm1 0.18 → 0.09, FA wm 0.17 → 0.13,
+  RND wm 0.12 → 0.06, T1w/T2w 0.41 → 0.25. Some fixed age slopes shift too (GM MD −0.04 → +0.03 SD/yr), which is the
+  age–epoch confounding.
+- **Grey-matter volume is the one measure that competes with thickness.** It is more reliable (0.45–0.49) and its SCZ
+  signal is as strong or slightly stronger (higher score = faster volume loss):
+
+  | score / arm | thickness (faster thinning) | GM volume (M0 → M2) |
+  |---|---|---|
+  | SCZ PRS-CS EUR | +0.036 (z 2.6) | −0.038 (z −2.8) → −0.043 (z −3.1) |
+  | SCZ PRS-CS pooled | +0.028 (2.8) | −0.025 (−2.6) → −0.028 (−2.8) |
+  | SCZ SBayesRC pooled | +0.031 (3.1) | −0.029 (−3.0) → −0.032 (−3.3) |
+  | MDD PRS-CS EUR / pooled | +0.030 (2.1) / +0.028 (2.7) | −0.022 (−1.5) / −0.019 (−2.0) |
+
+  Volume's extra reliability comes from area, which carries only a weak score effect in the same direction (SCZ
+  −0.015 to −0.021, z −1.1 to −1.8; MDD EUR −0.025 to −0.032). So the PRS z barely moves even though reliability
+  rises by half.
+- **Thinning shares genetics with area loss** (rA −0.36), and modestly with GWC decline (rA −0.27, the direction the
+  myelination account predicts). It does not share genetics with any intensity measure: T1 GM, T1 WM, T1w/T2w, and
+  diffusion dPC4 (step 6) all have rA ≈ 0.
+- **Caveat on GWC.** GWC samples grey matter at a fixed fraction of thickness and white matter at 1 mm, so thinner
+  cortex may lower it mechanically. Its MDD association also runs the other way: MDD EUR +0.035, z 2.4 = slower GWC
+  fall.
+- **The MDD score lowers the T1 GM-intensity slope** (EUR −0.036, z −2.7; pooled −0.022, z −2.2; same under M2 and
+  SBayesRC). This is independent of thinning genetically (rA +0.09). It is a lead, not a finding.
+
+**Reading.** In these data, the cross-measure shared genetic liability with thinning is in **surface geometry**
+(thickness, area, volume) and in boundary measures that depend on it (GWC, MD contrast, GM MD), not in tissue
+intensity or myelin proxies. Volume is a reasonable co-primary phenotype for the SCZ score (equal or slightly
+stronger). Thickness remains better for MDD and is the only measure significant in every cell, under every scanner
+model.
