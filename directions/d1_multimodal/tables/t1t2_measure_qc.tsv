@@ -1,0 +1,25 @@
+measure	quantity	value
+ct	scan-level site ICC (site / (site + child intercept + residual))	0.0436913945986655
+ct	residual SD / between-child slope SD (years of follow-up to reach SNR 1)	5.85824984879724
+ct	mean per-child slope reliability, 2 visits	0.173804287965612
+ct	mean per-child slope reliability, 3 visits	0.317910955583698
+ct	mean per-child slope reliability, 4 visits	0.380184925725665
+t1t2	scan-level site ICC (site / (site + child intercept + residual))	0.19333730349806
+t1t2	residual SD / between-child slope SD (years of follow-up to reach SNR 1)	4.77953116537596
+t1t2	mean per-child slope reliability, 2 visits	0.257430657856424
+t1t2	mean per-child slope reliability, 3 visits	0.42996333127858
+t1t2	mean per-child slope reliability, 4 visits	0.501830505066287
+ct	slope: R2 of site (child BLUP ~ site)	0.0298989014964136
+ct	slope: site F-test p	5.66740300016317e-45
+ct	slope: n children |z| > 4	15
+ct	slope: n children |z| > 8	0
+ct	slope: n children	8596
+t1t2	slope: R2 of site (child BLUP ~ site)	0.260507953026452
+t1t2	slope: site F-test p	0
+t1t2	slope: n children |z| > 4	15
+t1t2	slope: n children |z| > 8	10
+t1t2	slope: n children	8505
+ct x t1t2	r(faster thinning, faster T1w/T2w rise), Pearson	-0.00194984845102634
+ct x t1t2	same, Spearman	-0.0237618239970779
+ct x t1t2	same, within site (site-residualised)	0.0130399461597264
+ct x t1t2	n children	8390

@@ -113,8 +113,8 @@ for (i in seq_len(nrow(grid))) {
 }
 R <- rbindlist(ROWS); R[, mde80 := 2.80 * se]
 G <- rbindlist(GATE); G[, diff := est - committed_faster]
-fwrite(R, file.path(OUT, "t1t2_prs.tsv"), sep = "\t", float_format = "%.6g")
-fwrite(G, file.path(OUT, "t1t2_gate.tsv"), sep = "\t", float_format = "%.6g")
+fwrite(R, file.path(OUT, "t1t2_prs.tsv"), sep = "\t")
+fwrite(G, file.path(OUT, "t1t2_gate.tsv"), sep = "\t")
 cat(sprintf("\ngate: max |beta - committed| = %.2g; n mismatches = %d\n", max(abs(G$diff)), sum(G$n != G$committed_n)))
 w <- dcast(R[method == "prscs"], disorder + arm + outcome ~ model, value.var = c("est", "p"))
 print(w, digits = 2)
