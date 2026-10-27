@@ -67,8 +67,10 @@ flag, no Philips, and at least 2 scans. No LMM was singular.
 The %/yr column is not meaningful for `gwc` measures whose mean is near 0.
 
 **Every diffusion slope carries much more site variance than thickness.** The R² of site on child slopes is 0.07–0.40,
-against 0.03 for thickness. The `gwc` contrast measures are the least site-sensitive (0.07–0.13); `is__md__gwc` has a
-scan-level site ICC of 0.05 and slope R² 0.07, the only one close to thickness. Slope reliabilities (3 visits:
+against 0.03 for thickness. The `gwc` contrast measures are the least site-sensitive as a group: median 0.09 vs 0.18
+for the `gm`/`wm` measures, range 0.07–0.28. Thirteen of the fifteen are at most 0.13; the exceptions are the LD
+contrasts, `is__ld__gwc` 0.14 and `fs__ld__gwc` 0.28. `is__md__gwc` has a scan-level site ICC of 0.05 and slope R²
+0.07, the only one close to thickness. Slope reliabilities (3 visits:
 0.12–0.41) are of the same order as thickness (0.32) but, as for T1w/T2w, partly reflect site drift.
 
 **Coupling with faster thinning (within-site r of child slopes):**
