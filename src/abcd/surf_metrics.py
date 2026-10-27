@@ -12,11 +12,21 @@ measure        what                                           source
 ``gwc``        grey/white contrast, FreeSurfer ``pctsurfcon``  ``surf/?h.w-g.pct.mgh``
 ``t1__gm50``   T1w intensity at GM mid-depth                   ``mri/nu.mgz``, white + 0.5 (pial - white)
 ``t1__wm1``    T1w intensity 1 mm below the white surface      ``mri/nu.mgz``, white - 1 mm x outward normal
+``t2__gm50``   T2w intensity at GM mid-depth                   fMRIPrep ``desc-preproc_T2w`` (registered)
+``t2__wm1``    T2w intensity 1 mm below the white surface      fMRIPrep ``desc-preproc_T2w`` (registered)
+``t1t2__gm50`` T1w/T2w ratio at GM mid-depth, per vertex       fMRIPrep ``desc-preproc_T1w`` / ``_T2w``
 =============  =============================================  ==============================
 
 Volume measures are sampled with trilinear interpolation
 (``scipy.ndimage.map_coordinates``, order 1) at tkr-RAS vertex positions mapped to
-voxels with the inverse of the volume's ``vox2ras-tkr``.  The white-surface normal is the
+voxels with the inverse of the volume's ``vox2ras-tkr``.  fMRIPrep volumes (``fmriprep:``
+sources) live in fMRIPrep's own T1w space; they are reached through a per-session
+``bbregister`` LTA from the fMRIPrep T1w to the DAIRC ``orig.mgz`` (``<reg_root>/<sub>/<ses>/
+bbr.lta``, made by ``tools/t2reg.sbatch``).  The fMRIPrep T2w is already resampled into that
+T1w space, so one transform serves both.  fMRIPrep N4-corrects its T1w but not its T2w, so
+the T2w samples are divided by an N4 field computed the same way (``t2_biasfield_8mm.nii.gz``,
+also from ``tools/t2reg.sbatch``).  The ratio is formed per vertex before averaging, from the
+two (both N4-corrected) fMRIPrep images.  The white-surface normal is the
 normalised sum of the area-weighted normals of the faces around each vertex, oriented
 towards the pial surface.  Samples outside the volume are NaN.
 
@@ -36,7 +46,9 @@ Work is split in chunks (one array task each); each chunk writes a long parquet 
 table under ``<out>/surf_metrics_parts/``.  ``tools/surf_metrics_collect.py`` assembles the
 release-convention wide TSVs.
 
-    sbatch --array=0-169 tools/surf_metrics.sbatch           # all sessions, 200 per task
+    sbatch --array=0-168 tools/surf_metrics.sbatch           # all sessions, 200 per task
+    sbatch --array=0-168 tools/surf_metrics.sbatch --measures t2__gm50,t2__wm1,t1t2__gm50 \
+        --part-prefix part_t2                                # after tools/t2reg.sbatch
     python -m abcd.surf_metrics --sessions pilot.tsv --part-name pilot --out-dir /tmp/sm
 """
 
@@ -61,6 +73,11 @@ from .hcp_stats import (ATLAS, DEFAULT_FS_ROOT, DEFAULT_PARC_ROOT, Session,
 
 DEFAULT_BACKFILL_ROOT = Path(
     "/rds/user/rajd2/hpc-work/abcd_development/legacy/hpc/work/parcellations_backfill/T1")
+DEFAULT_FMRIPREP_ROOT = Path("/rds/project/rds-CeXlNYOYMxw/derivatives/abcc-fmriprep_v25.1.4")
+DEFAULT_REG_ROOT = Path("/rds/user/rajd2/hpc-work/abcd_development/legacy/hpc/work/d1_t2reg")
+#: fMRIPrep images that are NOT bias-corrected by fMRIPrep -> N4 field written by
+#: tools/t2reg.sbatch next to bbr.lta (fMRIPrep's T1w is already N4-corrected)
+BIASFIELD = {"T2w": "t2_biasfield_8mm.nii.gz"}
 HEMIS = ("lh", "rh")
 DK_EXCLUDE = {"unknown", "corpuscallosum"}
 HCP_MEDIAL_WALL = "???"
@@ -69,9 +86,14 @@ HCP_MEDIAL_WALL = "???"
 @dataclass(frozen=True)
 class Measure:
     name: str               # column infix after mr_y_smri__, e.g. "t1__gm50"
-    kind: str               # "surface" (per-vertex file) or "volume" (sampled)
-    source: str             # path under the FreeSurfer session; {hemi} filled in
+    kind: str               # "surface" (per-vertex file), "volume" (sampled) or "ratio"
+    source: str             # path under the FreeSurfer session ({hemi} filled in), or
+                            # "fmriprep:<suffix>"; a ratio is "<numerator>/<denominator>"
     depth: str | None = None  # gm50 / wm1 / wm2 for volume measures
+
+    @property
+    def volume_sources(self) -> list[str]:
+        return {"surface": [], "volume": [self.source], "ratio": self.source.split("/")}[self.kind]
 
 
 MEASURES = {
@@ -79,9 +101,14 @@ MEASURES = {
         Measure("gwc", "surface", "surf/{hemi}.w-g.pct.mgh"),
         Measure("t1__gm50", "volume", "mri/nu.mgz", "gm50"),
         Measure("t1__wm1", "volume", "mri/nu.mgz", "wm1"),
+        Measure("t2__gm50", "volume", "fmriprep:T2w", "gm50"),
+        Measure("t2__wm1", "volume", "fmriprep:T2w", "wm1"),
+        Measure("t1t2__gm50", "ratio", "fmriprep:T1w/fmriprep:T2w", "gm50"),
     )
 }
-DEFAULT_MEASURES = tuple(MEASURES)
+#: FreeSurfer-only measures (the first pass); the fMRIPrep ones need tools/t2reg.sbatch first
+DEFAULT_MEASURES = ("gwc", "t1__gm50", "t1__wm1")
+T2_MEASURES = ("t2__gm50", "t2__wm1", "t1t2__gm50")
 
 
 # --------------------------------------------------------------------------
@@ -131,16 +158,85 @@ def depth_coords(depth: str, white: np.ndarray, pial: np.ndarray, normals: np.nd
     raise ValueError(f"unknown depth {depth!r}")
 
 
-def sample_volume(data: np.ndarray, tkr2vox: np.ndarray, xyz: np.ndarray) -> np.ndarray:
+def sample_volume(data: np.ndarray, tkr2vox: np.ndarray, xyz: np.ndarray,
+                  mode: str = "constant") -> np.ndarray:
     """Trilinear samples of ``data`` at tkr-RAS points ``xyz`` (n x 3); NaN outside."""
     ijk = xyz @ tkr2vox[:3, :3].T + tkr2vox[:3, 3]
-    return map_coordinates(data, ijk.T, order=1, mode="constant", cval=np.nan)
+    return map_coordinates(data, ijk.T, order=1, mode=mode, cval=np.nan)
+
+
+def sample_source(vol: tuple, xyz: np.ndarray) -> np.ndarray:
+    """Sample a loaded source: ``(data, tkr2vox)`` or, bias-corrected,
+    ``(data, tkr2vox, field, field_tkr2vox)`` -> data / field (N4 convention)."""
+    v = sample_volume(vol[0], vol[1], xyz)
+    if len(vol) == 4:          # smooth, coarse field: extend at the grid edge
+        with np.errstate(invalid="ignore", divide="ignore"):
+            v = v / sample_volume(vol[2], vol[3], xyz, mode="nearest")
+    return v
 
 
 def load_volume(path: Path) -> tuple[np.ndarray, np.ndarray]:
     img = nib.load(str(path))
     data = np.asarray(img.dataobj, dtype=np.float32)
     return data, np.linalg.inv(img.header.get_vox2ras_tkr())
+
+
+def read_lta(path: Path) -> tuple[int, np.ndarray]:
+    """(type, 4x4 matrix) of a single-transform FreeSurfer LTA (0 = vox2vox, 1 = ras2ras)."""
+    lines = open(path).read().splitlines()
+    ltype = next(int(l.split("=")[1].split()[0]) for l in lines if l.strip().startswith("type"))
+    i = next(k for k, l in enumerate(lines) if l.split() == ["1", "4", "4"])
+    return ltype, np.array([[float(x) for x in lines[i + 1 + r].split()] for r in range(4)])
+
+
+def fmriprep_image(fmriprep_root: Path, sub: str, ses: str, suffix: str) -> Path | None:
+    """``*_desc-preproc_<suffix>.nii.gz``; an empty suffix gives the ``desc-brain_mask``."""
+    pat = f"*_desc-preproc_{suffix}.nii.gz" if suffix else "*_desc-brain_mask.nii.gz"
+    hits = sorted((fmriprep_root / sub / ses / "anat").glob(pat))
+    return hits[0] if hits else None
+
+
+def load_biasfield(field: Path, mov: Path, mask: Path | None, tkr2vox: np.ndarray
+                   ) -> tuple[np.ndarray, np.ndarray]:
+    """N4 field (coarse grid) and its tkr-RAS(orig) -> field-voxel matrix.
+
+    N4 does not normalise its field, so dividing by it would rescale the image by an
+    arbitrary per-session factor.  The field is divided by its median inside the fMRIPrep
+    brain mask, so the corrected image keeps the original intensity scale and only the
+    field's spatial shape is removed.
+    """
+    f = nib.load(str(field))
+    data = np.asarray(f.dataobj, dtype=np.float32)
+    mov_affine = nib.load(str(mov)).affine
+    if mask is not None:
+        m = nib.load(str(mask))
+        ijk = np.argwhere(np.asarray(m.dataobj) > 0)[::27]
+        fijk = (np.linalg.inv(f.affine) @ m.affine @ np.c_[ijk, np.ones(len(ijk))].T)[:3]
+        data = data / np.median(map_coordinates(data, fijk, order=1, mode="nearest"))
+    return data, np.linalg.inv(f.affine) @ mov_affine @ tkr2vox
+
+
+def load_registered(mov: Path, lta: Path, orig: Path) -> tuple[np.ndarray, np.ndarray]:
+    """A volume in fMRIPrep T1w space, with the tkr-RAS(orig) -> mov-voxel matrix.
+
+    The LTA maps the fMRIPrep T1w (src) onto ``orig.mgz`` (dst).  Any fMRIPrep image in the
+    same T1w space (the T2w is resampled there) shares the voxel grid of the T1w, which is
+    checked against the LTA's src geometry.
+    """
+    img = nib.load(str(mov))
+    oimg = nib.load(str(orig))
+    ltype, m = read_lta(lta)
+    tkr2orig = np.linalg.inv(oimg.header.get_vox2ras_tkr())
+    if ltype == 0:        # mov vox -> orig vox
+        tkr2vox = np.linalg.inv(m) @ tkr2orig
+    elif ltype == 1:      # mov scanner RAS -> orig scanner RAS
+        tkr2vox = np.linalg.inv(img.affine) @ np.linalg.inv(m) @ oimg.affine @ tkr2orig
+    else:
+        raise ValueError(f"{lta}: unsupported LTA type {ltype}")
+    src = next(l for l in open(lta) if l.startswith("volume ="))
+    if [int(x) for x in src.split("=")[1].split()] != list(img.shape[:3]):
+        raise ValueError(f"{mov.name}: grid {img.shape[:3]} differs from LTA src {src.strip()}")
+    return np.asarray(img.dataobj, dtype=np.float32), tkr2vox
 
 
 def sample_hemi(sdir: Path, hemi: str, measures: tuple[str, ...],
@@ -166,9 +262,17 @@ def sample_hemi(sdir: Path, hemi: str, measures: tuple[str, ...],
             if out[name] is not None and len(out[name]) != len(white):
                 raise ValueError(f"{p.name}: {len(out[name])} values for {len(white)} vertices")
         else:
-            vol = volumes.get(m.source)
-            out[name] = (None if vol is None
-                         else sample_volume(vol[0], vol[1], depth_coords(m.depth, white, pial, normals)))
+            vols = [volumes.get(s) for s in m.volume_sources]
+            if any(v is None for v in vols):
+                out[name] = None
+                continue
+            xyz = depth_coords(m.depth, white, pial, normals)
+            vals = [sample_source(v, xyz) for v in vols]
+            if m.kind == "ratio":
+                with np.errstate(invalid="ignore", divide="ignore"):
+                    out[name] = np.where(vals[1] > 0, vals[0] / vals[1], np.nan)
+            else:
+                out[name] = vals[0]
     return out, info
 
 
@@ -235,7 +339,8 @@ def annot_path(sess: Session, hemi: str, fs_root: Path, backfill_root: Path) -> 
 
 
 def process_session(sess: Session, fs_root: Path, backfill_root: Path,
-                    measures: tuple[str, ...], dk_codes: dict[str, str]
+                    measures: tuple[str, ...], dk_codes: dict[str, str],
+                    fmriprep_root: Path = DEFAULT_FMRIPREP_ROOT, reg_root: Path = DEFAULT_REG_ROOT
                     ) -> tuple[pd.DataFrame | None, list[dict]]:
     """All measures x {hcp, dsk} for one session: (long rows, QC rows per measure)."""
     t0 = time.time()
@@ -251,19 +356,32 @@ def process_session(sess: Session, fs_root: Path, backfill_root: Path,
         return None, list(qc.values())
 
     volumes = {}
-    for src in sorted({MEASURES[m].source for m in measures if MEASURES[m].kind == "volume"}):
-        p = sdir / src
-        if p.exists():
-            try:
-                volumes[src] = load_volume(p)
-            except Exception as exc:          # corrupt file: account for it, carry on
-                for m in measures:
-                    if MEASURES[m].source == src:
-                        qc[m]["missing_input"] = f"{src} unreadable: {exc}"
-        else:
-            for m in measures:
-                if MEASURES[m].source == src:
-                    qc[m]["missing_input"] = src
+    for src in sorted({s for m in measures for s in MEASURES[m].volume_sources}):
+        users = [m for m in measures if src in MEASURES[m].volume_sources]
+        try:
+            if src.startswith("fmriprep:"):
+                p = fmriprep_image(fmriprep_root, sess.subject, sess.session, src.split(":")[1])
+                lta = reg_root / sess.subject / sess.session / "bbr.lta"
+                field = lta.with_name(BIASFIELD.get(src.split(":")[1], "-"))
+                missing = (f"fmriprep {src.split(':')[1]}" if p is None
+                           else f"registration {lta.name}" if not lta.exists()
+                           else f"bias field {field.name}" if src.split(":")[1] in BIASFIELD
+                           and not field.exists() else None)
+                if missing is None:
+                    volumes[src] = load_registered(p, lta, sdir / "mri" / "orig.mgz")
+                    if src.split(":")[1] in BIASFIELD:
+                        mask = fmriprep_image(fmriprep_root, sess.subject, sess.session, "")
+                        volumes[src] = (*volumes[src], *load_biasfield(field, p, mask, volumes[src][1]))
+            else:
+                p = sdir / src
+                missing = None if p.exists() else src
+                if missing is None:
+                    volumes[src] = load_volume(p)
+        except Exception as exc:              # corrupt file: account for it, carry on
+            missing = f"{src} unreadable: {exc}"
+        if missing:
+            for m in users:
+                qc[m]["missing_input"] = qc[m]["missing_input"] or missing
 
     rows, summ = [], {}
     for hemi in HEMIS:
@@ -319,9 +437,10 @@ def process_session(sess: Session, fs_root: Path, backfill_root: Path,
 
 
 def _worker(args):
-    sess, fs_root, backfill_root, measures, dk_codes = args
+    sess, fs_root, backfill_root, measures, dk_codes, fmriprep_root, reg_root = args
     try:
-        return process_session(sess, Path(fs_root), Path(backfill_root), measures, dk_codes)
+        return process_session(sess, Path(fs_root), Path(backfill_root), measures, dk_codes,
+                               Path(fmriprep_root), Path(reg_root))
     except Exception as exc:   # never lose a session silently
         return None, [{"participant_id": sess.subject, "session_id": sess.session,
                        "measure": m, "status": f"error: {exc!r}"} for m in measures]
@@ -338,6 +457,7 @@ def all_sessions(parc_root: Path, backfill_root: Path) -> list[Session]:
 
 def run_chunk(sessions: list[Session], part_name: str, out_dir: Path, fs_root: Path,
               backfill_root: Path, measures: tuple[str, ...], workers: int,
+              fmriprep_root: Path = DEFAULT_FMRIPREP_ROOT, reg_root: Path = DEFAULT_REG_ROOT,
               log=print) -> Path:
     from .dk_stats import _region_to_code
     parts = out_dir / "surf_metrics_parts"
@@ -348,7 +468,8 @@ def run_chunk(sessions: list[Session], part_name: str, out_dir: Path, fs_root: P
         return target
     t0 = time.time()
     codes = _region_to_code()
-    tasks = [(s, str(fs_root), str(backfill_root), measures, codes) for s in sessions]
+    tasks = [(s, str(fs_root), str(backfill_root), measures, codes, str(fmriprep_root),
+              str(reg_root)) for s in sessions]
     longs, qcs = [], []
     with ProcessPoolExecutor(max_workers=workers) as ex:
         for i, (long, qc) in enumerate(ex.map(_worker, tasks, chunksize=1), 1):
@@ -378,6 +499,9 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.strip().splitlines()[0])
     ap.add_argument("--parc-root", type=Path, default=DEFAULT_PARC_ROOT)
     ap.add_argument("--backfill-root", type=Path, default=DEFAULT_BACKFILL_ROOT)
+    ap.add_argument("--fmriprep-root", type=Path, default=DEFAULT_FMRIPREP_ROOT)
+    ap.add_argument("--reg-root", type=Path, default=DEFAULT_REG_ROOT,
+                    help="per-session bbr.lta (fMRIPrep T1w -> orig.mgz), from tools/t2reg.sbatch")
     ap.add_argument("--fs-root", type=Path, default=DEFAULT_FS_ROOT)
     ap.add_argument("--out-dir", type=Path, default=None,
                     help="default: <release 7.0 dir>/processed/hcp")
@@ -388,6 +512,8 @@ def main(argv=None) -> int:
     ap.add_argument("--sessions", type=Path, default=None,
                     help="TSV with participant_id, session_id: process only these")
     ap.add_argument("--part-name", default=None)
+    ap.add_argument("--part-prefix", default="part",
+                    help="chunk part files are <prefix>_<chunk>; use e.g. part_t2 for a second pass")
     ap.add_argument("--list-chunks", action="store_true",
                     help="print the number of chunks and exit")
     a = ap.parse_args(argv)
@@ -412,13 +538,14 @@ def main(argv=None) -> int:
         part = a.part_name or a.sessions.stem
     elif a.chunk is not None:
         sessions = sessions[a.chunk * a.chunk_size:(a.chunk + 1) * a.chunk_size]
-        part = a.part_name or f"part_{a.chunk:04d}"
+        part = a.part_name or f"{a.part_prefix}_{a.chunk:04d}"
     else:
         ap.error("give --chunk or --sessions")
     if not sessions:
         print("no sessions in this chunk")
         return 0
     run_chunk(sessions, part, out_dir, a.fs_root, a.backfill_root, measures, a.workers,
+              a.fmriprep_root, a.reg_root,
               log=lambda m: print(m, flush=True))
     return 0
 
