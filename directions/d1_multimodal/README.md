@@ -7,7 +7,7 @@ Figure 1 PRS model, the D3 twin pipeline and, eventually, a cross-modal composit
 | step | file | status |
 |---|---|---|
 | 1 | `01_t1t2_prs.R`: PRS → T1w/T2w slope, plus the quality of the measure (DK; HCP-MMP T1w/T2w does not exist yet) | done 2026-10-27 |
-| — | `CSD3_INSTRUCTIONS.md`: HCP-MMP and DK GWC, T1/T2 intensity at GM mid-depth and in superficial WM, T1w/T2w ratio, and DTI/RSI if processed maps exist | brief written |
+| — | `CSD3_INSTRUCTIONS.md`: HCP-MMP and DK GWC, T1/T2 intensity at GM mid-depth and in superficial WM, T1w/T2w ratio, and DTI/RSI if processed maps exist | GWC, T1 gm50, T1 wm1 done on CSD3 2026-10-27 (`CSD3_REPORT.md`); T2, T1w/T2w, DTI held for a decision |
 | 2 | slopes for area, volume, GWC, DTI/RSI → PRS, twin h² and rA with ΔCT | waiting for data |
 | 3 | composite slope: multivariate LMM with correlated random slopes **and** correlated residuals; reliability of the common factor vs ΔCT alone | waiting for data |
 
