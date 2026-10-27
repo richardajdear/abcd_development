@@ -118,3 +118,57 @@ Thickness loads at most 0.12 on any of them, so the thinning slope is largely it
    also consistent with neuropil loss; the two cannot be separated with these data.
 3. A cross-modal composite will not raise the thinning slope's reliability: thinning shares at most about 12 % of its
    between-child variance with any diffusion axis (r ≤ 0.35), and the largest share is the partial-volume one.
+
+## Step 5: a constructed diffusion predictor of thinning, and PRS on the diffusion axes
+Scripts `05_pls_composite.py`, `06_pls_reliability_prs.R` and `07_pc_prs_adj.R`; tables `pls_fit.tsv`,
+`pls_weights.tsv`, `pls_reliability.tsv`, `pls_prs.tsv`, `pca5_loadings.tsv` and `pc_prs_adj_thin.tsv`.
+
+**PLS1 predictor.** The 45 site-residualised diffusion slopes predict the faster-thinning slope. It is cross-fitted
+with 5 family-grouped folds and an inner CV choice of components; every fold chose 10, the cap.
+- Out-of-fold r = 0.43 (R² 0.18), against 0.35 for the best single measure.
+- The largest weights are grey-matter FA/TD/LD, superficial-WM free and hindered water, and hindered-water contrast.
+
+**Reliability does not improve.** Each child's out-of-fold weights were applied scan by scan, and each series fitted
+with the Figure-1 LMM. Same 8,366 children:
+
+| series | mean slope reliability (2 / 3 / 4 visits) | site R² on slope | r with thickness slope |
+|---|---|---|---|
+| thickness | 0.296 (0.175 / 0.314 / 0.384) | 0.030 | 1 |
+| diffusion composite | 0.178 (0.103 / 0.188 / 0.235) | 0.099 | 0.35 |
+| 75 % thickness + 25 % composite | 0.296 | 0.025 | 0.93 |
+| 50 / 50 | 0.259 | 0.045 | 0.75 |
+| 25 % thickness + 75 % composite | 0.212 | 0.075 | 0.54 |
+
+The composite is noisier from scan to scan than thickness, so any weight on it adds error at least as fast as signal.
+It is also mostly the partial-volume axis (below), not an independent measurement of the same process.
+
+**PRS (Figure-1 model + site; PRS-CS):**
+- The composite slope is null (+0.005 to +0.018).
+- The child-level out-of-fold prediction is nominal only for MDD EUR (+0.033).
+- The 75/25 mix tracks thickness (+0.021 to +0.033), adding nothing.
+
+**Diffusion PCs** (site-residualised, z-scored slopes of all 47 measures; signs arbitrary). Correlation with faster
+thinning:
+
+| PC | r with faster thinning |
+|---|--:|
+| dPC1 | −0.20 |
+| dPC2 | +0.34 |
+| dPC3 | −0.09 |
+| dPC4 | −0.07 |
+| dPC5 | −0.04 |
+
+- **dPC1 (white-matter maturation: FA, RND, RNT vs TD): no PRS association** (\|β\| ≤ 0.015 in every cell).
+- **dPC2 (grey-matter MD/TD/free water, the partial-volume axis):** MDD EUR +0.048 (p 0.002), MDD pooled +0.023 (p 0.04),
+  SCZ pooled +0.022 (p 0.049); SBayesRC is weaker for SCZ. With the thinning slope as a covariate these fall to
+  +0.037 (p 0.011), +0.015 and +0.012 (both n.s.). So the dPC2 association is largely the thinning association
+  measured again, apart from part of the MDD EUR effect.
+- **dPC4 (superficial-WM hindered water and grey/white contrast of MD/FA/RND):** SCZ only.
+  - PRS-CS EUR +0.041 (p 0.010), pooled +0.023 (p 0.043); SBayesRC +0.041 (p 0.010) and +0.023 (p 0.043). The two
+    scores correlate 0.96, so the near-identical values are expected.
+  - Adjusting for thinning makes it slightly *larger* (EUR +0.047, p 0.003; pooled +0.026, p 0.021).
+  - MDD is null.
+  - Loading signs (this PCA): higher dPC4 = slower fall of superficial-WM hindered (extracellular) water, slower
+    WM FA rise, and a faster rise of grey/white MD/FA/RND contrast.
+  - Twenty score × arm tests on the PCs, so p 0.003 roughly meets Bonferroni (0.0025) only in the thinning-adjusted
+    EUR fit. Treat it as the lead candidate for the twin pipeline and for HCP-MMP regional maps, not a finding.
