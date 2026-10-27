@@ -78,6 +78,15 @@ DEFAULT_REG_ROOT = Path("/rds/user/rajd2/hpc-work/abcd_development/legacy/hpc/wo
 #: fMRIPrep images that are NOT bias-corrected by fMRIPrep -> N4 field written by
 #: tools/t2reg.sbatch next to bbr.lta (fMRIPrep's T1w is already N4-corrected)
 BIASFIELD = {"T2w": "t2_biasfield_8mm.nii.gz"}
+#: bbregister --t1 costs are bimodal over the 28.8k sessions: 99 % < 0.065, then a gap from
+#: 0.3 to 0.8 and ~75 sessions at 0.85-1.0 that fail from every initialisation tried (mri_coreg
+#: default/fast, --init-header).  Above this the fMRIPrep volumes are treated as unregistered.
+MAX_BBR_COST = 0.5
+#: fMRIPrep resamples each image into its T1w grid with zero fill, so cortex outside an image's
+#: field of view samples ~0 (seen for the T2w: up to 11 % of vertices in a session, ratios up to
+#: 1e8).  Samples of an fMRIPrep source below this fraction of the hemisphere's median gm50
+#: sample are set to NaN -- far below any tissue (CSF is brighter, WM ~0.8 x GM in T2w).
+FOV_FLOOR = 0.2
 HEMIS = ("lh", "rh")
 DK_EXCLUDE = {"unknown", "corpuscallosum"}
 HCP_MEDIAL_WALL = "???"
@@ -253,6 +262,7 @@ def sample_hemi(sdir: Path, hemi: str, measures: tuple[str, ...],
         raise ValueError(f"{hemi}: white/pial/area vertex counts differ")
     normals, agree = orient_outward(vertex_normals(white, faces), white, pial)
     out, info = {}, {"area": area, "normal_agree": agree, "n": len(white)}
+    floors = {}                       # fMRIPrep source -> out-of-field-of-view threshold
     for name in measures:
         m = MEASURES[name]
         if m.kind == "surface":
@@ -268,9 +278,15 @@ def sample_hemi(sdir: Path, hemi: str, measures: tuple[str, ...],
                 continue
             xyz = depth_coords(m.depth, white, pial, normals)
             vals = [sample_source(v, xyz) for v in vols]
+            for i, src in enumerate(m.volume_sources):
+                if src.startswith("fmriprep:"):
+                    if src not in floors:
+                        gm = sample_source(volumes[src], depth_coords("gm50", white, pial, normals))
+                        floors[src] = FOV_FLOOR * np.nanmedian(gm)
+                    vals[i] = np.where(vals[i] >= floors[src], vals[i], np.nan)
             if m.kind == "ratio":
                 with np.errstate(invalid="ignore", divide="ignore"):
-                    out[name] = np.where(vals[1] > 0, vals[0] / vals[1], np.nan)
+                    out[name] = vals[0] / vals[1]
             else:
                 out[name] = vals[0]
     return out, info
@@ -363,8 +379,14 @@ def process_session(sess: Session, fs_root: Path, backfill_root: Path,
                 p = fmriprep_image(fmriprep_root, sess.subject, sess.session, src.split(":")[1])
                 lta = reg_root / sess.subject / sess.session / "bbr.lta"
                 field = lta.with_name(BIASFIELD.get(src.split(":")[1], "-"))
+                cost_file = lta.with_name("bbr.dat.mincost")
+                cost = (float(cost_file.read_text().split()[0]) if cost_file.exists() else np.nan)
+                for m in users:
+                    qc[m]["bbr_mincost"] = cost
                 missing = (f"fmriprep {src.split(':')[1]}" if p is None
                            else f"registration {lta.name}" if not lta.exists()
+                           else f"registration failed (bbr cost {cost:.3f} > {MAX_BBR_COST})"
+                           if cost > MAX_BBR_COST
                            else f"bias field {field.name}" if src.split(":")[1] in BIASFIELD
                            and not field.exists() else None)
                 if missing is None:

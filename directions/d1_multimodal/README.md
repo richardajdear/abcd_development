@@ -7,7 +7,7 @@ Figure 1 PRS model, the D3 twin pipeline and, eventually, a cross-modal composit
 | step | file | status |
 |---|---|---|
 | 1 | `01_t1t2_prs.R`: PRS → T1w/T2w slope, plus the quality of the measure (DK; HCP-MMP T1w/T2w does not exist yet) | done 2026-10-27 |
-| — | `CSD3_INSTRUCTIONS.md`: HCP-MMP and DK GWC, T1/T2 intensity at GM mid-depth and in superficial WM, T1w/T2w ratio, and DTI/RSI if processed maps exist | GWC, T1 gm50, T1 wm1 done on CSD3 2026-10-27 (`CSD3_REPORT.md`); T2, T1w/T2w, DTI held for a decision |
+| — | `CSD3_INSTRUCTIONS.md`: HCP-MMP and DK GWC, T1/T2 intensity at GM mid-depth and in superficial WM, T1w/T2w ratio, and DTI/RSI if processed maps exist | GWC, T1 gm50/wm1 (33,795 sessions), T2 gm50/wm1 and T1w/T2w (28,689; fMRIPrep T2w registered to DAIRC, N4-corrected) done on CSD3 2026-10-27 (`CSD3_REPORT.md`); DTI held for a decision |
 | 2 | `02_dmri_scan_means.py`: per-scan whole-cortex means for 45 DK DTI/RSI release tables | done 2026-10-27 |
 | 3 | `03_fit_compare.R`: single-LMM slopes, quality, coupling with thinning / T1w/T2w, PRS | done 2026-10-27 |
 | 4 | `04_followups.R`: PRS adjusted for the thinning slope; PCA of the 47 slopes | done 2026-10-27 |

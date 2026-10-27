@@ -20,6 +20,10 @@
 # mask).  Only the bias field is kept, resampled to 8 mm (corrected = T2w / field);
 # surf_metrics divides the T2w samples by it.
 #
+# A bbregister cost above MAX_COST (0.5) gets one retry with the default mri_coreg ("retried"
+# marker; the lower-cost registration is kept).  abcd.surf_metrics ignores registrations whose
+# cost stays above it.
+#
 # Writes <REG_ROOT>/<sub>/<ses>/{bbr.lta, bbr.dat.mincost, coreg.lta, t2_biasfield_8mm.nii.gz}
 # (logs kept only on failure) and one status line per session to <REG_ROOT>/status/task_<i>.tsv.
 # A session with all of these is skipped, so the array can be resubmitted.  Nothing is written to derivatives/
@@ -36,6 +40,7 @@ export REG_ROOT="${REG_ROOT:-legacy/hpc/work/d1_t2reg}"
 export FS_ROOT=/rds/project/rds-CeXlNYOYMxw/derivatives/freesurfer
 export FMRIPREP=/rds/project/rds-CeXlNYOYMxw/derivatives/abcc-fmriprep_v25.1.4
 export COREG_OPTS="${COREG_OPTS:---sep 4 --ftol 0.0001 --linmintol 0.01}"
+export MAX_COST=0.5     # = abcd.surf_metrics.MAX_BBR_COST; above it, retry with default mri_coreg
 CHUNK=${CHUNK:-200}
 source /etc/profile.d/modules.sh
 module load freesurfer/7.1.0
@@ -46,10 +51,14 @@ export PATH="$ANTS/bin:$PATH" LD_LIBRARY_PATH="$ANTS/lib:${LD_LIBRARY_PATH:-}"
 export ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS=1
 mkdir -p "$REG_ROOT/status"
 
+high_cost() { [[ -s "$1/bbr.dat.mincost" ]] && awk -v m="$MAX_COST" '{exit !($1 > m)}' "$1/bbr.dat.mincost"; }
+export -f high_cost
+
 reg_one() {
     sub=$1; ses=$2; s=${sub}_${ses}
     d="$REG_ROOT/$sub/$ses"
-    if [[ -s "$d/bbr.lta" && -s "$d/bbr.dat.mincost" && -s "$d/t2_biasfield_8mm.nii.gz" ]]; then
+    if [[ -s "$d/bbr.lta" && -s "$d/bbr.dat.mincost" && -s "$d/t2_biasfield_8mm.nii.gz" ]] \
+           && { ! high_cost "$d" || [[ -e "$d/retried" ]]; }; then
         echo -e "$sub\t$ses\tskipped_done\tNA\tNA\tNA\t$(awk '{print $1}' "$d/bbr.dat.mincost")"; return
     fi
     t1=$(ls "$FMRIPREP/$sub/$ses/anat/"*_desc-preproc_T1w.nii.gz 2>/dev/null | head -1)
@@ -59,7 +68,9 @@ reg_one() {
         echo -e "$sub\t$ses\tmissing_input\tNA\tNA\tNA\tNA"; return
     fi
     mkdir -p "$d"
-    export SUBJECTS_DIR; SUBJECTS_DIR=$(mktemp -d "${TMPDIR:-/tmp}/t2reg.${s}.XXXX")
+    # no dots in the temp name: FreeSurfer picks the file format by searching the whole path for
+    # ".mgz", so a random suffix like ".mgzt" made it misread lh.thickness (1 of 28,765 sessions)
+    export SUBJECTS_DIR; SUBJECTS_DIR=$(mktemp -d "${TMPDIR:-/tmp}/t2reg_${s}_XXXX")
     ln -s "$FS_ROOT/$sub/$ses" "$SUBJECTS_DIR/$s"
     t0=$(date +%s.%N); t1s=$t0; t2s=$t0
     if [[ ! -s "$d/bbr.lta" || ! -s "$d/bbr.dat.mincost" ]]; then     # registration not yet done
@@ -73,7 +84,24 @@ reg_one() {
         fi
         t2s=$(date +%s.%N)
     fi
-    n4=$(mktemp -d "${TMPDIR:-/tmp}/n4.${s}.XXXX")
+    # a gross failure (cost ~0.9-1.0) is sometimes a bad mri_coreg start: retry once with the
+    # default (slower, two-scale) mri_coreg and keep whichever bbregister cost is lower
+    if high_cost "$d" && [[ ! -e "$d/retried" ]]; then
+        r="$d/retry"; mkdir -p "$r"
+        if mri_coreg --s "$s" --mov "$t1" --reg "$r/coreg.lta" --threads 1 > "$r/coreg.log" 2>&1 \
+               && bbregister --s "$s" --mov "$t1" --init-reg "$r/coreg.lta" --t1 --reg "$r/bbr.lta" > "$r/bbr.log" 2>&1 \
+               && awk 'NR == FNR {a = $1; next} {exit !($1 < a)}' "$d/bbr.dat.mincost" "$r/bbr.dat.mincost"; then
+            cp "$r/coreg.lta" "$r/bbr.lta" "$r/bbr.dat.mincost" "$d/"
+        fi
+        rm -rf "$r"; touch "$d/retried"
+        t2s=$(date +%s.%N)
+    fi
+    if [[ -s "$d/t2_biasfield_8mm.nii.gz" ]]; then                       # N4 already done
+        rm -rf "$SUBJECTS_DIR"
+        echo -e "$sub\t$ses\tok\t$(echo "$t1s - $t0" | bc)\t$(echo "$t2s - $t1s" | bc)\t0\t$(awk '{print $1}' "$d/bbr.dat.mincost")"
+        return
+    fi
+    n4=$(mktemp -d "${TMPDIR:-/tmp}/n4_${s}_XXXX")
     # fMRIPrep's T2w has small negative values (resampling undershoot); N4 log-transforms and,
     # given them, silently returns a flat field.  Clip to >= 1 and let N4 rescale (-r 1).
     # (Checked with a synthetic +-30 % field: recovered with log-slope 0.99, r = 1.000.)

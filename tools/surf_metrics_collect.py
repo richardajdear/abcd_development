@@ -99,6 +99,14 @@ def main(argv=None) -> int:
         "normal of the white surface (area-weighted face normals, oriented white->pial)",
         "intensity       : T1 = mri/nu.mgz (N4/nu-corrected, FreeSurfer-rescaled; conformed 1 mm), "
         "trilinear interpolation (scipy.ndimage.map_coordinates order 1), tkr-RAS -> voxel via inv(vox2ras-tkr)",
+        "T2w             : ABCC fMRIPrep v25.1.4 desc-preproc_T2w (in fMRIPrep's T1w space; raw scanner "
+        "units, NOT bias-corrected by fMRIPrep). Mapped to DAIRC orig.mgz by mri_coreg (--sep 4 --ftol 1e-4 "
+        "--linmintol 1e-2) + bbregister --t1 of desc-preproc_T1w (tools/t2reg.sbatch; "
+        "legacy/hpc/work/d1_t2reg/<sub>/<ses>/bbr.lta); divided by an ANTs N4 field (negatives clipped "
+        "to 1, fMRIPrep brain mask, -s 4 -b [200]; kept at 8 mm, normalised to median 1 in the mask). "
+        "T2 level differs by scanner -- not comparable across manufacturers without harmonisation",
+        "T1w/T2w         : fMRIPrep desc-preproc_T1w (N4) / N4-corrected desc-preproc_T2w, both "
+        "sampled at gm50 through the same bbr.lta; NaN where T2w <= 0",
         "GWC             : surf/?h.w-g.pct.mgh as written by recon-all pctsurfcon (FreeSurfer 7.1.1)",
         "summary         : parcel = vertex-area-weighted mean (surf/?h.area) over finite samples; "
         "hemisphere/whole cortex = area-weighted over all non-medial-wall vertices "
