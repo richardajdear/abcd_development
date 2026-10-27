@@ -55,6 +55,20 @@ tail -n +2 "$PILOT" | head -3 | while IFS=$'\t' read -r sub ses _rest; do
         --projfrac 0.5 --interp trilinear --o "$WORK/$s.lh.nu.projfrac0.5.mgh" > "$WORK/$s.vol2surf.log" 2>&1
     mri_vol2surf --mov "$SUBJECTS_DIR/$s/mri/nu.mgz" --regheader "$s" --hemi lh \
         --projdist -1 --interp trilinear --o "$WORK/$s.lh.nu.projdist-1.mgh" >> "$WORK/$s.vol2surf.log" 2>&1
+    # projfrac steps along the white normal; gm50 is the white-pial vertex midpoint.  For an
+    # exact-definition check, write that midpoint surface into a scratch copy of the subject
+    # (symlinks; the derivatives tree is read-only) and sample it at projdist 0.
+    m="$WORK/midsubj/$s"; mkdir -p "$m/surf"
+    for d in mri label; do ln -sfn "$FS_ROOT/$sub/$ses/$d" "$m/$d"; done
+    for f in "$FS_ROOT/$sub/$ses/surf/"*; do ln -sfn "$f" "$m/surf/"; done
+    python -c "
+import sys, nibabel.freesurfer as fs
+w, f, meta = fs.read_geometry(sys.argv[1] + '/lh.white', read_metadata=True)
+p, _ = fs.read_geometry(sys.argv[1] + '/lh.pial')
+fs.write_geometry(sys.argv[2] + '/lh.mid', w + 0.5 * (p - w), f, volume_info=meta)
+" "$FS_ROOT/$sub/$ses/surf" "$m/surf"
+    SUBJECTS_DIR="$WORK/midsubj" mri_vol2surf --mov "$m/mri/nu.mgz" --regheader "$s" --hemi lh \
+        --surf mid --projdist 0 --interp trilinear --o "$WORK/$s.lh.nu.mid.mgh" >> "$WORK/$s.vol2surf.log" 2>&1
     echo "  $s done"
 done
 
@@ -66,11 +80,11 @@ reg_one() {
     if [[ -z "$t1" || -z "$t2" ]]; then echo -e "$sub\t$ses\tno_fmriprep_T1w_or_T2w\tNA\tNA\tNA"; return; fi
     d="$WORK/reg/$s"; mkdir -p "$d"
     t0=$(date +%s.%N)
-    mri_coreg --mov "$t1" --ref "$SUBJECTS_DIR/$s/mri/orig.mgz" --reg "$d/coreg.lta" --threads 1 > "$d/coreg.log" 2>&1 || { echo -e "$sub\t$ses\tmri_coreg_failed\tNA\tNA\tNA"; return; }
+    mri_coreg --s "$s" --mov "$t1" --reg "$d/coreg.lta" --threads 1 > "$d/coreg.log" 2>&1 || { echo -e "$sub\t$ses\tmri_coreg_failed\tNA\tNA\tNA"; return; }
     t1s=$(date +%s.%N)
     bbregister --s "$s" --mov "$t1" --init-reg "$d/coreg.lta" --t1 --reg "$d/bbr.lta" > "$d/bbr.log" 2>&1 || { echo -e "$sub\t$ses\tbbregister_failed\tNA\tNA\tNA"; return; }
     t2s=$(date +%s.%N)
-    cost=$(awk '{print $1}' "$d/bbr.lta.mincost" 2>/dev/null || echo NA)
+    cost=$(awk '{print $1}' "$d/bbr.dat.mincost" 2>/dev/null || echo NA)   # bbregister names it after the .dat
     echo -e "$sub\t$ses\tok\t$(echo "$t1s - $t0" | bc)\t$(echo "$t2s - $t1s" | bc)\t$cost"
 }
 export -f reg_one; export WORK FMRIPREP SUBJECTS_DIR

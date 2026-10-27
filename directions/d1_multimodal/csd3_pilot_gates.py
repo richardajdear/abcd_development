@@ -117,12 +117,16 @@ def main() -> int:
         sdir = DEFAULT_FS_ROOT / sub / ses
         vals, _ = sample_hemi(sdir, "lh", ("t1__gm50", "t1__wm1"),
                               {"mri/nu.mgz": load_volume(sdir / "mri" / "nu.mgz")})
-        for meas, fsf in (("t1__gm50", f), ("t1__wm1", WORK / f"{s}.lh.nu.projdist-1.mgh")):
+        for meas, fsf, how in (("t1__gm50", f, "projfrac 0.5 (along white normal; not the same point)"),
+                               ("t1__gm50", WORK / f"{s}.lh.nu.mid.mgh", "--surf mid --projdist 0 (same definition)"),
+                               ("t1__wm1", WORK / f"{s}.lh.nu.projdist-1.mgh", "projdist -1")):
+            if not fsf.exists():
+                continue
             fsv = np.asarray(nib.load(str(fsf)).dataobj).reshape(-1)
             ok = np.isfinite(vals[meas]) & np.isfinite(fsv) & (fsv > 0)
             r = np.corrcoef(vals[meas][ok], fsv[ok])[0, 1]
-            say(f"{s} {meas}: n={ok.sum()}, r={r:.5f}, median|d|={np.median(np.abs(vals[meas][ok] - fsv[ok])):.3f}"
-                f"  ({'projfrac 0.5' if meas == 't1__gm50' else 'projdist -1'})")
+            say(f"{s} {meas}: n={ok.sum()}, r={r:.5f}, "
+                f"median|d|={np.median(np.abs(vals[meas][ok] - fsv[ok])):.3f}  [{how}]")
 
     # ---- D
     say("\n## Gate D: own DK t1__gm50 vs release mr_y_smri__t1__gm__dsk")

@@ -67,5 +67,30 @@ abcc-xcp_d_v0.13.0 freesurfer parcellations scratch tabulated`.
   registration (qsiprep T1w → DAIRC `orig.mgz`) would make FA/MD (and DKI/NODDI) sampleable without touching raw
   diffusion. If the user wants it, it is a second ~25k-session registration run.
 
-## Pilot
-Appended below after the pilot job (step 2).
+## Pilot (step 2): Slurm job 39327812, `directions/d1_multimodal/csd3_pilot.sbatch`
+20 sessions (`processed/hcp/surf_metrics_pilot_sessions.tsv`): 5 per visit, distinct sites within a visit, all
+three manufacturers, 15 primary + 5 backfill. All 20 × 3 measures `ok`. Full output:
+`processed/hcp/surf_metrics_pilot/gates.txt`.
+
+| gate | test | result |
+|---|---|---|
+| **A** GWC reproduces FreeSurfer | own DK unweighted parcel mean vs `stats/?h.w-g.pct.stats` `Mean` (1,360 parcels) | r = 1.000000, max \|Δ\| = 0.0001 → **PASS** |
+| A′ (extra) | own HCP GWC vs rr480's `?h_HCP.fsaverage.aparc.w-g.pct.stats` (30 hemispheres with that file, 5,400 parcels) | r = 1.000000, max \|Δ\| = 0.0001 |
+| **B** annotation = thickness annotation | HCP per-parcel vertex counts vs `.log` `nverts` (7,200 parcel rows) | 0 unmatched, 0 mismatches → **PASS** |
+| **C** sampler vs FreeSurfer (lh, 3 sessions) | `mri_vol2surf --mov nu.mgz --regheader --interp trilinear` | `--surf mid --projdist 0` (same point as gm50, the white–pial midpoint): r = 1.00000, median \|Δ\| 0.000 → **PASS**; `--projdist -1` vs wm1: r = 0.993–0.995, median \|Δ\| 0.02–0.04 → **PASS**; `--projfrac 0.5`: r = 0.936–0.962 (expected to differ: it steps 0.5 × thickness along the white normal, not to the midpoint) |
+| **D** release comparison | own DK `t1__gm50` vs release `mr_y_smri__t1__gm__dsk` | per-region r across sessions: median 0.980 (IQR 0.968–0.987, min 0.896), all 68 > 0.8 → **PASS**; whole-cortex r = 0.994. The level differs (own median 67.5 vs release 81.4), as expected if the release uses another depth and/or intensity scaling (not verified here). No DTI/RSI tables on CSD3. |
+| **E** timing | GWC + T1 gm50 + T1 wm1, HCP + DK, both hemispheres | 1.6 s/session (max 2.5) → ~15 core-hours for 33,795 sessions |
+
+Other checks: the white-surface normal agrees with the white→pial direction at ≥ 99.86 % of vertices in every pilot
+hemisphere (median 99.96 %). No non-finite samples.
+
+### T2 registration pilot (for the measures 4–5 decision)
+`mri_coreg --s <subj> --mov fMRIPrep desc-preproc_T1w` followed by `bbregister --t1 --init-reg` (FS 7.1.0, 1 thread):
+- 18/20 registered; 2 have no fMRIPrep anat (`sub-8R9KBJ6M/ses-04A`, `sub-3ADKR0X9/ses-06A`).
+- Time per session: `mri_coreg` median 231 s, `bbregister` 38 s; total median 272 s (max 324 s).
+- bbregister minimum cost 0.016–0.061 (median 0.023). All are low, so no failed alignments.
+- Projected: ~4.5 core-min × 28,765 sessions with fMRIPrep T2w ≈ **2,150 core-hours** (sl3 icelake).
+  `mri_coreg` dominates. A coarser `--sep`, or bbregister alone with `--init-header`, should cut this a lot (the two T1s
+  come from the same acquisition), but that is untested.
+- **Measures 4–5 are not run. Waiting for the user** on the cost and the T2 source (fMRIPrep `desc-preproc_T2w`; the
+  ratio would use fMRIPrep T1w/T2w, both in fMRIPrep T1w space, sampled on the DAIRC surfaces through this transform).
