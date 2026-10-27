@@ -282,3 +282,48 @@ Negative rA means children genetically inclined to faster thinning also tend to 
 intensity or myelin proxies. Volume is a reasonable co-primary phenotype for the SCZ score (equal or slightly
 stronger). Thickness remains better for MDD and is the only measure significant in every cell, under every scanner
 model.
+
+## Step 8: thickness + volume + area composites, and what lower scan noise would buy (`12_geometry_composite.R`)
+**Method.** Per-scan composites are sums of z-scores on the Figure-1 scans (8,716 children), fitted with the Figure-1
+LMM, so the shared surface errors are inside the reliability estimate. Scan-level r: thickness–volume 0.39,
+thickness–area −0.02, volume–area 0.91. The weight grid was fixed in advance. PRS z is the Figure-1 model + site
+(slope as faster loss), averaged over the 4 cells per disorder.
+
+| series | slope reliability (2 / 3 / 4 visits) | r with thickness slope | mean z SCZ | mean z MDD | mean z all 8 |
+|---|---|---|---|---|---|
+| thickness | 0.303 (0.17 / 0.32 / 0.38) | 1 | 2.69 | 2.51 | 2.60 |
+| volume | 0.449 | 0.73 | 2.77 | 1.97 | 2.37 |
+| area | 0.357 | 0.18 | 1.38 | 1.60 | 1.49 |
+| thk + 0.5 vol | 0.336 | 0.99 | 2.75 | 2.69 | 2.72 |
+| thk + vol | 0.357 | 0.97 | 2.81 | 2.68 | 2.75 |
+| thk + 2 vol | 0.384 | 0.93 | 2.88 | 2.55 | 2.71 |
+| thk + 0.5 area | 0.357 | 0.98 | 2.69 | 2.91 | 2.80 |
+| **thk + area** | **0.397** | 0.93 | 2.64 | **3.07** | **2.86** |
+| thk + vol + area | **0.408** (0.24 / 0.43 / 0.50) | 0.90 | 2.81 | 2.82 | 2.82 |
+
+**Reading.**
+- Every composite raises reliability: up to 0.41, a third more than thickness alone. The PRS z rises only modestly,
+  about +10 % averaged over all cells.
+- The gain is MDD-led. Higher MDD scores also go with faster area loss (EUR +0.025 to +0.032), so area adds MDD
+  signal. SCZ is unchanged (2.6–2.9 throughout).
+- Volume alone is worse than thickness overall: it is mostly area (r 0.91), which carries little SCZ signal.
+- Equal z-weights on thickness and area (± volume) are the reasonable composite. The best cell of 6 composites is
+  mildly selected, and the improvement over thickness is within the range a different weighting could give by chance.
+- Thickness and area loss share genetics only partly (twin rA −0.36, step 7). That fits a modest, not a large, gain.
+
+**Noise scenarios for the thinning slope.** The per-child posterior slope variance is recomputed with the residual
+(scan-to-scan) variance scaled down, keeping the between-child variance and each child's scan ages. The analytic f = 1
+reproduces lme4 exactly (mean 0.303; r = 1.000 across children).
+
+| residual variance × | residual SD × | mean reliability | 2 / 3 / 4 visits | expected PRS z × |
+|---|---|---|---|---|
+| 1 (now) | 1 | 0.303 | 0.17 / 0.32 / 0.38 | 1.00 |
+| 0.75 | 0.87 | 0.362 | 0.21 / 0.38 / 0.45 | 1.09 |
+| 0.5 | 0.71 | 0.450 | 0.27 / 0.48 / 0.55 | 1.22 |
+| 0.33 | 0.58 | 0.540 | 0.34 / 0.57 / 0.65 | 1.33 |
+| 0.25 | 0.50 | 0.601 | 0.40 / 0.64 / 0.71 | 1.41 |
+
+The FreeSurfer longitudinal stream removes part of the processing noise. The residual also contains scanner and
+software changes (27 % / 63.5 % of children), motion and real non-linear development, which it does not touch. A
+realistic whole-cortex expectation is residual variance × 0.5–0.75, i.e. PRS z × ~1.1–1.2. A pilot on a few hundred
+children would measure the actual residual reduction before the full run is committed.
