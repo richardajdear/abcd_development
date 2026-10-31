@@ -5,6 +5,8 @@
 #   thk          = whole-cortex mean thickness (reproduction control; must give r ~ 1 with global_slope_1lmm)
 #   area, vol    = HCP-MMP total surface area / GM volume, z-scored over scans (alone)
 #   thk_area, thk_vol_area = per-scan z-sum composites (step 8), as used in the Figure-1 variants
+#   thk_vol      = per-scan z(CT) + z(GMV), re-standardised (added 2026-10-31; appended as the last two columns so
+#                  the first ten are unchanged from the file the CSD3 scan_geom run used)
 # thk / thk_area / thk_vol_area BLUPs are read from the Figure-1-variant fits (genetic_analysis/fig1_variants);
 # area and vol are fitted here with the identical model.
 # Output (individual-level, gitignored): directions/d1_multimodal/work/gwas_pheno_geom.tsv
@@ -22,11 +24,11 @@ fit <- function(d) {
   data.table(subject = rownames(re), re_intercept = re[["(Intercept)"]], re_slope = re[["age_c"]])
 }
 B <- list(area = fit(S[metric == "smri__area_hcp"]), vol = fit(S[metric == "smri__vol_hcp"]))
-for (t in c("thk", "thk_area", "thk_vol_area")) B[[t]] <- fread(file.path(V, t, "blups.csv"))
+for (t in c("thk", "thk_area", "thk_vol_area", "thk_vol")) B[[t]] <- fread(file.path(V, t, "blups.csv"))
 cat(sprintf("scans %d; children per trait: %s\n", nrow(S) / 2,
             paste(sprintf("%s %d", names(B), sapply(B, nrow)), collapse = ", ")))
 out <- NULL
-for (t in c("thk", "area", "vol", "thk_area", "thk_vol_area")) {
+for (t in c("thk", "area", "vol", "thk_area", "thk_vol_area", "thk_vol")) {
   b <- copy(B[[t]]); setnames(b, c("re_intercept", "re_slope"), paste0(c("int_", "slope_"), t))
   out <- if (is.null(out)) b else merge(out, b, by = "subject")
 }
